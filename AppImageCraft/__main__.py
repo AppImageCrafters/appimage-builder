@@ -29,9 +29,8 @@ def __main__():
     parser = argparse.ArgumentParser(description='AppImage crafting tool')
     parser.add_argument('--recipe', dest='recipe', default=os.path.join(os.getcwd(), "AppImageCraft.yml"),
                         help='recipe file path (default: $PWD/AppImageCraft.yml)')
-    parser.add_argument('--log', dest='loglevel', default="INFO", help='logging level (default: INFO)')
-    parser.add_argument('--generate-desktop-entry', dest='do_generate_desktop_entry', action="store_true",
-                        help='Generate a desktop entry')
+    parser.add_argument('--log', dest='loglevel', default="INFO",
+                        help='logging level (default: INFO)')
     parser.add_argument('--skip-script', dest='skip_script', action="store_true",
                         help='Skip running script section')
     parser.add_argument('--skip-install', dest='skip_install', action="store_true",
