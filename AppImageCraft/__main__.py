@@ -56,13 +56,7 @@ def __main__():
     _execute_app_dir(recipe, app_dir, args.skip_install, args.skip_tests)
 
     if not args.skip_appimage:
-        appimage_tool = AppImageTool()
-        app_recipe = _check_recipe_entry("App", recipe)
-        app_name = _check_recipe_entry("name", app_recipe)
-        app_version = _check_recipe_entry("version", app_recipe)
-
-        output_file = os.path.join(os.getcwd(), "%s-%s-%s.AppImage" % (app_name, app_version, platform.machine()))
-        appimage_tool.bundle(app_dir.appdir_path, output_file)
+        _execute_appimage(app_dir, recipe)
 
 
 def _execute_script(recipe):
@@ -71,6 +65,15 @@ def _execute_script(recipe):
         logging.error("Malformed recipe. 'script' entry must be a list")
     shell_tool = ShellTool()
     shell_tool.execute(script_recipe)
+
+
+def _execute_appimage(app_dir, recipe):
+    appimage_tool = AppImageTool()
+    app_recipe = _check_recipe_entry("App", recipe)
+    app_name = _check_recipe_entry("name", app_recipe)
+    app_version = _check_recipe_entry("version", app_recipe)
+    output_file = os.path.join(os.getcwd(), "%s-%s-%s.AppImage" % (app_name, app_version, platform.machine()))
+    appimage_tool.bundle(app_dir.appdir_path, output_file)
 
 
 def _generate_desktop_entry(app_dir, recipe):

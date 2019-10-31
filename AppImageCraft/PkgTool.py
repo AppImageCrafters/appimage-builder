@@ -14,8 +14,13 @@ import os
 import shutil
 import tempfile
 import subprocess
+import logging
+
 
 class PkgTool:
+    def __init__(self):
+        self.logger = logging.getLogger("PkgTool")
+
     def find_pkgs_of(self, files):
         pkgs = []
 
@@ -30,18 +35,21 @@ class PkgTool:
 
     def deploy_pkgs(self, pkgs, appdir):
         temp_dir = tempfile.mkdtemp()
-        self._download_pkgs(pkgs, temp_dir)
-        print(appdir)
+
+        for pkg in pkgs:
+            self.logger.info("Downloading: %s" % pkg)
+            self._download_pkg(pkg, temp_dir)
+
         self._extract_pkgs_to(temp_dir, appdir)
 
         shutil.rmtree(temp_dir)
 
-    def _download_pkgs(self, pkgs, target_dir):
-        result = subprocess.run(["apt-get", "download", *pkgs], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    def _download_pkg(self, pkg, target_dir):
+        result = subprocess.run(["apt-get", "download", pkg], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                 cwd=target_dir)
 
         if result.returncode != 0:
-            print("Packages download failed. Error: " + result.stderr.decode('utf-8'))
+            self.logger.error("Packages download failed. Error: " + result.stderr.decode('utf-8'))
 
     def _extract_pkg_to(self, pkg_file, target_dir):
         result = subprocess.run(["dpkg-deb", "-x", pkg_file, target_dir], stdout=subprocess.PIPE,
@@ -49,10 +57,11 @@ class PkgTool:
                                 cwd=target_dir)
 
         if result.returncode != 0:
-            print("Package extraction failed. Error: " + result.stderr.decode('utf-8'))
+            self.logger.error("Package extraction failed. Error: " + result.stderr.decode('utf-8'))
 
     def _extract_pkgs_to(self, temp_dir, appdir):
         for root, dirs, files in os.walk(temp_dir):
             for filename in files:
                 if (filename.endswith(".deb")):
+                    self.logger.info("Extracting: %s" % filename)
                     self._extract_pkg_to(os.path.join(root, filename), appdir)
