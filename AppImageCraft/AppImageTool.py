@@ -11,9 +11,8 @@
 #  all copies or substantial portions of the Software.
 
 
-import os
-import subprocess
 import logging
+import subprocess
 
 
 class AppImageTool:

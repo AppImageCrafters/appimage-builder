@@ -14,11 +14,10 @@ import os
 import argparse
 import logging
 
-import FileUtils
-from LinkerTool import LinkerTool
-from PkgTool import PkgTool
-from AppRunBuilder import AppRunBuilder
-
+from AppImageCraft.AppRunBuilder import AppRunBuilder
+from AppImageCraft.LinkerTool import LinkerTool
+from AppImageCraft.PkgTool import PkgTool
+from AppImageCraft import FileUtils
 
 class AppDir:
     appdir_path = ""

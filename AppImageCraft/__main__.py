@@ -17,11 +17,11 @@ import yaml
 import pprint
 import logging
 import platform
-from AppDir import AppDir
-from TestsTool import TestsTool
-from AppImageTool import AppImageTool
-from DesktopEntryBuilder import DesktopEntryBuilder
-from ShellTool import ShellTool
+from AppImageCraft.AppDir import AppDir
+from AppImageCraft.TestsTool import TestsTool
+from AppImageCraft.AppImageTool import AppImageTool
+from AppImageCraft.DesktopEntryBuilder import DesktopEntryBuilder
+from AppImageCraft.ShellTool import ShellTool
 from shutil import copyfile
 
 

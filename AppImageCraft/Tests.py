@@ -15,9 +15,9 @@ import tempfile
 import shutil
 import os
 
-from PkgTool import PkgTool
-from LinkerTool import LinkerTool
-from AppDir import AppDir
+from AppImageCraft.PkgTool import PkgTool
+from AppImageCraft.LinkerTool import LinkerTool
+from AppImageCraft.AppDir import AppDir
 
 
 class PkgToolTestCase(unittest.TestCase):
