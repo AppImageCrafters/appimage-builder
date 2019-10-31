@@ -38,7 +38,8 @@ class LinkerTool:
             else:
                 missing.add(line_parts[0])
 
-        missing.remove("linux-vdso.so.1")
+        if "linux-vdso.so.1" in missing:
+            missing.remove("linux-vdso.so.1")
         return (dependencies, missing)
 
     def list_libraries_files(self, root_dir):
