@@ -44,6 +44,9 @@ def __main__():
     _configure_logger(args)
 
     recipe = _load_recipe_file(args.recipe)
+    if not recipe:
+        return 1
+
     logging.debug("Recipe: \n%s\n" % pprint.pformat(recipe))
 
     if not args.skip_script:
