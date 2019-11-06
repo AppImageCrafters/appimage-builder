@@ -137,6 +137,9 @@ def _execute_app_dir(recipe, app_dir, skip_install=False, skip_tests=False):
         with open(os.path.join(app_dir.appdir_path, "deployed_files.json"), "w") as f:
             f.write(json.dumps(app_dir.deploy_registry, indent=2, sort_keys=True))
 
+        with open(os.path.join(app_dir.appdir_path, "deployed_libs.json"), "w") as f:
+            f.write(json.dumps(app_dir.libs_registry, indent=2, sort_keys=True))
+
     app_dir.generate_app_run()
 
     addons = _check_optional_recipe_entry("addons", app_dir_recipe, None)

@@ -17,16 +17,17 @@ from AppImageCraft.PkgTool import PkgTool
 
 
 class AppDirIsolator:
-    deployed_packages = None
     app_dir_path = None
     deploy_map = None
+    libs_map = None
 
     def __init__(self, dir):
         self.pkg_tool = PkgTool()
         self.logger = logging.getLogger("AppDirIsolator")
-        self.deployed_packages = {}
+
         self.app_dir_path = dir
         self.deploy_map = {}
+        self.libs_map = {}
         self.linker = None
 
     def isolate(self):
@@ -55,6 +56,8 @@ class AppDirIsolator:
                     continue
 
                 self.deploy_package_of(dependency_file_path)
+        print(dependencies_map)
+        self.libs_map = {**self.libs_map, **dependencies_map}
 
     def list_files_with_external_dependencies(self):
         file_list = set()

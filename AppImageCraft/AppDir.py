@@ -36,6 +36,7 @@ class AppDir:
     bundle_packages = set()
 
     deploy_registry = {}
+    libs_registry = {}
 
     bundle_ldd_dependencies = set()
 
@@ -57,6 +58,7 @@ class AppDir:
         app_dir_isolator.isolate()
 
         self.deploy_registry = {**early_deployed_files, **app_dir_isolator.deploy_map}
+        self.libs_registry = app_dir_isolator.libs_map
 
     def _deploy_packages(self, additional_pkgs, excluded_pkgs):
         self.logger.debug("Deploying packages to: %s" % self.appdir_path)
