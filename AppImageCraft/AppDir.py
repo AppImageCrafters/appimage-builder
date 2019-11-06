@@ -17,7 +17,9 @@ import logging
 from AppImageCraft.AppRunBuilder import AppRunBuilder
 from AppImageCraft.LinkerTool import LinkerTool
 from AppImageCraft.PkgTool import PkgTool
+from AppImageCraft.AppDirIsolator import AppDirIsolator
 from AppImageCraft import FileUtils
+
 
 class AppDir:
     appdir_path = ""
@@ -35,27 +37,10 @@ class AppDir:
 
     bundle_ldd_dependencies = set()
 
-
     def __init__(self, app_dir=None, app_runnable=None):
         self.appdir_path = app_dir
         self.app_runnable = app_runnable
         self.logger = logging.getLogger("AppDir")
-
-    def load(self):
-        if not self.appdir_path:
-            raise RuntimeError("Missing AppDir")
-
-        if not self.app_runnable:
-            raise RuntimeError("Missing runnable")
-
-        ldd = LinkerTool()
-        (self.bundle_ldd_dependencies, missing) = ldd.list_link_dependencies(
-            os.path.join(self.appdir_path, self.app_runnable))
-
-        if missing:
-            raise RuntimeError("Missing library files: %s. Please make sure they are installed in your system or "
-                               "included in the AppDir manually." %
-                               missing.join(", "))
 
     def install(self, additional_pkgs=None, excluded_pkgs=None):
         if excluded_pkgs is None:
@@ -66,15 +51,22 @@ class AppDir:
 
         self._deploy_packages(additional_pkgs, excluded_pkgs)
 
-        FileUtils.make_inner_links_relative(self.appdir_path)
+        app_dir_isolator = AppDirIsolator(self.appdir_path)
+        app_dir_isolator.isolate()
+
+        FileUtils.make_links_relative_to_root(self.appdir_path)
 
     def _deploy_packages(self, additional_pkgs, excluded_pkgs):
         self.logger.debug("Deploying packages to: %s" % self.appdir_path)
         absolute_app_dir_path = os.path.abspath(self.appdir_path)
 
         pkg_tool = PkgTool()
-        self.bundle_packages = pkg_tool.find_pkgs_of(self.bundle_ldd_dependencies)
-        self.bundle_packages = self.bundle_packages.union(additional_pkgs)
+        self.bundle_packages = set(additional_pkgs)
+
+        if self.bundle_ldd_dependencies:
+            self.bundle_packages = self.bundle_packages.union(
+                pkg_tool.find_owner_packages(self.bundle_ldd_dependencies))
+
         self.bundle_packages = self.bundle_packages.difference(excluded_pkgs)
         pkg_tool.deploy_pkgs(self.bundle_packages, absolute_app_dir_path)
 
@@ -88,6 +80,9 @@ class AppDir:
         return list(ld_paths)
 
     def generate_app_run(self):
+        if not self.app_runnable:
+            raise RuntimeError("Missing runnable")
+
         linker = LinkerTool()
 
         app_run_generator = AppRunBuilder(self.appdir_path, self.app_runnable, linker.binary_path)

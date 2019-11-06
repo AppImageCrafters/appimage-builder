@@ -18,6 +18,7 @@ import os
 from AppImageCraft.PkgTool import PkgTool
 from AppImageCraft.LinkerTool import LinkerTool
 from AppImageCraft.AppDir import AppDir
+from AppImageCraft.AppDirIsolator import AppDirIsolator
 
 
 class PkgToolTestCase(unittest.TestCase):
@@ -27,8 +28,8 @@ class PkgToolTestCase(unittest.TestCase):
         self.pkg_tool = PkgTool()
 
     def test_find_pkgs_of(self):
-        pkgs = self.pkg_tool.find_pkgs_of(["/bin/echo", "/bin/less"])
-        self.assertEqual(pkgs, {"coreutils", "less"})
+        pkgs = self.pkg_tool.find_owner_packages("/bin/echo")
+        self.assertEqual(pkgs, {"coreutils"})
 
     def test_deploy_pkgs(self):
         temp_dir = tempfile.mkdtemp()
@@ -46,17 +47,66 @@ class PkgToolTestCase(unittest.TestCase):
         assert deployed_files
 
 
-class LddToolTestCase(unittest.TestCase):
+class LinkerToolTestCase(unittest.TestCase):
 
     def __init__(self, methodName: str = ...) -> None:
         super().__init__(methodName)
         self.ldd_tool = LinkerTool()
 
     def test_list_dependencies(self):
-        (dependencies, missing) = self.ldd_tool.list_link_dependencies("/bin/echo")
+        dependencies_map = self.ldd_tool.list_link_dependencies("/bin/echo")
+        assert dependencies_map
 
-        assert dependencies
-        assert not missing
+    def test_parse_output_regular(self):
+        output = self.ldd_tool._parse(
+            "        linux-vdso.so.1 (0x00007f4fc901c000)\n"
+            "        libc.so.6 => /AppDir/lib/x86_64-linux-gnu/libc.so.6 (0x00007f4fc8803000)\n"
+            "        /AppDir/lib/x86_64-linux-gnu/ld-2.27.so (0x00007f4fc8df7000)\n")
+
+        expected = {
+            "linux-vdso.so.1": None,
+            "libc.so.6": "/AppDir/lib/x86_64-linux-gnu/libc.so.6",
+            "/AppDir/lib/x86_64-linux-gnu/ld-2.27.so": None
+        }
+
+        assert output == expected
+
+    def test_parse_output_static(self):
+        output = self.ldd_tool._parse("        statically linked\n")
+        expected = {}
+        assert output == expected
+
+
+class AppDirIsolatorTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        os.makedirs(os.path.join(self.temp_dir, "usr", "bin"))
+
+        shutil.copy("/bin/echo", os.path.join(self.temp_dir, "usr/bin"))
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def test_deploy_linker(self):
+        isolator = AppDirIsolator(self.temp_dir)
+        isolator.deploy_linker()
+
+        deployed_linker_path = LinkerTool.find_binary_path(self.temp_dir)
+        assert deployed_linker_path.startswith(self.temp_dir)
+
+    def test_list_files_with_external_dependencies(self):
+        isolator = AppDirIsolator(self.temp_dir)
+
+        files = isolator.list_files_with_external_dependencies()
+        assert os.path.join(self.temp_dir, "usr", "bin", "echo") in files
+
+    def test_isolate(self):
+        isolator = AppDirIsolator(self.temp_dir)
+        isolator.isolate()
+
+        files = isolator.list_files_with_external_dependencies()
+        assert not files
 
 
 class AppDirTestCase(unittest.TestCase):
@@ -77,13 +127,10 @@ class AppDirTestCase(unittest.TestCase):
         assert self.app_dir.bundle_ldd_dependencies
 
     def test_deploy(self):
-        self.app_dir = AppDir(self.temp_dir, self.runnable_path)
+        self.app_dir = AppDir(self.temp_dir)
 
-        self.app_dir.load()
-        self.app_dir.install()
+        self.app_dir.install(additional_pkgs=["coreutils"])
 
-        assert self.app_dir.bundle_ldd_dependencies
-        assert self.app_dir.bundle_packages
         deployed_files = []
         for root, dirs, files in os.walk(self.temp_dir):
             for filename in files:

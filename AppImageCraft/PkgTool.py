@@ -16,22 +16,29 @@ import tempfile
 import subprocess
 import logging
 
+from AppImageCraft.FileUtils import make_links_relative_to_root
+
 
 class PkgTool:
     def __init__(self):
         self.logger = logging.getLogger("PkgTool")
 
-    def find_pkgs_of(self, files):
-        pkgs = []
+    def find_owner_packages(self, path):
+        packages = []
 
-        result = subprocess.run(["dpkg-query", "-S", *files], stdout=subprocess.PIPE)
+        result = subprocess.run(["dpkg-query", "-S", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output = result.stdout.decode('utf-8')
+        errors = result.stderr.decode('utf-8')
+
+        for line in errors.splitlines():
+            if line.startswith("dpkg-query: no path found matching pattern"):
+                self.logger.error(line)
 
         for line in output.splitlines():
             pkg_name, file_path = line.split(" ")
-            pkgs.append(pkg_name.rstrip(":"))
+            packages.append(pkg_name.rstrip(":"))
 
-        return set(pkgs)
+        return set(packages)
 
     def deploy_pkgs(self, pkgs, appdir):
         temp_dir = tempfile.mkdtemp()
@@ -41,6 +48,8 @@ class PkgTool:
             self._download_pkg(pkg, temp_dir)
 
         self._extract_pkgs_to(temp_dir, appdir)
+
+        make_links_relative_to_root(appdir)
 
         shutil.rmtree(temp_dir)
 
@@ -52,9 +61,14 @@ class PkgTool:
             self.logger.error("Packages download failed. Error: " + result.stderr.decode('utf-8'))
 
     def _extract_pkg_to(self, pkg_file, target_dir):
-        result = subprocess.run(["dpkg-deb", "-x", pkg_file, target_dir], stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                cwd=target_dir)
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir)
+        target_dir = os.path.abspath(target_dir)
+
+        command = ["dpkg-deb", "-X", pkg_file, target_dir]
+        self.logger.debug(command)
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=target_dir)
+        self.logger.info("Deployed files:\n%s" % result.stdout.decode('utf-8'))
 
         if result.returncode != 0:
             self.logger.error("Package extraction failed. Error: " + result.stderr.decode('utf-8'))

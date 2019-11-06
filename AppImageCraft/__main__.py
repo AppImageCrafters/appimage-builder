@@ -60,7 +60,7 @@ def __main__():
 
 
 def _execute_script(recipe):
-    script_recipe = _check_recipe_entry("script", recipe)
+    script_recipe = _check_optional_recipe_entry("script", recipe, list())
     if not isinstance(script_recipe, list):
         logging.error("Malformed recipe. 'script' entry must be a list")
     shell_tool = ShellTool()
@@ -128,9 +128,7 @@ def _execute_app_dir(recipe, app_dir, skip_install=False, skip_tests=False):
     app_dir.app_runnable = _check_recipe_entry('exec', app_recipe)
 
     app_dir_recipe = _check_recipe_entry('AppDir', recipe)
-    app_dir.appdir_path = _check_recipe_entry('path', app_dir_recipe)
-
-    app_dir.load()
+    app_dir.appdir_path = os.path.abspath(_check_recipe_entry('path', app_dir_recipe))
 
     if not skip_install:
         install_requirements(app_dir_recipe, app_dir)

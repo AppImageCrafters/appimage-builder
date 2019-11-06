@@ -14,7 +14,7 @@ import os
 import fileinput
 
 
-def make_inner_links_relative(root_dir):
+def make_links_relative_to_root(root_dir):
     for root, dirs, files in os.walk(root_dir):
         for filename in files:
             absolute_path = os.path.join(root, filename)

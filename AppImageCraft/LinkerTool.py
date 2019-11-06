@@ -11,36 +11,68 @@
 #  all copies or substantial portions of the Software.
 
 import os
+import re
 import lief
 import subprocess
+import logging
+
 
 class LinkerTool:
 
-    def __init__(self, binary_path=""):
-        self.binary_path = binary_path
+    def __init__(self, binary_path=None):
+        self.logger = logging.getLogger("LinkerTool")
+        if not binary_path:
+            self.binary_path = self.find_binary_path("/")
+        else:
+            self.binary_path = binary_path
 
-        if not self.binary_path and os.path.exists("/lib/x86_64-linux-gnu/ld-2.27.so"):
-            self.binary_path = "/lib/x86_64-linux-gnu/ld-2.27.so"
+    @staticmethod
+    def find_binary_path(prefix):
+        possible_paths = [
+            os.path.join(prefix, "lib", "x86_64-linux-gnu", "ld-2.27.so"),
+            os.path.join(prefix, "lib", "i386-linux-gnu", "ld-2.27.so")
+        ]
 
-        if not self.binary_path and os.path.exists("/lib/i386-linux-gnu/ld-2.27.so"):
-            self.binary_path = "/lib/i386-linux-gnu/ld-2.27.so"
+        for path in possible_paths:
+            logging.debug("Looking linker binary at: %s\n" % path)
+            if os.path.exists(path):
+                return path
 
-    def list_link_dependencies(self, file):
-        dependencies = set()
-        missing = set()
-        result = subprocess.run([self.binary_path, "--list", file], stdout=subprocess.PIPE)
-        output = result.stdout.decode('utf-8')
+        return None
 
-        for line in output.splitlines():
-            line_parts = line.strip().split(" ")
-            if len(line_parts) > 2:
-                dependencies.add(line_parts[2])
-            else:
-                missing.add(line_parts[0])
+    def list_link_dependencies(self, file, ignore_cache=False, library_dirs=None):
+        result = self._execute_ld_so_command(file, ignore_cache, library_dirs)
+        if result.returncode == 0:
+            return self._parse(result.stdout.decode('utf-8'))
+        else:
+            self.logger.error("Dependencies lockup failed: %s" % result.stderr.decode('utf-8'))
 
-        if "linux-vdso.so.1" in missing:
-            missing.remove("linux-vdso.so.1")
-        return (dependencies, missing)
+    def _execute_ld_so_command(self, file, ignore_cache, library_dirs):
+        command = [self.binary_path]
+        if ignore_cache:
+            command.append("--inhibit-cache")
+        if library_dirs:
+            command.append("--library-path")
+            command.append("\"%s\"" % ":".join(library_dirs))
+        command.append("--list")
+        command.append(file)
+
+        self.logger.debug(" ".join(command))
+
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return result
+
+    def list_linkable_files(self, root_dir):
+        linkable_files = []
+
+        for root, dirs, files in os.walk(root_dir):
+            for filename in files:
+                full_path = os.path.join(root, filename)
+                result = subprocess.run([self.binary_path, "--verify", full_path])
+                if result.returncode == 2 or result.returncode == 0:
+                    linkable_files.append(full_path)
+
+        return linkable_files
 
     def list_libraries_files(self, root_dir):
         library_files = []
@@ -68,35 +100,6 @@ class LinkerTool:
         # print("Runnable Files found: \n\t%s\n" % "\n\t".join(binary_files) )
         return binary_files
 
-    def update_run_paths(self):
-        elf_files = self._locate_elf_files()
-        ld_paths = sorted(self._generate_run_paths(elf_files))
-
-        print("Updating run paths to:")
-        for path in ld_paths:
-            print("\t%s" % path)
-
-        for file in elf_files:
-            # Don't modify the linker
-            if "ld-" in file and (file.endswith(".so") or file.endswith(".so.2")):
-                # FileUtils.replace_in_file(file, b"/usr/", b"/xxx/")
-                print("skip linker %s" % file)
-                continue
-
-            binary = lief.parse(file)
-
-            try:
-                runpath_entry = binary.get(tag=lief.ELF.DYNAMIC_TAGS.RUNPATH)
-                if ld_paths != runpath_entry.paths:
-                    runpath_entry.paths = ld_paths
-                    binary.write(file)
-                    print("run path entry updated for: %s" % file)
-            except:
-                runpath_entry = lief.ELF.DynamicEntryRunPath(ld_paths)
-                binary.add(runpath_entry)
-                binary.write(file)
-                print("run path entry created for: %s" % file)
-
     def _locate_elf_files(self):
         elf_files = []
         for root, dirs, files in os.walk(self.appdir_path):
@@ -108,13 +111,23 @@ class LinkerTool:
 
         return elf_files
 
+    def _parse(self, output):
+        results = {}
+        for line in output.splitlines():
+            if "statically linked" in line:
+                continue
 
-    def _generate_run_paths(self, elf_files):
-        run_paths = set()
-        binary_dir = os.path.join(self.appdir_path, os.path.dirname(self.app_runnable))
-        for file in elf_files:
-            dir_name = os.path.dirname(file)
-            relative_path = os.path.relpath(dir_name, binary_dir)
-            run_paths.add("$ORIGIN/%s" % relative_path)
+            line = self._remove_output_line_memory_address(line.strip(" "))
 
-        return list(run_paths)
+            if '=>' in line:
+                line_parts = line.split('=>')
+                results[line_parts[0].strip()] = line_parts[1].strip()
+            else:
+                results[line] = None
+
+        return results
+
+    @staticmethod
+    def _remove_output_line_memory_address(line):
+        line = re.sub(r'\(.*\)', '', line)
+        return line.strip()

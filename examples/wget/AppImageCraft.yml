@@ -8,13 +8,6 @@ App:
   icon: utilities-terminal
   exec: usr/bin/wget
 
-# build instructions
-script:
-  - mkdir -p AppDir
-  - cd AppDir && apt-get download wget
-  - cd AppDir && dpkg-deb -x wget*.deb .
-  - cd AppDir && rm *.deb
-
 AppDir:
   path: ./AppDir
   addons:
@@ -23,6 +16,7 @@ AppDir:
 
   apt:
     include:
+      - wget
       - libssl1.1
 
   test:
