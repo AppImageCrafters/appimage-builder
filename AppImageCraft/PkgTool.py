@@ -47,11 +47,12 @@ class PkgTool:
             self.logger.info("Downloading: %s" % pkg)
             self._download_pkg(pkg, temp_dir)
 
-        self._extract_pkgs_to(temp_dir, appdir)
+        extracted_files = self._extract_pkgs_to(temp_dir, appdir)
 
         make_links_relative_to_root(appdir)
 
         shutil.rmtree(temp_dir)
+        return extracted_files
 
     def _download_pkg(self, pkg, target_dir):
         result = subprocess.run(["apt-get", "download", pkg], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -72,10 +73,19 @@ class PkgTool:
 
         if result.returncode != 0:
             self.logger.error("Package extraction failed. Error: " + result.stderr.decode('utf-8'))
+            return []
+
+        return result.stdout.decode('utf-8').splitlines()
 
     def _extract_pkgs_to(self, temp_dir, appdir):
+        extraction_map = {}
         for root, dirs, files in os.walk(temp_dir):
             for filename in files:
-                if (filename.endswith(".deb")):
+                if filename.endswith(".deb"):
                     self.logger.info("Extracting: %s" % filename)
-                    self._extract_pkg_to(os.path.join(root, filename), appdir)
+                    extracted_files = self._extract_pkg_to(os.path.join(root, filename), appdir)
+
+                    for extracted_file in extracted_files:
+                        extraction_map[extracted_file] = os.path.basename(filename)
+
+        return extraction_map

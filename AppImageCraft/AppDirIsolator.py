@@ -17,15 +17,15 @@ from AppImageCraft.PkgTool import PkgTool
 
 
 class AppDirIsolator:
-    deployed_files = None
+    deployed_packages = None
     app_dir_path = None
     deploy_map = None
 
     def __init__(self, dir):
         self.pkg_tool = PkgTool()
-        self.deployed_files = set()
-        self.app_dir_path = dir
         self.logger = logging.getLogger("AppDirIsolator")
+        self.deployed_packages = {}
+        self.app_dir_path = dir
         self.deploy_map = {}
         self.linker = None
 
@@ -73,10 +73,10 @@ class AppDirIsolator:
 
     def deploy_package_of(self, file):
         packages = self.pkg_tool.find_owner_packages(file)
-        self.pkg_tool.deploy_pkgs(packages, self.app_dir_path)
+        deployed_files = self.pkg_tool.deploy_pkgs(packages, self.app_dir_path)
 
-        for package in packages:
-            self.deploy_map[file] = package
+        for path,pkg in deployed_files.items():
+            self.deploy_map[path] = pkg
 
     def deployed(self, file):
         return file.startswith(self.app_dir_path) or os.path.exists(self.app_dir_path + file)

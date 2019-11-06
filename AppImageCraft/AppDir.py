@@ -18,7 +18,7 @@ from AppImageCraft.AppRunBuilder import AppRunBuilder
 from AppImageCraft.LinkerTool import LinkerTool
 from AppImageCraft.PkgTool import PkgTool
 from AppImageCraft.AppDirIsolator import AppDirIsolator
-from AppImageCraft import FileUtils
+import json
 
 
 class AppDir:
@@ -35,6 +35,8 @@ class AppDir:
     bundle_exclude = set()
     bundle_packages = set()
 
+    deploy_registry = {}
+
     bundle_ldd_dependencies = set()
 
     def __init__(self, app_dir=None, app_runnable=None):
@@ -49,12 +51,12 @@ class AppDir:
         if additional_pkgs is None:
             additional_pkgs = set()
 
-        self._deploy_packages(additional_pkgs, excluded_pkgs)
+        early_deployed_files = self._deploy_packages(additional_pkgs, excluded_pkgs)
 
         app_dir_isolator = AppDirIsolator(self.appdir_path)
         app_dir_isolator.isolate()
 
-        FileUtils.make_links_relative_to_root(self.appdir_path)
+        self.deploy_registry = {**early_deployed_files, **app_dir_isolator.deploy_map}
 
     def _deploy_packages(self, additional_pkgs, excluded_pkgs):
         self.logger.debug("Deploying packages to: %s" % self.appdir_path)
@@ -68,7 +70,7 @@ class AppDir:
                 pkg_tool.find_owner_packages(self.bundle_ldd_dependencies))
 
         self.bundle_packages = self.bundle_packages.difference(excluded_pkgs)
-        pkg_tool.deploy_pkgs(self.bundle_packages, absolute_app_dir_path)
+        return pkg_tool.deploy_pkgs(self.bundle_packages, absolute_app_dir_path)
 
     def _generate_ld_path(self, elf_files):
         ld_paths = set()

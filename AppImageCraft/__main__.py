@@ -14,6 +14,7 @@
 import os
 import argparse
 import yaml
+import json
 import pprint
 import logging
 import platform
@@ -132,6 +133,9 @@ def _execute_app_dir(recipe, app_dir, skip_install=False, skip_tests=False):
 
     if not skip_install:
         install_requirements(app_dir_recipe, app_dir)
+
+        with open(os.path.join(app_dir.appdir_path, "deployed_files.json"), "w") as f:
+            f.write(json.dumps(app_dir.deploy_registry, indent=2, sort_keys=True))
 
     app_dir.generate_app_run()
 
