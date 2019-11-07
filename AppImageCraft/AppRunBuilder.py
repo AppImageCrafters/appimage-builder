@@ -49,7 +49,7 @@ class AppRunBuilder:
         exec_command = "exec \"${APPDIR}/%s\" --inhibit-cache " % self.linker_path
 
         if self.library_paths:
-            exec_command = exec_command + "--library-path \"%s\" " % ":".join(self.library_paths)
+            exec_command = exec_command + "--library-path \"${APPDIR}/%s\" " % ":${APPDIR}/".join(self.library_paths)
 
         exec_command = exec_command + "\"${APPDIR}/%s\" $@\n" % self.app_runnable
 
