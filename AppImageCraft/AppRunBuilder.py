@@ -19,6 +19,7 @@ class AppRunBuilder:
     export_xdg_data_dirs = True
     library_paths = []
     linker_path = None
+    hooks = []
 
     def __init__(self, appdir_path, app_runnable, linker_path):
         self.appdir_path = appdir_path
@@ -33,11 +34,17 @@ class AppRunBuilder:
         self._write_header(f)
 
         if self.export_appdir:
-            f.write("APPDIR=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" >/dev/null 2>&1 && pwd )\"\n")
+            f.write("if [ -z ${APPDIR+x} ]; then\n"
+                    "   APPDIR=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" >/dev/null 2>&1 && pwd )\"\n"
+                    "fi\n")
 
         if self.export_xdg_data_dirs:
             f.write("export XDG_DATA_DIRS=\"${APPDIR}\"/usr/share/:\"${XDG_DATA_DIRS}\"\n")
 
+        for hook in self.hooks:
+            commands = hook.app_run_commands()
+            if commands:
+                f.write(commands)
 
         exec_command = "exec \"${APPDIR}/%s\" --inhibit-cache " % self.linker_path
 

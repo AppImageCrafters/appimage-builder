@@ -18,7 +18,7 @@ from AppImageCraft.LinkerTool import LinkerTool
 from AppImageCraft.PkgTool import PkgTool
 from AppImageCraft.AppDirIsolator import AppDirIsolator
 from AppImageCraft.Hook.Qt5Hook import Qt5Hook
-
+from AppImageCraft.Hook.FontConfigHook import FontConfigHook
 
 class AppDir:
     path = ""
@@ -43,6 +43,7 @@ class AppDir:
         self.path = path
         self.app_runnable = app_runnable
         self.logger = logging.getLogger("AppDir")
+        self.hooks = [Qt5Hook(self), FontConfigHook(self)]
 
     def install(self, additional_pkgs=None, excluded_pkgs=None):
         if excluded_pkgs is None:
@@ -59,8 +60,7 @@ class AppDir:
         self.deploy_registry = {**early_deployed_files, **app_dir_isolator.deploy_map}
         self.libs_registry = app_dir_isolator.libs_map
 
-        hooks = [Qt5Hook(self)]
-        for hook in hooks:
+        for hook in self.hooks:
             if hook.active():
                 hook.after_install()
 
@@ -95,7 +95,7 @@ class AppDir:
         linker = LinkerTool()
 
         app_run_generator = AppRunBuilder(self.path, self.app_runnable, linker.binary_path)
-
+        app_run_generator.hooks = self.hooks
         elf_files = linker.list_libraries_files(self.path)
         app_run_generator.library_paths = self._generate_ld_path(elf_files)
 

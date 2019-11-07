@@ -18,12 +18,12 @@ import json
 import pprint
 import logging
 import platform
+from shutil import copyfile
 from AppImageCraft.AppDir import AppDir
 from AppImageCraft.TestsTool import TestsTool
 from AppImageCraft.AppImageTool import AppImageTool
 from AppImageCraft.DesktopEntryBuilder import DesktopEntryBuilder
 from AppImageCraft.ShellTool import ShellTool
-from shutil import copyfile
 
 
 def __main__():
