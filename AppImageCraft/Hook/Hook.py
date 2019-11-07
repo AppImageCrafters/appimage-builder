@@ -24,3 +24,6 @@ class Hook:
 
     def after_install(self):
         pass
+
+    def app_run_commands(self):
+        pass
