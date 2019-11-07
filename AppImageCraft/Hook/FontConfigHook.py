@@ -19,4 +19,4 @@ class FontConfigHook(Hook):
 
     def app_run_commands(self):
         return "# Set font config configuration file\n" \
-               "export FONTCONFIG_FILE=\"$AppDir/etc/fonts/fonts.conf\"\n"
+               "export FONTCONFIG_FILE=\"${APPDIR}/etc/fonts/fonts.conf\"\n"
