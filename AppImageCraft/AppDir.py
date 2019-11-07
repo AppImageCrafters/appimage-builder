@@ -11,18 +11,17 @@
 #  all copies or substantial portions of the Software.
 
 import os
-import argparse
 import logging
 
 from AppImageCraft.AppRunBuilder import AppRunBuilder
 from AppImageCraft.LinkerTool import LinkerTool
 from AppImageCraft.PkgTool import PkgTool
 from AppImageCraft.AppDirIsolator import AppDirIsolator
-import json
+from AppImageCraft.Hook.Qt5Hook import Qt5Hook
 
 
 class AppDir:
-    appdir_path = ""
+    path = ""
 
     app_id = ""
     app_name = ""
@@ -40,8 +39,8 @@ class AppDir:
 
     bundle_ldd_dependencies = set()
 
-    def __init__(self, app_dir=None, app_runnable=None):
-        self.appdir_path = app_dir
+    def __init__(self, path=None, app_runnable=None):
+        self.path = path
         self.app_runnable = app_runnable
         self.logger = logging.getLogger("AppDir")
 
@@ -54,15 +53,21 @@ class AppDir:
 
         early_deployed_files = self._deploy_packages(additional_pkgs, excluded_pkgs)
 
-        app_dir_isolator = AppDirIsolator(self.appdir_path)
+        app_dir_isolator = AppDirIsolator(self.path)
         app_dir_isolator.isolate()
 
         self.deploy_registry = {**early_deployed_files, **app_dir_isolator.deploy_map}
         self.libs_registry = app_dir_isolator.libs_map
 
+        hooks = [Qt5Hook(self)]
+        for hook in hooks:
+            if hook.active():
+                hook.after_install()
+
+
     def _deploy_packages(self, additional_pkgs, excluded_pkgs):
-        self.logger.debug("Deploying packages to: %s" % self.appdir_path)
-        absolute_app_dir_path = os.path.abspath(self.appdir_path)
+        self.logger.debug("Deploying packages to: %s" % self.path)
+        absolute_app_dir_path = os.path.abspath(self.path)
 
         pkg_tool = PkgTool()
         self.bundle_packages = set(additional_pkgs)
@@ -78,7 +83,7 @@ class AppDir:
         ld_paths = set()
         for file in elf_files:
             dir_name = os.path.dirname(file)
-            relative_path = os.path.relpath(dir_name, self.appdir_path)
+            relative_path = os.path.relpath(dir_name, self.path)
             ld_paths.add(relative_path)
 
         return list(ld_paths)
@@ -89,41 +94,9 @@ class AppDir:
 
         linker = LinkerTool()
 
-        app_run_generator = AppRunBuilder(self.appdir_path, self.app_runnable, linker.binary_path)
+        app_run_generator = AppRunBuilder(self.path, self.app_runnable, linker.binary_path)
 
-        elf_files = linker.list_libraries_files(self.appdir_path)
+        elf_files = linker.list_libraries_files(self.path)
         app_run_generator.library_paths = self._generate_ld_path(elf_files)
 
         app_run_generator.build()
-
-
-def main():
-    parser = argparse.ArgumentParser(description='AppDir crafting tool')
-    parser.add_argument('--appdir', dest='appdir', default=os.getcwd(), help='target AppDir (default: $PWD)')
-    parser.add_argument('--app', dest='app', help='target Application path relative to the AppDir')
-    parser.add_argument('--install-deps', dest='do_install_deps', action='store_true',
-                        help='install dependencies of the App into the AppDir')
-
-    parser.add_argument('--update-run-paths', dest='do_run_paths_update', action='store_true',
-                        help='Update the run paths of the installed binaries')
-
-    parser.add_argument('--generate-apprun', dest='do_generate_apprun', action='store_true',
-                        help='Generate the AppRun file required to properly start the App')
-
-    args = parser.parse_args()
-
-    if args.do_install_deps:
-        print("Installing application dependencies")
-        appDir = AppDir()
-        appDir.load()
-        appDir.install()
-
-    if args.do_generate_apprun:
-        print("Generating the AppRun file")
-        appDir = AppDir()
-        appDir.load()
-        appDir.generate_app_run()
-
-
-if __name__ == '__main__':
-    main()

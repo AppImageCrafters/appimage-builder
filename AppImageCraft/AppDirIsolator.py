@@ -56,7 +56,7 @@ class AppDirIsolator:
                     continue
 
                 self.deploy_package_of(dependency_file_path)
-        print(dependencies_map)
+
         self.libs_map = {**self.libs_map, **dependencies_map}
 
     def list_files_with_external_dependencies(self):

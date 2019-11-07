@@ -74,7 +74,7 @@ def _execute_appimage(app_dir, recipe):
     app_name = _check_recipe_entry("name", app_recipe)
     app_version = _check_recipe_entry("version", app_recipe)
     output_file = os.path.join(os.getcwd(), "%s-%s-%s.AppImage" % (app_name, app_version, platform.machine()))
-    appimage_tool.bundle(app_dir.appdir_path, output_file)
+    appimage_tool.bundle(app_dir.path, output_file)
 
 
 def _generate_desktop_entry(app_dir, recipe):
@@ -90,7 +90,7 @@ def _generate_desktop_entry(app_dir, recipe):
     builder.app_categories = _check_optional_recipe_entry("categories", app_recipe, ["Utility"])
     builder.app_summary = _check_optional_recipe_entry("summary", app_recipe, "")
 
-    desktop_entry_path = os.path.join(app_dir.appdir_path, builder.get_file_name())
+    desktop_entry_path = os.path.join(app_dir.path, builder.get_file_name())
     builder.generate(desktop_entry_path)
 
 
@@ -119,7 +119,7 @@ def _copy_icon_from_theme(app_dir, recipe):
             if app_icon in filename:
                 icon_path = os.path.join(root, filename)
 
-    target_icon_path = os.path.join(os.path.abspath(app_dir.appdir_path), os.path.basename(icon_path))
+    target_icon_path = os.path.join(os.path.abspath(app_dir.path), os.path.basename(icon_path))
     logging.info("Coping: '%s' to '%s'" % (icon_path, target_icon_path))
     copyfile(icon_path, target_icon_path)
 
@@ -129,15 +129,15 @@ def _execute_app_dir(recipe, app_dir, skip_install=False, skip_tests=False):
     app_dir.app_runnable = _check_recipe_entry('exec', app_recipe)
 
     app_dir_recipe = _check_recipe_entry('AppDir', recipe)
-    app_dir.appdir_path = os.path.abspath(_check_recipe_entry('path', app_dir_recipe))
+    app_dir.path = os.path.abspath(_check_recipe_entry('path', app_dir_recipe))
 
     if not skip_install:
         install_requirements(app_dir_recipe, app_dir)
 
-        with open(os.path.join(app_dir.appdir_path, "deployed_files.json"), "w") as f:
+        with open(os.path.join(app_dir.path, "deployed_files.json"), "w") as f:
             f.write(json.dumps(app_dir.deploy_registry, indent=2, sort_keys=True))
 
-        with open(os.path.join(app_dir.appdir_path, "deployed_libs.json"), "w") as f:
+        with open(os.path.join(app_dir.path, "deployed_libs.json"), "w") as f:
             f.write(json.dumps(app_dir.libs_registry, indent=2, sort_keys=True))
 
     app_dir.generate_app_run()
