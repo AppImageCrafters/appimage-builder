@@ -12,11 +12,10 @@
 
 import os
 import shutil
-import tempfile
 import subprocess
 import logging
 
-from AppImageCraft.FileUtils import make_links_relative_to_root
+from AppImageCraft.FileUtils import make_link_relative
 
 
 class PkgTool:
@@ -40,26 +39,46 @@ class PkgTool:
 
         return set(packages)
 
-    def deploy_pkgs(self, pkgs, appdir):
-        temp_dir = tempfile.mkdtemp()
+    def list_package_files(self, package):
+        files = []
 
-        for pkg in pkgs:
-            self.logger.info("Downloading: %s" % pkg)
-            self._download_pkg(pkg, temp_dir)
-
-        extracted_files = self._extract_pkgs_to(temp_dir, appdir)
-
-        make_links_relative_to_root(appdir)
-
-        shutil.rmtree(temp_dir)
-        return extracted_files
-
-    def _download_pkg(self, pkg, target_dir):
-        result = subprocess.run(["apt-get", "download", pkg], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                cwd=target_dir)
+        result = subprocess.run(["dpkg-query", "-L", package], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output = result.stdout.decode('utf-8')
 
         if result.returncode != 0:
-            self.logger.error("Packages download failed. Error: " + result.stderr.decode('utf-8'))
+            return files
+
+        for line in output.splitlines():
+            if os.path.isfile(line):
+                files.append(line)
+
+        return files
+
+    def deploy_pkgs(self, pkgs, app_dir):
+        extracted_files = {}
+        for pkg in pkgs:
+            self.logger.info("Deploying package: %s" % pkg)
+            files = self.list_package_files(pkg)
+
+            for file in files:
+                target_file = app_dir + file
+                self.logger.info("Deploying %s", file)
+
+                os.makedirs(os.path.dirname(target_file), exist_ok=True)
+                shutil.copy2(file, target_file)
+
+                extracted_files[file] = pkg
+                if os.path.islink(target_file):
+                    self._make_links_relative_to_app_dir(app_dir, target_file)
+
+        return extracted_files
+
+    @staticmethod
+    def _make_links_relative_to_app_dir(app_dir, target_file):
+        link_target = os.readlink(target_file)
+        if link_target.startswith("/"):
+            logging.info("Making link %s relative to %s", link_target, app_dir)
+            make_link_relative(app_dir, target_file, link_target)
 
     def _extract_pkg_to(self, pkg_file, target_dir):
         if not os.path.exists(target_dir):

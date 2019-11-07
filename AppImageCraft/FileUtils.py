@@ -21,10 +21,10 @@ def make_links_relative_to_root(root_dir):
             if os.path.islink(absolute_path):
                 link_target = os.readlink(absolute_path)
                 if link_target.startswith("/"):
-                    _make_link_relative(root_dir, absolute_path, link_target)
+                    make_link_relative(root_dir, absolute_path, link_target)
 
 
-def _make_link_relative(root_dir, absolute_path, link_target):
+def make_link_relative(root_dir, absolute_path, link_target):
     absolute_new_link_target = root_dir + link_target
 
     folder_path = os.path.dirname(absolute_path)
