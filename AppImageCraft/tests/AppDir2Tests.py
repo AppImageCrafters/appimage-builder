@@ -30,9 +30,6 @@ class AppDir2TestCase(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.app_dir_path)
 
-    def test_path_validation(self):
-        self.assertRaises(AssertionError, AppDir2, "/asdasldkjasld/skljdflkjasdf")
-
     def test_init(self):
         app_dir = AppDir2(self.app_dir_path)
         self.assertEqual(list(app_dir.lockup_queue), [self.runnable_path])

@@ -55,7 +55,8 @@ class Driver:
 
         dependency.deployed = True
 
+    def configure_app_run(self, app_run):
+        pass
+
     def __str__(self) -> str:
         return self.id
-
-

@@ -13,8 +13,8 @@
 import os
 import yaml
 
-from AppImageCraft.AppDir import AppDir
-from AppImageCraft.AppImageCraft import AppImageCraft
+from AppImageCraft import AppDir2
+from AppImageCraft.AppImageBuilder import AppImageBuilder
 
 
 class ConfigurationError(RuntimeError):
@@ -49,14 +49,11 @@ class Configurator:
 
         self._load_recipe_version()
 
-        app = AppImageCraft()
+        builder = AppImageBuilder()
+        builder.app_dir_config['path'] = self._check_entry(["AppDir", "path"])
+        builder.app_config = self._check_entry(["App"])
 
-        app_dir = AppDir()
-        app_dir.path = self._check_entry(["AppDir", "path"])
-
-        app.app_dir = app_dir
-
-        return app
+        return builder
 
     def _load_recipe_version(self):
         self.version = self._check_entry(["version"])

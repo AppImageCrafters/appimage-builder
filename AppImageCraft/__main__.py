@@ -19,7 +19,9 @@ import pprint
 import logging
 import platform
 from shutil import copyfile
-from AppImageCraft.AppDir import AppDir
+from AppImageCraft.Configurator import Configurator
+from AppImageCraft.Configurator import ConfigurationError
+from AppImageCraft.AppImageBuilder import AppImageBuilder
 from AppImageCraft.TestsTool import TestsTool
 from AppImageCraft.tools.AppImageTool import AppImageTool
 from AppImageCraft.DesktopEntryBuilder import DesktopEntryBuilder
@@ -44,21 +46,12 @@ def __main__():
     args = parser.parse_args()
     _configure_logger(args)
 
-    recipe = _load_recipe_file(args.recipe)
-    if not recipe:
-        return 1
-
-    logging.debug("Recipe: \n%s\n" % pprint.pformat(recipe))
-
-    if not args.skip_script:
-        _execute_script(recipe)
-
-    app_dir = AppDir()
-    _execute_app_dir(recipe, app_dir, args.skip_install, args.skip_tests)
-
-    if not args.skip_appimage:
-        _execute_appimage(app_dir, recipe)
-
+    try:
+        configurator = Configurator()
+        builder = configurator.load_file(args.recipe)
+        builder.build()
+    except ConfigurationError as error:
+        logging.error(error)
 
 def _execute_script(recipe):
     script_recipe = _check_optional_recipe_entry("script", recipe, list())

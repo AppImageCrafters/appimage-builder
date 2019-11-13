@@ -27,7 +27,8 @@ class AppRunTestCase(unittest.TestCase):
         'export APP_PATH="usr/bin/exec"',
         'exec "${APPDIR}/${LINKER_PATH}" \\',
         '   --inhibit-cache --library-path ${LD_LIBRARY_DIRS} \\',
-        '  ${APPDIR}/${APP_PATH}'
+        '  ${APPDIR}/${APP_PATH}',
+        ''
     ]
 
     def test_minimal_script_generation(self):

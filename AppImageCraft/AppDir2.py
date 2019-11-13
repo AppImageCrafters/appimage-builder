@@ -21,8 +21,7 @@ class AppDir2:
     drivers = []
 
     def __init__(self, path):
-        assert os.path.exists(path)
-        assert os.path.isdir(path)
+        os.makedirs(path, exist_ok=True)
 
         self.path = path
         self.drivers.append(drivers.Linker())

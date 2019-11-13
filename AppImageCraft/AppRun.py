@@ -30,7 +30,8 @@ class AppRun:
         ],
         'EXEC': ['exec "${APPDIR}/${LINKER_PATH}" \\',
                  '   --inhibit-cache --library-path ${LD_LIBRARY_DIRS} \\',
-                 '  ${APPDIR}/${APP_PATH}']
+                 '  ${APPDIR}/${APP_PATH}',
+                 '']
     }
 
     def __init__(self, app_path):
