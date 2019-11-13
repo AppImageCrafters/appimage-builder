@@ -14,8 +14,8 @@ import os
 import logging
 
 from AppImageCraft.AppRunBuilder import AppRunBuilder
-from AppImageCraft.LinkerTool import LinkerTool
-from AppImageCraft.PkgTool import PkgTool
+from AppImageCraft.tools.LinkerTool import LinkerTool
+from AppImageCraft.tools.PkgTool import PkgTool
 from AppImageCraft.AppDirIsolator import AppDirIsolator
 from AppImageCraft.Hook.Qt5Hook import Qt5Hook
 from AppImageCraft.Hook.FontConfigHook import FontConfigHook
@@ -38,6 +38,9 @@ class AppDir:
     libs_registry = {}
 
     bundle_ldd_dependencies = set()
+
+    app_recipe = None
+    app_dir_recipe = None
 
     def __init__(self, path=None, app_runnable=None):
         self.path = path

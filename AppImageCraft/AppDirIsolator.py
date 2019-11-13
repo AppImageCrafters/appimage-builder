@@ -12,8 +12,8 @@
 
 import os
 import logging
-from AppImageCraft.LinkerTool import LinkerTool
-from AppImageCraft.PkgTool import PkgTool
+from AppImageCraft.tools.LinkerTool import LinkerTool
+from AppImageCraft.tools.PkgTool import PkgTool
 
 
 class AppDirIsolator:

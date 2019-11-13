@@ -15,8 +15,8 @@ import tempfile
 import shutil
 import os
 
-from AppImageCraft.PkgTool import PkgTool
-from AppImageCraft.LinkerTool import LinkerTool
+from AppImageCraft.tools.PkgTool import PkgTool
+from AppImageCraft.tools.LinkerTool import LinkerTool
 from AppImageCraft.AppDir import AppDir
 from AppImageCraft.AppDirIsolator import AppDirIsolator
 

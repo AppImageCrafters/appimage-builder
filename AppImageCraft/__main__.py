@@ -21,9 +21,9 @@ import platform
 from shutil import copyfile
 from AppImageCraft.AppDir import AppDir
 from AppImageCraft.TestsTool import TestsTool
-from AppImageCraft.AppImageTool import AppImageTool
+from AppImageCraft.tools.AppImageTool import AppImageTool
 from AppImageCraft.DesktopEntryBuilder import DesktopEntryBuilder
-from AppImageCraft.ShellTool import ShellTool
+from AppImageCraft.tools.ShellTool import ShellTool
 
 
 def __main__():

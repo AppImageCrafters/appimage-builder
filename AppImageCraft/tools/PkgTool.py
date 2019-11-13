@@ -19,8 +19,10 @@ from AppImageCraft.FileUtils import make_link_relative
 
 
 class PkgTool:
+    target_arch = None
     def __init__(self):
         self.logger = logging.getLogger("PkgTool")
+        self.target_arch = self.get_deb_host_arch()
 
     def find_owner_packages(self, path):
         packages = []
@@ -34,10 +36,28 @@ class PkgTool:
                 self.logger.error(line)
 
         for line in output.splitlines():
-            pkg_name, file_path = line.split(" ")
-            packages.append(pkg_name.rstrip(":"))
+            packages = self._parse_package_names_from_dpkg_query_output(line)
+
+            for package in packages:
+                if self.target_arch in packages:
+                    # only use packages matching the target arch
+                    packages.append(package)
 
         return set(packages)
+
+    @staticmethod
+    def _parse_package_names_from_dpkg_query_output(line):
+        line = line.replace(',', '')
+        sections = line.split(" ")
+        # remove file path
+        sections.pop()
+        packages = []
+        for package in sections:
+            # remove last ',' or ':'
+            package = package[:-1]
+            packages.append(package)
+
+        return packages
 
     def list_package_files(self, package):
         files = []
@@ -108,3 +128,11 @@ class PkgTool:
                         extraction_map[extracted_file] = os.path.basename(filename)
 
         return extraction_map
+
+    @staticmethod
+    def get_deb_host_arch():
+        result = subprocess.run(["dpkg-architecture", "-q", 'DEB_HOST_ARCH'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if result.returncode == 0:
+            return result.stdout.decode('utf-8').strip()
+        else:
+            return None

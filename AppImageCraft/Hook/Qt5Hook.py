@@ -15,7 +15,7 @@ import logging
 import configparser
 
 from AppImageCraft.Hook.Hook import Hook
-from AppImageCraft.LinkerTool import LinkerTool
+from AppImageCraft.tools.LinkerTool import LinkerTool
 
 
 class Qt5Hook(Hook):

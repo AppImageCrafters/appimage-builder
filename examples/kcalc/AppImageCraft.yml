@@ -14,7 +14,7 @@ AppDir:
     - generate-desktop-entry
     - copy-icon-from-theme
 
-  apt:
+  dpkg:
     include:
       - kcalc
       - qt5-style-plugins

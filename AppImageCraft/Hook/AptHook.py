@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #  Copyright  2019 Alexis Lopez Zubieta
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a
@@ -11,6 +10,20 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-from AppImageCraft.AppDir import AppDir
-from AppImageCraft.TestsTool import TestsTool
-from AppImageCraft.AppDir2 import AppDir2
+from AppImageCraft.Hook.Hook import Hook
+
+
+class AptHook(Hook):
+    included_packages = []
+    excluded_packages = []
+
+    pkg_tool = None
+
+    def active(self):
+        return self.included_packages or self.excluded_packages
+
+    def before_install(self):
+        self.pkg_tool.deploy_pkgs(self.included_packages)
+
+
+
