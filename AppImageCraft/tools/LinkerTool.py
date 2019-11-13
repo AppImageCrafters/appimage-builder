@@ -68,11 +68,14 @@ class LinkerTool:
         for root, dirs, files in os.walk(root_dir):
             for filename in files:
                 full_path = os.path.join(root, filename)
-                result = subprocess.run([self.binary_path, "--verify", full_path])
-                if result.returncode == 2 or result.returncode == 0:
+                if self.linkable(full_path):
                     linkable_files.append(full_path)
 
         return linkable_files
+
+    def linkable(self, full_path):
+        result = subprocess.run([self.binary_path, "--verify", full_path])
+        return result.returncode == 2 or result.returncode == 0
 
     def list_libraries_files(self, root_dir):
         library_files = []

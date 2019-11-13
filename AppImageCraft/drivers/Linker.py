@@ -41,9 +41,11 @@ class Linker(drivers.Driver):
         self.linker = tools.Linker()
 
     def lockup_dependencies(self, file):
-        linker_map = self.linker.list_link_dependencies(file)
-
         dependencies = []
+        if not self.linker.linkable(file):
+            return None
+
+        linker_map = self.linker.list_link_dependencies(file)
         if linker_map:
             for k, v in linker_map.items():
                 if v:
