@@ -12,5 +12,4 @@
 #  all copies or substantial portions of the Software.
 
 from AppImageCraft.AppDir import AppDir
-from AppImageCraft.TestsTool import TestsTool
 from AppImageCraft.AppDir2 import AppDir2

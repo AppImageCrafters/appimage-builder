@@ -12,6 +12,7 @@
 
 import os
 from AppImageCraft import drivers
+from AppImageCraft.AppRun import AppRun
 
 
 class AppDir2:
@@ -74,8 +75,14 @@ class AppDir2:
         for dependency in dependencies:
             self.lockup_queue.append(dependency.source)
 
-    def write_app_run(self, app_run_path):
-        pass
+    def write_app_run(self, exec):
+        app_run = AppRun(exec)
+        app_run_path = os.path.join(self.path, "AppRun")
+
+        for driver in self.drivers:
+            driver.configure_app_run(app_run)
+
+        app_run.save(app_run_path)
 
     def write_app_dir_info(self):
         pass
