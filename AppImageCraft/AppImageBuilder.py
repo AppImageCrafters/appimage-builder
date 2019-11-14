@@ -10,8 +10,9 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import os
+import logging
+
 from AppImageCraft import AppDir2
-from AppImageCraft import drivers
 from AppImageCraft.AppRun import AppRun
 
 
@@ -21,6 +22,10 @@ class AppImageBuilder:
     app_dir_config = {}
 
     drivers = None
+    logger = None
+
+    def __init__(self):
+        self.logger = logging.getLogger('builder')
 
     def _load_app_dir(self):
         absolute_app_dir_path = os.path.abspath(self.app_dir_config['path'])
@@ -30,13 +35,16 @@ class AppImageBuilder:
     def build(self):
         self._load_app_dir()
         self.bundle_dependencies()
-        self.write_app_run(self.app_config['exec'])
+        self.configure(self.app_config['exec'])
+        self.logger.info("AppDir build completed")
 
     def bundle_dependencies(self):
+        self.logger.info("Bundling dependencies into the AppDir: %s" % self.app_dir.path)
         dependencies = self._load_base_dependencies()
         while dependencies:
             dependency = dependencies.pop()
 
+            self.logger.info("Inspecting: %s" % dependency.source)
             new_dependencies = self._lockup_new_dependencies(dependency)
             dependencies.extend(new_dependencies)
 
@@ -69,11 +77,12 @@ class AppImageBuilder:
 
         return dependencies
 
-    def write_app_run(self, exec):
-        app_run = AppRun(exec)
-        app_run_path = os.path.join(self.app_dir.path, "AppRun")
+    def configure(self, exec):
+        self.logger.info("Configuring AppDir")
+        self.app_dir.app_run = AppRun(exec)
 
         for driver in self.drivers.values():
-            driver.configure_app_run(app_run, self.app_dir)
+            driver.configure(self.app_dir)
 
-        app_run.save(app_run_path)
+        app_run_path = os.path.join(self.app_dir.path, "AppRun")
+        self.app_dir.app_run.save(app_run_path)

@@ -22,3 +22,5 @@ from AppImageCraft.drivers.Linker import LinkerDependency
 
 from AppImageCraft.drivers.Dpkg import Dpkg
 from AppImageCraft.drivers.Dpkg import DpkgDependency
+
+from AppImageCraft.drivers.Qt import Qt

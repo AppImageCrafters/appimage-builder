@@ -1,4 +1,4 @@
-version: 0.1
+version: 1
 
 # Application related information
 App:
@@ -20,13 +20,15 @@ AppDir:
       - qt5-style-plugins
       - libqt5quicktemplates2-5
       - libqt5gui5
-      - qtwayland5
-      - libgl1-mesa-dri
       - frameworkintegration
       - gtk2-engines-pixbuf
       - gtk2-engines-murrine
       - fontconfig-config
       - breeze-icon-theme
+      # graphic stack dependencies
+      - qtwayland5
+      - libglx-mesa0
+      - libgl1-mesa-dri
 
   test:
     centos:

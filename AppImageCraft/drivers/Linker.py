@@ -10,7 +10,6 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import os
-import shutil
 
 from AppImageCraft import drivers
 from AppImageCraft import tools
@@ -53,14 +52,15 @@ class Linker(drivers.Driver):
 
         return dependencies
 
-    def configure_app_run(self, app_run, app_dir):
-        self._set_app_run_ld_library_dirs_env(app_dir, app_run)
+    def configure_app_dir(self, app_dir):
+        self._set_app_run_ld_library_dirs_env(app_dir)
 
-        app_run.env['LINKER_PATH'] = "$APPDIR" + self.linker.binary_path
+        app_dir.app_run.env['LINKER_PATH'] = "$APPDIR" + self.linker.binary_path
 
-    def _set_app_run_ld_library_dirs_env(self, app_dir, app_run):
+    def _set_app_run_ld_library_dirs_env(self, app_dir):
         elf_file_paths = self.linker.list_libraries_files(app_dir.path)
         elf_dirs_paths = {os.path.dirname(file) for file in elf_file_paths}
         relative_elf_dir_paths = {dir.replace(app_dir.path, '').lstrip('/') for dir in elf_dirs_paths}
         ld_library_path_entries = {"${APPDIR}/%s" % dir for dir in relative_elf_dir_paths}
-        app_run.env['LD_LIBRARY_DIRS'] = ":".join(ld_library_path_entries)
+
+        app_dir.app_run.env['LD_LIBRARY_DIRS'] = ":".join(ld_library_path_entries)
