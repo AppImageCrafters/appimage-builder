@@ -10,14 +10,13 @@ App:
 
 AppDir:
   path: ./AppDir
-  addons:
-    - generate-desktop-entry
-    - copy-icon-from-theme
 
-  apt:
+  dpkg:
     include:
       - wget
       - libssl1.1
+      # Domain name resolution lib
+      - libnss-mdns
 
   test:
     centos:

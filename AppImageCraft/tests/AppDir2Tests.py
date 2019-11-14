@@ -30,46 +30,14 @@ class AppDir2TestCase(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.app_dir_path)
 
-    def test_init(self):
+    def test_files(self):
         app_dir = AppDir2(self.app_dir_path)
-        self.assertEqual(list(app_dir.lockup_queue), [self.runnable_path])
+        files = app_dir.files()
+        self.assertEqual(files, [self.runnable_path])
 
-    def test_bundle_dependencies(self):
+    def test_bundled(self):
         app_dir = AppDir2(self.app_dir_path)
-        app_dir.bundle_dependencies()
-
-        linker_path = self.app_dir_path + '/lib/x86_64-linux-gnu/ld-2.27.so'
-        libc_path = self.app_dir_path + '/lib/x86_64-linux-gnu/libc.so.6'
-        self.assertTrue(os.path.exists(linker_path))
-        self.assertTrue(os.path.exists(libc_path))
-
-        libraries_path = self.app_dir_path + '/lib/x86_64-linux-gnu'
-        command = [linker_path, '--inhibit-cache', '--library-path', libraries_path, self.runnable_path, 'hello']
-
-        result = subprocess.run(command, stdout=subprocess.PIPE)
-        self.assertEqual(0, result.returncode)
-
-        output = result.stdout.decode('utf-8').strip()
-        self.assertEqual('hello', output)
-
-    def test_linker_driver_lockup_dependencies(self):
-        linker = drivers.Linker()
-        dependencies = linker.lockup_dependencies(self.runnable_path)
-
-        expected = [drivers.LinkerDependency(linker, '/lib/x86_64-linux-gnu/libc.so.6', None, 'libc6.so.6'),
-                    drivers.LinkerDependency(linker, '/lib/x86_64-linux-gnu/ld-2.27.so', None,
-                                             '/lib/x86_64-linux-gnu/ld-2.27.so')]
-
-        self.assertEqual(dependencies, expected)
-
-    def test_linker_driver_deploy(self):
-        app_dir = AppDir2(self.app_dir_path)
-        linker = drivers.Linker()
-
-        dependency = drivers.LinkerDependency(linker, '/lib/x86_64-linux-gnu/libc.so.6', None, 'libc6.so.6')
-
-        dependency.deploy(app_dir)
-        self.assertTrue(os.path.exists(self.app_dir_path + '/lib/x86_64-linux-gnu/libc.so.6'))
+        self.assertTrue(app_dir.bundled(self.runnable_path))
 
 
 if __name__ == '__main__':

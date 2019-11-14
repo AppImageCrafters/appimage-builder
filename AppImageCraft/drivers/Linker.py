@@ -19,7 +19,7 @@ from AppImageCraft import tools
 class LinkerDependency(drivers.Dependency):
     soname = None
 
-    def __init__(self, driver=None, source=None, target=None, soname = None):
+    def __init__(self, driver=None, source=None, target=None, soname=None):
         super().__init__(driver, source, target)
 
     def __eq__(self, o: object) -> bool:
@@ -40,7 +40,7 @@ class Linker(drivers.Driver):
     def __init__(self):
         self.linker = tools.Linker()
 
-    def lockup_dependencies(self, file):
+    def lockup_file_dependencies(self, file, app_dir):
         dependencies = []
         if not self.linker.linkable(file):
             return None
@@ -48,7 +48,19 @@ class Linker(drivers.Driver):
         linker_map = self.linker.list_link_dependencies(file)
         if linker_map:
             for k, v in linker_map.items():
-                if v:
+                if v and not app_dir.bundled(v):
                     dependencies.append(LinkerDependency(self, v, None, k))
 
         return dependencies
+
+    def configure_app_run(self, app_run, app_dir):
+        self._set_app_run_ld_library_dirs_env(app_dir, app_run)
+
+        app_run.env['LINKER_PATH'] = "$APPDIR" + self.linker.binary_path
+
+    def _set_app_run_ld_library_dirs_env(self, app_dir, app_run):
+        elf_file_paths = self.linker.list_libraries_files(app_dir.path)
+        elf_dirs_paths = {os.path.dirname(file) for file in elf_file_paths}
+        relative_elf_dir_paths = {dir.replace(app_dir.path, '').lstrip('/') for dir in elf_dirs_paths}
+        ld_library_path_entries = {"${APPDIR}/%s" % dir for dir in relative_elf_dir_paths}
+        app_run.env['LD_LIBRARY_DIRS'] = ":".join(ld_library_path_entries)

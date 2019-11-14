@@ -13,3 +13,4 @@
 
 from AppImageCraft.AppDir import AppDir
 from AppImageCraft.AppDir2 import AppDir2
+from AppImageCraft.AppImageBuilder import AppImageBuilder

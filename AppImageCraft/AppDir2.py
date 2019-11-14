@@ -11,80 +11,23 @@
 #  all copies or substantial portions of the Software.
 
 import os
-from AppImageCraft import drivers
-from AppImageCraft.AppRun import AppRun
 
 
 class AppDir2:
     path = None
-    lockup_queue = None
-    drivers = []
+    deploy_cache = []
 
     def __init__(self, path):
         os.makedirs(path, exist_ok=True)
-
         self.path = path
-        self.drivers.append(drivers.Linker())
-        self.drivers.append(drivers.Dpkg())
 
-        self.lockup_queue = self.list_app_dir_files()
-
-    def list_app_dir_files(self):
-        file_list = list()
+    def files(self):
+        file_list = []
 
         for root, dirs, files in os.walk(self.path):
-            for filename in files:
-                file_list.append(os.path.join(root, filename))
+            file_list.extend([os.path.join(root, file_name) for file_name in files])
 
         return file_list
 
-    def bundle_dependencies(self):
-        while self.lockup_queue:
-            file = self.lockup_queue.pop()
-
-            dependencies = self._lockup_file_dependencies(file)
-            dependencies = self._filter_bundled_dependencies(dependencies)
-
-            self._deploy_dependencies(dependencies)
-            self._queue_for_lockup(dependencies)
-
-    def _lockup_file_dependencies(self, file):
-        dependencies = []
-        for driver in self.drivers:
-            driver_dependencies = driver.lockup_dependencies(file)
-            if driver_dependencies:
-                for dependency in driver_dependencies:
-                    dependencies.append(dependency)
-
-        return dependencies
-
-    def _filter_bundled_dependencies(self, dependency_list):
-        filtered_dependency_list = []
-        for dependency in dependency_list:
-            if not self._bundled(dependency.source):
-                filtered_dependency_list.append(dependency)
-
-        return filtered_dependency_list
-
-    def _deploy_dependencies(self, dependency_list):
-        for dependency in dependency_list:
-            dependency.deploy(self)
-
-    def _queue_for_lockup(self, dependencies):
-        for dependency in dependencies:
-            self.lockup_queue.append(dependency.source)
-
-    def write_app_run(self, exec):
-        app_run = AppRun(exec)
-        app_run_path = os.path.join(self.path, "AppRun")
-
-        for driver in self.drivers:
-            driver.configure_app_run(app_run)
-
-        app_run.save(app_run_path)
-
-    def write_app_dir_info(self):
-        pass
-
-    def _bundled(self, source):
-        return os.path.exists(self.path + source)
+    def bundled(self, source):
+        return os.path.exists(self.path + source) or source.startswith(self.path)

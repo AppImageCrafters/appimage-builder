@@ -11,12 +11,21 @@
 #  all copies or substantial portions of the Software.
 
 from AppImageCraft import drivers
+from AppImageCraft import AppDir2
 
 
 class Source(drivers.Driver):
     """Special driver to to identify source binaries"""
     id = 'source'
 
+    def list_base_dependencies(self, app_dir):
+        dependencies = []
+        for file in app_dir.files():
+            dependencies.append(SourceDependency(self, file, None))
+
+        return dependencies
+
 
 class SourceDependency(drivers.Dependency):
-    pass
+    def deploy(self, app_dir):
+        pass

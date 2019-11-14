@@ -74,14 +74,14 @@ class PkgTool:
 
         return files
 
-    def deploy_pkgs(self, pkgs, app_dir):
+    def deploy_pkgs(self, pkgs, app_dir_path):
         extracted_files = {}
         for pkg in pkgs:
             self.logger.info("Deploying package: %s" % pkg)
             files = self.list_package_files(pkg)
 
             for file in files:
-                target_file = app_dir + file
+                target_file = app_dir_path + file
                 self.logger.info("Deploying %s", file)
 
                 os.makedirs(os.path.dirname(target_file), exist_ok=True)
@@ -89,7 +89,7 @@ class PkgTool:
 
                 extracted_files[file] = pkg
                 if os.path.islink(target_file):
-                    self._make_links_relative_to_app_dir(app_dir, target_file)
+                    self._make_links_relative_to_app_dir(app_dir_path, target_file)
 
         return extracted_files
 

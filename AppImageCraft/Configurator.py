@@ -12,9 +12,11 @@
 
 import os
 import yaml
+import logging
 
 from AppImageCraft import AppDir2
 from AppImageCraft.AppImageBuilder import AppImageBuilder
+from AppImageCraft import drivers
 
 
 class ConfigurationError(RuntimeError):
@@ -29,6 +31,11 @@ class Configurator:
 
     version = None
     supported_versions = [1]
+
+    logger = None
+
+    def __init__(self):
+        self.logger = logging.getLogger("Configurator")
 
     def load_file(self, path=None):
         """Load recipe from file"""
@@ -50,10 +57,33 @@ class Configurator:
         self._load_recipe_version()
 
         builder = AppImageBuilder()
-        builder.app_dir_config['path'] = self._check_entry(["AppDir", "path"])
-        builder.app_config = self._check_entry(["App"])
+        builder.drivers = {
+            drivers.Source.id: drivers.Source(),
+            drivers.Linker.id: drivers.Linker(),
+            drivers.Dpkg.id: drivers.Dpkg()
+        }
+        builder.app_config['exec'] = self._check_entry(['App', 'exec'])
+
+        self._load_app_dir_config(builder)
 
         return builder
+
+    def _load_app_dir_config(self, builder):
+        app_dir_config = self._check_entry(['AppDir'])
+        app_dir_config_keys = ['path']
+
+        for k, v in app_dir_config.items():
+
+            if k in app_dir_config_keys:
+                # store root keys
+                builder.app_dir_config[k] = v
+                continue
+
+            if k in builder.drivers.keys():
+                builder.drivers[k].load_config(v)
+                continue
+
+            self.logger.warning("Unknown AppDir entry '%s' will be ignored." % k)
 
     def _load_recipe_version(self):
         self.version = self._check_entry(["version"])

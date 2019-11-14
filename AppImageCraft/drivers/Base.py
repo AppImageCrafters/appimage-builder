@@ -12,6 +12,7 @@
 
 import os
 import shutil
+import logging
 
 
 class Dependency:
@@ -42,21 +43,35 @@ class Dependency:
 class Driver:
     """Assist on identifying and deploying file dependencies"""
     id = None
+    config = {}
+    _logger = None
 
-    def lockup_dependencies(self, file):
+    def load_config(self, config):
+        self.config = config
+
+    def list_base_dependencies(self, app_dir):
+        pass
+
+    def lockup_file_dependencies(self, file, app_dir):
         pass
 
     def deploy(self, dependency, app_dir):
         dependency.target = app_dir.path + dependency.source
+        self.logger().info("Deploying %s to %s" % (dependency.source, dependency.target))
 
         os.makedirs(os.path.dirname(dependency.target), exist_ok=True)
-
         shutil.copy2(dependency.source, dependency.target)
 
         dependency.deployed = True
 
-    def configure_app_run(self, app_run):
+    def configure_app_run(self, app_run, app_dir):
         pass
 
     def __str__(self) -> str:
         return self.id
+
+    def logger(self):
+        if not self._logger:
+            self._logger = logging.getLogger(self.id)
+
+        return self._logger

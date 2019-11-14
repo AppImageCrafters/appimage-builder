@@ -25,6 +25,8 @@ class ConfiguratorTests(unittest.TestCase):
         configurator = Configurator()
         recipe = '''
                 version: 1
+                App:
+                    exec: usr/bin/echo
                 AppDir:
                   path: ./AppDir
                 '''
@@ -53,12 +55,14 @@ class ConfiguratorTests(unittest.TestCase):
         configurator = Configurator()
         recipe = '''
         version: 1
+        App:
+            exec: usr/bin/echo
         AppDir:
           path: ./AppDir
         '''
-        app = configurator.load(recipe)
+        builder = configurator.load(recipe)
 
-        self.assertEqual(app.app_dir.path, "./AppDir")
+        self.assertEqual(builder.app_dir_config['path'], "./AppDir")
 
 
 if __name__ == '__main__':

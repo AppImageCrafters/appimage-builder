@@ -14,8 +14,11 @@ import stat
 
 
 class AppRun:
-    env = {'LD_LIBRARY_DIRS': None,
-           'XDG_DATA_DIRS': None}
+    env = {
+        'LD_LIBRARY_DIRS': None,
+        'XDG_DATA_DIRS': None,
+        'LINKER_PATH': None
+    }
 
     sections = {
         'HEADER': [
@@ -24,14 +27,18 @@ class AppRun:
             ''
         ],
         'APPDIR': [
+            '# Fallback APPDIR variable setup for uncompressed usage',
             'if [ -z ${APPDIR+x} ]; then',
             '    APPDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"',
             'fi'
         ],
-        'EXEC': ['exec "${APPDIR}/${LINKER_PATH}" \\',
-                 '   --inhibit-cache --library-path ${LD_LIBRARY_DIRS} \\',
-                 '  ${APPDIR}/${APP_PATH}',
-                 '']
+        'EXEC': [
+            '# Launch application using only the bundled libraries',
+            'exec "${LINKER_PATH}" \\',
+            '   --inhibit-cache --library-path "${LD_LIBRARY_DIRS}" \\',
+            '  ${APPDIR}/${APP_PATH} $@',
+            ''
+        ]
     }
 
     def __init__(self, app_path):
@@ -70,7 +77,7 @@ class AppRun:
             if v:
                 line = 'export %s="%s"' % (k, v)
                 lines.append(line)
-
+        lines.append('')
         return lines
 
     def _set_permissions(self, path):
