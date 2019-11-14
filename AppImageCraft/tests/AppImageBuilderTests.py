@@ -16,6 +16,7 @@ import unittest
 import tempfile
 import subprocess
 
+from AppImageCraft.tests import tests_common
 from AppImageCraft import AppImageBuilder
 from AppImageCraft import AppDir2
 from AppImageCraft import drivers
@@ -23,10 +24,7 @@ from AppImageCraft import drivers
 
 class AppImageBuilderTestCase(unittest.TestCase):
     def setUp(self):
-        self.app_dir_path = tempfile.mkdtemp()
-        os.makedirs(os.path.join(self.app_dir_path, "usr", "bin"))
-        self.runnable_path = os.path.join(self.app_dir_path, "usr", "bin", "echo")
-        shutil.copy("/bin/echo", self.runnable_path)
+        self.app_dir_path, self.runnable_path = tests_common.create_echo_app_dir()
         self.app_dir = AppDir2(self.app_dir_path)
 
     def tearDown(self):

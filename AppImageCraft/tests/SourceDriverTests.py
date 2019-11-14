@@ -10,22 +10,18 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-import os
 import shutil
-import tempfile
 import unittest
 
 from AppImageCraft import AppDir2
 from AppImageCraft.drivers import Source
 from AppImageCraft.drivers import SourceDependency
+from AppImageCraft.tests import tests_common
 
 
 class TestCase(unittest.TestCase):
     def setUp(self):
-        self.app_dir_path = tempfile.mkdtemp()
-        os.makedirs(os.path.join(self.app_dir_path, "usr", "bin"))
-        self.runnable_path = os.path.join(self.app_dir_path, "usr", "bin", "echo")
-        shutil.copy("/bin/echo", self.runnable_path)
+        self.app_dir_path, self.runnable_path = tests_common.create_echo_app_dir()
         self.app_dir = AppDir2(self.app_dir_path)
 
     def tearDown(self):
