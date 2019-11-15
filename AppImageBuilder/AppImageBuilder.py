@@ -15,7 +15,7 @@ import platform
 
 from AppImageBuilder import AppDir2
 from AppImageBuilder.AppRun import AppRun
-from AppImageBuilder.TestsTool import TestsTool
+from AppImageBuilder.tools.TestsTool import TestsTool
 from AppImageBuilder.tools.AppImageTool import AppImageTool
 
 

@@ -30,18 +30,26 @@ AppDir:
     centos:
       image: centos:6
       command: "./AppRun --help"
-    arch:
-      image: archlinux
-      command: "./AppRun --help"
-    fedora:
-      image: fedora:26
-      command: "./AppRun --help"
-    ubuntu:
-      image: ubuntu:xenial
-      command: "./AppRun --help"
+      use_host_x: True
+      env:
+        - QT_QPA_PLATFORM=minimal
     debian:
       image: debian:stable
       command: "./AppRun --help"
+      use_host_x: True
+    arch:
+      image: archlinux
+      command: "./AppRun --help"
+      use_host_x: True
+    fedora:
+      image: fedora:26
+      command: "./AppRun --help"
+      use_host_x: True
+    ubuntu:
+      image: ubuntu:xenial
+      command: "./AppRun --help"
+      use_host_x: True
+
 
 AppImage:
   update-information: None

@@ -15,14 +15,12 @@ import os
 import argparse
 import yaml
 import json
-import pprint
 import logging
 import platform
 from shutil import copyfile
 from AppImageBuilder.Configurator import Configurator
 from AppImageBuilder.Configurator import ConfigurationError
-from AppImageBuilder.AppImageBuilder import AppImageBuilder
-from AppImageBuilder.TestsTool import TestsTool
+from AppImageBuilder.tools.TestsTool import TestsTool
 from AppImageBuilder.tools.AppImageTool import AppImageTool
 from AppImageBuilder.DesktopEntryBuilder import DesktopEntryBuilder
 from AppImageBuilder.tools.ShellTool import ShellTool
