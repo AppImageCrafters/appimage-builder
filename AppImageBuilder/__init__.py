@@ -11,6 +11,5 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-from AppImageBuilder.AppDir import AppDir
 from AppImageBuilder.AppDir2 import AppDir2
 from AppImageBuilder.AppImageBuilder import AppImageBuilder

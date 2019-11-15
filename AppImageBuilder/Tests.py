@@ -109,36 +109,5 @@ class AppDirIsolatorTestCase(unittest.TestCase):
         assert not files
 
 
-class AppDirTestCase(unittest.TestCase):
-
-    def setUp(self):
-        self.temp_dir = tempfile.mkdtemp()
-        os.makedirs(os.path.join(self.temp_dir, "usr", "bin"))
-        self.runnable_path = os.path.join(self.temp_dir, "usr", "bin", "echo")
-        shutil.copy("/bin/echo", self.runnable_path)
-
-    def tearDown(self):
-        shutil.rmtree(self.temp_dir)
-
-    def test_load(self):
-        self.app_dir = AppDir()
-
-        self.app_dir.load()
-        assert self.app_dir.bundle_ldd_dependencies
-
-    def test_deploy(self):
-        self.app_dir = AppDir(self.temp_dir)
-
-        self.app_dir.install(additional_pkgs=["coreutils"])
-
-        deployed_files = []
-        for root, dirs, files in os.walk(self.temp_dir):
-            for filename in files:
-                deployed_files.append(os.path.join(root, filename))
-
-        print(deployed_files)
-        assert deployed_files
-
-
 if __name__ == '__main__':
     unittest.main()
