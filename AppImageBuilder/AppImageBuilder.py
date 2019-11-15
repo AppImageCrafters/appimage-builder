@@ -11,9 +11,11 @@
 #  all copies or substantial portions of the Software.
 import os
 import logging
+import platform
 
 from AppImageBuilder import AppDir2
 from AppImageBuilder.AppRun import AppRun
+from AppImageBuilder.tools.AppImageTool import AppImageTool
 
 
 class AppImageBuilder:
@@ -32,8 +34,10 @@ class AppImageBuilder:
 
         self.app_dir = AppDir2(absolute_app_dir_path)
 
-    def build(self):
-        self._load_app_dir()
+    def build_app_dir(self):
+        if not self.app_dir:
+            self._load_app_dir()
+
         self.bundle_dependencies()
         self.configure(self.app_dir_config['exec'])
         self.logger.info("AppDir build completed")
@@ -86,3 +90,17 @@ class AppImageBuilder:
 
         app_run_path = os.path.join(self.app_dir.path, "AppRun")
         self.app_dir.app_run.save(app_run_path)
+
+    def build_appimage(self):
+        if not self.app_dir:
+            self._load_app_dir()
+
+        self.logger.info("Build AppImage")
+        appimage_tool = AppImageTool()
+
+        info_driver = self.drivers['info']
+        app_name = info_driver.config['name']
+        app_version = info_driver.config['version']
+        output_file = os.path.join(os.getcwd(), "%s-%s-%s.AppImage" % (app_name, app_version, platform.machine()))
+
+        appimage_tool.bundle(self.app_dir.path, output_file)

@@ -34,12 +34,8 @@ def __main__():
                         help='recipe file path (default: $PWD/AppImageBuilder.yml)')
     parser.add_argument('--log', dest='loglevel', default="INFO",
                         help='logging level (default: INFO)')
-    parser.add_argument('--skip-script', dest='skip_script', action="store_true",
-                        help='Skip running script section')
-    parser.add_argument('--skip-install', dest='skip_install', action="store_true",
-                        help='Skip dependencies installation')
-    parser.add_argument('--skip-tests', dest='skip_tests', action="store_true",
-                        help='Skip running docker tests')
+    parser.add_argument('--skip-appdir', dest='skip_appdir', action="store_true",
+                        help='Skip appdir building')
     parser.add_argument('--skip-appimage', dest='skip_appimage', action="store_true",
                         help='Skip AppImage generation')
 
@@ -49,7 +45,12 @@ def __main__():
     try:
         configurator = Configurator()
         builder = configurator.load_file(args.recipe)
-        builder.build()
+        if not args.skip_appdir:
+            builder.build_app_dir()
+
+        if not args.skip_appimage:
+            builder.build_appimage()
+
     except ConfigurationError as error:
         logging.error(error)
 
