@@ -61,7 +61,8 @@ class Configurator:
             drivers.Source.id: drivers.Source(),
             drivers.Linker.id: drivers.Linker(),
             drivers.Dpkg.id: drivers.Dpkg(),
-            drivers.Qt.id: drivers.Qt()
+            drivers.Qt.id: drivers.Qt(),
+            drivers.Info.id: drivers.Info()
         }
         builder.app_dir_config['exec'] = self._check_entry(['AppDir', 'exec'])
 

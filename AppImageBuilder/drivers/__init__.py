@@ -24,3 +24,5 @@ from AppImageBuilder.drivers.Dpkg import Dpkg
 from AppImageBuilder.drivers.Dpkg import DpkgDependency
 
 from AppImageBuilder.drivers.Qt import Qt
+
+from AppImageBuilder.drivers.Info import Info

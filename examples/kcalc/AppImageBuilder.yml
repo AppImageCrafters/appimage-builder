@@ -1,15 +1,15 @@
 version: 1
 
-# Application related information
-App:
-  id: org.kde.kcalc
-  version: 19.08.02
-  name: kcalc
-  icon: accessories-calculator
-
 AppDir:
   path: ./AppDir
   exec: usr/bin/kcalc
+
+  info:
+    id: org.kde.kcalc
+    name: kcalc
+    icon: accessories-calculator
+    version: 19.08.02
+
   addons:
     - generate-desktop-entry
     - copy-icon-from-theme

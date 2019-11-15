@@ -1,15 +1,13 @@
 version: 1
 
-# Application related information
-App:
-  id: org.gnu.wget
-  version: 1.9
-  name: wget
-  icon: utilities-terminal
-
 AppDir:
   path: ./AppDir
   exec: usr/bin/wget
+  info:
+    id: org.gnu.wget
+    version: 1.9
+    name: wget
+    icon: utilities-terminal
 
   dpkg:
     include:
