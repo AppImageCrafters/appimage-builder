@@ -35,7 +35,7 @@ class AppImageBuilder:
     def build(self):
         self._load_app_dir()
         self.bundle_dependencies()
-        self.configure(self.app_config['exec'])
+        self.configure(self.app_dir_config['exec'])
         self.logger.info("AppDir build completed")
 
     def bundle_dependencies(self):

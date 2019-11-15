@@ -63,7 +63,7 @@ class Configurator:
             drivers.Dpkg.id: drivers.Dpkg(),
             drivers.Qt.id: drivers.Qt()
         }
-        builder.app_config['exec'] = self._check_entry(['App', 'exec'])
+        builder.app_dir_config['exec'] = self._check_entry(['AppDir', 'exec'])
 
         self._load_app_dir_config(builder)
 
@@ -71,7 +71,7 @@ class Configurator:
 
     def _load_app_dir_config(self, builder):
         app_dir_config = self._check_entry(['AppDir'])
-        app_dir_config_keys = ['path']
+        app_dir_config_keys = ['path', 'exec']
 
         for k, v in app_dir_config.items():
 

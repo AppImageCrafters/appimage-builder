@@ -24,10 +24,9 @@ class ConfiguratorTests(unittest.TestCase):
     def test_load_version(self):
         configurator = Configurator()
         recipe = '''
-                version: 1
-                App:
-                    exec: usr/bin/echo
+                version: 1  
                 AppDir:
+                  exec: usr/bin/echo
                   path: ./AppDir
                 '''
         configurator.load(recipe)
@@ -55,10 +54,9 @@ class ConfiguratorTests(unittest.TestCase):
         configurator = Configurator()
         recipe = '''
         version: 1
-        App:
-            exec: usr/bin/echo
         AppDir:
           path: ./AppDir
+          exec: usr/bin/echo
         '''
         builder = configurator.load(recipe)
 

@@ -6,10 +6,10 @@ App:
   version: 19.08.02
   name: kcalc
   icon: accessories-calculator
-  exec: usr/bin/kcalc
 
 AppDir:
   path: ./AppDir
+  exec: usr/bin/kcalc
   addons:
     - generate-desktop-entry
     - copy-icon-from-theme

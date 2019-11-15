@@ -6,10 +6,10 @@ App:
   version: 1.9
   name: wget
   icon: utilities-terminal
-  exec: usr/bin/wget
 
 AppDir:
   path: ./AppDir
+  exec: usr/bin/wget
 
   dpkg:
     include:
