@@ -17,8 +17,6 @@ import os
 
 from AppImageBuilder.tools.PkgTool import PkgTool
 from AppImageBuilder.tools.LinkerTool import LinkerTool
-from AppImageBuilder.AppDir import AppDir
-from AppImageBuilder.AppDirIsolator import AppDirIsolator
 
 
 class PkgToolTestCase(unittest.TestCase):
@@ -75,38 +73,6 @@ class LinkerToolTestCase(unittest.TestCase):
         output = self.ldd_tool._parse("        statically linked\n")
         expected = {}
         assert output == expected
-
-
-class AppDirIsolatorTestCase(unittest.TestCase):
-
-    def setUp(self):
-        self.temp_dir = tempfile.mkdtemp()
-        os.makedirs(os.path.join(self.temp_dir, "usr", "bin"))
-
-        shutil.copy("/bin/echo", os.path.join(self.temp_dir, "usr/bin"))
-
-    def tearDown(self):
-        shutil.rmtree(self.temp_dir)
-
-    def test_deploy_linker(self):
-        isolator = AppDirIsolator(self.temp_dir)
-        isolator.deploy_linker()
-
-        deployed_linker_path = LinkerTool.find_binary_path(self.temp_dir)
-        assert deployed_linker_path.startswith(self.temp_dir)
-
-    def test_list_files_with_external_dependencies(self):
-        isolator = AppDirIsolator(self.temp_dir)
-
-        files = isolator.list_files_with_external_dependencies()
-        assert os.path.join(self.temp_dir, "usr", "bin", "echo") in files
-
-    def test_isolate(self):
-        isolator = AppDirIsolator(self.temp_dir)
-        isolator.isolate()
-
-        files = isolator.list_files_with_external_dependencies()
-        assert not files
 
 
 if __name__ == '__main__':
