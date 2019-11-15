@@ -39,7 +39,7 @@ class AppImageBuilderTestCase(unittest.TestCase):
             drivers.Dpkg.id: drivers.Dpkg()
         }
 
-        builder.bundle_dependencies()
+        builder._bundle_dependencies()
 
         linker_path = self.app_dir_path + '/lib/x86_64-linux-gnu/ld-2.27.so'
         libc_path = self.app_dir_path + '/lib/x86_64-linux-gnu/libc.so.6'

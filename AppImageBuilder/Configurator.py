@@ -64,7 +64,6 @@ class Configurator:
             drivers.Qt.id: drivers.Qt(),
             drivers.Info.id: drivers.Info()
         }
-        builder.app_dir_config['exec'] = self._check_entry(['AppDir', 'exec'])
 
         self._load_app_dir_config(builder)
 
@@ -72,7 +71,7 @@ class Configurator:
 
     def _load_app_dir_config(self, builder):
         app_dir_config = self._check_entry(['AppDir'])
-        app_dir_config_keys = ['path', 'exec']
+        app_dir_config_keys = ['path', 'exec', 'test']
 
         for k, v in app_dir_config.items():
 
@@ -102,5 +101,18 @@ class Configurator:
                 visited.append(item)
             else:
                 raise ConfigurationError("Missing %s entry in recipe in %s" % (item, " > ".join(visited)))
+
+        return current
+
+    def _check_optional_entry(self, path, fallback):
+        """Lockup for an entry starting by the recipe root"""
+        current = self.recipe
+        visited = []
+        for item in path:
+            if item in current:
+                current = current[item]
+                visited.append(item)
+            else:
+                return fallback
 
         return current

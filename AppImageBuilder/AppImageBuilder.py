@@ -15,6 +15,7 @@ import platform
 
 from AppImageBuilder import AppDir2
 from AppImageBuilder.AppRun import AppRun
+from AppImageBuilder.TestsTool import TestsTool
 from AppImageBuilder.tools.AppImageTool import AppImageTool
 
 
@@ -38,11 +39,11 @@ class AppImageBuilder:
         if not self.app_dir:
             self._load_app_dir()
 
-        self.bundle_dependencies()
-        self.configure(self.app_dir_config['exec'])
+        self._bundle_dependencies()
+        self.configure_app_dir(self.app_dir_config['exec'])
         self.logger.info("AppDir build completed")
 
-    def bundle_dependencies(self):
+    def _bundle_dependencies(self):
         self.logger.info("Bundling dependencies into the AppDir: %s" % self.app_dir.path)
         dependencies = self._load_base_dependencies()
         while dependencies:
@@ -81,7 +82,7 @@ class AppImageBuilder:
 
         return dependencies
 
-    def configure(self, exec):
+    def configure_app_dir(self, exec):
         self.logger.info("Configuring AppDir")
         self.app_dir.app_run = AppRun(exec)
 
@@ -90,6 +91,14 @@ class AppImageBuilder:
 
         app_run_path = os.path.join(self.app_dir.path, "AppRun")
         self.app_dir.app_run.save(app_run_path)
+
+    def test_app_dir(self):
+        if not self.app_dir:
+            self._load_app_dir()
+
+        if 'test' in self.app_dir_config:
+            tests_tool = TestsTool(self.app_dir, self.app_dir_config['test'])
+            tests_tool.run_tests()
 
     def build_appimage(self):
         if not self.app_dir:

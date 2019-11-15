@@ -23,7 +23,7 @@ class TestsTool:
 
     def run_tests(self):
         logging.info("Running app tests")
-        absolute_app_dir_path = os.path.abspath(self.app_dir.appdir_path)
+        absolute_app_dir_path = os.path.abspath(self.app_dir.path)
         failed = []
         for k, v in self.test_scenarios.items():
             logging.info("Testing app on: %s" % k)

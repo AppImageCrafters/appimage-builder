@@ -10,10 +10,6 @@ AppDir:
     icon: accessories-calculator
     version: 19.08.02
 
-  addons:
-    - generate-desktop-entry
-    - copy-icon-from-theme
-
   dpkg:
     include:
       - kcalc

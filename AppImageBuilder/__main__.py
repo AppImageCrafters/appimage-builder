@@ -35,7 +35,9 @@ def __main__():
     parser.add_argument('--log', dest='loglevel', default="INFO",
                         help='logging level (default: INFO)')
     parser.add_argument('--skip-appdir', dest='skip_appdir', action="store_true",
-                        help='Skip appdir building')
+                        help='Skip AppDir building')
+    parser.add_argument('--skip-appdir-test', dest='skip_appdir_test', action="store_true",
+                        help='Skip AppDir testing')
     parser.add_argument('--skip-appimage', dest='skip_appimage', action="store_true",
                         help='Skip AppImage generation')
 
@@ -47,6 +49,9 @@ def __main__():
         builder = configurator.load_file(args.recipe)
         if not args.skip_appdir:
             builder.build_app_dir()
+
+        if not args.skip_appdir_test:
+            builder.test_app_dir()
 
         if not args.skip_appimage:
             builder.build_appimage()
