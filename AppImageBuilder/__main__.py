@@ -12,18 +12,11 @@
 #  all copies or substantial portions of the Software.
 
 import os
-import argparse
-import yaml
-import json
 import logging
-import platform
-from shutil import copyfile
-from AppImageBuilder.Configurator import Configurator
+import argparse
+
 from AppImageBuilder.Configurator import ConfigurationError
-from AppImageBuilder.tools.TestsTool import TestsTool
-from AppImageBuilder.tools.AppImageTool import AppImageTool
-from AppImageBuilder.DesktopEntryBuilder import DesktopEntryBuilder
-from AppImageBuilder.tools.ShellTool import ShellTool
+from AppImageBuilder.Configurator import Configurator
 
 
 def __main__():
@@ -57,148 +50,12 @@ def __main__():
     except ConfigurationError as error:
         logging.error(error)
 
-def _execute_script(recipe):
-    script_recipe = _check_optional_recipe_entry("script", recipe, list())
-    if not isinstance(script_recipe, list):
-        logging.error("Malformed recipe. 'script' entry must be a list")
-    shell_tool = ShellTool()
-    shell_tool.execute(script_recipe)
-
-
-def _execute_appimage(app_dir, recipe):
-    appimage_tool = AppImageTool()
-    app_recipe = _check_recipe_entry("App", recipe)
-    app_name = _check_recipe_entry("name", app_recipe)
-    app_version = _check_recipe_entry("version", app_recipe)
-    output_file = os.path.join(os.getcwd(), "%s-%s-%s.AppImage" % (app_name, app_version, platform.machine()))
-    appimage_tool.bundle(app_dir.path, output_file)
-
-
-def _generate_desktop_entry(app_dir, recipe):
-    logging.info("Generating desktop entry.")
-    app_recipe = _check_recipe_entry("App", recipe)
-
-    builder = DesktopEntryBuilder()
-
-    builder.app_id = _check_recipe_entry("id", app_recipe)
-    builder.app_name = _check_recipe_entry("name", app_recipe)
-    builder.app_icon = _check_recipe_entry("icon", app_recipe)
-    builder.app_version = _check_recipe_entry("version", app_recipe)
-    builder.app_categories = _check_optional_recipe_entry("categories", app_recipe, ["Utility"])
-    builder.app_summary = _check_optional_recipe_entry("summary", app_recipe, "")
-
-    desktop_entry_path = os.path.join(app_dir.path, builder.get_file_name())
-    builder.generate(desktop_entry_path)
-
-
-def _check_recipe_entry(entry, recipe):
-    if entry in recipe:
-        return recipe[entry]
-
-    logging.error("Missing '%s' entry in recipe" % entry)
-
-
-def _check_optional_recipe_entry(entry, recipe, fallback):
-    if entry in recipe:
-        return recipe[entry]
-
-    return fallback
-
-
-def _copy_icon_from_theme(app_dir, recipe):
-    app_recipe = _check_recipe_entry("App", recipe)
-    app_icon = _check_recipe_entry("icon", app_recipe)
-    logging.info("Importing icon '%s' from theme" % app_icon)
-
-    icon_path = None
-    for root, dirs, files in os.walk("/usr/share/icons"):
-        for filename in files:
-            if app_icon in filename:
-                icon_path = os.path.join(root, filename)
-
-    target_icon_path = os.path.join(os.path.abspath(app_dir.path), os.path.basename(icon_path))
-    logging.info("Coping: '%s' to '%s'" % (icon_path, target_icon_path))
-    copyfile(icon_path, target_icon_path)
-
-
-def _execute_app_dir(recipe, app_dir, skip_install=False, skip_tests=False):
-    app_recipe = _check_recipe_entry('App', recipe)
-    app_dir.app_runnable = _check_recipe_entry('exec', app_recipe)
-
-    app_dir_recipe = _check_recipe_entry('AppDir', recipe)
-    app_dir.path = os.path.abspath(_check_recipe_entry('path', app_dir_recipe))
-
-    if not skip_install:
-        install_requirements(app_dir_recipe, app_dir)
-
-        with open(os.path.join(app_dir.path, "deployed_files.json"), "w") as f:
-            f.write(json.dumps(app_dir.deploy_registry, indent=2, sort_keys=True))
-
-        with open(os.path.join(app_dir.path, "deployed_libs.json"), "w") as f:
-            f.write(json.dumps(app_dir.libs_registry, indent=2, sort_keys=True))
-
-    app_dir.generate_app_run()
-
-    addons = _check_optional_recipe_entry("addons", app_dir_recipe, None)
-    if addons:
-        if 'generate-desktop-entry' in addons:
-            _generate_desktop_entry(app_dir, recipe)
-
-        if 'copy-icon-from-theme' in addons:
-            _copy_icon_from_theme(app_dir, recipe)
-
-    if not skip_tests:
-        tests_recipe = _check_recipe_entry('test', app_dir_recipe)
-        run_tests(app_dir, tests_recipe)
-
-
-def _load_recipe_file(recipe_path):
-    try:
-        with open(recipe_path) as f:
-            return yaml.load(f, Loader=yaml.FullLoader)
-    except:
-        logging.error("Unable to read recipe file: %s" % recipe_path)
-
-
-def install_requirements(recipe, app_dir):
-    apt_include = []
-    apt_exclude = []
-    if 'apt' in recipe:
-        (apt_include, apt_exclude) = _read_apt_instructions(app_dir, recipe)
-
-    app_dir.install(apt_include, apt_exclude)
-
-
-def _read_apt_instructions(app_dir, recipe):
-    apt_include = []
-    apt_exclude = []
-    if 'include' in recipe['apt']:
-        if not isinstance(recipe['apt']['include'], list):
-            logging.error("Malformed recipe. 'apt' > 'include' entry must be a list")
-
-        apt_include = recipe['apt']['include']
-    if 'exclude' in recipe['apt']:
-        if not isinstance(recipe['apt']['exclude'], list):
-            logging.error("Malformed recipe. 'apt' > 'exclude' entry must be a list")
-
-        apt_exclude = recipe['apt']['exclude']
-
-    return (apt_include, apt_exclude)
-
 
 def _configure_logger(args):
     numeric_level = getattr(logging, args.loglevel.upper())
     if not isinstance(numeric_level, int):
         logging.error('Invalid log level: %s' % args.loglevel)
     logging.basicConfig(level=numeric_level)
-
-
-def run_tests(app_dir, test_scenarios):
-    if not isinstance(test_scenarios, dict):
-        logging.error("Malformed recipe. 'test' entry must be a dict")
-
-    tests_tool = TestsTool(app_dir, test_scenarios)
-    tests_tool.run_tests()
 
 
 if __name__ == '__main__':
