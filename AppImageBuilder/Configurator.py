@@ -62,7 +62,8 @@ class Configurator:
             drivers.Linker.id: drivers.Linker(),
             drivers.Dpkg.id: drivers.Dpkg(),
             drivers.Qt.id: drivers.Qt(),
-            drivers.Info.id: drivers.Info()
+            drivers.Info.id: drivers.Info(),
+            drivers.FontConfig.id: drivers.FontConfig()
         }
 
         self._load_app_dir_config(builder)

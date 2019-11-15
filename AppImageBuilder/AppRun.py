@@ -16,7 +16,9 @@ import stat
 class AppRun:
     env = {
         'LD_LIBRARY_DIRS': None,
-        'LINKER_PATH': None
+        'LINKER_PATH': None,
+        'XDG_DATA_DIRS': '${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}',
+        'XDG_CONFIG_DIRS': '$APPDIR/etc/xdg:$XDG_CONFIG_DIRS'
     }
 
     sections = {
@@ -31,7 +33,6 @@ class AppRun:
             '    APPDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"',
             'fi'
         ],
-        'XDG_DATA_DIRS': ['XDG_DATA_DIRS=$APPDIR/usr/local/share:$APPDIR/usr/share:XDG_DATA_DIRS'],
         'EXEC': [
             '# Launch application using only the bundled libraries',
             'exec "${LINKER_PATH}" \\',

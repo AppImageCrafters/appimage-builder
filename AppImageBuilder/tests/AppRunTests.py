@@ -19,17 +19,23 @@ class AppRunTestCase(unittest.TestCase):
         '#!/bin/bash',
         '# This file was created by AppImageBuilder',
         '',
+        '# Fallback APPDIR variable setup for uncompressed usage',
         'if [ -z ${APPDIR+x} ]; then',
-        '    APPDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"',
+        '    APPDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd '
+        ')"',
         'fi',
         '',
         '# Run Environment Setup',
+        'export '
+        'XDG_DATA_DIRS="${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}"',
+        'export XDG_CONFIG_DIRS="$APPDIR/etc/xdg:$XDG_CONFIG_DIRS"',
         'export APP_PATH="usr/bin/exec"',
-        'exec "${APPDIR}/${LINKER_PATH}" \\',
-        '   --inhibit-cache --library-path ${LD_LIBRARY_DIRS} \\',
-        '  ${APPDIR}/${APP_PATH}',
-        ''
-    ]
+        '',
+        '# Launch application using only the bundled libraries',
+        'exec "${LINKER_PATH}" \\',
+        '   --inhibit-cache --library-path "${LD_LIBRARY_DIRS}" \\',
+        '  ${APPDIR}/${APP_PATH} $@',
+        '']
 
     def test_minimal_script_generation(self):
         app_run = AppRun('usr/bin/exec')

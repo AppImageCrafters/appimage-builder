@@ -19,8 +19,13 @@ AppDir:
       - frameworkintegration
       - gtk2-engines-pixbuf
       - gtk2-engines-murrine
-      - fontconfig-config
       - breeze-icon-theme
+      # minimal font stack
+      - fontconfig-config
+      - ucf
+      - fonts-dejavu-core
+      - ttf-bitstream-vera
+      - fonts-liberation
       # graphic stack dependencies
       - qtwayland5
       - libglx-mesa0
