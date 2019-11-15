@@ -1,4 +1,4 @@
-# AppImageCraft
+# AppImageBuilder
 
 A recipe based AppImage creation meta-tool featuring:
 
@@ -35,7 +35,7 @@ Building an AppImage in a modern system using the traditional methods
 renders to bundles incompatible with any distribution released before
 due glib and glibc missing features.
 
-AppImageCrafts fixes this issue by embedding those libraries and the
+AppImageBuilder fixes this issue by embedding those libraries and the
 required loader tool making your bundle __really__ self-sufficient.
 
 ## all-in bundles

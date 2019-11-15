@@ -17,19 +17,19 @@ with open("README.md", "r") as fh:
 
 
 setuptools.setup(
-    name="appimage_craft",
+    name="appimage_builder",
     version="0.0.1",
     author="Alexis Lopez Zubieta",
     author_email="contact@azubieta.net",
     description="Recipe based AppImage creation meta-tool",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    scripts=['appimage-craft'],
-    url="https://github.com/AppImageCrafters/AppImageCraft",
+    scripts=['appimage-builder'],
+    url="https://github.com/AppImageCrafters/AppImageBuilder",
     project_urls={
-        "Bug Tracker": "https://github.com/AppImageCrafters/AppImageCraft/issues",
-        "Documentation": "https://github.com/AppImageCrafters/AppImageCraft/wiki",
-        "Source Code": "https://github.com/AppImageCrafters/AppImageCraft",
+        "Bug Tracker": "https://github.com/AppImageCrafters/AppImageBuilder/issues",
+        "Documentation": "https://github.com/AppImageCrafters/AppImageBuilder/wiki",
+        "Source Code": "https://github.com/AppImageCrafters/AppImageBuilder",
     },
     packages=setuptools.find_packages(),
     classifiers=[
