@@ -11,38 +11,8 @@
 #  all copies or substantial portions of the Software.
 
 import unittest
-import tempfile
-import shutil
-import os
 
-from AppImageBuilder.tools.PkgTool import PkgTool
 from AppImageBuilder.tools.LinkerTool import LinkerTool
-
-
-class PkgToolTestCase(unittest.TestCase):
-
-    def __init__(self, methodName: str = ...) -> None:
-        super().__init__(methodName)
-        self.pkg_tool = PkgTool()
-
-    def test_find_pkgs_of(self):
-        pkgs = self.pkg_tool.find_owner_packages("/bin/echo")
-        self.assertEqual(pkgs, {"coreutils"})
-
-    def test_deploy_pkgs(self):
-        temp_dir = tempfile.mkdtemp()
-
-        self.pkg_tool.deploy_pkgs(['less'], temp_dir)
-
-        deployed_files = []
-        for root, dirs, files in os.walk(temp_dir):
-            for filename in files:
-                deployed_files.append(os.path.join(root, filename))
-
-        print(deployed_files)
-        shutil.rmtree(temp_dir)
-
-        assert deployed_files
 
 
 class LinkerToolTestCase(unittest.TestCase):
