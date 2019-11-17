@@ -13,18 +13,92 @@ import configparser
 import os
 
 from AppImageBuilder import tools
-from AppImageBuilder.drivers import Base
-from AppImageBuilder import AppDir2
+from AppImageBuilder.drivers import Base, Dependency
+
+
+class QtDependency(Dependency):
+    qml_module = None
+
+    def __init__(self, driver=None, source=None, target=None, qml_module=None):
+        super().__init__(driver, source, target)
+        self.qml_module = qml_module
+
+    def __str__(self):
+        return '\n'.join([
+            '{',
+            'driver: %s' % self.driver.id,
+            'source: %s' % self.source,
+            'target: %s' % self.target,
+            'qml_module: %s' % self.qml_module,
+        ])
 
 
 class Qt(Base.Driver):
     id = 'Qt'
+    qt = None
+    qt_env = None
+
+    module_dependencies_cache = set()
+
+    def __init__(self):
+        self.qt = tools.QtTool()
+        self.qt_env = self.qt.query_qt_env()
 
     def configure(self, app_dir):
-        linker = tools.Linker()
-        linker_path = linker.find_binary_path(app_dir.path)
-
         self._generate_qt_conf(app_dir)
+
+    def list_base_dependencies(self, app_dir):
+        dependencies = []
+        source_dirs = []
+        if 'qml_source_dirs' in self.config:
+            source_dirs.extend(self.config['qml_source_dirs'])
+
+        for root, dirs, files in os.walk(app_dir.path):
+            for file in files:
+                if file.endswith('.qml'):
+                    absolute_path = os.path.join(root, file)
+                    dependencies.append(QtDependency(self, absolute_path, None, None))
+
+    def lockup_file_dependencies(self, file, app_dir):
+        dependencies = []
+        if file.endswith('.qml'):
+            if file in self.module_dependencies_cache:
+                return []
+
+            qml_imports = self._get_qml_file_imports(file)
+
+            for qml_import in qml_imports:
+                if 'path' in qml_import:
+                    new_dependencies = self._generate_module_dependencies(qml_import, app_dir)
+                    dependencies.extend(new_dependencies)
+
+        return dependencies
+
+    def _generate_module_dependencies(self, qml_import, app_dir):
+        if 'path' not in qml_import:
+            return []
+
+        path = qml_import['path']
+        dependencies = []
+
+        if os.path.isdir(path):
+            for root, dirs, files in os.walk(path):
+                for file in files:
+                    absolute_path = os.path.join(root, file)
+                    if not app_dir.bundled(absolute_path):
+                        dependencies.append(QtDependency(self, absolute_path, None, qml_import))
+        else:
+            if os.path.exists(path):
+                dependencies.append(QtDependency(self, path, None, qml_import))
+
+        return dependencies
+
+    def _get_qml_file_imports(self, file):
+        import_dirs = [self.qt_env['QT_INSTALL_QML']]
+        if 'qml_import_dirs' in self.config:
+            import_dirs.extend(self.config['qml_import_dirs'])
+
+        return self.qt.qml_scan_imports([file], import_dirs)
 
     def _generate_qt_conf(self, app_dir):
         qt_conf_path = self._find_qt_conf()

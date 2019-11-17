@@ -10,6 +10,7 @@ lief = "*"
 pyyaml = "*"
 docker = "*"
 'bash.py' = "*"
+PySide2 = '*'
 
 [requires]
 python_version = "3.6"

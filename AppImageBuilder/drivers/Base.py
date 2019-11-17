@@ -58,10 +58,13 @@ class Driver:
     def deploy(self, dependency, app_dir):
         dependency.target = app_dir.path + dependency.source
         self.logger().info("Deploying %s to %s" % (dependency.source, dependency.target))
-
-        os.makedirs(os.path.dirname(dependency.target), exist_ok=True)
-        shutil.copy2(dependency.source, dependency.target)
-
+        try:
+            os.makedirs(os.path.dirname(dependency.target), exist_ok=True)
+            shutil.copy2(dependency.source, dependency.target)
+        except FileNotFoundError as error:
+            raise RuntimeError('Unable to deploy %s. %s' % (dependency, error))
+        except NotADirectoryError as error:
+            raise RuntimeError('Unable to deploy %s. %s' % (dependency, error))
         dependency.deployed = True
 
     def configure(self, app_dir):
