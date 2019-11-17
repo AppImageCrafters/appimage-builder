@@ -44,11 +44,23 @@ class Info(drivers.Driver):
         self.logger().info("Importing icon '%s' from system theme" % app_icon)
 
         icon_path = None
-        for root, dirs, files in os.walk("/usr/share/icons"):
-            for filename in files:
-                if app_icon in filename:
-                    icon_path = os.path.join(root, filename)
+        icon_path = self._search_icon(app_icon, app_dir.path + "/usr/share/icons")
+        if not icon_path:
+            icon_path = self._search_icon(app_icon, "/usr/share/icons")
+
+        if not icon_path:
+            raise RuntimeError('Icon not found in system')
 
         target_icon_path = os.path.join(os.path.abspath(app_dir.path), os.path.basename(icon_path))
         self.logger().info("Coping: '%s' to '%s'" % (icon_path, target_icon_path))
         shutil.copyfile(icon_path, target_icon_path)
+
+    def _search_icon(self, app_icon, search_path):
+        icon_path = None
+        self.logger().info("Looking app icon at: %s" % search_path)
+        for root, dirs, files in os.walk(search_path):
+            for filename in files:
+                if app_icon in filename:
+                    icon_path = os.path.join(root, filename)
+
+        return icon_path
