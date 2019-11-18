@@ -18,7 +18,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="appimage_builder",
-    version="0.0.1",
+    version="0.0.2",
     author="Alexis Lopez Zubieta",
     author_email="contact@azubieta.net",
     description="Recipe based AppImage creation meta-tool",
