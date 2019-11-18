@@ -70,7 +70,10 @@ class Qt(Base.Driver):
             for qml_import in qml_imports:
                 if 'path' in qml_import:
                     new_dependencies = self._generate_module_dependencies(qml_import, app_dir)
-                    dependencies.extend(new_dependencies)
+
+                    for dependency in new_dependencies:
+                        dependencies.append(dependency)
+                        self.module_dependencies_cache.add(dependency.source)
 
         return dependencies
 

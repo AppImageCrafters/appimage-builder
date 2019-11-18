@@ -45,13 +45,15 @@ class AppImageBuilder:
 
     def _bundle_dependencies(self):
         self.logger.info("Bundling dependencies into the AppDir: %s" % self.app_dir.path)
-        dependencies = self._load_base_dependencies()
-        while dependencies:
-            dependency = dependencies.pop()
+        lockup_queue = {}
+        self._queue_dependencies(lockup_queue, self._load_base_dependencies())
 
-            self.logger.info("Inspecting: %s" % dependency.source)
+        while lockup_queue:
+            path, dependency = lockup_queue.popitem()
+
+            self.logger.info("Inspecting: %s" % path)
             new_dependencies = self._lockup_new_dependencies(dependency)
-            dependencies.extend(new_dependencies)
+            self._queue_dependencies(lockup_queue, new_dependencies)
 
             if not self.app_dir.bundled(dependency.source):
                 dependency.deploy(self.app_dir)
@@ -113,3 +115,8 @@ class AppImageBuilder:
         output_file = os.path.join(os.getcwd(), "%s-%s-%s.AppImage" % (app_name, app_version, platform.machine()))
 
         appimage_tool.bundle(self.app_dir.path, output_file)
+
+    def _queue_dependencies(self, lockup_queue, dependencies):
+        for dependency in dependencies:
+            if dependency.source not in lockup_queue:
+                lockup_queue[dependency.source] = dependency
