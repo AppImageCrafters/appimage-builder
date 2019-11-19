@@ -49,15 +49,16 @@ class Qt(Base.Driver):
 
     def list_base_dependencies(self, app_dir):
         dependencies = []
-        source_dirs = []
+        source_dirs = [app_dir.path]
         if 'qml_source_dirs' in self.config:
             source_dirs.extend(self.config['qml_source_dirs'])
 
-        for root, dirs, files in os.walk(app_dir.path):
-            for file in files:
-                if file.endswith('.qml'):
-                    absolute_path = os.path.join(root, file)
-                    dependencies.append(QtDependency(self, absolute_path, None, None))
+        for source_dir in source_dirs:
+            for root, dirs, files in os.walk(source_dir):
+                for file in files:
+                    if file.endswith('.qml'):
+                        absolute_path = os.path.join(root, file)
+                        dependencies.append(QtDependency(self, absolute_path, None, None))
 
     def lockup_file_dependencies(self, file, app_dir):
         dependencies = []
