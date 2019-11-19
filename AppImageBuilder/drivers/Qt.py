@@ -34,7 +34,7 @@ class QtDependency(Dependency):
 
 
 class Qt(Base.Driver):
-    id = 'Qt'
+    id = 'qt'
     qt = None
     qt_env = None
 
