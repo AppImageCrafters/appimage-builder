@@ -10,11 +10,10 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
+import logging
 import os
 import re
-import lief
 import subprocess
-import logging
 
 
 class LinkerTool:
@@ -102,17 +101,6 @@ class LinkerTool:
 
         # print("Runnable Files found: \n\t%s\n" % "\n\t".join(binary_files) )
         return binary_files
-
-    def _locate_elf_files(self):
-        elf_files = []
-        for root, dirs, files in os.walk(self.appdir_path):
-            for filename in files:
-                full_path = os.path.join(root, filename)
-                binary = lief.parse(full_path)
-                if binary:
-                    elf_files.append(full_path)
-
-        return elf_files
 
     def _parse(self, output):
         results = {}
