@@ -52,24 +52,3 @@ class Dpkg(drivers.Driver):
                     dependencies.append(DpkgDependency(self, package_file, None, package))
 
         return dependencies
-
-    def lockup_file_dependencies(self, file, app_dir):
-        if file in self.cache:
-            # the files deployed by a single package will always return the same dependencies
-            return []
-        if file.startswith(app_dir.path):
-            # dpkg lockup only work with system files
-            return []
-
-        packages = self.dpkg.find_owner_packages(file)
-
-        dependencies = []
-
-        for package in packages:
-            package_files = self.dpkg.list_package_files(package)
-            for package_file in package_files:
-                dependencies.append(DpkgDependency(self, package_file, None, package))
-
-                self.cache[package_file] = package
-
-        return dependencies
