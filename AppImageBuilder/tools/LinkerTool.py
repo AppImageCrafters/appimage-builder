@@ -10,9 +10,9 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-import logging
 import os
 import re
+import logging
 import subprocess
 
 
@@ -27,15 +27,14 @@ class LinkerTool:
 
     @staticmethod
     def find_binary_path(prefix):
-        possible_paths = [
-            os.path.join(prefix, "lib", "x86_64-linux-gnu", "ld-2.27.so"),
-            os.path.join(prefix, "lib", "i386-linux-gnu", "ld-2.27.so")
-        ]
+        linker_dirs = [os.path.join(prefix, "lib", "x86_64-linux-gnu")]
 
-        for path in possible_paths:
-            logging.debug("Looking linker binary at: %s\n" % path)
-            if os.path.exists(path):
-                return path
+        for linker_dir in linker_dirs:
+            logging.debug("Looking linker binary at: %s\n" % linker_dir)
+            for root, dirs, files in os.walk(linker_dir):
+                for file_name in files:
+                    if file_name.startswith('ld-') and file_name.endswith('.so'):
+                        return os.path.join(root, file_name)
 
         return None
 
