@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Qt Quick Controls 2 Application
+Comment=Application to test Qt Quick Controls 2 
+TryExec=QtQuickControls2Application
+Exec=QtQuickControls2Application
+Icon=QtQuickControls2Application
+MimeType=image/x-foo;
+Categories=Utility;
