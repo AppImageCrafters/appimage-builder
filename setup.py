@@ -17,7 +17,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="appimage_builder",
-    version="0.0.9",
+    version="0.0.10",
     author="Alexis Lopez Zubieta",
     author_email="contact@azubieta.net",
     description="Recipe based AppImage creation meta-tool",
@@ -36,6 +36,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License"
     ],
     license='MIT',
-    install_requires=['lief', 'pyyaml>=5', 'docker', 'bash.py'],
+    install_requires=['pyyaml>=5', 'docker', 'bash.py'],
     python_requires='>=3.6',
 )
