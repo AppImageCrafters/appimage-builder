@@ -25,6 +25,8 @@ def __main__():
                         help='recipe file path (default: $PWD/AppImageBuilder.yml)')
     parser.add_argument('--log', dest='loglevel', default="INFO",
                         help='logging level (default: INFO)')
+    parser.add_argument('--skip-script', dest='skip_script', action="store_true",
+                        help='Skip script execution')
     parser.add_argument('--skip-appdir', dest='skip_appdir', action="store_true",
                         help='Skip AppDir building')
     parser.add_argument('--skip-appdir-test', dest='skip_appdir_test', action="store_true",
@@ -38,6 +40,9 @@ def __main__():
     try:
         configurator = Configurator()
         builder = configurator.load_file(args.recipe)
+        if not args.skip_script:
+            builder.run_script()
+
         if not args.skip_appdir:
             builder.build_app_dir()
 

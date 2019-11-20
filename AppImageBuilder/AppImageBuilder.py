@@ -17,6 +17,7 @@ from AppImageBuilder import AppDir2
 from AppImageBuilder.AppRun import AppRun
 from AppImageBuilder.tools.TestsTool import TestsTool
 from AppImageBuilder.tools.AppImageTool import AppImageTool
+from AppImageBuilder.tools.ShellTool import ShellTool
 
 
 class AppImageBuilder:
@@ -24,6 +25,7 @@ class AppImageBuilder:
     app_config = {}
     app_dir_config = {}
 
+    script = []
     drivers = None
     logger = None
 
@@ -34,6 +36,16 @@ class AppImageBuilder:
         absolute_app_dir_path = os.path.abspath(self.app_dir_config['path'])
 
         self.app_dir = AppDir2(absolute_app_dir_path)
+
+    def run_script(self):
+        if self.script:
+            self.logger.info("Running script")
+            shell = ShellTool()
+            shell.execute(self.script)
+
+            self.logger.info("Script completed")
+        else:
+            self.logger.info("No 'script' entry in the recipe.")
 
     def build_app_dir(self):
         if not self.app_dir:
@@ -110,7 +122,7 @@ class AppImageBuilder:
         appimage_tool = AppImageTool()
 
         info_driver = self.drivers['info']
-        app_name = info_driver.config['name']
+        app_name = info_driver.config['name'].replace(' ','_')
         app_version = info_driver.config['version']
         output_file = os.path.join(os.getcwd(), "%s-%s-%s.AppImage" % (app_name, app_version, platform.machine()))
 

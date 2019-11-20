@@ -66,6 +66,7 @@ class Configurator:
             drivers.FontConfig.id: drivers.FontConfig()
         }
 
+        self._load_script(builder)
         self._load_app_dir_config(builder)
 
         return builder
@@ -117,3 +118,6 @@ class Configurator:
                 return fallback
 
         return current
+
+    def _load_script(self, builder):
+        builder.script = self._check_optional_entry(['script'], [])

@@ -14,6 +14,10 @@ from bash import Bash
 import logging
 
 
+class ExecutionFailed(RuntimeError):
+    pass
+
+
 class ShellTool:
     def execute(self, instructions=None):
         if instructions is None:
@@ -31,4 +35,4 @@ class ShellTool:
                 logger.warning(" %s" % line)
 
             if command.return_code != 0:
-                logger.error('Execution failed')
+                raise ExecutionFailed("%s exited with code %s" % (instruction, command.return_code))
