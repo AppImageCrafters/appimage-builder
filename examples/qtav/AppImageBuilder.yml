@@ -9,7 +9,9 @@ AppDir:
     name: QMLPlayer
     icon: QtAV
     version: 1.12.0
-
+  qt:
+    qml_source_dirs:
+      - /usr/lib/x86_64-linux-gnu/qt5/qml/QtAV
   dpkg:
     include:
       - qtav-players

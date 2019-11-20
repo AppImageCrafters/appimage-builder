@@ -57,16 +57,23 @@ class Qt(Base.Driver):
             for root, dirs, files in os.walk(source_dir):
                 for file in files:
                     if file.endswith('.qml'):
-                        absolute_path = os.path.join(root, file)
-                        dependencies.append(QtDependency(self, absolute_path, None, None))
+                        absolute_path = os.path.abspath(os.path.join(root, file))
+                        dependencies.extend(self.lockup_file_dependencies(absolute_path, app_dir))
+        return dependencies
 
     def lockup_file_dependencies(self, file, app_dir):
         dependencies = []
         if file.endswith('.qml'):
-            if file in self.module_dependencies_cache:
+            root_dir = os.path.dirname(file)
+
+            if root_dir in self.module_dependencies_cache:
                 return []
 
-            qml_imports = self._get_qml_file_imports(file)
+            self.module_dependencies_cache.add(root_dir)
+            self.logger().info("Looking for dependencies of: %s" % root_dir)
+
+
+            qml_imports = self._get_qml_file_imports(root_dir)
 
             for qml_import in qml_imports:
                 if 'path' in qml_import:
@@ -74,7 +81,9 @@ class Qt(Base.Driver):
 
                     for dependency in new_dependencies:
                         dependencies.append(dependency)
-                        self.module_dependencies_cache.add(dependency.source)
+
+                        if dependency.source.startswith(root_dir):
+                            self.module_dependencies_cache.add(dependency.source)
 
         return dependencies
 
@@ -97,12 +106,12 @@ class Qt(Base.Driver):
 
         return dependencies
 
-    def _get_qml_file_imports(self, file):
+    def _get_qml_file_imports(self, dir):
         import_dirs = [self.qt_env['QT_INSTALL_QML']]
         if 'qml_import_dirs' in self.config:
             import_dirs.extend(self.config['qml_import_dirs'])
 
-        return self.qt.qml_scan_imports([file], import_dirs)
+        return self.qt.qml_scan_imports([dir], import_dirs)
 
     def _generate_qt_conf(self, app_dir):
         qt_conf_path = self._find_qt_conf()

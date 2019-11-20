@@ -28,11 +28,11 @@ class QtTool:
 
         return env
 
-    def qml_scan_imports(self, qml_file_paths=None, import_paths=None):
+    def qml_scan_imports(self, root_paths=None, import_paths=None):
         command = [self.qmlimportscanner_bin]
-        if qml_file_paths:
-            command.append('-qmlFiles')
-            command.extend(qml_file_paths)
+        if root_paths:
+            command.append('-rootPath')
+            command.extend(root_paths)
 
         if import_paths:
             command.append('-importPath')
