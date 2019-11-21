@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 
 import os
+import re
 import shutil
 import subprocess
 import logging
@@ -20,9 +21,26 @@ from AppImageBuilder.FileUtils import make_link_relative
 
 class PkgTool:
     target_arch = None
+
     def __init__(self):
         self.logger = logging.getLogger("PkgTool")
         self.target_arch = self.get_deb_host_arch()
+
+    def find_package_dependencies(self, package_name):
+        result = subprocess.run(["apt-cache", "depends", package_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output = result.stdout.decode('utf-8')
+        errors = result.stderr.decode('utf-8')
+
+        depends = []
+        if result.returncode != 0:
+            self.logger.warning("Unable to find %s dependencies: %s"(package_name, errors))
+        else:
+            for line in output.splitlines():
+                depends_search = re.search(r'Depends: (?P<pkg_name>(\w|\.|-|_|\d)+)', line, re.IGNORECASE)
+                if depends_search:
+                    depends.append(depends_search.group('pkg_name'))
+
+        return depends
 
     def find_owner_packages(self, path):
         packages = []
@@ -131,7 +149,8 @@ class PkgTool:
 
     @staticmethod
     def get_deb_host_arch():
-        result = subprocess.run(["dpkg-architecture", "-q", 'DEB_HOST_ARCH'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(["dpkg-architecture", "-q", 'DEB_HOST_ARCH'], stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
         if result.returncode == 0:
             return result.stdout.decode('utf-8').strip()
         else:

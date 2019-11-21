@@ -43,12 +43,23 @@ class Dpkg(drivers.Driver):
     def list_base_dependencies(self, app_dir):
         dependencies = []
 
+        deploy_list = set()
         if 'include' in self.config:
             for package in self.config['include']:
-                package_files = self.dpkg.list_package_files(package)
-                for package_file in package_files:
-                    self.cache[package_file] = package
+                deploy_list.add(package)
+                deploy_list.update(self.dpkg.find_package_dependencies(package))
 
-                    dependencies.append(DpkgDependency(self, package_file, None, package))
+        if 'exclude' in self.config:
+            for package in self.config['exclude']:
+                if package in deploy_list:
+                    deploy_list.remove(package)
+
+        for package in deploy_list:
+            package_files = self.dpkg.list_package_files(package)
+            for package_file in package_files:
+                self.cache[package_file] = package
+
+                dependencies.append(DpkgDependency(self, package_file, None, package))
+        self.logger().info("Packages to be deployed:\n\t%s" % '\t\n'.join(deploy_list))
 
         return dependencies
