@@ -10,13 +10,13 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-import os
-import yaml
 import logging
+import os
 
-from AppImageBuilder import AppDir2
-from AppImageBuilder.AppImageBuilder import AppImageBuilder
+import yaml
+
 from AppImageBuilder import drivers
+from AppImageBuilder.AppImageBuilder import AppImageBuilder
 
 
 class ConfigurationError(RuntimeError):
@@ -63,7 +63,8 @@ class Configurator:
             drivers.Dpkg.id: drivers.Dpkg(),
             drivers.Qt.id: drivers.Qt(),
             drivers.Info.id: drivers.Info(),
-            drivers.FontConfig.id: drivers.FontConfig()
+            drivers.FontConfig.id: drivers.FontConfig(),
+            drivers.GStreamer.id: drivers.GStreamer()
         }
 
         self._load_script(builder)

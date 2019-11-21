@@ -27,3 +27,5 @@ from AppImageBuilder.drivers.Qt import Qt
 
 from AppImageBuilder.drivers.Info import Info
 from AppImageBuilder.drivers.FontConfig import FontConfig
+
+from AppImageBuilder.drivers.GStreamer import GStreamer
