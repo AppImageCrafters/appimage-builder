@@ -13,23 +13,11 @@ AppDir:
   dpkg:
     include:
       - kcalc
-      - qt5-style-plugins
-      - libqt5quicktemplates2-5
-      - libqt5gui5
-      - frameworkintegration
-      - gtk2-engines-pixbuf
-      - gtk2-engines-murrine
-      - breeze-icon-theme
       # minimal font stack
-      - fontconfig-config
+      - fontconfig
       - ucf
       - fonts-dejavu-core
       - ttf-bitstream-vera
-      - fonts-liberation
-      # graphic stack dependencies
-      - qtwayland5
-      - libglx-mesa0
-      - libgl1-mesa-dri
 
   test:
     centos:
@@ -40,7 +28,7 @@ AppDir:
         - QT_QPA_PLATFORM=minimal
     debian:
       image: debian:stable
-      command: "./AppRun --help"
+      command: "./AppRun"
       use_host_x: True
     arch:
       image: archlinux
