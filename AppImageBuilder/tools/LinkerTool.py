@@ -10,9 +10,9 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
+import logging
 import os
 import re
-import logging
 import subprocess
 
 
@@ -26,7 +26,7 @@ class LinkerTool:
             self.binary_path = binary_path
 
     @staticmethod
-    def find_binary_path(prefix):
+    def find_binary_path(prefix: str) -> str:
         linker_dirs = [os.path.join(prefix, "lib", "x86_64-linux-gnu")]
 
         for linker_dir in linker_dirs:
@@ -36,7 +36,7 @@ class LinkerTool:
                     if file_name.startswith('ld-') and file_name.endswith('.so'):
                         return os.path.join(root, file_name)
 
-        return None
+        return ''
 
     def list_link_dependencies(self, file, ignore_cache=False, library_dirs=None):
         result = self._execute_ld_so_command(file, ignore_cache, library_dirs)

@@ -72,7 +72,6 @@ class Qt(Base.Driver):
             self.module_dependencies_cache.add(root_dir)
             self.logger().info("Looking for dependencies of: %s" % root_dir)
 
-
             qml_imports = self._get_qml_file_imports(root_dir)
 
             for qml_import in qml_imports:
@@ -114,21 +113,30 @@ class Qt(Base.Driver):
         return self.qt.qml_scan_imports([dir], import_dirs)
 
     def _generate_qt_conf(self, app_dir):
-        qt_conf_path = self._find_qt_conf()
-
-        qt_conf = configparser.ConfigParser()
-        qt_conf.optionxform = str
-
-        if qt_conf_path:
-            qt_conf.read(qt_conf_path)
-
-        qt_conf['Paths']['Prefix'] = "../../usr"
-        qt_conf['Paths']['Settings'] = "../../etc"
+        qt_conf = [
+            '[Paths]\n',
+            'Prefix=../../usr\n',
+            'Settings=../../etc\n',
+            'ArchData=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_ARCHDATA'], '/usr/'),
+            'Binaries=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_BINS'], '/usr/'),
+            'Data=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_DATA'], '/usr/'),
+            'Libraries=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_LIBS'], '/usr/'),
+            'LibraryExecutables=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_LIBEXECS'], '/usr/'),
+            'Plugins=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_PLUGINS'], '/usr/'),
+            'Qml2Imports=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_QML'], '/usr/'),
+            'Translations=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_TRANSLATIONS'], '/usr/')
+        ]
 
         qt_conf_target_path = self._generate_qt_conf_target_path(app_dir)
         self.logger().info("Writing qt.conf to: %s" % qt_conf_target_path)
         with open(qt_conf_target_path, "w") as f:
-            qt_conf.write(f)
+            f.writelines(qt_conf)
+
+    @staticmethod
+    def _remove_prefix(text, prefix):
+        if text.startswith(prefix):
+            return text[len(prefix):]
+        return text  # or whatever
 
     @staticmethod
     def _generate_qt_conf_target_path(app_dir):
@@ -136,13 +144,3 @@ class Qt(Base.Driver):
         liker_dir = os.path.dirname(linker_path)
         qt_conf_target_path = os.path.join(liker_dir, "qt.conf")
         return qt_conf_target_path
-
-    @staticmethod
-    def _find_qt_conf():
-        qt_conf_path = None
-        for root, dirs, files in os.walk("/usr"):
-            for filename in files:
-                if filename == "qt.conf":
-                    qt_conf_path = os.path.join(root, filename)
-
-        return qt_conf_path
