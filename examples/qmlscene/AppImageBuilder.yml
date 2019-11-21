@@ -16,37 +16,38 @@ AppDir:
   dpkg:
     include:
       - qmlscene
+      # minimal graphics stack
+      - libglu1-mesa
+      - libgl1-mesa-glx
+      - libgl1-mesa-dri
+      - freeglut3
       # minimal font stack
-      - fontconfig-config
+      - fontconfig
       - ucf
       - fonts-dejavu-core
       - ttf-bitstream-vera
-      - fonts-liberation
-      # graphic stack dependencies
-      - libglx-mesa0
-      - libgl1-mesa-dri
 
   test:
     centos:
       image: centos:6
-      command: "./AppRun"
+      command: "./AppRun main.qml"
       use_host_x: True
-#    debian:
-#      image: debian:stable
-#      command: "./AppRun --help"
-#      use_host_x: True
-#    arch:
-#      image: archlinux
-#      command: "./AppRun --help"
-#      use_host_x: True
-#    fedora:
-#      image: fedora:26
-#      command: "./AppRun --help"
-#      use_host_x: True
-#    ubuntu:
-#      image: ubuntu:xenial
-#      command: "./AppRun --help"
-#      use_host_x: True
+    debian:
+      image: debian:stable
+      command: "./AppRun $@ main.qml"
+      use_host_x: True
+    arch:
+      image: archlinux
+      command: "./AppRun main.qml"
+      use_host_x: True
+    fedora:
+      image: fedora:26
+      command: "./AppRun main.qml"
+      use_host_x: True
+    ubuntu:
+      image: ubuntu:xenial
+      command: "./AppRun main.qml"
+      use_host_x: True
 
 
 AppImage:
