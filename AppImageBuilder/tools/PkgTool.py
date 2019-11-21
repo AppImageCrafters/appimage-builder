@@ -33,7 +33,7 @@ class PkgTool:
 
         depends = []
         if result.returncode != 0:
-            self.logger.warning("Unable to find %s dependencies: %s"(package_name, errors))
+            self.logger.warning("Unable to find %s dependencies: %s" % (package_name, errors))
         else:
             for line in output.splitlines():
                 depends_search = re.search(r'Depends: (?P<pkg_name>(\w|\.|-|_|\d)+)', line, re.IGNORECASE)
