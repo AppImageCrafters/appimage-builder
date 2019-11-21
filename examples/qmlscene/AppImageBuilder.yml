@@ -1,0 +1,54 @@
+version: 1
+script:
+  - mkdir -p AppDir
+  - cp -f main.qml AppDir/
+
+AppDir:
+  path: ./AppDir
+  exec: usr/lib/x86_64-linux-gnu/qt5/bin/qmlscene
+
+  info:
+    id: org.qt.qmlscene
+    name: qmlscene
+    icon: text-x-qml
+    version: 19.08.02
+
+  dpkg:
+    include:
+      - qmlscene
+      # minimal font stack
+      - fontconfig-config
+      - ucf
+      - fonts-dejavu-core
+      - ttf-bitstream-vera
+      - fonts-liberation
+      # graphic stack dependencies
+      - libglx-mesa0
+      - libgl1-mesa-dri
+
+  test:
+    centos:
+      image: centos:6
+      command: "./AppRun"
+      use_host_x: True
+#    debian:
+#      image: debian:stable
+#      command: "./AppRun --help"
+#      use_host_x: True
+#    arch:
+#      image: archlinux
+#      command: "./AppRun --help"
+#      use_host_x: True
+#    fedora:
+#      image: fedora:26
+#      command: "./AppRun --help"
+#      use_host_x: True
+#    ubuntu:
+#      image: ubuntu:xenial
+#      command: "./AppRun --help"
+#      use_host_x: True
+
+
+AppImage:
+  update-information: None
+  sign-key: None

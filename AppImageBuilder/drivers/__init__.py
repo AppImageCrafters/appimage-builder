@@ -29,3 +29,4 @@ from AppImageBuilder.drivers.Info import Info
 from AppImageBuilder.drivers.FontConfig import FontConfig
 
 from AppImageBuilder.drivers.GStreamer import GStreamer
+from AppImageBuilder.drivers.LibGL import LibGL
