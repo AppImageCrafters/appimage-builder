@@ -46,6 +46,7 @@ class Dpkg(drivers.Driver):
         deploy_list = set()
         if 'include' in self.config:
             for package in self.config['include']:
+                self.logger().info('Listing dependencies of: %s' % package)
                 deploy_list.add(package)
                 deploy_list.update(self.dpkg.find_package_dependencies(package))
 
@@ -55,6 +56,7 @@ class Dpkg(drivers.Driver):
                     deploy_list.remove(package)
 
         for package in deploy_list:
+            self.logger().info('Including files of: %s', package)
             package_files = self.dpkg.list_package_files(package)
             for package_file in package_files:
                 self.cache[package_file] = package
