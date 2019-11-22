@@ -17,13 +17,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="appimage_builder",
-    version="0.0.14",
+    version="0.0.15",
     author="Alexis Lopez Zubieta",
     author_email="contact@azubieta.net",
     description="Recipe based AppImage creation meta-tool",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    scripts=['appimage-builder'],
+    scripts=['appimage-builder', 'appdir-docker', 'appdir-dependency-map'],
     url="https://github.com/AppImageCrafters/AppImageBuilder",
     project_urls={
         "Bug Tracker": "https://github.com/AppImageCrafters/AppImageBuilder/issues",
