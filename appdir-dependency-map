@@ -18,6 +18,8 @@ from AppImageBuilder.AppDir2 import AppDir2
 
 from AppImageBuilder.tools import Linker
 
+from AppImageBuilder.tools import Dpkg
+
 
 class Node:
     path = ""
@@ -62,6 +64,8 @@ def main():
     parser.add_argument('AppDir', type=str, help='target AppDir to inspect')
     parser.add_argument('--print-roots', dest='do_print_roots', action='store_true',
                         help='print the dependency graph roots')
+    parser.add_argument('--print-roots-packages', dest='do_print_roots_packages', action='store_true',
+                        help='print the dependency graph roots packages')
 
     args = parser.parse_args()
     configure_logger(args.loglevel)
@@ -73,6 +77,19 @@ def main():
     if args.do_print_roots:
         for key in graph.roots:
             print(key)
+
+    if args.do_print_roots_packages:
+        root_packages = set()
+        dpkg = Dpkg()
+        for path in graph.roots:
+            original_path = path.replace(app_dir.path, '')
+            logging.debug("Looking for file package : %s" % path)
+            packages = dpkg.find_owner_packages(original_path)
+            logging.debug("File package: %s" % ' '.join(packages))
+            root_packages.update(packages)
+
+        for pkg in root_packages:
+            print(pkg)
 
 
 def configure_logger(loglevel):
