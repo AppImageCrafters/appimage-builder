@@ -42,10 +42,15 @@ class PkgTool:
 
         return depends
 
-    def find_owner_packages(self, path):
-        packages = []
+    def find_owner_packages(self, paths):
+        packages = set()
+        command = ["dpkg-query", "-S"]
+        if isinstance(paths, list):
+            command.extend(paths)
+        else:
+            command.append(paths)
 
-        result = subprocess.run(["dpkg-query", "-S", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output = result.stdout.decode('utf-8')
         errors = result.stderr.decode('utf-8')
 
@@ -54,26 +59,34 @@ class PkgTool:
                 self.logger.error(line)
 
         for line in output.splitlines():
-            packages = self._parse_package_names_from_dpkg_query_output(line)
+            line_packages = self._parse_package_names_from_dpkg_query_output(line)
 
-            for package in packages:
-                if self.target_arch in packages:
-                    # only use packages matching the target arch
-                    packages.append(package)
+            for package in line_packages:
+                if ':' not in package:
+                    # not an arch specific package
+                    packages.add(package)
+                else:
+                    # arch specific package
+                    if self.target_arch in package:
+                        # only use packages matching the target arch
+                        packages.add(package)
 
-        return set(packages)
+        return packages
 
-    @staticmethod
-    def _parse_package_names_from_dpkg_query_output(line):
-        line = line.replace(',', '')
-        sections = line.split(" ")
-        # remove file path
-        sections.pop()
-        packages = []
-        for package in sections:
-            # remove last ',' or ':'
-            package = package[:-1]
-            packages.append(package)
+    def _parse_package_names_from_dpkg_query_output(self, line):
+        regex = r'((?P<package>(\w|-|_)+(:((\w|-|_)+))?))( |:|,)'
+        matches = re.finditer(regex, line, re.MULTILINE)
+
+        packages = set()
+        for matchNum, match in enumerate(matches, start=1):
+
+            self.logger.debug(
+                "Match {matchNum} was found at {start}-{end}: {match}".format(matchNum=matchNum, start=match.start(),
+                                                                              end=match.end(), match=match.group()))
+
+            group_dict = match.groupdict()
+            if 'package' in group_dict:
+                packages.add(group_dict['package'])
 
         return packages
 
@@ -100,10 +113,14 @@ class PkgTool:
 
             for file in files:
                 target_file = app_dir_path + file
-                self.logger.info("Deploying %s", file)
 
                 os.makedirs(os.path.dirname(target_file), exist_ok=True)
-                shutil.copy2(file, target_file)
+
+                try:
+                    shutil.copy2(file, target_file)
+                    self.logger.info(" + %s", file)
+                except RuntimeError as error:
+                    self.logger.warning(" * %s (%s)" % (file, error))
 
                 extracted_files[file] = pkg
                 if os.path.islink(target_file):
