@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+#  Copyright  2019 Alexis Lopez Zubieta
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+import argparse
+import logging
+import os
+
+from AppImageBuilder import AppDir2
+from AppImageBuilder.tools import Dpkg
+
+
+def configure_logger(loglevel):
+    numeric_level = getattr(logging, loglevel.upper())
+    if not isinstance(numeric_level, int):
+        logging.error('Invalid log level: %s' % loglevel)
+    logging.basicConfig(level=numeric_level)
+    return logging.getLogger('appdir-dpkg')
+
+
+def main():
+    parser = argparse.ArgumentParser(description='AppDir building tool. Allows to bundle deb packages into the AppDir.')
+    parser.add_argument('--log', dest='loglevel', default="INFO", help='logging level (default: INFO)')
+    parser.add_argument('app_dir', type=str, default='AppDir', help='target AppDir')
+    parser.add_argument('--deploy', type=str, nargs='+', help='Deploys packages into the AppDir')
+    parser.add_argument('--remove', type=str, nargs='+', help='Remove packages from the AppDir')
+    parser.add_argument('--list', dest='do_list', action='store_true', help='list packages deployed in the AppDir')
+
+    args = parser.parse_args()
+    logger = configure_logger(args.loglevel)
+    absolute_app_dir_path = os.path.abspath(args.app_dir)
+
+    dpkg = Dpkg()
+    if args.deploy:
+        dpkg.deploy_pkgs(args.deploy, absolute_app_dir_path)
+
+    if args.remove:
+        dpkg.remove_pkgs(args.remove, absolute_app_dir_path)
+
+    if args.do_list:
+        pkg_file_paths = []
+        logger.info("Listing files in: %s" % absolute_app_dir_path)
+        for root, dirs, files in os.walk(absolute_app_dir_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                pkg_file_paths.append(file_path.replace(absolute_app_dir_path, ''))
+
+        logger.info("Looking for packages")
+        packages = dpkg.find_owner_packages(pkg_file_paths)
+
+        logger.info("Package list:")
+        for package in packages:
+            print(package)
+
+
+if __name__ == '__main__':
+    main()
