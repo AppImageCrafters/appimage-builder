@@ -23,9 +23,15 @@ AppDir:
       - freeglut3
       # minimal font stack
       - fontconfig
-      - ucf
       - fonts-dejavu-core
       - ttf-bitstream-vera
+    exclude:
+      - coreutils
+      - dpkg
+      - debconf
+      - qtchooser
+      - sensible-utils
+      - ucf
 
   test:
     centos:
