@@ -172,3 +172,18 @@ class PkgTool:
             return result.stdout.decode('utf-8').strip()
         else:
             return None
+
+    def remove_pkgs(self, pkgs, app_dir_path):
+        for pkg in pkgs:
+            files = self.list_package_files(pkg)
+            self.logger.info("Removing package: %s", pkg)
+            for file in files:
+                full_path = app_dir_path + file
+
+                if os.path.exists(full_path):
+                    os.remove(full_path)
+                    self.logger.info(" - %s", full_path)
+                else:
+                    self.logger.info(" * %s (not deployed)", full_path)
+
+            self.logger.info("Package removed: %s", pkg)
