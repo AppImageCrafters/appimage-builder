@@ -74,7 +74,7 @@ class PkgTool:
         return packages
 
     def _parse_package_names_from_dpkg_query_output(self, line):
-        regex = r'((?P<package>(\w|-|_|\.)+(:((\w|-|_)+))?))( |:|,)'
+        regex = r'((?P<package>(\w|-|_|\.|\+)+(:((\w|-|_)+))?))( |:|,)'
         matches = re.finditer(regex, line, re.MULTILINE)
 
         packages = set()
