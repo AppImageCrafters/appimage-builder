@@ -40,28 +40,12 @@ class TestsTool:
 
             docker_image = v['image']
             command = v['command']
+            environment = v['env'] if 'env' in v else []
+            use_host_x = v['use_host_x'] if 'use_host_x' in v else False
+
             try:
-                volumes = {absolute_app_dir_path: {'bind': '/app', 'mode': 'ro'}}
-                environment = []
-                if 'env' in v:
-                    environment = v['env']
-
-                if 'use_host_x' in v and v['use_host_x']:
-                    command = [self.tests_wrapper_path, command]
-                    volumes['/tmp/.X11-unix'] = {'bind': '/tmp/.X11-unix', 'mode': 'rw'}
-                    volumes[self.tests_dir_path] = {'bind': self.tests_dir_path, 'mode': 'rw'}
-                    environment.append('DISPLAY=%s' % os.getenv('DISPLAY'))
-
-                ctr = self.client.containers.run(docker_image, command, auto_remove=True, working_dir='/app',
-                                                 volumes=volumes, stdout=True, stderr=True,
-                                                 environment=environment, detach=True)
-
-                logs = ctr.logs(stream=True)
-
-                for line in logs:
-                    test_logger.info(line.decode('utf-8').strip())
-
-                result = ctr.wait()
+                result = self.docker_run(absolute_app_dir_path, command, docker_image, environment, use_host_x,
+                                         test_logger)
                 if result['StatusCode'] != 0:
                     test_logger.warning("Execution failed. Error message: %s" % result['Error'])
                     failed.append(k)
@@ -74,6 +58,32 @@ class TestsTool:
         for k, v in self.test_scenarios.items():
             result = "failed" if k in failed else "passed"
             self.logger.info(" - %s : %s" % (k, result))
+
+    def docker_run(self, absolute_app_dir_path, command, docker_image, environment=None,
+                   use_host_x=False, logger=None):
+
+        if environment is None:
+            environment = []
+
+        volumes = {absolute_app_dir_path: {'bind': '/app', 'mode': 'ro'}}
+
+        if use_host_x:
+            command = [self.tests_wrapper_path, command]
+            volumes['/tmp/.X11-unix'] = {'bind': '/tmp/.X11-unix', 'mode': 'rw'}
+            volumes[self.tests_dir_path] = {'bind': self.tests_dir_path, 'mode': 'rw'}
+            environment.append('DISPLAY=%s' % os.getenv('DISPLAY'))
+
+        ctr = self.client.containers.run(docker_image, command, auto_remove=True, working_dir='/app',
+                                         volumes=volumes, stdout=True, stderr=True,
+                                         environment=environment, detach=True)
+        logs = ctr.logs(stream=True)
+
+        if logger:
+            for line in logs:
+                logger.info(line.decode('utf-8').strip())
+
+        result = ctr.wait()
+        return result
 
     def _write_host_x_share_wrapper(self):
         with open(self.tests_wrapper_path, 'w') as f:

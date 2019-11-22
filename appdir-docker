@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+#  Copyright  2019 Alexis Lopez Zubieta
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+import argparse
+import logging
+import os
+
+from AppImageBuilder import AppDir2
+from AppImageBuilder.tools import TestsTool
+
+
+def main():
+    parser = argparse.ArgumentParser(description='AppDir testing tool. Allows to run AppDir inside docker containers.')
+    parser.add_argument('--log', dest='loglevel', default="INFO", help='logging level (default: INFO)')
+    parser.add_argument('app_dir', type=str, help='target AppDir')
+    parser.add_argument('command', type=str, help='command to run')
+    parser.add_argument('--docker-image', dest='docker_image', type=str, default='ubuntu:trusty',
+                        help='docker image to use')
+    parser.add_argument('--docker-use-host-x', dest='docker_use_host_x', type=bool, default=True,
+                        help='Share the host X server with the docker container')
+
+    args = parser.parse_args()
+    logger = configure_logger(args.loglevel)
+    app_dir = AppDir2(args.app_dir)
+
+    absolute_appdir_path = os.path.abspath(app_dir.path)
+    tests_tool = TestsTool(app_dir, {})
+    tests_tool.docker_run(absolute_appdir_path, args.command, docker_image=args.docker_image,
+                          use_host_x=args.docker_use_host_x, logger=logger)
+
+
+def configure_logger(loglevel):
+    numeric_level = getattr(logging, loglevel.upper())
+    if not isinstance(numeric_level, int):
+        logging.error('Invalid log level: %s' % loglevel)
+    logging.basicConfig(level=numeric_level)
+    return logging.getLogger('appdir-docker')
+
+
+if __name__ == '__main__':
+    main()

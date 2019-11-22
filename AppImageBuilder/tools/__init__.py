@@ -15,3 +15,4 @@ from AppImageBuilder.tools.LinkerTool import LinkerTool as Linker
 from AppImageBuilder.tools.ShellTool import ShellTool as Shell
 from AppImageBuilder.tools.AppImageTool import AppImageTool as AppImage
 from AppImageBuilder.tools.QtTool import QtTool
+from AppImageBuilder.tools.TestsTool import TestsTool
