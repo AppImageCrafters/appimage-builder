@@ -30,31 +30,47 @@ class Node:
 
 
 class Graph:
-    roots = {}
-    nodes = {}
+    relations = {}
+    _dependencies_count = {}
 
-    def add(self, path, dependcies_paths):
-        node = None
-        if path in self.nodes:
-            node = self.nodes[path]
+    def add(self, path, dependencies_paths):
+        if path in self.relations:
+            self.relations[path].update(dependencies_paths)
         else:
-            node = Node(path)
+            self.relations[path] = set(dependencies_paths)
 
-            self.roots[path] = node
-            self.nodes[path] = node
+        if path not in self._dependencies_count:
+            self._dependencies_count[path] = 0
 
-        for dependency_path in dependcies_paths:
-            if dependency_path in self.roots:
-                del self.roots[dependency_path]
-
-            child = None
-            if dependency_path in self.nodes:
-                child = self.nodes[dependency_path]
+        for dependency_path in dependencies_paths:
+            if dependency_path in self._dependencies_count:
+                self._dependencies_count[dependency_path] = self._dependencies_count[dependency_path] + 1
             else:
-                child = Node(dependency_path)
-                self.nodes[dependency_path] = child
+                self._dependencies_count[dependency_path] = 1
 
-            node.children.append(child)
+    def roots(self):
+        root_list = []
+        for path, count in self._dependencies_count.items():
+            if count == 0:
+                root_list.append(path)
+
+        return root_list
+
+    def known(self, path):
+        return path in self.relations
+
+    def print_dependencies(self, node, app_dir_path, indentation=0, visited=None):
+        if not visited:
+            visited = set()
+
+        visited.add(node)
+
+        print('%s%s' % ('----' * indentation, node.replace(app_dir_path, '')))
+        children_indentation = indentation + 1
+
+        for child in self.relations[node]:
+            if child not in visited:
+                self.print_dependencies(child, app_dir_path, children_indentation, visited)
 
 
 def main():
@@ -66,6 +82,8 @@ def main():
                         help='print the dependency graph roots')
     parser.add_argument('--print-roots-packages', dest='do_print_roots_packages', action='store_true',
                         help='print the dependency graph roots packages')
+    parser.add_argument('--print-map', dest='do_print_map', action='store_true',
+                        help='print the dependency graph packages')
 
     args = parser.parse_args()
     configure_logger(args.loglevel)
@@ -75,13 +93,17 @@ def main():
     graph = build_dependencies_graph(app_dir)
 
     if args.do_print_roots:
-        for key in graph.roots:
+        for key in graph.roots():
             print(key)
+
+    if args.do_print_map:
+        for node in graph.roots():
+            graph.print_dependencies(node, app_dir.path)
 
     if args.do_print_roots_packages:
         root_packages = set()
         dpkg = Dpkg()
-        for path in graph.roots:
+        for path in graph.roots():
             original_path = path.replace(app_dir.path, '')
             logging.debug("Looking for file package : %s" % path)
             packages = dpkg.find_owner_packages(original_path)
@@ -111,7 +133,7 @@ def build_dependencies_graph(app_dir):
 
     for file in linkable_files:
         logging.debug("Inspecting dependencies of: %s" % file)
-        if file not in graph.nodes:
+        if not graph.known(file):
             dependencies = linker.list_link_dependencies(file, ignore_cache=True, library_dirs=lib_dirs)
             if not dependencies:
                 dependencies = set()
