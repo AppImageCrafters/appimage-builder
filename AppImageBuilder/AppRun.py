@@ -18,9 +18,9 @@ class AppRun:
         'LD_LIBRARY_DIRS': None,
         'LINKER_PATH': None,
         'XDG_DATA_DIRS': '${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}',
-        'XDG_CONFIG_DIRS': '$APPDIR/etc/xdg:$XDG_CONFIG_DIRS'
+        'XDG_CONFIG_DIRS': '$APPDIR/etc/xdg:$XDG_CONFIG_DIRS',
+        'EXEC_ARGS': '$@',
     }
-
     sections = {
         'HEADER': [
             '#!/bin/bash',
@@ -37,15 +37,17 @@ class AppRun:
             '# Launch application using only the bundled libraries',
             'exec "${LINKER_PATH}" \\',
             '   --inhibit-cache --library-path "${LD_LIBRARY_DIRS}" \\',
-            '  ${APPDIR}/${APP_PATH} $@',
+            '  ${APPDIR}/${BIN_PATH} ${EXEC_ARGS}',
             ''
         ]
     }
 
-    def __init__(self, app_path):
-        assert app_path
+    def __init__(self, bin_path, exec_args=None):
+        assert bin_path
 
-        self.env['APP_PATH'] = app_path
+        self.env['BIN_PATH'] = bin_path
+        if exec_args:
+            self.env['EXEC_ARGS'] = exec_args
 
     def save(self, path):
         lines = self._generate()
@@ -63,7 +65,7 @@ class AppRun:
         file_lines.extend(self._generate_env_section())
 
         for k, v in self.sections.items():
-            if k not in ['HEADER', 'APPDIR', 'EXEC']:
+            if k not in ['HEADER', 'APPDIR', 'EXEC', 'EXEC_ARGS']:
                 # avoid including any special section
                 file_lines.extend(['', '# %s' % k])
                 file_lines.extend(v)

@@ -6,6 +6,7 @@ script:
 AppDir:
   path: ./AppDir
   exec: usr/lib/x86_64-linux-gnu/qt5/bin/qmlscene
+  exec_args: $@ ${APPDIR}/main.qml
 
   info:
     id: org.qt.qmlscene

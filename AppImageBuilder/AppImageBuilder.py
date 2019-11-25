@@ -52,7 +52,7 @@ class AppImageBuilder:
             self._load_app_dir()
 
         self._bundle_dependencies()
-        self.configure_app_dir(self.app_dir_config['exec'])
+        self.configure_app_dir()
         self.logger.info("AppDir build completed")
 
     def _bundle_dependencies(self):
@@ -96,9 +96,12 @@ class AppImageBuilder:
 
         return dependencies
 
-    def configure_app_dir(self, exec):
+    def configure_app_dir(self):
+        exec = self.app_dir_config['exec']
+        exec_args = self.app_dir_config['exec_args'] if 'exec_args' in self.app_dir_config else None
+
         self.logger.info("Configuring AppDir")
-        self.app_dir.app_run = AppRun(exec)
+        self.app_dir.app_run = AppRun(exec, exec_args)
 
         for driver in self.drivers.values():
             driver.configure(self.app_dir)
@@ -122,7 +125,7 @@ class AppImageBuilder:
         appimage_tool = AppImageTool()
 
         info_driver = self.drivers['info']
-        app_name = info_driver.config['name'].replace(' ','_')
+        app_name = info_driver.config['name'].replace(' ', '_')
         app_version = info_driver.config['version']
         output_file = os.path.join(os.getcwd(), "%s-%s-%s.AppImage" % (app_name, app_version, platform.machine()))
 

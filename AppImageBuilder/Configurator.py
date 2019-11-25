@@ -75,7 +75,7 @@ class Configurator:
 
     def _load_app_dir_config(self, builder):
         app_dir_config = self._check_entry(['AppDir'])
-        app_dir_config_keys = ['path', 'exec', 'test']
+        app_dir_config_keys = ['path', 'exec', 'exec_args', 'test']
 
         for k, v in app_dir_config.items():
 

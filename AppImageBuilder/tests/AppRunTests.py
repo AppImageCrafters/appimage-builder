@@ -26,15 +26,15 @@ class AppRunTestCase(unittest.TestCase):
         'fi',
         '',
         '# Run Environment Setup',
-        'export '
-        'XDG_DATA_DIRS="${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}"',
+        'export XDG_DATA_DIRS="${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}"',
         'export XDG_CONFIG_DIRS="$APPDIR/etc/xdg:$XDG_CONFIG_DIRS"',
-        'export APP_PATH="usr/bin/exec"',
+        'export EXEC_ARGS="$@"',
+        'export BIN_PATH="usr/bin/exec"',
         '',
         '# Launch application using only the bundled libraries',
         'exec "${LINKER_PATH}" \\',
         '   --inhibit-cache --library-path "${LD_LIBRARY_DIRS}" \\',
-        '  ${APPDIR}/${APP_PATH} $@',
+        '  ${APPDIR}/${BIN_PATH} ${EXEC_ARGS}',
         '']
 
     def test_minimal_script_generation(self):
