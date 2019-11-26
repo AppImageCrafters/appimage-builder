@@ -36,10 +36,10 @@ class QmlImportScannerToolTestCase(unittest.TestCase):
 
     def test_qml_scan_imports(self):
         qt = QtTool()
-        qml_files = [self.qml_file_path]
+        qml_project_root = [os.path.join(self.test_dir, "qml_project")]
         import_dirs = [self.test_dir]
 
-        imports = qt.qml_scan_imports(qml_files, import_dirs)
+        imports = qt.qml_scan_imports(qml_project_root, import_dirs)
         expected = [
             {'name': 'QtQuick', 'type': 'module', 'version': '2.0'},
             {'name': 'qml_module', 'path': os.path.dirname(self.qml_module_dir_file_path),
