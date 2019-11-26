@@ -113,10 +113,14 @@ class Qt(Base.Driver):
         return self.qt.qml_scan_imports([dir], import_dirs)
 
     def _generate_qt_conf(self, app_dir):
+        qt_conf_target_path = self._generate_qt_conf_target_path(app_dir)
+        linker_dir_path = os.path.dirname(qt_conf_target_path)
+        usr_path = os.path.relpath(os.path.join(app_dir.path, 'usr'), linker_dir_path)
+        etc_path = os.path.relpath(os.path.join(app_dir.path, 'etc'), linker_dir_path)
         qt_conf = [
             '[Paths]\n',
-            'Prefix=../../usr\n',
-            'Settings=../../etc\n',
+            'Prefix=%s\n' % usr_path,
+            'Settings=%s\n' % etc_path,
             'ArchData=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_ARCHDATA'], '/usr/'),
             'Binaries=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_BINS'], '/usr/'),
             'Data=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_DATA'], '/usr/'),
@@ -127,7 +131,6 @@ class Qt(Base.Driver):
             'Translations=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_TRANSLATIONS'], '/usr/')
         ]
 
-        qt_conf_target_path = self._generate_qt_conf_target_path(app_dir)
         self.logger().info("Writing qt.conf to: %s" % qt_conf_target_path)
         with open(qt_conf_target_path, "w") as f:
             f.writelines(qt_conf)
