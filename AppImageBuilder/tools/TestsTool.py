@@ -75,7 +75,7 @@ class TestsTool:
 
         ctr = self.client.containers.run(docker_image, command, auto_remove=True, working_dir='/app',
                                          volumes=volumes, stdout=True, stderr=True,
-                                         environment=environment, detach=True)
+                                         environment=environment, detach=True, devices=['/dev/snd'])
         logs = ctr.logs(stream=True)
 
         if logger:
