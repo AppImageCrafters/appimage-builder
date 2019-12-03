@@ -18,18 +18,38 @@ class GStreamer(drivers.Driver):
     id = 'gstreamer'
 
     def configure(self, app_dir):
+        gst_1_lib_path = None
+        gst_plugins_scanner_path = None
+        gst_ptp_helper_path = None
 
-        add_gstreamer_env = False
         for root, dirs, files in os.walk(app_dir.path):
             if 'libgstreamer-1.0.so.0' in files:
-                add_gstreamer_env = True
-                break
+                gst_1_lib_path = os.path.join(root, 'libgstreamer-1.0.so.0')
 
-        if add_gstreamer_env:
-            app_dir.app_run.env['GST_REGISTRY_REUSE_PLUGIN_SCANNER'] = 'no'
-            app_dir.app_run.env['GST_PLUGIN_PATH_1_0'] = '${APPDIR}/usr/lib/x86_64-linux-gnu/gstreamer-1.0/'
-            app_dir.app_run.env['GST_PLUGIN_SYSTEM_PATH_1_0'] = '${APPDIR}/usr/lib/x86_64-linux-gnu/gstreamer-1.0/'
-            app_dir.app_run.env['GST_PLUGIN_SCANNER_1_0'] = '{APPDIR}/usr/lib/x86_64-linux-gnu/gstreamer1.0/' \
-                                                            'gstreamer-1.0/gst-plugin-scanner'
-            app_dir.app_run.env['GST_PTP_HELPER_1_0'] = '${APPDIR}/usr/lib/x86_64-linux-gnu/' \
-                                                        'gstreamer1.0/gstreamer-1.0/gst-ptp-helper'
+            if 'gst-plugin-scanner' in files:
+                gst_plugins_scanner_path = os.path.join(root, 'gst-plugin-scanner')
+
+            if 'gst-ptp-helper' in files:
+                gst_ptp_helper_path = os.path.join(root, 'gst-ptp-helper')
+
+        if gst_1_lib_path:
+            gst_plugins_path = os.path.join(os.path.dirname(gst_1_lib_path), 'gstreamer-1.0')
+            gst_plugins_path.replace(app_dir.path, '${APPDIR}')
+
+            app_dir.app_run.env['GST_PLUGIN_PATH'] = gst_plugins_path
+            app_dir.app_run.env['GST_PLUGIN_PATH_1_0'] = gst_plugins_path
+            app_dir.app_run.env['GST_PLUGIN_SYSTEM_PATH'] = gst_plugins_path
+            app_dir.app_run.env['GST_PLUGIN_SYSTEM_PATH_1_0'] = gst_plugins_path
+
+            if gst_plugins_scanner_path:
+                gst_plugins_scanner_path.replace(app_dir.path, '${APPDIR}')
+                app_dir.app_run.env['GST_REGISTRY_REUSE_PLUGIN_SCANNER'] = 'no'
+                app_dir.app_run.env['GST_PLUGIN_SCANNER_1_0'] = gst_plugins_scanner_path
+            else:
+                self.logger().warning('Missing gst-plugin-scanner binary')
+
+            if gst_ptp_helper_path:
+                gst_ptp_helper_path.replace(app_dir.path, '${APPDIR}')
+                app_dir.app_run.env['GST_PTP_HELPER_1_0'] = gst_ptp_helper_path
+            else:
+                self.logger().warning('Missing gst-ptp-helper binary')
