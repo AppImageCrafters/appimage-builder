@@ -21,8 +21,9 @@ class GStreamer(drivers.Driver):
         gst_1_lib_path = None
         gst_plugins_scanner_path = None
         gst_ptp_helper_path = None
+        absolute_appdir_path = os.path.abspath(app_dir.path)
 
-        for root, dirs, files in os.walk(app_dir.path):
+        for root, dirs, files in os.walk(absolute_appdir_path):
             if 'libgstreamer-1.0.so.0' in files:
                 gst_1_lib_path = os.path.join(root, 'libgstreamer-1.0.so.0')
 
@@ -33,7 +34,8 @@ class GStreamer(drivers.Driver):
                 gst_ptp_helper_path = os.path.join(root, 'gst-ptp-helper')
 
         if gst_1_lib_path:
-            gst_plugins_path = os.path.join(os.path.dirname(gst_1_lib_path), 'gstreamer-1.0')
+            absolute_gst_1_lib_path = os.path.abspath(gst_1_lib_path)
+            gst_plugins_path = os.path.join(os.path.dirname(absolute_gst_1_lib_path), 'gstreamer-1.0')
             gst_plugins_path.replace(app_dir.path, '${APPDIR}')
 
             app_dir.app_run.env['GST_PLUGIN_PATH'] = gst_plugins_path
@@ -42,14 +44,14 @@ class GStreamer(drivers.Driver):
             app_dir.app_run.env['GST_PLUGIN_SYSTEM_PATH_1_0'] = gst_plugins_path
 
             if gst_plugins_scanner_path:
-                gst_plugins_scanner_path.replace(app_dir.path, '${APPDIR}')
+                gst_plugins_scanner_path.replace(absolute_appdir_path, '${APPDIR}')
                 app_dir.app_run.env['GST_REGISTRY_REUSE_PLUGIN_SCANNER'] = 'no'
                 app_dir.app_run.env['GST_PLUGIN_SCANNER_1_0'] = gst_plugins_scanner_path
             else:
                 self.logger().warning('Missing gst-plugin-scanner binary')
 
             if gst_ptp_helper_path:
-                gst_ptp_helper_path.replace(app_dir.path, '${APPDIR}')
+                gst_ptp_helper_path.replace(absolute_appdir_path, '${APPDIR}')
                 app_dir.app_run.env['GST_PTP_HELPER_1_0'] = gst_ptp_helper_path
             else:
                 self.logger().warning('Missing gst-ptp-helper binary')
