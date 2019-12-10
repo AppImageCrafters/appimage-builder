@@ -25,7 +25,7 @@ class DesktopEntryBuilder:
     template = ("[Desktop Entry]\n"
                 "Type=Application\n"
                 "Name=%s\n"
-                "Comment=%s"
+                "Comment=%s\n"
                 "Exec=./AppRun\n"
                 "Icon=%s\n"
                 "Categories=%s;\n"
