@@ -37,22 +37,52 @@ class Dpkg(drivers.Driver):
     dpkg = None
     cache = {}
 
+    # Base packages are will be excluded from the deploy list
+    base_packages = {
+        'minimal': [
+            'ucf',  # Update Configuration File
+            'coreutils',  # basic file, shell and text manipulation utilities of the GNU operating system.
+            'dpkg',  # Debian package management system
+            'debconf',  # Debian configuration management system
+            'cdebconf',  # Debian configuration management system
+            'sensible-utils',  # Utilities for sensible alternative selection
+            'qtchooser',  # Wrapper to select between Qt development binary versions
+        ],
+    }
+
+    default_base_packages = 'minimal'
+
     def __init__(self):
         self.dpkg = tools.Dpkg()
 
     def list_base_dependencies(self, app_dir):
         dependencies = []
+        if 'base' in self.config:
+            self.default_base_packages = self.config['base']
+
+        exclude_list = set()
+        if self.default_base_packages in self.base_packages.keys():
+            exclude_list.update(self.base_packages[self.default_base_packages])
+        else:
+            self.logger().error('Unknown dpkg base: %s' % self.default_base_packages)
 
         deploy_list = set()
         if 'include' in self.config:
             to_include = self.config['include']
+            for package in to_include:
+                if package in exclude_list:
+                    self.logger().info('Forcing deployment of base package: %s' % package)
+                    exclude_list.remove(package)
+
             self.logger().info('Listing dependencies of: %s' % ','.join(to_include))
             deploy_list.update(self.dpkg.list_dependencies(to_include))
 
         if 'exclude' in self.config:
-            for package in self.config['exclude']:
-                if package in deploy_list:
-                    deploy_list.remove(package)
+            exclude_list.update(self.config['exclude'])
+
+        for package in exclude_list:
+            if package in deploy_list:
+                deploy_list.remove(package)
 
         for package in deploy_list:
             self.logger().info('Including files of: %s', package)
