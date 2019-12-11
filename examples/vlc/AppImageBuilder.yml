@@ -13,34 +13,6 @@ AppDir:
   dpkg:
     include:
       - vlc
-      - libqt5svg5
-      # multimedia stack
-      - libpulse0
-      # minimal font stack
-      - fontconfig-config
-      - ucf
-      - fonts-dejavu-core
-      - ttf-bitstream-vera
-      - fonts-liberation
-      # graphic stack dependencies
-      - kwin-wayland
-      - libqt5gui5
-      - qtwayland5
-      # low level graphic stack dependencies
-      - libxshmfence1
-      - libxcb-present0
-      - libxcb-dri3-0
-      - libxxf86vm1
-      - libxdamage1
-      - libxcb-dri2-0
-      - libglapi-mesa
-      - libglx-mesa0
-      - libpciaccess0
-      - libxv1
-      - libdrm-nouveau2
-      - libdrm-radeon1
-      - libdrm-intel1
-      - libgl1-mesa-dri
 
   test:
     debian:
