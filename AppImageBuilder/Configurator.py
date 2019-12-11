@@ -66,6 +66,7 @@ class Configurator:
             drivers.FontConfig.id: drivers.FontConfig(),
             drivers.GStreamer.id: drivers.GStreamer(),
             drivers.LibGL.id: drivers.LibGL(),
+            drivers.OpenSSL.id: drivers.OpenSSL(),
         }
 
         self._load_script(builder)

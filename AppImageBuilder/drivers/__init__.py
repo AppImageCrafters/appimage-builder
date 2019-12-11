@@ -30,3 +30,4 @@ from AppImageBuilder.drivers.FontConfig import FontConfig
 
 from AppImageBuilder.drivers.GStreamer import GStreamer
 from AppImageBuilder.drivers.LibGL import LibGL
+from AppImageBuilder.drivers.OpenSSL import OpenSSL
