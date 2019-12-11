@@ -45,10 +45,9 @@ class Dpkg(drivers.Driver):
 
         deploy_list = set()
         if 'include' in self.config:
-            for package in self.config['include']:
-                self.logger().info('Listing dependencies of: %s' % package)
-                deploy_list.add(package)
-                deploy_list.update(self.dpkg.find_package_dependencies(package))
+            to_include = self.config['include']
+            self.logger().info('Listing dependencies of: %s' % ','.join(to_include))
+            deploy_list.update(self.dpkg.list_dependencies(to_include))
 
         if 'exclude' in self.config:
             for package in self.config['exclude']:
@@ -62,6 +61,5 @@ class Dpkg(drivers.Driver):
                 self.cache[package_file] = package
 
                 dependencies.append(DpkgDependency(self, package_file, None, package))
-        self.logger().info("Packages to be deployed:\n\t%s" % '\t\n'.join(deploy_list))
 
         return dependencies

@@ -26,19 +26,27 @@ class PkgTool:
         self.logger = logging.getLogger("PkgTool")
         self.target_arch = self.get_deb_host_arch()
 
-    def find_package_dependencies(self, package_name):
-        result = subprocess.run(["apt-cache", "depends", package_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def list_dependencies(self, packages):
+        command = ["apt-cache", "depends", "--recurse", "--no-recommends", "--no-suggests", "--no-conflicts",
+                   "--no-breaks", "--no-replaces", "--no-enhances", "--no-pre-depends"]
+        command.extend(packages)
+
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         output = result.stdout.decode('utf-8')
         errors = result.stderr.decode('utf-8')
 
         depends = []
         if result.returncode != 0:
-            self.logger.warning("Unable to find %s dependencies: %s" % (package_name, errors))
+            self.logger.warning("Unable to find %s dependencies: %s" % (packages, errors))
         else:
             for line in output.splitlines():
-                depends_search = re.search(r'Depends: (?P<pkg_name>(\w|\.|-|_|\d)+)', line, re.IGNORECASE)
-                if depends_search:
-                    depends.append(depends_search.group('pkg_name'))
+                # package names starts a the beginning of the line
+                if line.startswith(' '):
+                    continue
+
+                package, arch = line.split(':', 1) if ':' in line else (line, self.target_arch)
+                if self.target_arch in arch or 'any' in arch:
+                    depends.append(line)
 
         return depends
 

@@ -1,5 +1,6 @@
 version: 1
 script:
+  - rm -rf AppDir
   - mkdir -p AppDir
   - cp -f main.qml AppDir/
 
@@ -17,15 +18,6 @@ AppDir:
   dpkg:
     include:
       - qmlscene
-      # minimal graphics stack
-      - libglu1-mesa
-      - libgl1-mesa-glx
-      - libgl1-mesa-dri
-      - freeglut3
-      # minimal font stack
-      - fontconfig
-      - fonts-dejavu-core
-      - ttf-bitstream-vera
     exclude:
       - coreutils
       - dpkg
@@ -33,6 +25,8 @@ AppDir:
       - qtchooser
       - sensible-utils
       - ucf
+      - <debconf-2.0>
+      - tar
 
   test:
     centos:
