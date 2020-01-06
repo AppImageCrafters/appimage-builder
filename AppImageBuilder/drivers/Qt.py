@@ -59,7 +59,8 @@ class Qt(Base.Driver):
                     if file.endswith('.qml'):
                         absolute_path = os.path.abspath(os.path.join(root, file))
                         dependencies.extend(self.lockup_file_dependencies(absolute_path, app_dir))
-        return dependencies
+        # return dependencies
+        return []
 
     def lockup_file_dependencies(self, file, app_dir):
         dependencies = []

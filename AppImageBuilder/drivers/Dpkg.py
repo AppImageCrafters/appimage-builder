@@ -9,6 +9,8 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import os
+import tempfile
 
 from AppImageBuilder import drivers
 from AppImageBuilder import tools
@@ -30,6 +32,9 @@ class DpkgDependency(drivers.Dependency):
 
     def __str__(self):
         return super().__str__()
+
+    def deploy(self, app_dir):
+        pass
 
 
 class Dpkg(drivers.Driver):
@@ -54,6 +59,7 @@ class Dpkg(drivers.Driver):
 
     def __init__(self):
         self.dpkg = tools.Dpkg()
+        self.apt = tools.Apt()
 
     def list_base_dependencies(self, app_dir):
         dependencies = []
@@ -75,7 +81,7 @@ class Dpkg(drivers.Driver):
                     exclude_list.remove(package)
 
             self.logger().info('Listing dependencies of: %s' % ','.join(to_include))
-            deploy_list.update(self.dpkg.list_dependencies(to_include))
+            deploy_list.update(self.apt.dependencies(to_include))
 
         if 'exclude' in self.config:
             exclude_list.update(self.config['exclude'])
@@ -84,12 +90,22 @@ class Dpkg(drivers.Driver):
             if package in deploy_list:
                 deploy_list.remove(package)
 
-        for package in deploy_list:
-            self.logger().info('Including files of: %s', package)
-            package_files = self.dpkg.list_package_files(package)
-            for package_file in package_files:
-                self.cache[package_file] = package
+        self.apt.download(deploy_list)
 
-                dependencies.append(DpkgDependency(self, package_file, None, package))
+        self.dpkg.unpack_packages(os.path.join(self.apt.root, 'var', 'cache', 'apt', 'archives'), app_dir.path)
 
-        return dependencies
+        return []
+
+    def load_config(self, config):
+        super().load_config(config)
+
+        self.create_chroot()
+
+    def create_chroot(self):
+        self.logger().info("Updating apt cache")
+        self.arch = self.config['arch'] if 'arch' in self.config else self.dpkg.get_deb_host_arch()
+        self.sources = self.config['sources'] if 'sources' in self.config else self.apt.get_host_sources()
+        self.apt_cache_dir = tempfile.mkdtemp()
+        self.logger().info("Building base system at: %s" % self.apt_cache_dir)
+        self.apt.configure(root=self.apt_cache_dir, arch=self.arch, sources=self.sources)
+        self.apt.update()

@@ -9,6 +9,7 @@ verify_ssl = true
 pyyaml = "*"
 docker = "*"
 'bash.py' = "*"
+requests = "*"
 
 [requires]
 python_version = "3.6"

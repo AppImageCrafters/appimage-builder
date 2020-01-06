@@ -159,7 +159,7 @@ class PkgTool:
 
         return result.stdout.decode('utf-8').splitlines()
 
-    def _extract_pkgs_to(self, temp_dir, appdir):
+    def unpack_packages(self, temp_dir, appdir):
         extraction_map = {}
         for root, dirs, files in os.walk(temp_dir):
             for filename in files:
