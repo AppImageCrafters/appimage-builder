@@ -60,9 +60,8 @@ class Linker(drivers.Driver):
         app_dir.app_run.env['LINKER_PATH'] =  linker_path
 
     def _set_app_run_ld_library_dirs_env(self, app_dir):
-        elf_file_paths = self.linker.list_libraries_files(app_dir.path)
+        elf_file_paths = self.linker.list_libraries_files_using_magic_bytes(app_dir.path)
         elf_dirs_paths = {os.path.dirname(file) for file in elf_file_paths}
         relative_elf_dir_paths = {dir.replace(app_dir.path, '').lstrip('/') for dir in elf_dirs_paths}
         ld_library_path_entries = {"${APPDIR}/%s" % dir for dir in relative_elf_dir_paths}
-
         app_dir.app_run.env['LD_LIBRARY_DIRS'] = ":".join(ld_library_path_entries)
