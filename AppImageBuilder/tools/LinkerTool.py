@@ -101,10 +101,13 @@ class LinkerTool:
         for root, dirs, files in os.walk(root_dir):
             for filename in files:
                 full_path = os.path.join(root, filename)
-                with open(full_path, "rb") as f:
-                    bits = f.read(4)
-                    if bits == b'\x7fELF':
-                        library_files.append(full_path)
+                try:
+                    with open(full_path, "rb") as f:
+                        bits = f.read(4)
+                        if bits == b'\x7fELF':
+                            library_files.append(full_path)
+                except FileNotFoundError:
+                    pass
 
         # print("Library Files found: \n\t%s\n" % "\n\t".join(library_files) )
         return library_files
