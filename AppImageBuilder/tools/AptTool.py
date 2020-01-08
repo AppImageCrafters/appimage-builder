@@ -51,7 +51,8 @@ class AptTool:
         with open(os.path.join(self.root, 'var/lib/dpkg/arch'), 'w') as f:
             f.write(self.arch)
 
-        os.mknod(os.path.join(self.root, 'var', 'lib', 'dpkg', 'status'))
+        if not os.path.exists(os.path.join(self.root, 'var', 'lib', 'dpkg', 'status')):
+            os.mknod(os.path.join(self.root, 'var', 'lib', 'dpkg', 'status'))
 
         self._write_apt_conf()
         self._add_sources()

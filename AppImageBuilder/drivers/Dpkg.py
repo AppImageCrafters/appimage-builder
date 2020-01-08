@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 import os
 import tempfile
+import hashlib
 
 from AppImageBuilder import drivers
 from AppImageBuilder import tools
@@ -105,7 +106,13 @@ class Dpkg(drivers.Driver):
         self.logger().info("Updating apt cache")
         self.arch = self.config['arch'] if 'arch' in self.config else self.dpkg.get_deb_host_arch()
         self.sources = self.config['sources'] if 'sources' in self.config else self.apt.get_host_sources()
-        self.apt_cache_dir = tempfile.mkdtemp()
+        self.apt_cache_dir = self.make_temp_dir_path()
         self.logger().info("Building base system at: %s" % self.apt_cache_dir)
         self.apt.configure(root=self.apt_cache_dir, arch=self.arch, sources=self.sources)
         self.apt.update()
+
+    def make_temp_dir_path(self):
+        name = hashlib.md5(os.getcwd().encode('utf-8')).hexdigest()
+        path = "/tmp/appimage-builder-%s" % name
+        os.makedirs(path, exist_ok=True)
+        return path
