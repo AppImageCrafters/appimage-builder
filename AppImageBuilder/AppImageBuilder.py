@@ -165,6 +165,7 @@ class AppImageBuilder:
                     buffer = squashfs_file.read(1024)
 
         os.chmod(output_path, stat.S_IRWXU | stat.S_IXGRP | stat.S_IWGRP | stat.S_IXOTH | stat.S_IWOTH)
+        os.remove(squashfs_path)
 
     def _queue_dependencies(self, lockup_queue, dependencies):
         for dependency in dependencies:
