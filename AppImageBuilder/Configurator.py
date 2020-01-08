@@ -71,6 +71,7 @@ class Configurator:
 
         self._load_script(builder)
         self._load_app_dir_config(builder)
+        self._load_appimage_config(builder)
 
         return builder
 
@@ -124,3 +125,6 @@ class Configurator:
 
     def _load_script(self, builder):
         builder.script = self._check_optional_entry(['script'], [])
+
+    def _load_appimage_config(self, builder):
+        builder.appimage_config = self._check_entry(["AppImage"])

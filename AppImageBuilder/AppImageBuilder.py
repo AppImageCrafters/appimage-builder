@@ -9,21 +9,24 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import os
 import logging
+import os
 import platform
+import stat
+from urllib import request
 
 from AppImageBuilder import AppDir2
 from AppImageBuilder.AppRun import AppRun
-from AppImageBuilder.tools.TestsTool import TestsTool
-from AppImageBuilder.tools.AppImageTool import AppImageTool
+from AppImageBuilder.tools import MkSquashFs
 from AppImageBuilder.tools.ShellTool import ShellTool
+from AppImageBuilder.tools.TestsTool import TestsTool
 
 
 class AppImageBuilder:
     app_dir = None
     app_config = {}
     app_dir_config = {}
+    appimage_config = {}
 
     script = []
     drivers = None
@@ -121,15 +124,47 @@ class AppImageBuilder:
         if not self.app_dir:
             self._load_app_dir()
 
-        self.logger.info("Build AppImage")
-        appimage_tool = AppImageTool()
+        supported_architectures = ["i686", "aarch64", "armhf", "x86_64"]
+        target_arch = self.appimage_config['arch']
+        if target_arch not in supported_architectures:
+            self.logger.error("There is not a prebuild runtime for the %s architecture."
+                              " You will have to build the AppImage runtime manually." % target_arch)
 
-        info_driver = self.drivers['info']
-        app_name = info_driver.config['name'].replace(' ', '_')
-        app_version = info_driver.config['version']
-        output_file = os.path.join(os.getcwd(), "%s-%s-%s.AppImage" % (app_name, app_version, platform.machine()))
+        runtime_url_template = "https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-%s"
+        runtime_url = runtime_url_template % target_arch
+        runtime_path = "AppRun-%s" % target_arch
 
-        appimage_tool.bundle(self.app_dir.path, output_file)
+        if not os.path.exists(runtime_path):
+            self.logger.info("Downloading runtime: %s" % runtime_url_template % runtime_url)
+            request.urlretrieve(runtime_url, runtime_path)
+
+        mk_squash_fs_tool = MkSquashFs()
+        squashfs_path = "AppDir.squashfs"
+        self.logger.info("Compressing AppDir to: %s" % squashfs_path)
+        mk_squash_fs_tool.make_squash_file_system(self.app_dir.path, squashfs_path)
+
+        if 'name' in self.appimage_config:
+            output_path = self.appimage_config['name']
+        else:
+            info_driver = self.drivers['info']
+            app_name = info_driver.config['name'].replace(' ', '_')
+            app_version = info_driver.config['version']
+            output_path = os.path.join(os.getcwd(), "%s-%s-%s.AppImage" % (app_name, app_version, target_arch))
+
+        with open(output_path, "wb") as appimage_file:
+            with open(runtime_path, "rb") as runtime_file:
+                buffer = runtime_file.read(1024)
+                while buffer:
+                    appimage_file.write(buffer)
+                    buffer = runtime_file.read(1024)
+
+            with open(squashfs_path, "rb") as squashfs_file:
+                buffer = squashfs_file.read(1024)
+                while buffer:
+                    appimage_file.write(buffer)
+                    buffer = squashfs_file.read(1024)
+
+        os.chmod(output_path, stat.S_IRWXU | stat.S_IXGRP | stat.S_IWGRP | stat.S_IXOTH | stat.S_IWOTH)
 
     def _queue_dependencies(self, lockup_queue, dependencies):
         for dependency in dependencies:
