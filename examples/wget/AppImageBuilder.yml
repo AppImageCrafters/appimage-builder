@@ -10,6 +10,12 @@ AppDir:
     icon: utilities-terminal
 
   dpkg:
+    arch: amd64
+    sources:
+      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ bionic-updates main restricted universe multiverse'
+
     include:
       - wget
       - libssl1.1
@@ -34,5 +40,6 @@ AppDir:
       command: "./AppRun --help"
 
 AppImage:
+  arch: x86_64
   update-information: None
   sign-key: None
