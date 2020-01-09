@@ -29,14 +29,21 @@ class LinkerTool:
 
     @staticmethod
     def find_binary_path(prefix: str) -> str:
+        linker_path = ''
         linker_dir = os.path.join(prefix, 'lib')
         logging.debug("Looking linker binary at: %s\n" % linker_dir)
         for root, dirs, files in os.walk(linker_dir):
             for file_name in files:
                 if file_name.startswith('ld-linux') and '.so' in file_name:
-                    return os.path.join(root, file_name)
+                    linker_path = os.path.join(root, file_name)
+        if os.path.islink(linker_path):
+            link_path = os.readlink(linker_path)
+            if link_path.startswith('/'):
+                linker_path = os.path.join(prefix, link_path)
+            else:
+                linker_path = os.path.join(os.path.dirname(linker_path), link_path)
 
-        return ''
+        return linker_path
 
     def list_link_dependencies(self, file, ignore_cache=False, library_dirs=None):
         result = self._execute_ld_so_command(file, ignore_cache, library_dirs)
