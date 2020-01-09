@@ -29,18 +29,12 @@ class LinkerTool:
 
     @staticmethod
     def find_binary_path(prefix: str) -> str:
-        linker_dirs = [
-            os.path.join(prefix, 'lib64'),
-            os.path.join(prefix, 'lib32'),
-            os.path.join(prefix, 'lib'),
-        ]
-
-        for linker_dir in linker_dirs:
-            logging.debug("Looking linker binary at: %s\n" % linker_dir)
-            for root, dirs, files in os.walk(linker_dir):
-                for file_name in files:
-                    if file_name.startswith('ld-linux') and '.so' in file_name:
-                        return os.path.join(root, file_name)
+        linker_dir = os.path.join(prefix, 'lib')
+        logging.debug("Looking linker binary at: %s\n" % linker_dir)
+        for root, dirs, files in os.walk(linker_dir):
+            for file_name in files:
+                if file_name.startswith('ld-linux') and '.so' in file_name:
+                    return os.path.join(root, file_name)
 
         return ''
 
