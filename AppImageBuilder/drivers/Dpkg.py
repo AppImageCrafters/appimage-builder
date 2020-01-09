@@ -53,6 +53,10 @@ class Dpkg(drivers.Driver):
             'cdebconf',  # Debian configuration management system
             'sensible-utils',  # Utilities for sensible alternative selection
             'qtchooser',  # Wrapper to select between Qt development binary versions
+            'systemd', # system and service manager
+            'passwd', # change user password
+            'procps', # Command line and full screen utilities for browsing procfs
+            'util-linux', # miscellaneous system utilities
         ],
     }
 
