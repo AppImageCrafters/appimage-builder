@@ -118,23 +118,63 @@ class Qt(Base.Driver):
         linker_dir_path = os.path.dirname(qt_conf_target_path)
         usr_path = os.path.relpath(os.path.join(app_dir.path, 'usr'), linker_dir_path)
         etc_path = os.path.relpath(os.path.join(app_dir.path, 'etc'), linker_dir_path)
-        qt_conf = [
-            '[Paths]\n',
-            'Prefix=%s\n' % usr_path,
-            'Settings=%s\n' % etc_path,
-            'ArchData=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_ARCHDATA'], '/usr/'),
-            'Binaries=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_BINS'], '/usr/'),
-            'Data=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_DATA'], '/usr/'),
-            'Libraries=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_LIBS'], '/usr/'),
-            'LibraryExecutables=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_LIBEXECS'], '/usr/'),
-            'Plugins=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_PLUGINS'], '/usr/'),
-            'Qml2Imports=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_QML'], '/usr/'),
-            'Translations=%s\n' % self._remove_prefix(self.qt_env['QT_INSTALL_TRANSLATIONS'], '/usr/')
-        ]
 
-        self.logger().info("Writing qt.conf to: %s" % qt_conf_target_path)
-        with open(qt_conf_target_path, "w") as f:
-            f.writelines(qt_conf)
+        qt_libs_path = None
+        qt_lib_execs_path = None
+        qt_plugins_path = None
+        qt_qml_path = None
+        qt_translations_path = None
+        qt_data_dir = None
+
+        base_path = os.path.join(app_dir.path, 'usr') + '/'
+        for root, dirs, files in os.walk(base_path):
+            if 'libQt5Core.so.5' in files and not qt_libs_path:
+                qt_libs_path = self._remove_prefix(root, base_path)
+
+            if 'plugins' in dirs and 'qt' in root and not qt_plugins_path:
+                qt_plugins_path = self._remove_prefix(os.path.join(root, 'plugins'), base_path)
+
+            if 'libexec' in dirs and 'qt' in root and not qt_lib_execs_path:
+                qt_lib_execs_path = self._remove_prefix(os.path.join(root, 'libexec'), base_path)
+
+            if 'qml' in dirs and 'qt' in root and not qt_qml_path:
+                qt_qml_path = self._remove_prefix(os.path.join(root, 'qml'), base_path)
+
+            if 'translations' in dirs and 'qt' in root and not qt_translations_path:
+                qt_translations_path = self._remove_prefix(os.path.join(root, 'translations'), base_path)
+
+            if 'qt5' in dirs and 'share' in root and not qt_data_dir:
+                qt_data_dir = self._remove_prefix(os.path.join(root, 'qt5'), base_path)
+
+        if qt_libs_path:
+            qt_conf = [
+                '[Paths]\n',
+                'Prefix=%s\n' % usr_path,
+                'Settings=%s\n' % etc_path,
+            ]
+            if qt_data_dir:
+                qt_conf.append('Data=%s\n' % qt_data_dir)
+
+            if qt_libs_path:
+                qt_conf.append('Libraries=%s\n' % qt_libs_path)
+
+            if qt_lib_execs_path:
+                qt_conf.append('LibraryExecutables=%s\n' % qt_lib_execs_path)
+
+            if qt_plugins_path:
+                qt_conf.append('Plugins=%s\n' % qt_plugins_path)
+
+            if qt_qml_path:
+                qt_conf.append('Qml2Imports=%s\n' % qt_qml_path)
+
+            if qt_translations_path:
+                qt_conf.append('Translations=%s\n' % qt_translations_path)
+
+            self.logger().info("Writing qt.conf to: %s" % qt_conf_target_path)
+            with open(qt_conf_target_path, "w") as f:
+                f.writelines(qt_conf)
+        else:
+            self.logger().info("No Qt5 libs were found. Skipping Qt5 configuration.")
 
     @staticmethod
     def _remove_prefix(text, prefix):
