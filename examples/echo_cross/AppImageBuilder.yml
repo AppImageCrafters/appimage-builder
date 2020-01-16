@@ -2,16 +2,16 @@ version: 1
 
 AppDir:
   path: ./AppDir
-  exec: bin/echo
-  exec_args: $@
 
-  info:
+  app_info:
     id: org.gnu.echo
     name: echo
     icon: utilities-terminal
     version: 2.7.1
+    exec: bin/echo
+    exec_args: $@
 
-  dpkg:
+  apt:
     arch: arm64
     sources:
       - sourceline: 'deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports bionic main'
@@ -19,9 +19,11 @@ AppDir:
 
     include:
       - coreutils
-      - libc6
 
-  test:
+    exclude:
+      - libpcre3
+
+  tests:
     centos:
       image: centos:6
       command: "./AppRun Hello World"

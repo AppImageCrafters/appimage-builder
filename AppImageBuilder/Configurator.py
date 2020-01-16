@@ -16,7 +16,7 @@ import os
 import yaml
 
 from AppImageBuilder import drivers
-from AppImageBuilder.AppImageBuilder import AppImageBuilder
+from AppImageBuilder.AppImageBuilder2 import AppImageBuilder
 
 
 class ConfigurationError(RuntimeError):
@@ -80,7 +80,7 @@ class Configurator:
         app_dir_config_keys = ['path', 'exec', 'exec_args', 'test']
 
         for k, v in app_dir_config.items():
-
+            print(v)
             if k in app_dir_config_keys:
                 # store root keys
                 builder.app_dir_config[k] = v

@@ -9,7 +9,24 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import logging
+import os
+import subprocess
 
 
-class AppImageBuilder:
+class DpkgDebError(RuntimeError):
     pass
+
+
+class DpkgDeb:
+    def extract(self, deb_file, target_dir):
+        command = ["dpkg-deb", "-X", deb_file, target_dir]
+        logging.debug(command)
+        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=target_dir)
+        output = result.stdout.decode('utf-8')
+
+        if result.returncode != 0:
+            raise DpkgDebError("Package extraction failed. Error: " + result.stderr.decode('utf-8'))
+
+        for line in output.splitlines():
+            logging.info('%s: %s' % (os.path.basename(deb_file), line))

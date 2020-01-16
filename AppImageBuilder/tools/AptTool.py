@@ -92,12 +92,12 @@ class AptTool:
         os.makedirs(os.path.dirname(self.config_file_path), exist_ok=True)
 
         with open(self.config_file_path, "w") as f:
-            f.write('Apt::Architecture "%s";\n' % self.arch)
+            f.write('apt::Architecture "%s";\n' % self.arch)
             f.write('APT::Get::Host-Architecture "%s";\n' % self.arch)
 
             f.write('Dir "%s";\n' % self.root)
-            f.write('Apt::Get::Download-Only "true";\n')
-            f.write('Apt::Install-Recommends "false";\n')
+            f.write('apt::Get::Download-Only "true";\n')
+            f.write('apt::Install-Recommends "false";\n')
             f.write('APT::Default-Release "*";\n')
 
     @staticmethod
