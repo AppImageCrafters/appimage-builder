@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 from .dynamic_loader import DynamicLoader
 from .base_helper import BaseHelper
+from .fontconfig import FontConfig
 
 
 class HelperFactoryError(RuntimeError):
@@ -23,7 +24,8 @@ class HelperFactory:
         self.app_dir_files = app_dir_files
 
         self.helpers = {
-            'loader': DynamicLoader
+            'loader': DynamicLoader,
+            'fontconfig': FontConfig,
         }
 
     def get(self, id) -> BaseHelper:
