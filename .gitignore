@@ -3,6 +3,7 @@
 
 # Example builds
 /examples/*/AppDir
+/examples/*/appimage-builder-cache
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
