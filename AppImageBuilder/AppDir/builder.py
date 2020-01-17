@@ -24,11 +24,11 @@ class BuilderError(RuntimeError):
 class Builder:
     def __init__(self, recipe):
         self.recipe = recipe
-        self._load_config(recipe)
+        self._load_config()
 
-    def _load_config(self, recipe):
-        self._load_app_dir_conf(recipe)
-        self._load_app_dir_path()
+    def _load_config(self):
+        self.app_dir_conf = self.recipe.get_item('AppDir')
+        self.app_dir_path = os.path.abspath(self.recipe.get_item('AppDir/path'))
         self._load_app_info_config()
 
         if 'apt' in self.app_dir_conf:
@@ -36,19 +36,9 @@ class Builder:
             self.apt_config.apt_prefix = ''
             self.apt_config.load(self.app_dir_conf['apt'])
 
-    def _load_app_dir_path(self):
-        if 'path' not in self.app_dir_conf:
-            raise BuilderError('Missing \'AppDir/path\' entry')
-        else:
-            self.app_dir_path = os.path.abspath(self.app_dir_conf['path'])
-
     def _load_app_info_config(self):
-        if 'app_info' in self.app_dir_conf:
-            loader = AppInfoLoader()
-            self.app_info = loader.load(self.app_dir_conf['app_info'])
-
-    def _load_app_dir_conf(self, recipe):
-        self.app_dir_conf = recipe.get_item('AppDir')
+        loader = AppInfoLoader()
+        self.app_info = loader.load(self.recipe)
 
     def build(self):
         os.makedirs(self.app_dir_path, exist_ok=True)

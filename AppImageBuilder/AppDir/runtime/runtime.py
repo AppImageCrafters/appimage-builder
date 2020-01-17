@@ -25,7 +25,7 @@ class Runtime():
         self.app_dir = os.path.abspath(self.app_dir)
 
         self.exec = recipe.get_item('AppDir/app_info/exec')
-        self.exec_args = recipe.get_item('AppDir/app_info/exec_args', None)
+        self.exec_args = recipe.get_item('AppDir/app_info/exec_args', '$@')
 
     def generate(self):
         app_run = AppRun(self.exec, self.exec_args)

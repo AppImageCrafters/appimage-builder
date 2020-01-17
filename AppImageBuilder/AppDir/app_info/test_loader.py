@@ -11,20 +11,30 @@
 #  all copies or substantial portions of the Software.
 
 import unittest
-from AppImageBuilder.AppDir.app_info.loader import AppInfoLoader, MissingConfigurationField
+
+from AppImageBuilder.AppDir.app_info.loader import AppInfoLoader
+from AppImageBuilder.recipe import Recipe, RecipeError
 
 
 class LoaderTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.recipe = Recipe()
+        self.recipe.recipe = {
+            'AppDir': {
+                'app_info': {
+                    'id': 'org.gnu.echo',
+                    'name': 'echo',
+                    'icon': 'utilities-terminal',
+                    'version': '2.7.1',
+                    "exec": "bin/echo",
+                    'exec_args': '$@'
+                }
+            }
+        }
+
     def test_load_config(self):
         loader = AppInfoLoader()
-        app_info = loader.load({
-            'id': 'org.gnu.echo',
-            'name': 'echo',
-            'icon': 'utilities-terminal',
-            'version': '2.7.1',
-            "exec": "bin/echo",
-            'exec_args': '$@'
-        })
+        app_info = loader.load(self.recipe)
 
         self.assertEqual(app_info.id, 'org.gnu.echo')
         self.assertEqual(app_info.name, 'echo')
@@ -35,11 +45,15 @@ class LoaderTest(unittest.TestCase):
 
     def test_load_incomplete_config(self):
         app_info = AppInfoLoader()
-        self.assertRaises(MissingConfigurationField, app_info.load,
-                          {
-                              'name': 'echo',
-                              'icon': 'utilities-terminal',
-                              'version': '2.7.1',
-                              "exec": "bin/echo",
-                              'exec_args': '$@'
-                          })
+        self.recipe.recipe = {
+            'AppDir': {
+                'app_info': {
+                    'name': 'echo',
+                    'icon': 'utilities-terminal',
+                    'version': '2.7.1',
+                    "exec": "bin/echo",
+                    'exec_args': '$@'
+                }
+            }
+        }
+        self.assertRaises(RecipeError, app_info.load, self.recipe)
