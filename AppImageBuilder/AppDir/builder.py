@@ -14,6 +14,7 @@ import os
 from .app_info.loader import AppInfoLoader
 from .apt.apt import Apt
 from .apt.config import Config as AptConfig
+from .runtime.runtime import Runtime
 
 
 class BuilderError(RuntimeError):
@@ -22,6 +23,7 @@ class BuilderError(RuntimeError):
 
 class Builder:
     def __init__(self, recipe):
+        self.recipe = recipe
         self._load_config(recipe)
 
     def _load_config(self, recipe):
@@ -54,3 +56,6 @@ class Builder:
 
         apt = Apt(self.apt_config)
         apt.deploy_packages(self.app_dir_path)
+
+        runtime = Runtime(self.recipe)
+        runtime.generate()

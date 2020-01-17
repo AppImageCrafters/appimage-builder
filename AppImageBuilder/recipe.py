@@ -18,6 +18,41 @@ class RecipeError(RuntimeError):
 
 
 class Recipe:
+    class ItemResolver():
+        def __init__(self, dict, path, fallback=None):
+            self.root = dict
+            self.path = path
+            self.fallback = fallback
+
+            self.left = None
+            self.right = None
+            self.cur = None
+            self.key = None
+
+        def resolve(self):
+            self.cur = self.root
+            self.left = []
+            self.right = self.path.split('/')
+            try:
+                self._resolve_item()
+            except KeyError:
+                self._fallback_or_raise()
+
+            return self.cur
+
+        def _resolve_item(self):
+            while self.right:
+                self.key = self.right.pop(0)
+                self.cur = self.cur[self.key]
+
+                self.left.append(self.key)
+
+        def _fallback_or_raise(self):
+            if self.fallback:
+                self.cur = self.fallback
+            else:
+                raise RecipeError('\'%s\' key required in: %s' % (self.key, '/'.join(self.left)))
+
     def __init__(self):
         self.path = None
         self.recipe = None
@@ -43,15 +78,6 @@ class Recipe:
         if not self.recipe:
             raise RecipeError("Empty recipe")
 
-    def get_item(self, path):
-        parts = path.split('/')
-        cur = self.recipe
-
-        for i in range(0, len(parts)):
-            key = parts[i]
-            if key in cur:
-                cur = cur[key]
-            else:
-                raise RecipeError('Missing key: %s' % '/'.join(parts[0, i]))
-
-        return cur
+    def get_item(self, path, fallback=None):
+        resolver = Recipe.ItemResolver(self.recipe, path, fallback)
+        return resolver.resolve()
