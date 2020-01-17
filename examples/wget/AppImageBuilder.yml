@@ -2,14 +2,15 @@ version: 1
 
 AppDir:
   path: ./AppDir
-  exec: usr/bin/wget
-  info:
+
+  app_info:
     id: org.gnu.wget
     version: 1.9
     name: wget
     icon: utilities-terminal
+    exec: usr/bin/wget
 
-  dpkg:
+  apt:
     arch: amd64
     sources:
       - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
@@ -18,7 +19,7 @@ AppDir:
 
     include:
       - wget
-      - libssl1.1
+      - libssl1.0.0
       # Domain name resolution lib
       - libnss-mdns
 
