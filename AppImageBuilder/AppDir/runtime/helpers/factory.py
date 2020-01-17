@@ -12,6 +12,7 @@
 from .dynamic_loader import DynamicLoader
 from .base_helper import BaseHelper
 from .fontconfig import FontConfig
+from .openssl import OpenSSL
 
 
 class HelperFactoryError(RuntimeError):
@@ -26,6 +27,7 @@ class HelperFactory:
         self.helpers = {
             'loader': DynamicLoader,
             'fontconfig': FontConfig,
+            'openssl': OpenSSL,
         }
 
     def get(self, id) -> BaseHelper:
