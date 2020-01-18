@@ -39,8 +39,8 @@ class FontConfig(BaseHelper):
             f.writelines(new_lines)
 
     def _add_app_dir_relative_fonts_dir_line(self, lines):
-        entry_index = lines.index('<!-- Font directory list -->')
-        lines.insert(entry_index + 1, '<dir prefix="relative">../../usr/share/fonts</dir>')
+        entry_index = lines.index('<!-- Font directory list -->\n')
+        lines.insert(entry_index + 1, '<dir prefix="relative">../../usr/share/fonts</dir>\n')
 
     def _read_font_conf(self):
         with open(self._get_font_conf_path(), 'r') as f:
