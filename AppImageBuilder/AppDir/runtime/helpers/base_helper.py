@@ -46,3 +46,10 @@ class BaseHelper:
                 return os.path.relpath(dir, self.app_dir)
 
         return None
+
+    def _get_relative_file_path(self, file_name):
+        for file in self.app_dir_files:
+            if file.endswith(file_name):
+                return os.path.relpath(file, self.app_dir)
+
+        return None

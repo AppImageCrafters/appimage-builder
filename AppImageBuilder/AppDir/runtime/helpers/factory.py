@@ -12,6 +12,7 @@
 from .dynamic_loader import DynamicLoader
 from .base_helper import BaseHelper
 from .fontconfig import FontConfig
+from .gstreamer import GStreamer
 from .libgl import LibGL
 from .openssl import OpenSSL
 from .qt import Qt
@@ -31,7 +32,8 @@ class HelperFactory:
             'fontconfig': FontConfig,
             'openssl': OpenSSL,
             'qt': Qt,
-            'libgl': LibGL
+            'libgl': LibGL,
+            'gstreamer': GStreamer
         }
 
     def get(self, id) -> BaseHelper:
