@@ -26,7 +26,7 @@ class FontConfigCase(unittest.TestCase):
     def test_add_app_dir_relative_fonts_dir_line(self):
         lines = ['<!-- Font directory list -->\n']
         self.fc._add_app_dir_relative_fonts_dir_line(lines)
-        self.assertEqual(lines, ['<!-- Font directory list -->\n', '<dir prefix="relative">../../usr/share/fonts</dir>\n'])
+        self.assertEqual(lines, ['<!-- Font directory list -->\n', '<dir prefix="relative">usr/share/fonts</dir>\n'])
 
 
 if __name__ == '__main__':
