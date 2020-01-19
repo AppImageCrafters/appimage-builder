@@ -17,7 +17,7 @@ from .openssl import OpenSSL
 class OpenSSLTestCase(unittest.TestCase):
     def test_get_engines_dir(self):
         open_ssl = OpenSSL('AppDir', ['AppDir/usr/lib/x86_64-linux-gnu/openssl-1.0.0/engines/libaep.so'])
-        self.assertEqual(open_ssl._get_engines_dir(), 'AppDir/usr/lib/x86_64-linux-gnu/openssl-1.0.0/engines')
+        self.assertEqual(open_ssl._get_engines_dir(), 'usr/lib/x86_64-linux-gnu/openssl-1.0.0/engines')
 
 
 if __name__ == '__main__':

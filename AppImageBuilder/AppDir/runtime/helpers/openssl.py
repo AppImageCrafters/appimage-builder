@@ -23,11 +23,7 @@ class OpenSSL(BaseHelper):
         engines_dir = self._get_engines_dir()
 
         if engines_dir:
-            app_run.env['OPENSSL_ENGINES'] = engines_dir.replace(self.app_dir, '${APPDIR}')
+            app_run.env['OPENSSL_ENGINES'] = engines_dir
 
     def _get_engines_dir(self):
-        for path in self.app_dir_files:
-            if 'openssl-1.0.0/engines' in path:
-                return os.path.dirname(path)
-
-        return None
+        return self._get_relative_sub_dir_path('openssl-1.0.0/engines')
