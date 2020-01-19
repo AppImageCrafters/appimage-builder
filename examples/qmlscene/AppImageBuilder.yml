@@ -6,16 +6,16 @@ script:
 
 AppDir:
   path: ./AppDir
-  exec: usr/lib/i386-linux-gnu/qt5/bin/qmlscene
-  exec_args: $@ ${APPDIR}/main.qml
 
-  info:
+  app_info:
     id: org.qt.qmlscene
     name: qmlscene
     icon: text-x-qml
     version: 19.08.02
+    exec: usr/lib/i386-linux-gnu/qt5/bin/qmlscene
+    exec_args: $@ ${APPDIR}/main.qml
 
-  dpkg:
+  apt:
     arch: i386
     sources:
       - sourceline: 'deb [arch=i386] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
