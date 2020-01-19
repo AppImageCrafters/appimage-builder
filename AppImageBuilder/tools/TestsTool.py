@@ -73,9 +73,9 @@ class TestsTool:
             volumes[self.tests_dir_path] = {'bind': self.tests_dir_path, 'mode': 'rw'}
             environment.append('DISPLAY=%s' % os.getenv('DISPLAY'))
 
-        ctr = self.client.containers.run(docker_image, command, auto_remove=True, working_dir='/app',
-                                         volumes=volumes, stdout=True, stderr=True,
-                                         environment=environment, detach=True, devices=['/dev/snd'])
+        ctr = self.client.containers.run_tests(docker_image, command, auto_remove=True, working_dir='/app',
+                                               volumes=volumes, stdout=True, stderr=True,
+                                               environment=environment, detach=True, devices=['/dev/snd'])
         logs = ctr.logs(stream=True)
 
         if logger:

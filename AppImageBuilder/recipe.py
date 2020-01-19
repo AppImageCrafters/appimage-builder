@@ -48,7 +48,7 @@ class Recipe:
                 self.left.append(self.key)
 
         def _fallback_or_raise(self):
-            if self.fallback:
+            if self.fallback is not None:
                 self.cur = self.fallback
             else:
                 raise RecipeError('\'%s\' key required in: %s' % (self.key, '/'.join(self.left)))

@@ -17,6 +17,7 @@ import logging
 import os
 
 from AppImageBuilder.AppDir.builder import Builder
+from AppImageBuilder.AppDir.tester import Tester
 from AppImageBuilder.recipe import Recipe, RecipeError
 
 if __name__ == '__main__':
@@ -24,6 +25,10 @@ if __name__ == '__main__':
     parser.add_argument('--log', dest='loglevel', default="INFO", help='logging level (default: INFO)')
     parser.add_argument('--recipe', dest='recipe', default=os.path.join(os.getcwd(), "AppImageBuilder.yml"),
                         help='recipe file path (default: $PWD/AppImageBuilder.yml)')
+    parser.add_argument('--skip-build', dest='skip_build', action="store_true",
+                        help='Skip build')
+    parser.add_argument('--skip-tests', dest='skip_tests', action="store_true",
+                        help='Skip test')
 
     args = parser.parse_args()
     numeric_level = getattr(logging, args.loglevel.upper())
@@ -31,8 +36,14 @@ if __name__ == '__main__':
         logging.error('Invalid log level: %s' % args.loglevel)
     logging.basicConfig(level=numeric_level)
 
+
     recipe = Recipe()
     recipe.load_file(args.recipe)
 
-    builder = Builder(recipe)
-    builder.build()
+    if not args.skip_build:
+        builder = Builder(recipe)
+        builder.build()
+
+    if not args.skip_tests:
+        tester = Tester(recipe)
+        tester.run_tests()
