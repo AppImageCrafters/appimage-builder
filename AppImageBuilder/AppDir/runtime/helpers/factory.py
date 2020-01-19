@@ -12,6 +12,7 @@
 from .dynamic_loader import DynamicLoader
 from .base_helper import BaseHelper
 from .fontconfig import FontConfig
+from .libgl import LibGL
 from .openssl import OpenSSL
 from .qt import Qt
 
@@ -30,6 +31,7 @@ class HelperFactory:
             'fontconfig': FontConfig,
             'openssl': OpenSSL,
             'qt': Qt,
+            'libgl': LibGL
         }
 
     def get(self, id) -> BaseHelper:
