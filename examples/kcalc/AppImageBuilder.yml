@@ -2,15 +2,15 @@ version: 1
 
 AppDir:
   path: ./AppDir
-  exec: usr/bin/kcalc
 
-  info:
+  app_info:
     id: org.kde.kcalc
     name: kcalc
     icon: accessories-calculator
     version: 19.08.02
+    exec: usr/bin/kcalc
 
-  dpkg:
+  apt:
     arch: amd64
     sources:
       - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
