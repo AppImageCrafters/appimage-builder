@@ -69,15 +69,6 @@ class Qt(BaseHelper):
     def _get_qt_qml_path(self):
         return self._get_relative_sub_dir_path('qt5/qml')
 
-    def _get_relative_sub_dir_path(self, sub_dir):
-        for file in self.app_dir_files:
-            if sub_dir in file:
-                idx = file.index(sub_dir) + len(sub_dir)
-                dir = file[0:idx]
-                return os.path.relpath(dir, self.app_dir)
-
-        return None
-
     def _get_qt_conf_etc_path(self, qt_conf_dir_path):
         return os.path.relpath(os.path.join(self.app_dir, 'etc'), qt_conf_dir_path)
 
@@ -92,14 +83,6 @@ class Qt(BaseHelper):
 
         qt_conf_target_path = os.path.join(liker_dir, "qt.conf")
         return qt_conf_target_path
-
-    def _get_relative_parent_dir_of(self, file_name):
-        for file in self.app_dir_files:
-            if file.endswith(file_name):
-                dir = os.path.dirname(file)
-                return os.path.relpath(dir, self.app_dir)
-
-        return None
 
     def _get_qt_translations_path(self):
         return self._get_relative_sub_dir_path('qt5/translations')

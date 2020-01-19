@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import os
 
 
 class BaseHelper:
@@ -28,3 +29,20 @@ class BaseHelper:
         if text.startswith(prefix):
             return text[len(prefix):]
         return text
+
+    def _get_relative_sub_dir_path(self, sub_dir):
+        for file in self.app_dir_files:
+            if sub_dir in file:
+                idx = file.index(sub_dir) + len(sub_dir)
+                dir = file[0:idx]
+                return os.path.relpath(dir, self.app_dir)
+
+        return None
+
+    def _get_relative_parent_dir_of(self, file_name):
+        for file in self.app_dir_files:
+            if file.endswith(file_name):
+                dir = os.path.dirname(file)
+                return os.path.relpath(dir, self.app_dir)
+
+        return None
