@@ -22,3 +22,9 @@ class BaseHelper:
 
     def configure(self, app_run):
         pass
+
+    @staticmethod
+    def _remove_prefix(text, prefix):
+        if text.startswith(prefix):
+            return text[len(prefix):]
+        return text

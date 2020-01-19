@@ -13,6 +13,7 @@ from .dynamic_loader import DynamicLoader
 from .base_helper import BaseHelper
 from .fontconfig import FontConfig
 from .openssl import OpenSSL
+from .qt import Qt
 
 
 class HelperFactoryError(RuntimeError):
@@ -28,6 +29,7 @@ class HelperFactory:
             'loader': DynamicLoader,
             'fontconfig': FontConfig,
             'openssl': OpenSSL,
+            'qt': Qt,
         }
 
     def get(self, id) -> BaseHelper:
