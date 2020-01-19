@@ -2,23 +2,29 @@ version: 1
 
 AppDir:
   path: ./AppDir
-  exec: usr/bin/vlc
 
-  info:
+  app_info:
     id: org.videolan.vlc
     name: VLC media player
     icon: vlc
     version: 3.0.8-0-gf350b6b5a7
+    exec: usr/bin/vlc
 
-  dpkg:
-    arch: amd64
+  apt:
+    arch: i386
     sources:
-      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
+      - sourceline: 'deb [arch=i386] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
-      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ bionic-updates main restricted universe multiverse'
+      - sourceline: 'deb [arch=i386] http://mx.archive.ubuntu.com/ubuntu/ bionic-updates main restricted universe multiverse'
 
     include:
       - vlc
+      - libv4l-0
+      - libv4lconvert0
+      - libxcursor1
+      - i965-va-driver
+      - libproxy1v5
+      - libstdc++6
 
   test:
     debian:
