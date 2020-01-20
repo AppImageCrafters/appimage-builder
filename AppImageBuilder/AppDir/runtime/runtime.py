@@ -13,7 +13,8 @@ import os
 
 from .app_run import AppRun
 from AppImageBuilder.recipe import Recipe, RecipeError
-from AppImageBuilder.AppDir.runtime.helpers.factory import HelperFactory
+from .helpers.factory import HelperFactory
+from AppImageBuilder.AppDir.app_info.loader import AppInfoLoader
 
 
 class Runtime():
@@ -24,11 +25,11 @@ class Runtime():
         self.app_dir = recipe.get_item('AppDir/path')
         self.app_dir = os.path.abspath(self.app_dir)
 
-        self.exec = recipe.get_item('AppDir/app_info/exec')
-        self.exec_args = recipe.get_item('AppDir/app_info/exec_args', '$@')
+        app_info_loader = AppInfoLoader()
+        self.app_info = app_info_loader.load(recipe)
 
     def generate(self):
-        app_run = AppRun(self.exec, self.exec_args)
+        app_run = AppRun(self.app_info.exec, self.app_info.exec_args)
         self._configure_runtime(app_run)
 
         app_run_path = self._get_app_run_path()
