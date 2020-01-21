@@ -11,10 +11,11 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from .metadata.loader import AppInfoLoader
-from .metadata.icon_bundler import IconBundler
 from .apt.apt import Apt
 from .apt.config import Config as AptConfig
+from .metadata.desktop_entry_generator import DesktopEntryGenerator
+from .metadata.icon_bundler import IconBundler
+from .metadata.loader import AppInfoLoader
 from .runtime.runtime import Runtime
 
 
@@ -52,7 +53,12 @@ class Builder:
         runtime.generate()
 
         self._bundle_app_dir_icon()
+        self._generate_app_dir_desktop_entry()
 
     def _bundle_app_dir_icon(self):
         icon_bundler = IconBundler(self.app_dir_path, self.app_info.icon)
         icon_bundler.bundle_icon()
+
+    def _generate_app_dir_desktop_entry(self):
+        desktop_entry_editor = DesktopEntryGenerator(self.app_dir_path)
+        desktop_entry_editor.generate(self.app_info)
