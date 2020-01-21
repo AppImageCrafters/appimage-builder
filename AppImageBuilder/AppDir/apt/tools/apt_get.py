@@ -23,7 +23,7 @@ class AptGet:
         self.prefix = prefix
         self.config = config_path
 
-    def download(self, packages):
+    def install(self, packages):
         errors, output, result = self._call_apt_get_install_download_only(packages)
 
         if result.returncode != 0:
@@ -64,3 +64,29 @@ class AptGet:
         stdout, stderr = process.communicate()
 
         return process, stderr, stdout
+
+    def mark_as_installed(self, default_exclude_list):
+        with open(os.path.join(self.prefix, 'var', 'lib', 'dpkg', 'status'), 'w') as f:
+            for pkg in default_exclude_list:
+                status_entry = self._generate_pkg_status_entry(pkg)
+                f.write(status_entry)
+
+    @staticmethod
+    def _generate_pkg_status_entry(pkg_name):
+        return """Package: %s
+Status: install ok installed
+Priority: optional
+Section: libs
+Installed-Size: 0
+Maintainer: Maintainer <maintainer@none.org>
+Architecture: all
+Multi-Arch: same
+Source: %s
+Version: 9999.0.0
+Depends: 
+Description: None
+ None
+Homepage: http://none.org/
+Original-Maintainer: Maintainer <maintainer@none.org>
+
+""" % (pkg_name, pkg_name)

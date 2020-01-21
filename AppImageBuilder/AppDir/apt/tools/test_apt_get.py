@@ -58,7 +58,7 @@ class AptGetDownloadTestCase(unittest.TestCase):
 
     def test_download(self):
         package = 'libc6'
-        self.apt_get.download([package])
+        self.apt_get.install([package])
 
         file_path = self._find_deb_by_package_name(package)
         self.assertTrue(file_path)
