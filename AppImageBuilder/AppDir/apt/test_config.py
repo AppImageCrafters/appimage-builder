@@ -182,6 +182,26 @@ class GenerateAptConfigTestCase(unittest.TestCase):
         self.assertTrue(os.path.exists(self.conf._get_dpkg_arch_path()))
         self.assertTrue(os.path.exists(self.conf._get_dpkg_status_path()))
 
+    def test_generate_pkg_status_installed_ok_entry(self):
+        result = self.conf._generate_pkg_status_installed_ok_entry('package')
+        self.assertEqual(result,
+                         '\n'.join(['Package: %s' % 'package',
+                                    'Status: install ok installed',
+                                    'Priority: optional',
+                                    'Section: libs',
+                                    'Installed-Size: 0',
+                                    'Maintainer: Maintainer <maintainer@none.org>',
+                                    'Architecture: all',
+                                    'Multi-Arch: same',
+                                    'Source: %s' % 'package',
+                                    'Version: 9999.0.0',
+                                    'Depends:',
+                                    'Description: None',
+                                    ' None',
+                                    'Homepage: http://none.org/',
+                                    'Original-Maintainer: Maintainer <maintainer@none.org>',
+                                    '', '']))
+
 
 if __name__ == '__main__':
     unittest.main()

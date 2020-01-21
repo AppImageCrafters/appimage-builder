@@ -39,7 +39,7 @@ class Apt:
         self.apt_get.update()
 
         exclusion_list = self._generate_exclusion_list()
-        self.apt_get.mark_as_installed(exclusion_list)
+        self.config.set_installed_packages(exclusion_list)
 
         self.apt_get.install(self.config.apt_include)
 

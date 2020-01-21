@@ -52,7 +52,6 @@ class Config:
         self._generate_dpkg_arch()
         self._generate_dpkg_status()
 
-
     def _load_arch(self):
         if 'arch' not in self.settings:
             self.settings['arch'] = PkgTool.get_deb_host_arch()
@@ -235,3 +234,30 @@ class Config:
 
         if not os.path.exists(path):
             os.mknod(path)
+
+    def set_installed_packages(self, pkg_list):
+        dpkg_status_path = self._get_dpkg_status_path()
+
+        with open(dpkg_status_path, 'w') as f:
+            for pkg in pkg_list:
+                status_entry = self._generate_pkg_status_installed_ok_entry(pkg)
+                f.write(status_entry)
+
+    @staticmethod
+    def _generate_pkg_status_installed_ok_entry(pkg_name):
+        return '\n'.join(['Package: %s' % pkg_name,
+                          'Status: install ok installed',
+                          'Priority: optional',
+                          'Section: libs',
+                          'Installed-Size: 0',
+                          'Maintainer: Maintainer <maintainer@none.org>',
+                          'Architecture: all',
+                          'Multi-Arch: same',
+                          'Source: %s' % pkg_name,
+                          'Version: 9999.0.0',
+                          'Depends:',
+                          'Description: None',
+                          ' None',
+                          'Homepage: http://none.org/',
+                          'Original-Maintainer: Maintainer <maintainer@none.org>',
+                          '', ''])
