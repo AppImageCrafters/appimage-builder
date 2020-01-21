@@ -14,7 +14,7 @@ import tempfile
 import unittest
 import platform
 
-from AppImageBuilder.AppDir.apt.config import Config, AptConfigError
+from AppImageBuilder.AppDir.apt_bundler.config import Config, AptConfigError
 
 
 class LoadAptConfigTestCase(unittest.TestCase):

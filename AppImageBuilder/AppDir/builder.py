@@ -11,8 +11,8 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from .apt.apt import Apt
-from .apt.config import Config as AptConfig
+from .apt_bundler.apt import Apt
+from .apt_bundler.config import Config as AptConfig
 from .metadata.desktop_entry_generator import DesktopEntryGenerator
 from .metadata.icon_bundler import IconBundler
 from .metadata.loader import AppInfoLoader
