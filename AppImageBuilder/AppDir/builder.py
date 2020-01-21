@@ -11,7 +11,8 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from .app_info.loader import AppInfoLoader
+from .metadata.loader import AppInfoLoader
+from .metadata.icon_bundler import IconBundler
 from .apt.apt import Apt
 from .apt.config import Config as AptConfig
 from .runtime.runtime import Runtime
@@ -49,3 +50,9 @@ class Builder:
 
         runtime = Runtime(self.recipe)
         runtime.generate()
+
+        self._bundle_app_dir_icon()
+
+    def _bundle_app_dir_icon(self):
+        icon_bundler = IconBundler(self.app_dir_path, self.app_info.icon)
+        icon_bundler.bundle_icon()

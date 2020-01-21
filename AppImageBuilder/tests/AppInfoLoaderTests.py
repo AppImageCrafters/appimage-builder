@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 
 import unittest
-from AppImageBuilder.AppDir.app_info.loader import AppInfoLoader, MissingConfigurationField
+from AppImageBuilder.AppDir.metadata.loader import AppInfoLoader, MissingConfigurationField
 
 
 class AppInfoLoaderTests(unittest.TestCase):

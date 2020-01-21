@@ -12,7 +12,7 @@
 
 import unittest
 
-from AppImageBuilder.AppDir.app_info.loader import AppInfoLoader
+from AppImageBuilder.AppDir.metadata.loader import AppInfoLoader
 from AppImageBuilder.recipe import Recipe, RecipeError
 
 
@@ -21,7 +21,7 @@ class LoaderTest(unittest.TestCase):
         self.recipe = Recipe()
         self.recipe.recipe = {
             'AppDir': {
-                'app_info': {
+                'metadata': {
                     'id': 'org.gnu.echo',
                     'name': 'echo',
                     'icon': 'utilities-terminal',
@@ -47,7 +47,7 @@ class LoaderTest(unittest.TestCase):
         app_info = AppInfoLoader()
         self.recipe.recipe = {
             'AppDir': {
-                'app_info': {
+                'metadata': {
                     'name': 'echo',
                     'icon': 'utilities-terminal',
                     'version': '2.7.1',
