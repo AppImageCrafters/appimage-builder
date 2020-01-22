@@ -21,7 +21,16 @@ AppDir:
     include:
       - kcalc
     exclude:
-      - phonon4qt5-backend-vlc
+      - phonon4qt5
+
+  files:
+    exclude:
+      - usr/lib/x86_64-linux-gnu/gconv
+      - usr/share/man
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
 
   test:
     centos:
