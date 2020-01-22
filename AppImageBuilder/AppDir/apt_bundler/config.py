@@ -15,6 +15,7 @@ import subprocess
 
 import requests
 
+from AppImageBuilder.commands.apt_key import AptKey
 from AppImageBuilder.commands.dpkg_architecture import DpkgArchitecture
 
 
@@ -155,12 +156,11 @@ class Config:
             self._add_apt_key(key_url, keyring_path)
 
     def _add_apt_key(self, key_url, keyring_path):
-        try:
-            logging.info('Importing key: %s' % key_url)
-            key = self._try_download_apt_key(key_url)
-            self._try_to_add_key_to_keyring(key, keyring_path)
-        except AptConfigError as er:
-            logging.warning(er)
+        logging.info('Importing key: %s' % key_url)
+        key = self._try_download_apt_key(key_url)
+
+        apt_key = AptKey()
+        apt_key.add(key, keyring_path)
 
     def _try_download_apt_key(self, key_url):
         key = requests.get(key_url)
@@ -169,25 +169,6 @@ class Config:
             raise AptConfigError('Unable to retrieve apt key: %s' % key_url)
 
         return key.content
-
-    def _try_to_add_key_to_keyring(self, key, keyring_file_path):
-        process, stderr, stdout = self._run_apt_key_add(key, keyring_file_path)
-
-        if process.wait() != 0:
-            errors = stderr.decode('utf-8')
-            raise AptConfigError('apt-key add failed: %s' % errors)
-        else:
-            logging.info(stdout.decode('utf-8'))
-
-    def _run_apt_key_add(self, key_data, keyring_path):
-        apt_key_add_command = ["fakeroot", "apt-key", "--keyring", keyring_path, "add", "-"]
-        logging.debug(' '.join(apt_key_add_command))
-        process = subprocess.Popen(apt_key_add_command, cwd=self.apt_prefix,
-                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        stdout, stderr = process.communicate(key_data)
-
-        return process, stderr, stdout
 
     def _generate_apt_conf(self):
         path = self.get_apt_conf_path()

@@ -34,11 +34,13 @@ class Command:
         self.stdout = []
         self.stderr = []
 
-    def _run(self, command):
+    def _run(self, command, input=None):
         self.logger.info(' '.join(command))
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(command,stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if input:
+            process.communicate(input)
 
-        while process.poll() == None:
+        while process.poll() is None:
             self._process_stdout_lines(process)
             self._process_stderr_lines(process)
 
