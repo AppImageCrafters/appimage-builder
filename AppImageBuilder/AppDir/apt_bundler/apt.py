@@ -12,7 +12,7 @@
 import logging
 import os
 
-from .tools.apt_get import AptGet
+from AppImageBuilder.commands.apt_get import AptGet
 from .tools.dpkg_deb import DpkgDeb, DpkgDebError
 
 

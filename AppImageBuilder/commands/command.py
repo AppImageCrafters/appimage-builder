@@ -19,8 +19,8 @@ class Command:
         pass
 
     def __init__(self, runnable, logger=None):
-        self.app = which(runnable)
-        if not self.app:
+        self.runnable = which(runnable)
+        if not self.runnable:
             raise Command.CommandMissingError('Unable to locate %s runnable. Please make sure it is installed '
                                               'and available in the environment variable PATH.')
 
@@ -40,6 +40,8 @@ class Command:
             self._process_stdout_lines(process)
             self._process_stderr_lines(process)
 
+        process.stdout.close()
+        process.stderr.close()
         self.return_code = process.poll()
 
     def _process_stderr_lines(self, process):

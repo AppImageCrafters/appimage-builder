@@ -12,8 +12,9 @@
 import os
 import tempfile
 import unittest
-from .apt_get import AptGet, AptGetError
-from ..config import Config
+
+from AppImageBuilder.commands.apt_get import AptGet
+from AppImageBuilder.AppDir.apt_bundler.config import Config
 
 
 class AptGetUpdateTestCase(unittest.TestCase):
