@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import uuid
 
 from .base_helper import BaseHelper
 
@@ -16,9 +17,22 @@ from .base_helper import BaseHelper
 class GdkPixbuf(BaseHelper):
 
     def configure(self, app_run):
-        dri_path = self._get_gdk_pixbud_loaders_path()
-        if dri_path:
-            app_run.env['GDK_PIXBUF_MODULEDIR'] = '${APPDIR}/%s' % dri_path
+        path = self._get_gdk_pixbuf_loaders_path()
+        if path:
+            app_run.env['GDK_PIXBUF_MODULEDIR'] = '${APPDIR}/%s' % path
+            app_run.env['GDK_PIXBUF_MODULE_FILE'] = self._get_temp_unique_file_path()
 
-    def _get_gdk_pixbud_loaders_path(self):
+            bin_path = self._get_gdk_pixbuf_query_loaders_path()
+            app_run.sections['GDK_PIXBUF'] = \
+                ['"$LINKER_PATH" --inhibit-cache --library-path "$LD_LIBRARY_DIRS" '
+                 '"$APPDIR"/%s --update-cache' % bin_path]
+
+    def _get_gdk_pixbuf_loaders_path(self):
         return self._get_glob_relative_sub_dir_path('*/usr/*/gdk-pixbuf-2.0/*/loaders/*')
+
+    def _get_gdk_pixbuf_query_loaders_path(self):
+        return self._get_relative_file_path('gdk-pixbuf-query-loaders')
+
+    def _get_temp_unique_file_path(self):
+        id = uuid.uuid4()
+        return '/tmp/appimage_gdk_pixbuf_loaders.cache.%s' % str(id.time)
