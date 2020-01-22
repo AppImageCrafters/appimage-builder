@@ -14,7 +14,7 @@ import os
 from .app_run import AppRun
 from AppImageBuilder.recipe import Recipe, RecipeError
 from .helpers.factory import HelperFactory
-from AppImageBuilder.AppDir.metadata.loader import AppInfoLoader
+from AppImageBuilder.app_dir.metadata.loader import AppInfoLoader
 
 
 class Runtime():

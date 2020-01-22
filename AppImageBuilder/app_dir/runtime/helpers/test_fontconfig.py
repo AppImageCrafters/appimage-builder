@@ -12,7 +12,7 @@
 
 import unittest
 
-from AppImageBuilder.AppDir.runtime.helpers.fontconfig import FontConfig
+from AppImageBuilder.app_dir.runtime.helpers.fontconfig import FontConfig
 
 
 class FontConfigCase(unittest.TestCase):

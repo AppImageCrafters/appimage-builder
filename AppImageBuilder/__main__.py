@@ -16,8 +16,8 @@ import logging
 import os
 
 from AppImageBuilder.appimage_builder import AppImageBuilder
-from AppImageBuilder.AppDir.builder import Builder
-from AppImageBuilder.AppDir.tester import Tester
+from AppImageBuilder.app_dir.builder import Builder
+from AppImageBuilder.app_dir.tester import Tester
 from AppImageBuilder.recipe import Recipe
 from AppImageBuilder.script import Script
 
