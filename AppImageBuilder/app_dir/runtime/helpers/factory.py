@@ -16,6 +16,7 @@ from .gstreamer import GStreamer
 from .libgl import LibGL
 from .openssl import OpenSSL
 from .qt import Qt
+from .gdk_pixbuf import GdkPixbuf
 
 
 class HelperFactoryError(RuntimeError):
@@ -33,7 +34,8 @@ class HelperFactory:
             'openssl': OpenSSL,
             'qt': Qt,
             'libgl': LibGL,
-            'gstreamer': GStreamer
+            'gstreamer': GStreamer,
+            'gdk_pixbuf': GdkPixbuf
         }
 
     def get(self, id) -> BaseHelper:
