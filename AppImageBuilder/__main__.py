@@ -11,12 +11,15 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-import os
-import logging
 import argparse
+import logging
+import os
 
-from AppImageBuilder.Configurator import ConfigurationError
-from AppImageBuilder.Configurator import Configurator
+from AppImageBuilder.AppImageBuilder import AppImageBuilder
+from AppImageBuilder.AppDir.builder import Builder
+from AppImageBuilder.AppDir.tester import Tester
+from AppImageBuilder.recipe import Recipe
+from AppImageBuilder.script import Script
 
 
 def __main__():
@@ -27,40 +30,36 @@ def __main__():
                         help='logging level (default: INFO)')
     parser.add_argument('--skip-script', dest='skip_script', action="store_true",
                         help='Skip script execution')
-    parser.add_argument('--skip-appdir', dest='skip_appdir', action="store_true",
+    parser.add_argument('--skip-build', dest='skip_build', action="store_true",
                         help='Skip AppDir building')
-    parser.add_argument('--skip-appdir-test', dest='skip_appdir_test', action="store_true",
+    parser.add_argument('--skip-tests', dest='skip_tests', action="store_true",
                         help='Skip AppDir testing')
     parser.add_argument('--skip-appimage', dest='skip_appimage', action="store_true",
                         help='Skip AppImage generation')
 
     args = parser.parse_args()
-    _configure_logger(args)
-
-    try:
-        configurator = Configurator()
-        builder = configurator.load_file(args.recipe)
-        if not args.skip_script:
-            builder.run_script()
-
-        if not args.skip_appdir:
-            builder.build_app_dir()
-
-        if not args.skip_appdir_test:
-            builder.test_app_dir()
-
-        if not args.skip_appimage:
-            builder.build_appimage()
-
-    except ConfigurationError as error:
-        logging.error(error)
-
-
-def _configure_logger(args):
     numeric_level = getattr(logging, args.loglevel.upper())
     if not isinstance(numeric_level, int):
         logging.error('Invalid log level: %s' % args.loglevel)
     logging.basicConfig(level=numeric_level)
+
+    recipe = Recipe()
+    recipe.load_file(args.recipe)
+    if not args.skip_script:
+        script = Script(recipe)
+        script.execute()
+
+    if not args.skip_build:
+        builder = Builder(recipe)
+        builder.build()
+
+    if not args.skip_tests:
+        tester = Tester(recipe)
+        tester.run_tests()
+
+    if not args.skip_appimage:
+        builder = AppImageBuilder(recipe)
+        builder.build()
 
 
 if __name__ == '__main__':

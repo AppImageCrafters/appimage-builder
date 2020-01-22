@@ -14,7 +14,7 @@ from AppImageBuilder.tools.PkgTool import PkgTool as Dpkg
 from AppImageBuilder.tools.AptTool import AptTool as Apt
 from AppImageBuilder.tools.LinkerTool import LinkerTool as Linker
 from AppImageBuilder.tools.ShellTool import ShellTool as Shell
-from AppImageBuilder.tools.AppImageTool import AppImageTool as AppImage
+from AppImageBuilder.tools.AppImageTool import GenerateAppImageCommand as AppImage
 from AppImageBuilder.tools.QtTool import QtTool
 from AppImageBuilder.tools.TestsTool import TestsTool
 from AppImageBuilder.tools.MkSquashFs import MkSquashFs
