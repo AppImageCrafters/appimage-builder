@@ -13,7 +13,7 @@ import os
 import logging
 from urllib import request
 
-from AppImageBuilder.commands.generate_appimage_command import GenerateAppImageCommand
+from AppImageBuilder.commands.appimage_tool_command import AppImageToolCommand
 
 
 class AppImageBuilder:
@@ -37,9 +37,9 @@ class AppImageBuilder:
         self._generate_appimage(runtime_path)
 
     def _generate_appimage(self, runtime_path):
-        appimage_tool = GenerateAppImageCommand(self.app_dir)
+        appimage_tool = AppImageToolCommand(self.app_dir, self.target_file)
         appimage_tool.runtime_file = runtime_path
-        appimage_tool.run(self.target_file)
+        appimage_tool.run()
 
     def _download_runtime_if_required(self, runtime_path, runtime_url):
         if not os.path.exists(runtime_path):
