@@ -34,7 +34,11 @@ class FileBundler:
 
     def remove_excluded(self):
         for path in self._get_exclude_file_list():
-            shutil.rmtree(path)
+            if os.path.exists(path):
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+                else:
+                    os.remove(path)
 
     def _get_exclude_file_list(self):
         files_list = []
