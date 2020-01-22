@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 
 import glob
+import logging
 import os
 import shutil
 
@@ -36,8 +37,10 @@ class FileBundler:
         for path in self._get_exclude_file_list():
             if os.path.exists(path):
                 if os.path.isdir(path):
+                    logging.info('Excluding dir: %s' % os.path.relpath(path, self.app_dir))
                     shutil.rmtree(path)
                 else:
+                    logging.info('Excluding file: %s' % os.path.relpath(path, self.app_dir))
                     os.remove(path)
 
     def _get_exclude_file_list(self):
