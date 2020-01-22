@@ -27,12 +27,14 @@ class Apt:
             'avahi-daemon',
             'base-files',
             'bind9-host',
+            'consolekit',
             'dbus',
             'debconf',
             'dpkg',
             'lsb-base',
             'multiarch-support',
             'passwd',
+            'systemd',
         ]
 
     def deploy_packages(self, app_dir_path):
