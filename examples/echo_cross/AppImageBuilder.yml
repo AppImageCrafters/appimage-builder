@@ -19,11 +19,10 @@ AppDir:
 
     include:
       - coreutils
-
     exclude:
       - libpcre3
 
-  tests:
+  test:
     centos:
       image: centos:6
       command: "./AppRun Hello World"
