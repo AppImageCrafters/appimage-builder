@@ -20,9 +20,8 @@ AppDir:
 
     include:
       - kcalc
-      - qttranslations5-l10n
-      - qt5-image-formats-plugins
-      - libxcursor1
+    exclude:
+      - phonon4qt5-backend-vlc
 
   test:
     centos:
