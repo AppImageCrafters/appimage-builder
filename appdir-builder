@@ -19,12 +19,15 @@ import os
 from AppImageBuilder.AppDir.builder import Builder
 from AppImageBuilder.AppDir.tester import Tester
 from AppImageBuilder.recipe import Recipe, RecipeError
+from AppImageBuilder.script import Script
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='AppDir build tools. Allows to bundle software inside an AppDir.')
     parser.add_argument('--log', dest='loglevel', default="INFO", help='logging level (default: INFO)')
     parser.add_argument('--recipe', dest='recipe', default=os.path.join(os.getcwd(), "AppImageBuilder.yml"),
                         help='recipe file path (default: $PWD/AppImageBuilder.yml)')
+    parser.add_argument('--skip-script', dest='skip_script', action="store_true",
+                        help='Skip script section')
     parser.add_argument('--skip-build', dest='skip_build', action="store_true",
                         help='Skip build')
     parser.add_argument('--skip-tests', dest='skip_tests', action="store_true",
@@ -39,6 +42,9 @@ if __name__ == '__main__':
 
     recipe = Recipe()
     recipe.load_file(args.recipe)
+    if not args.skip_script:
+        script = Script(recipe)
+        script.execute()
 
     if not args.skip_build:
         builder = Builder(recipe)
