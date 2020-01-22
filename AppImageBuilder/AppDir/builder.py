@@ -13,6 +13,7 @@ import os
 
 from .apt_bundler.apt import Apt
 from .apt_bundler.config import Config as AptConfig
+from .file_bundler import FileBundler
 from .metadata.desktop_entry_generator import DesktopEntryGenerator
 from .metadata.icon_bundler import IconBundler
 from .metadata.loader import AppInfoLoader
@@ -38,6 +39,8 @@ class Builder:
             self.apt_config.apt_prefix = ''
             self.apt_config.load(self.app_dir_conf['apt'])
 
+        self.file_bundler = FileBundler(self.recipe)
+
     def _load_app_info_config(self):
         loader = AppInfoLoader()
         self.app_info = loader.load(self.recipe)
@@ -48,6 +51,9 @@ class Builder:
 
         apt = Apt(self.apt_config)
         apt.deploy_packages(self.app_dir_path)
+
+        self.file_bundler.bundle_included()
+        self.file_bundler.remove_excluded()
 
         runtime = Runtime(self.recipe)
         runtime.generate()

@@ -22,6 +22,10 @@ AppDir:
       # Domain name resolution lib
       - libnss-mdns
 
+  files:
+    exclude:
+      - usr/lib/x86_64-linux-gnu/gconv
+
   test:
     centos:
       image: centos:6
