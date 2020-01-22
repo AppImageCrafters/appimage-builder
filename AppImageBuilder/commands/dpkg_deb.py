@@ -9,24 +9,30 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import logging
 import os
-import subprocess
+
+from .command import Command
 
 
 class DpkgDebError(RuntimeError):
     pass
 
 
-class DpkgDeb:
+class DpkgDeb(Command):
+    def __init__(self):
+        super().__init__('dpkg-deb')
+        self.log_stdout = False
+
     def extract(self, deb_file, target_dir):
-        command = ["dpkg-deb", "-X", deb_file, target_dir]
-        logging.debug(command)
-        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=target_dir)
-        output = result.stdout.decode('utf-8')
+        command = [self.runnable, '-X', deb_file, target_dir]
+        self._run(command)
 
-        if result.returncode != 0:
-            raise DpkgDebError("Package extraction failed. Error: " + result.stderr.decode('utf-8'))
+        if self.return_code != 0:
+            raise DpkgDebError("Package extraction failed")
 
-        for line in output.splitlines():
-            logging.info('%s: %s' % (os.path.basename(deb_file), line))
+        for line in self.stdout:
+            if line.startswith('./'):
+                line = line[2:]
+
+            if line:
+                self.logger.info('%s: %s' % (os.path.basename(deb_file), line))

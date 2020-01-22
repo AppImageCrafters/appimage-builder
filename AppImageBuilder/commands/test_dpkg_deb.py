@@ -14,10 +14,10 @@ import tempfile
 import unittest
 import urllib.request
 
-from .dpkg_deb import DpkgDeb, DpkgDebError
+from .dpkg_deb import DpkgDeb
 
 
-class MyTestCase(unittest.TestCase):
+class DpkgDebTestCase(unittest.TestCase):
     def setUp(self):
         url = 'http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-8/gcc-8-multilib_8.2.0-7ubuntu1_amd64.deb'
         response = urllib.request.urlopen(url)

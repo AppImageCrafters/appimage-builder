@@ -23,6 +23,8 @@ class Command:
         if not self.runnable:
             raise Command.CommandMissingError('Unable to locate %s runnable. Please make sure it is installed '
                                               'and available in the environment variable PATH.')
+        self.log_stdout = True
+        self.log_stderr = True
 
         self.logger = logger
         if not self.logger:
@@ -49,7 +51,8 @@ class Command:
         while stderr_line:
             stderr_line = stderr_line.decode('utf-8').strip()
             self.stderr.append(stderr_line)
-            self.logger.warning(stderr_line)
+            if self.log_stderr:
+                self.logger.warning(stderr_line)
 
             stderr_line = process.stderr.readline()
 
@@ -58,6 +61,7 @@ class Command:
         while stdout_line:
             stdout_line = stdout_line.decode('utf-8').strip()
             self.stdout.append(stdout_line)
-            self.logger.info(stdout_line)
+            if self.log_stdout:
+                self.logger.info(stdout_line)
 
             stdout_line = process.stdout.readline()

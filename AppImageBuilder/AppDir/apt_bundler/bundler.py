@@ -13,7 +13,7 @@ import logging
 import os
 
 from AppImageBuilder.commands.apt_get import AptGet
-from .tools.dpkg_deb import DpkgDeb, DpkgDebError
+from AppImageBuilder.commands.dpkg_deb import DpkgDeb, DpkgDebError
 
 
 class AptBundler:
