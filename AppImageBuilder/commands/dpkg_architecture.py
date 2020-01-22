@@ -12,9 +12,13 @@
 
 
 import subprocess
+from .command import Command
 
 
-class DpkgArchitectureCommand:
+class DpkgArchitecture(Command):
+    def __init__(self):
+        super().__init__('dpkg-architecture')
+
     def get_deb_host_arch(self):
         return self._query('DEB_HOST_ARCH')
 

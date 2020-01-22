@@ -13,7 +13,7 @@ import os
 import logging
 from urllib import request
 
-from AppImageBuilder.commands.appimage_tool_command import AppImageToolCommand
+from AppImageBuilder.commands.appimagetool import AppImageToolCommand
 
 
 class AppImageBuilder:

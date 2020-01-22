@@ -1,4 +1,4 @@
-#  Copyright  2019 Alexis Lopez Zubieta
+#  Copyright  2020 Alexis Lopez Zubieta
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a
 #  copy of this software and associated documentation files (the "Software"),
@@ -14,9 +14,13 @@
 import logging
 import subprocess
 
+from .command import Command
 
-class AppImageToolCommand:
+
+class AppImageToolCommand(Command):
     def __init__(self, app_dir, target_file):
+        super().__init__('appimagetool')
+
         self.app_dir = app_dir
         self.runtime_file = None
         self.update_information = None
@@ -26,13 +30,11 @@ class AppImageToolCommand:
     def run(self):
         logging.info("Generating AppImage from %s" % self.app_dir)
         command = self._generate_command()
-        logging.info(' '.join(command))
 
-        result = subprocess.run(command)
-        if result.returncode != 0:
+        self._run(command)
+        if self.return_code != 0:
             logging.error("AppImage generation failed")
         else:
-            logging.info(result.stdout)
             logging.info("AppImage created successfully")
 
     def _generate_command(self):

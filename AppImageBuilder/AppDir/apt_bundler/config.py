@@ -15,7 +15,7 @@ import subprocess
 
 import requests
 
-from AppImageBuilder.commands.dpkg_architecture_command import DpkgArchitectureCommand
+from AppImageBuilder.commands.dpkg_architecture import DpkgArchitecture
 
 
 class AptConfigError(RuntimeError):
@@ -54,7 +54,7 @@ class Config:
 
     def _load_arch(self):
         if 'arch' not in self.settings:
-            dpkg_architecture = DpkgArchitectureCommand()
+            dpkg_architecture = DpkgArchitecture()
             self.settings['arch'] = dpkg_architecture.get_deb_host_arch()
             logging.info('No apt target arch set. Using the system arch as fallback: %s' % self.settings['arch'])
 
