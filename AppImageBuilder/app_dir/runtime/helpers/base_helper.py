@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import fnmatch
 import os
 
 
@@ -53,3 +54,9 @@ class BaseHelper:
                 return os.path.relpath(file, self.app_dir)
 
         return None
+
+    def _get_glob_relative_sub_dir_path(self, pattern):
+        for file in self.app_dir_files:
+            if fnmatch.fnmatch(file, pattern):
+                dir_name = os.path.dirname(file)
+                return os.path.relpath(dir_name, self.app_dir)
