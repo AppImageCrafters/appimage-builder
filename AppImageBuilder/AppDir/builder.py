@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from .apt_bundler.apt import Apt
+from .apt_bundler.bundler import AptBundler
 from .apt_bundler.config import Config as AptConfig
 from .file_bundler import FileBundler
 from .metadata.desktop_entry_generator import DesktopEntryGenerator
@@ -49,7 +49,7 @@ class Builder:
         os.makedirs(self.app_dir_path, exist_ok=True)
         self.apt_config.generate()
 
-        apt = Apt(self.apt_config)
+        apt = AptBundler(self.apt_config)
         apt.deploy_packages(self.app_dir_path)
 
         self.file_bundler.bundle_included()

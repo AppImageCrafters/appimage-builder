@@ -16,7 +16,7 @@ from AppImageBuilder.commands.apt_get import AptGet
 from .tools.dpkg_deb import DpkgDeb, DpkgDebError
 
 
-class Apt:
+class AptBundler:
     def __init__(self, config):
         self.config = config
 
