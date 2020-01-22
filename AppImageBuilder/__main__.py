@@ -15,7 +15,7 @@ import argparse
 import logging
 import os
 
-from AppImageBuilder.AppImageBuilder import AppImageBuilder
+from AppImageBuilder.appimage_builder import AppImageBuilder
 from AppImageBuilder.AppDir.builder import Builder
 from AppImageBuilder.AppDir.tester import Tester
 from AppImageBuilder.recipe import Recipe
