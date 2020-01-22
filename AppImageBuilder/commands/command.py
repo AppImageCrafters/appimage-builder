@@ -34,18 +34,27 @@ class Command:
         self.stdout = []
         self.stderr = []
 
-    def _run(self, command, input=None):
+    def _run(self, command):
         self.logger.info(' '.join(command))
-        process = subprocess.Popen(command,stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if input:
-            process.communicate(input)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+        self._poll_process(process)
+
+    def _run_with_input(self, command, input):
+        self.logger.info(' '.join(command))
+        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process.communicate(input)
+
+        self._poll_process(process)
+
+    def _poll_process(self, process):
         while process.poll() is None:
             self._process_stdout_lines(process)
             self._process_stderr_lines(process)
 
         process.stdout.close()
         process.stderr.close()
+
         self.return_code = process.poll()
 
     def _process_stderr_lines(self, process):

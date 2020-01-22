@@ -23,7 +23,7 @@ class AptKey(Command):
 
     def add(self, key_data, keyring_file_path):
         command = self._get_apt_key_add_command(keyring_file_path)
-        self._run(command, key_data)
+        self._run_with_input(command, key_data)
         if self.return_code != 0:
             raise AptKeyError('apt-key add failed')
 
