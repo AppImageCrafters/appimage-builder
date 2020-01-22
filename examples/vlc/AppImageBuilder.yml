@@ -4,7 +4,7 @@ AppDir:
   path: ./AppDir
 
   app_info:
-    id: org.videolan.vlc
+    id: vlc
     name: VLC media player
     icon: vlc
     version: 3.0.8-0-gf350b6b5a7
@@ -19,12 +19,6 @@ AppDir:
 
     include:
       - vlc
-      - libv4l-0
-      - libv4lconvert0
-      - libxcursor1
-      - i965-va-driver
-      - libproxy1v5
-      - libstdc++6
 
   test:
     debian:
