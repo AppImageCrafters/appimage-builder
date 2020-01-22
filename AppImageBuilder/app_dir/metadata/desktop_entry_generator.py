@@ -77,6 +77,8 @@ class DesktopEntryGenerator:
         except FileNotFoundError:
             raise DesktopEntryGenerator.Error('Unable to locate the application desktop entry: %s.desktop' % app_id)
 
+        raise DesktopEntryGenerator.Error('Unable to locate the application desktop entry: %s.desktop' % app_id)
+
     def _save_app_dir_desktop_entry(self, app_id):
         file_name = os.path.join(self.app_dir, app_id + '.desktop')
 
