@@ -13,6 +13,7 @@ from .dynamic_loader import DynamicLoader
 from .base_helper import BaseHelper
 from .fontconfig import FontConfig
 from .gstreamer import GStreamer
+from .java import Java
 from .libgl import LibGL
 from .openssl import OpenSSL
 from .qt import Qt
@@ -37,7 +38,8 @@ class HelperFactory:
             'libgl': LibGL,
             'gstreamer': GStreamer,
             'gdk_pixbuf': GdkPixbuf,
-            'glib_schemas': GLibSchemas
+            'glib_schemas': GLibSchemas,
+            'java': Java
         }
 
     def get(self, id) -> BaseHelper:
