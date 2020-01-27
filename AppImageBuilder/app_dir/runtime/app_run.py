@@ -13,11 +13,13 @@
 
 import os
 import stat
+import uuid
 
 
 class AppRun:
     env = {
-        'LD_LIBRARY_DIRS': None,
+        'APPIMAGE_UUID': None,
+        'LD_LIBRARY_PATH': None,
         'LINKER_PATH': None,
         'XDG_DATA_DIRS': '${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}',
         'XDG_CONFIG_DIRS': '$APPDIR/etc/xdg:$XDG_CONFIG_DIRS',
@@ -36,10 +38,10 @@ class AppRun:
             'fi'
         ],
         'EXEC': [
-            '# Launch application using only the bundled libraries',
-            'exec "${LINKER_PATH}" \\',
-            '   --inhibit-cache --library-path "${LD_LIBRARY_DIRS}" \\',
-            '  ${APPDIR}/${BIN_PATH} ${EXEC_ARGS}',
+            '# Work around for not supported $ORIGIN in the elf PT_INTERP segment',
+            'ln -s ${LINKER_PATH} /tmp/appimage_$APPIMAGE_UUID.ld.so --force',
+            '# Launch application',
+            'exec ${APPDIR}/${BIN_PATH} ${EXEC_ARGS}',
             ''
         ]
     }
@@ -50,6 +52,8 @@ class AppRun:
         self.env['BIN_PATH'] = bin_path
         if exec_args:
             self.env['EXEC_ARGS'] = exec_args
+
+        self.env['APPIMAGE_UUID'] = str(uuid.uuid4())
 
     def save(self, path):
         lines = self._generate()

@@ -35,16 +35,11 @@ class DynamicLoaderTestCase(unittest.TestCase):
 
     def test_get_binary_path(self):
         dl = DynamicLoader('AppDir', self.app_dir_files)
-        self.assertEqual(dl.get_binary_path(), 'lib/ld-linux-aarch64.so.1')
+        self.assertEqual(dl.get_binary_path(), 'lib/aarch64-linux-gnu/ld-2.27.so')
 
     def test_list_libs(self):
         dl = DynamicLoader('AppDir', ['/path/to/file', 'path/to/shared_lib.so', 'path/to/shared_lib.so.1'])
         self.assertEqual(dl._list_libs(), ['path/to/shared_lib.so', 'path/to/shared_lib.so.1'])
-
-    def test_list_lib_dirs(self):
-        dl = DynamicLoader('AppDir', ['/path/to/file', 'path/to/shared_lib.so', 'path/to/shared_lib.so.1'])
-        self.assertEqual(dl._list_lib_dirs(), {'path/to'})
-
 
 if __name__ == '__main__':
     unittest.main()

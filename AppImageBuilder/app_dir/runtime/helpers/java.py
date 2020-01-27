@@ -15,11 +15,19 @@ from .base_helper import BaseHelper
 
 
 class Java(BaseHelper):
+    class Error(RuntimeError):
+        pass
+
     def configure(self, app_run):
-        java_home = self._get_java_home_dir()
-        if java_home:
+        try:
+            java_home = self._get_java_home_dir()
             app_run.env['JAVA_HOME'] = '${APPDIR}/%s' % java_home
+        except Java.Error:
+            pass
 
     def _get_java_home_dir(self):
         java_bin_dir = self._get_relative_parent_dir_of('bin/java')
+        if not java_bin_dir:
+            raise Java.Error('Missing jave binary')
+
         return os.path.dirname(java_bin_dir)

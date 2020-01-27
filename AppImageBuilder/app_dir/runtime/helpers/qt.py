@@ -21,20 +21,20 @@ class Qt(BaseHelper):
         super().__init__(app_dir, app_dir_files)
 
     def configure(self, app_run):
-        qt_dirs = self._get_qt_dirs()
-        if qt_dirs['Libraries']:
-            self._generate_qt_conf(qt_dirs)
-        else:
-            logging.info("No Qt5 libs were found. Skipping Qt5 configuration.")
+        qt_lib_path = self._get_qt_libs_path()
+        if qt_lib_path:
+            qt_dirs = self._get_qt_dirs(app_run)
+            self._generate_qt_conf(qt_dirs, app_run)
 
-    def _generate_qt_conf(self, qt_dirs):
-        qt_conf_target_path = self._get_qt_conf_path()
+    def _generate_qt_conf(self, qt_dirs, app_run):
+        qt_conf_target_path = self._get_qt_conf_path(app_run)
 
         qt_conf = ['[Paths]\n']
         for k, v in qt_dirs.items():
             if v:
                 qt_conf.append("%s=%s\n" % (k, v))
 
+        logging.info('Writing qt.conf file to: %s' % qt_conf_target_path)
         self._write_qt_conf(qt_conf, os.path.join(self.app_dir, qt_conf_target_path))
 
     def _write_qt_conf(self, qt_conf, qt_conf_target_path):
@@ -42,8 +42,8 @@ class Qt(BaseHelper):
         with open(qt_conf_target_path, "w") as f:
             f.writelines(qt_conf)
 
-    def _get_qt_dirs(self):
-        qt_conf_target_path = self._get_qt_conf_path()
+    def _get_qt_dirs(self, app_run):
+        qt_conf_target_path = self._get_qt_conf_path(app_run)
         qt_conf_dir_path = os.path.dirname(qt_conf_target_path)
 
         return {
@@ -75,11 +75,8 @@ class Qt(BaseHelper):
     def _get_qt_conf_prefix_path(self, qt_conf_dir_path):
         return os.path.relpath(self.app_dir, qt_conf_dir_path)
 
-    def _get_qt_conf_path(self):
-        ld = DynamicLoader(self.app_dir, self.app_dir_files)
-        linker_path = ld.get_binary_path()
-
-        liker_dir = os.path.dirname(os.path.join(self.app_dir, linker_path))
+    def _get_qt_conf_path(self, app_run):
+        liker_dir = os.path.dirname(os.path.join(self.app_dir, app_run.env['BIN_PATH']))
 
         qt_conf_target_path = os.path.join(liker_dir, "qt.conf")
         return qt_conf_target_path

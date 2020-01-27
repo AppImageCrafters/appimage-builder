@@ -9,10 +9,13 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import fnmatch
 import logging
 import os
 
 from .base_helper import BaseHelper
+
+import lief
 
 
 class DynamicLoader(BaseHelper):
@@ -30,6 +33,11 @@ class DynamicLoader(BaseHelper):
         binary_path = self._make_path_relative_to_app_dir(binary_path)
 
         return binary_path
+
+    def configure(self, app_run):
+        linker_path = self.get_binary_path()
+        app_run.env['LINKER_PATH'] = os.path.join('$APPDIR', linker_path)
+        self._set_elf_run_paths(app_run.env['APPIMAGE_UUID'])
 
     def _make_path_relative_to_app_dir(self, binary_path):
         binary_path = os.path.abspath(binary_path)
@@ -52,32 +60,20 @@ class DynamicLoader(BaseHelper):
 
     def _find_binary_by_name(self, linker_dir) -> str:
         for file in self.app_dir_files:
-            if self._is_a_linker_binary(file, linker_dir):
+            if self._is_linker_file(file):
                 return file
 
     @staticmethod
-    def _is_a_linker_binary(file, linker_dir):
-        file_name = os.path.basename(file)
-        return file.startswith(linker_dir) and file_name.startswith('ld-linux') and '.so' in file_name
+    def _is_linker_file(file):
+        return fnmatch.fnmatch(file, '*/lib/*/ld-*.so*') or fnmatch.fnmatch(file, '*/lib*/ld-*.so*')
 
-    def configure(self, app_run):
-        linker_path = self.get_binary_path()
-
-        app_run.env['LINKER_PATH'] = os.path.join('$APPDIR', linker_path)
-        app_run.env['LD_LIBRARY_DIRS'] = ';'.join(self._get_ld_library_dirs())
-
-    def _get_ld_library_dirs(self):
-        relative_elf_dir_paths = self._list_lib_dirs()
-        return {"${APPDIR}/%s" % dir for dir in relative_elf_dir_paths}
-
-    def _list_lib_dirs(self):
+    def _set_elf_run_paths(self, appimage_uuid):
         elf_file_paths = self._list_libs()
+        lib_dir_paths = {os.path.dirname(os.path.join(self.app_dir, file)) for file in elf_file_paths}
 
-        elf_dirs_paths = {os.path.dirname(file) for file in elf_file_paths}
-
-        relative_elf_dir_paths = {dir.replace(self.app_dir, '').lstrip('/') for dir in elf_dirs_paths}
-
-        return relative_elf_dir_paths
+        for file in self.app_dir_files:
+            if not self._is_linker_file(file) and not os.path.islink(file):
+                self._set_pach_elf(file, appimage_uuid)
 
     def _list_libs(self):
         library_files = []
@@ -86,6 +82,53 @@ class DynamicLoader(BaseHelper):
                 library_files.append(full_path)
 
         return library_files
+
+    def _set_pach_elf(self, file, appimage_uuid):
+        binary = lief.ELF.parse(file)
+        if not binary:
+            return
+
+        try:
+            if binary.interpreter:
+                binary.interpreter = '/tmp/appimage_%s.ld.so' % appimage_uuid
+        except lief.not_found:
+            pass
+
+        self._set_elf_run_path(binary, file)
+        binary.write(file)
+
+    def _set_elf_run_path(self, binary, file):
+        link_dirs = self._resolve_elf_link_dirs(binary)
+        # if not link_dirs:
+        #     return
+        logging.info("Setting RUNPATH: %s" % file)
+        binary.remove(lief.ELF.DYNAMIC_TAGS.RPATH)
+        binary.remove(lief.ELF.DYNAMIC_TAGS.RUNPATH)
+        run_path = self._create_elf_run_path_entry(file, link_dirs)
+        binary.add(run_path)
+
+    @staticmethod
+    def _create_elf_run_path_entry(file, link_dirs):
+        run_path = lief.ELF.DynamicEntryRunPath()
+        for dir_path in link_dirs:
+            rel_path = os.path.relpath(dir_path, os.path.dirname(file))
+            if rel_path == '.':
+                rel_path = ''
+
+            run_path_entry = '$ORIGIN/%s' % rel_path
+
+            logging.info("\t%s" % run_path_entry)
+            run_path.append(run_path_entry)
+        return run_path
+
+    def _resolve_elf_link_dirs(self, binary):
+        lib_dirs = set()
+        for entry in binary.libraries:
+            path = self._get_relative_parent_dir_of(entry)
+            if path:
+                abs_path = os.path.join(self.app_dir, path)
+                lib_dirs.add(abs_path)
+        return lib_dirs
 
     @staticmethod
     def _is_shared_lib(path):

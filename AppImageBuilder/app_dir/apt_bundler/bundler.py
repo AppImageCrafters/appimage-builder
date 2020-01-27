@@ -32,9 +32,13 @@ class AptBundler:
             'debconf',
             'dpkg',
             'lsb-base',
+            'libcap2-bin',
+            'libinput-bin',
             'multiarch-support',
             'passwd',
             'systemd',
+            'ucf',
+            'iso-codes',
         ]
 
     def deploy_packages(self, app_dir_path):
