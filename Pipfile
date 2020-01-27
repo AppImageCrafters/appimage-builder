@@ -10,7 +10,6 @@ pyyaml = "*"
 docker = "*"
 'bash.py' = "*"
 requests = "*"
-lief = "*"
 
 [requires]
 python_version = "3.6"

@@ -13,9 +13,8 @@ import fnmatch
 import logging
 import os
 
+from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
 from .base_helper import BaseHelper
-
-import lief
 
 
 class DynamicLoader(BaseHelper):
@@ -23,6 +22,8 @@ class DynamicLoader(BaseHelper):
         super().__init__(app_dir, app_dir_files)
 
         self.priority = 100
+        self.patch_elf = PatchElf()
+        self.patch_elf.logger.level = logging.WARNING
 
     def get_binary_path(self) -> str:
         linker_dir = os.path.join(self.app_dir, 'lib')
@@ -68,12 +69,9 @@ class DynamicLoader(BaseHelper):
         return fnmatch.fnmatch(file, '*/lib/*/ld-*.so*') or fnmatch.fnmatch(file, '*/lib*/ld-*.so*')
 
     def _set_elf_run_paths(self, appimage_uuid):
-        elf_file_paths = self._list_libs()
-        lib_dir_paths = {os.path.dirname(os.path.join(self.app_dir, file)) for file in elf_file_paths}
-
         for file in self.app_dir_files:
             if not self._is_linker_file(file) and not os.path.islink(file):
-                self._set_pach_elf(file, appimage_uuid)
+                self._patch_elf(file, appimage_uuid)
 
     def _list_libs(self):
         library_files = []
@@ -83,33 +81,32 @@ class DynamicLoader(BaseHelper):
 
         return library_files
 
-    def _set_pach_elf(self, file, appimage_uuid):
-        binary = lief.ELF.parse(file)
-        if not binary:
-            return
-
+    def _patch_elf(self, file, appimage_uuid):
         try:
-            if binary.interpreter:
-                binary.interpreter = '/tmp/appimage_%s.ld.so' % appimage_uuid
-        except lief.not_found:
+            self.patch_elf.log_stderr = False
+            needed_libs = self.patch_elf.get_needed(file)
+            if needed_libs:
+                link_dirs = self._find_elf_link_dirs(needed_libs)
+                run_path = self._create_elf_run_path_list(file, link_dirs)
+
+                self.patch_elf.log_stderr = True
+                self.patch_elf.set_run_path(file, run_path)
+        except PatchElfError:
             pass
 
-        self._set_elf_run_path(binary, file)
-        binary.write(file)
+        try:
+            self.patch_elf.log_stderr = False
+            interpreter = self.patch_elf.get_interpreter(file)
+            if interpreter:
+                self.patch_elf.log_stderr = True
+                self.patch_elf.set_interpreter(file, '/tmp/appimage_%s.ld.so' % appimage_uuid)
 
-    def _set_elf_run_path(self, binary, file):
-        link_dirs = self._resolve_elf_link_dirs(binary)
-        # if not link_dirs:
-        #     return
-        logging.info("Setting RUNPATH: %s" % file)
-        binary.remove(lief.ELF.DYNAMIC_TAGS.RPATH)
-        binary.remove(lief.ELF.DYNAMIC_TAGS.RUNPATH)
-        run_path = self._create_elf_run_path_entry(file, link_dirs)
-        binary.add(run_path)
+        except PatchElfError:
+            pass
 
     @staticmethod
-    def _create_elf_run_path_entry(file, link_dirs):
-        run_path = lief.ELF.DynamicEntryRunPath()
+    def _create_elf_run_path_list(file, link_dirs):
+        run_path = set()
         for dir_path in link_dirs:
             rel_path = os.path.relpath(dir_path, os.path.dirname(file))
             if rel_path == '.':
@@ -118,12 +115,13 @@ class DynamicLoader(BaseHelper):
             run_path_entry = '$ORIGIN/%s' % rel_path
 
             logging.info("\t%s" % run_path_entry)
-            run_path.append(run_path_entry)
+            run_path.add(run_path_entry)
+
         return run_path
 
-    def _resolve_elf_link_dirs(self, binary):
+    def _find_elf_link_dirs(self, needed):
         lib_dirs = set()
-        for entry in binary.libraries:
+        for entry in needed:
             path = self._get_relative_parent_dir_of(entry)
             if path:
                 abs_path = os.path.join(self.app_dir, path)

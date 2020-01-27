@@ -12,7 +12,7 @@ AppDir:
     name: qmlscene
     icon: text-x-qml
     version: 19.08.02
-    exec: usr/lib/i386-linux-gnu/qt5/bin/qmlscene
+    exec: usr/lib/qt5/bin/qmlscene
     exec_args: $@ ${APPDIR}/main.qml
 
   apt:
@@ -43,10 +43,6 @@ AppDir:
       - tar
 
   test:
-    centos:
-      image: centos:6
-      command: "./AppRun main.qml"
-      use_host_x: True
     debian:
       image: debian:stable
       command: "./AppRun $@ main.qml"
@@ -63,7 +59,10 @@ AppDir:
       image: ubuntu:xenial
       command: "./AppRun main.qml"
       use_host_x: True
-
+    centos:
+      image: centos:6
+      command: "./AppRun main.qml"
+      use_host_x: True
 
 AppImage:
   update-information: None
