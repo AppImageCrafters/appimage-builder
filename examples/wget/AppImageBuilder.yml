@@ -31,6 +31,9 @@ AppDir:
       - usr/share/doc/*/NEWS.*
       - usr/share/doc/*/TODO.*
 
+  runtime:
+    env:
+      PATH: '${APPDIR}/usr/bin:${PATH}'
 
   test:
     centos:

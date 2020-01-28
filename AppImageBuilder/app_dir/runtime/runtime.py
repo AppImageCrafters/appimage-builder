@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import logging
 import os
 
 from .app_run import AppRun
@@ -27,12 +28,15 @@ class Runtime():
 
         app_info_loader = AppInfoLoader()
         self.app_info = app_info_loader.load(recipe)
+        self.env = recipe.get_item('AppDir/runtime/env', {})
 
     def generate(self):
         app_run = AppRun(self.app_info.exec, self.app_info.exec_args)
         self._configure_runtime(app_run)
 
         app_run_path = self._get_app_run_path()
+
+        self._add_user_defined_settings(app_run)
         app_run.save(app_run_path)
 
     def _get_app_run_path(self):
@@ -54,3 +58,10 @@ class Runtime():
                 app_dir_files.append(os.path.join(root, file))
 
         return app_dir_files
+
+    def _add_user_defined_settings(self, app_run: AppRun) -> None:
+        for k, v in self.env.items():
+            if k in app_run.env:
+                logging.info('Overriding runtime env: %s' % k)
+
+            app_run.env[k] = v
