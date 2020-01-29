@@ -35,4 +35,4 @@ class DpkgDeb(Command):
                 line = line[2:]
 
             if line:
-                self.logger.info('%s: %s' % (os.path.basename(deb_file), line))
+                self.logger.debug('%s: %s' % (os.path.basename(deb_file), line))
