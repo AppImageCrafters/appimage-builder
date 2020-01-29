@@ -87,7 +87,7 @@ class DynamicLoader(BaseHelper):
             needed_libs = self.patch_elf.get_needed(file)
             if needed_libs:
                 link_dirs = self._find_elf_link_dirs(needed_libs)
-                logging.info("Setting RUN_PATHS to %s" % file)
+                logging.info("Setting RUN_PATHS to: %s" % os.path.relpath(file, self.app_dir))
                 run_path = self._create_elf_run_path_list(file, link_dirs)
 
                 self.patch_elf.log_stderr = True
@@ -100,7 +100,7 @@ class DynamicLoader(BaseHelper):
             interpreter = self.patch_elf.get_interpreter(file)
             if interpreter:
                 # https://docs.oracle.com/cd/E19957-01/806-0641/chapter6-71736/index.html
-                logging.info("Setting PT_INTERP to %s" % file)
+                logging.info("Setting PT_INTERP to: %s" % os.path.relpath(file, self.app_dir))
                 self.patch_elf.log_stderr = True
                 self.patch_elf.set_interpreter(file, '/tmp/appimage_%s.ld.so' % appimage_uuid)
 
