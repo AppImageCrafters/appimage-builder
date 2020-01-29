@@ -22,7 +22,7 @@ class Command:
         self.runnable = which(runnable)
         if not self.runnable:
             raise Command.CommandMissingError('Unable to locate %s runnable. Please make sure it is installed '
-                                              'and available in the environment variable PATH.')
+                                              'and available in the environment variable PATH.' % self.runnable)
         self.log_command = True
         self.log_stdout = True
         self.log_stderr = True
