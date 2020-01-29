@@ -57,6 +57,7 @@ class AptBundler:
 
         for file_name in os.listdir(archives_path):
             if self._is_deb_file(file_name):
+                logging.info("Deploying: %s" % file_name)
                 file_path = os.path.join(archives_path, file_name)
                 self._extract_deb(file_path, app_dir_path)
 
