@@ -117,7 +117,7 @@ class DynamicLoader(BaseHelper):
 
             run_path_entry = '$ORIGIN/%s' % rel_path
 
-            logging.info("\t%s" % run_path_entry)
+            logging.debug("\t%s" % run_path_entry)
             run_path.add(run_path_entry)
 
         return run_path
