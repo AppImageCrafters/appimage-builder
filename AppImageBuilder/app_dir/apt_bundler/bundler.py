@@ -40,6 +40,10 @@ class AptBundler:
             'systemd',
             'ucf',
             'iso-codes',
+            'util-linux',
+            'systemd',
+            'shared-mime-info',
+            'mount'
         ]
 
     def deploy_packages(self, app_dir_path):
