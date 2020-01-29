@@ -22,6 +22,7 @@ class AptBundler:
 
         self.apt_get = AptGet(self.config.apt_prefix, self.config.get_apt_conf_path())
         self.dpkg_deb = DpkgDeb()
+        self.dpkg_deb.log_command = False
         self.default_exclude_list = [
             'adduser',
             'avahi-daemon',

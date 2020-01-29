@@ -23,6 +23,7 @@ class Command:
         if not self.runnable:
             raise Command.CommandMissingError('Unable to locate %s runnable. Please make sure it is installed '
                                               'and available in the environment variable PATH.')
+        self.log_command = True
         self.log_stdout = True
         self.log_stderr = True
 
@@ -35,7 +36,11 @@ class Command:
         self.stderr = []
 
     def _run(self, command):
-        self.logger.info(' '.join(command))
+        if self.log_command:
+            self.logger.info(' '.join(command))
+        else:
+            self.logger.debug(' '.join(command))
+
         process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         self._poll_process(process)
