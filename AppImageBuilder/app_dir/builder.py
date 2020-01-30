@@ -49,8 +49,9 @@ class Builder:
         os.makedirs(self.app_dir_path, exist_ok=True)
         self.apt_config.generate()
 
-        apt = AptBundler(self.apt_config)
-        apt.deploy_packages(self.app_dir_path)
+        if 'apt' in self.app_dir_conf:
+            apt = AptBundler(self.apt_config)
+            apt.deploy_packages(self.app_dir_path)
 
         self.file_bundler.bundle_included()
         self.file_bundler.remove_excluded()
