@@ -16,6 +16,8 @@ import os
 from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
 from .base_helper import BaseHelper
 
+class DynamicLoaderError(RuntimeError):
+    pass
 
 class DynamicLoader(BaseHelper):
     def __init__(self, app_dir, app_dir_files):
@@ -63,10 +65,11 @@ class DynamicLoader(BaseHelper):
         for file in self.app_dir_files:
             if self._is_linker_file(file):
                 return file
+        raise DynamicLoaderError('Unable to find \'ld.so\' in the AppDir')
 
     @staticmethod
     def _is_linker_file(file):
-        return fnmatch.fnmatch(file, '*/lib/*/ld-*.so*') or fnmatch.fnmatch(file, '*/lib*/ld-*.so*')
+        return fnmatch.fnmatch(file, '*/lib/*/ld-*.so*') or fnmatch.fnmatch(file, '*/lib64/ld-*.so*')
 
     def _set_elf_run_paths(self, appimage_uuid):
         for file in self.app_dir_files:

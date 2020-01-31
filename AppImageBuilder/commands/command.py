@@ -10,6 +10,7 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import logging
+import os
 from shutil import which
 import subprocess
 
@@ -20,9 +21,8 @@ class Command:
 
     def __init__(self, runnable, logger=None):
         self.runnable = which(runnable)
-        if not self.runnable:
-            raise Command.CommandMissingError('Unable to locate %s runnable. Please make sure it is installed '
-                                              'and available in the environment variable PATH.' % self.runnable)
+        self.assert_runnable_exists(runnable)
+
         self.log_command = True
         self.log_stdout = True
         self.log_stderr = True
@@ -34,6 +34,13 @@ class Command:
         self.return_code = None
         self.stdout = []
         self.stderr = []
+        self.cwd = os.path.curdir
+
+    @staticmethod
+    def assert_runnable_exists(runnable):
+        if not runnable:
+            raise Command.CommandMissingError('Unable to locate \'%s\' runnable. Please make sure it is installed '
+                                              'and available in the environment variable PATH.' % runnable)
 
     def _run(self, command):
         if self.log_command:
@@ -41,13 +48,14 @@ class Command:
         else:
             self.logger.debug(' '.join(command))
 
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd)
 
         self._poll_process(process)
 
     def _run_with_input(self, command, input):
         self.logger.info(' '.join(command))
-        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                   cwd=self.cwd)
         process.communicate(input)
 
         self._poll_process(process)

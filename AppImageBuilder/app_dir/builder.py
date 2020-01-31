@@ -13,11 +13,14 @@ import os
 
 from .apt_bundler.bundler import AptBundler
 from .apt_bundler.config import Config as AptConfig
+from .yum_bundler.bundler import Bundler as YumBundler
+from .yum_bundler.config import Config as YumConfig
 from .file_bundler import FileBundler
 from .metadata.desktop_entry_generator import DesktopEntryGenerator
 from .metadata.icon_bundler import IconBundler
 from .metadata.loader import AppInfoLoader
 from .runtime.runtime import Runtime
+
 
 
 class BuilderError(RuntimeError):
@@ -47,11 +50,18 @@ class Builder:
 
     def build(self):
         os.makedirs(self.app_dir_path, exist_ok=True)
-        self.apt_config.generate()
 
         if 'apt' in self.app_dir_conf:
+            self.apt_config.generate()
             apt = AptBundler(self.apt_config)
             apt.deploy_packages(self.app_dir_path)
+
+        if 'yum' in self.app_dir_conf:
+            config = YumConfig(self.recipe)
+            config.configure()
+
+            yum = YumBundler(config)
+            yum.deploy_packages(self.app_dir_path)
 
         self.file_bundler.bundle_included()
         self.file_bundler.remove_excluded()
