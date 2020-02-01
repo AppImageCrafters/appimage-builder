@@ -1,27 +1,26 @@
 # appimage-builder
 
-`appimage-builder` allows to pack applications along with *all* of its dependencies.
-It uses traditional GNU/Linux software package tools like `apt` or `yum` to obtain
-binaries and resolve dependencies creating a self sufficient bundle. The embedded
-binaries are configured to be relocatable and to interact with the rest. Finally the
-whole bundle is compressed as a *squashfs* filesystem and attached to a launcher binary
-using `appimagetool` making a nice AppImage.
+appimage-builder allows packing applications along with all of its dependencies. It uses 
+traditional GNU/Linux software package tools like apt or yum to obtain binaries and resolve 
+dependencies creating a self-sufficient bundle. The embedded binaries are configured to be 
+relocatable and to interact with the rest. Finally, the whole bundle is compressed as a 
+squashfs filesystem and attached to a launcher binary using appimagetool making a 
+nice AppImage.
 
 **Features**:
-- recipe based
-- self sufficient bundles
-- backwards and forwards compatibility 
-- cross bundling (don't confuse it with cross compilation, that's out of 
-the tool scope)
-- basic license compliance (package licence files will be bundled)
-- apt package manager support
-- yum package manager support (experimental)
+ - recipe based
+ - self-sufficient bundles
+ - backward and forwards compatibility
+ - cross bundling (don't confuse it with cross-compilation, that's out of the tool scope)
+ - basic license compliance (package license files will be bundled)
+ - apt package manager support
+ - yum package manager support (experimental)
 
 ## Dependencies & Installation
 
-The project is built using Python 3 and uses various command line applications
-to fulfill its goal. Depending on the host system and the recipe the packages 
-providing such application may vary.
+The project is built using Python 3 and uses various command-line applications to 
+fulfill its goal. Depending on the host system and the recipe the packages providing 
+such applications may vary.
 
 **Install on Debian/Ubuntu**
 ```shell script
@@ -36,29 +35,31 @@ sudo pip3 install appimage-builder
 
 ## Usage
 
-The packaging process will be defined in a *yaml* formatted file name `AppImageBuilder.yml`. 
-This file is made up three main sections: **script**, **AppDir** and **AppImage**. Each
-correspond to a different step of the AppImage creation process.
+The packaging process will be defined in a yaml formatted file name *AppImageBuilder.yml*. 
+This file is made up three main sections: **script**, **AppDir** and **AppImage**. 
+Each corresponds to a different step of the AppImage creation process.
 
-Bellow you will find a description of each section of the AppImageBuilder file. Additionally
-are provide a set of examples in the [project repository](https://github.com/AppImageCrafters/appimage-builder/tree/master/examples).
-Please refer to them if you need a template.
+Bellow, you will find a description of each section of the AppImageBuilder file. 
+Additionally are provide a set of examples in the 
+[project repository](https://github.com/AppImageCrafters/appimage-builder/tree/master/examples). 
+Please refer to them if you are looking for a template.
 
 ### script
 
- The script section consists of a list of shell instructions. It should be used to
- deploy your application binaries and resources or other resources that cannot be
- resolved using the package manager.
+The script section consists of a list of shell instructions. It should be used to deploy 
+your application binaries and resources or other resources that cannot be resolved 
+using the package manager.
 
- Example of how to deploy a regular cmake application binaries. 
+Example of how to deploy a regular cmake application binaries.
+ 
 ```yaml
 script:
   - cmake .
   - make DESTDIR=Appdir install
 ``` 
 
- In the cases where you don't use a build tool or it doesn't have an install feature
- you can run any type of command in this section. In the example below a `qml` file
+In the cases where you don't use a build tool or it doesn't have an install feature,
+ you can run any type of command in this section. In the example below a `qml` file 
  is deployed to be used as part of a pure qml application.
    
 ```yaml
@@ -70,10 +71,10 @@ script:
  
  ### AppDir
  
- The AppDir section is the heart of the recipe. It will contain information about
- the software being packed, its dependencies, the runtime configuration and 
- the tests. See the example below corresponding to a pure QML application.
- 
+The AppDir section is the heart of the recipe. It will contain information about the 
+software being packed, its dependencies, the runtime configuration, and the tests. See 
+the example below corresponding to a pure QML application.
+
 AppDir sections:
 
 #### path
@@ -85,14 +86,15 @@ AppDir:
 ```
 
 #### app_info
- - **id**: application id. Mandatory field, must match the application desktop entry 
- name without the '.desktop' extensions. It's recommended to used reverse domain notation like: `org.goodcoders.app`
+ - **id**: application id. Is a mandatory field and must match the application desktop 
+ entry name without the '.desktop' extensions. It's recommended to used reverse 
+ domain notation like *org.goodcoders.app*.
  - **name**: Application name, feel free here :)
  - **icon**: Application icon. It will be used as the bundle icon. The icon will be copied from `$APPDIR/usr/share/icons` or 
  from your system folder `/usr/share/icons`
  - **version**: application version
- - **exec**: path to the application binary. In case of interpreted programing
- languages such as Java, Python or QML it should point to the interpreter binary.
+ - **exec**: path to the application binary. In the case of interpreted programming
+languages such as Java, Python or QML it should point to the interpreter binary.
  - **exec_args**: arguments to be passed when starting the application. You can 
  make use of environment variables such as "$APPDIR" to refer to the bundle root and
  $@ to bypass the user arguments to binary.
@@ -147,8 +149,8 @@ AppDir:
  #### files
  The *files* is used to manipulate (include/exclude) files directly.
  [Globing expressions](https://docs.python.org/3.6/library/glob.html#module-glob)
- can be used to refer to a given set of file.
- - **include**: list of absolute path to files. The file will be copied under the same
+ can be used to refer to a given set of files.
+ - **include**: list of absolute paths to files. The file will be copied under the same
  inside the AppDir. i.e.: `/usr/bin/xrandr` will end at `$APPDIR/usr/bin/randr`
  - **exclude**: list of relative globing shell expressions to the files that will
  not be included in the final AppDir. Expressions will be evaluated relative to the
@@ -210,10 +212,10 @@ AppDir:
 
 The AppImage section refers to the final bundle creation. It's basically a wrapper over `appimagetool`
 
-- **arch**: AppImage runtime arch. Usually it should match the embed binaries arch, but a different compatible one could
-be used. By example a amd64 runtime can be used with i386 embed binaries.
+- **arch**: AppImage runtime arch. Usually, it should match the embed binaries arch, but a different compatible one could
+be used. For example, an amd64 runtime can be used with i386 embed binaries.
 - **update-indo**: AppImage update info. See [Making AppImages updateable](https://docs.appimage.org/packaging-guide/optional/updates.html).
-- **sign-key**: key to sign the bundle. See [Signing AppImage](https://docs.appimage.org/packaging-guide/optional/signatures.html).
+- **sign-key**: the key to sign the bundle. See [Signing AppImage](https://docs.appimage.org/packaging-guide/optional/signatures.html).
 - **name**: use it to rename your final bundle. By default it will be named as follows: 
 `${AppDir.app_info.name}-${AppDir.app_info.version}-${AppImage.arch}.AppImage`. Variables are not supported yet and are 
 used only for illustrative purposes.
