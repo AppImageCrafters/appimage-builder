@@ -1,88 +1,219 @@
-# AppImageBuilder
+# appimage-builder
 
-A recipe based AppImage creation meta-tool featuring:
+`appimage-builder` allows to pack applications along with *all* of its dependencies.
+It uses traditional GNU/Linux software package tools like `apt` or `yum` to obtain
+binaries and resolve dependencies creating a self sufficient bundle. The embedded
+binaries are configured to be relocatable and to interact with the rest. Finally the
+whole bundle is compressed as a *squashfs* filesystem and attached to a launcher binary
+using `appimagetool` making a nice AppImage.
 
-__Done__:
-- Structured recipes
-- AppImage creation in modern system (backward compatibility is keep) 
-- all-in bundles (no external dependencies but Linux Kernel and libfuse)
-- distributions compatibility testing
-- Assisted licensing compliance
+**Features**:
+- recipe based
+- self sufficient bundles
+- backwards and forwards compatibility 
+- cross bundling (don't confuse it with cross compilation, that's out of 
+the tool scope)
+- basic license compliance (package licence files will be bundled)
+- apt package manager support
+- yum package manager support (experimental)
 
-__Todo__:
-- Embed software tracking
-- AppDir structure validation
-- Reproducible builds*
-- continuous integration ready
+## Dependencies & Installation
 
-__Limitations__:
-- only Debian based systems are supported as build platform. _If you think
-we should support another please let us know._
+The project is built using Python 3 and uses various command line applications
+to fulfill its goal. Depending on the host system and the recipe the packages 
+providing such application may vary.
 
-# Features description
+**Install on Debian/Ubuntu**
+```shell script
+sudo apt install -y python3-pip python3-setuptools patchelf desktop-file-utils
+# Install appimagetool AppImage
+sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+sudo chmod +x /usr/local/bin/appimagetool
 
-## Structured recipes
-
-Recipes are wrote using the `yaml` format resulting in a well 
-structured and human readable recipe were each build step is
-specified in a different section.
-
-User can check the `examples` folder for already built recipes. 
-
-## AppImage creation in modern system
-
-Building an AppImage in a modern system using the traditional methods
-renders to bundles incompatible with any distribution released before
-due glib and glibc missing features.
-
-AppImageBuilder fixes this issue by embedding those libraries and the
-required loader tool making your bundle __really__ self-sufficient.
-
-## all-in bundles
-
-All goes into the resulting AppImage file. And by all we also mean
-libc, glib, libssl and any other library. This may render having
-outdated bundles a security issue. But bundles can be easily 
-rebuilt by user or developers so it just takes an update.
-
-A draw-back of this feature is that the resulting AppImage have a
-larger size, yet it's about ~10 mb which _is not a big deal in
-modern times_.
+sudo pip3 install appimage-builder
+```
 
 
-## distributions compatibility testing
+## Usage
 
-Compatibility tests can be easily setup to run the resulting
-bundle in different distributions by means of docker. Therefore
-developers can have a real idea of where they software will be
-able to run.
+The packaging process will be defined in a *yaml* formatted file name `AppImageBuilder.yml`. 
+This file is made up three main sections: **script**, **AppDir** and **AppImage**. Each
+correspond to a different step of the AppImage creation process.
+
+Bellow you will find a description of each section of the AppImageBuilder file. Additionally
+are provide a set of examples in the [project repository](https://github.com/AppImageCrafters/appimage-builder/tree/master/examples).
+Please refer to them if you need a template.
+
+### script
+
+ The script section consists of a list of shell instructions. It should be used to
+ deploy your application binaries and resources or other resources that cannot be
+ resolved using the package manager.
+
+ Example of how to deploy a regular cmake application binaries. 
+```yaml
+script:
+  - cmake .
+  - make DESTDIR=Appdir install
+``` 
+
+ In the cases where you don't use a build tool or it doesn't have an install feature
+ you can run any type of command in this section. In the example below a `qml` file
+ is deployed to be used as part of a pure qml application.
+   
+```yaml
+script:
+  - mkdir -p AppDir
+  - cp -f main.qml AppDir/
+``` 
+ 
+ 
+ ### AppDir
+ 
+ The AppDir section is the heart of the recipe. It will contain information about
+ the software being packed, its dependencies, the runtime configuration and 
+ the tests. See the example below corresponding to a pure QML application.
+ 
+AppDir sections:
+
+#### path
+Path to the AppDir.
+
+```yaml
+AppDir:
+  path: ./AppDir
+```
+
+#### app_info
+ - **id**: application id. Mandatory field, must match the application desktop entry 
+ name without the '.desktop' extensions. It's recommended to used reverse domain notation like: `org.goodcoders.app`
+ - **name**: Application name, feel free here :)
+ - **icon**: Application icon. It will be used as the bundle icon. The icon will be copied from `$APPDIR/usr/share/icons` or 
+ from your system folder `/usr/share/icons`
+ - **version**: application version
+ - **exec**: path to the application binary. In case of interpreted programing
+ languages such as Java, Python or QML it should point to the interpreter binary.
+ - **exec_args**: arguments to be passed when starting the application. You can 
+ make use of environment variables such as "$APPDIR" to refer to the bundle root and
+ $@ to bypass the user arguments to binary.
+
+```yaml
+  app_info:
+    id: org.apppimagecrafters.hello_qml
+    name: Hello QML
+    icon: text-x-qml
+    version: 1.0
+    exec: usr/lib/qt5/bin/qmlscene
+    exec_args: $@ ${APPDIR}/main.qml
+```
+ 
+ #### apt
+ 
+ The `apt` is used to list the packages of the app dependencies and the sources
+ to fetch them.
+ 
+ - **arch**: binaries arch. Must match the one used in the sources configuration.
+ - **sources**: apt sources to be used to retrieve the packages
+    - **sourceline**: apt config source line. It's recommended to include the *arch* on
+    it to speed up builds.   
+    - **key_url**: apt key to validate the packages in the repository. An url to the actual
+    key is expected.
+    
+ - **include**: list of packages to be included in the bundle. Package dependencies will
+ also be bundled
+ - **exclude**: list of packages to *not* be bundle. Use it to excluded those packages
+ that aren't required.
+ 
+ ```yaml
+   apt:
+    arch: i386
+    sources:
+      - sourceline: 'deb [arch=i386] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+
+    include:
+      - qmlscene
+      - qml-module-qtquick2
+    exclude:
+      - qtchooser
+```
+ 
+ The tool generates a cache where the downloaded packages and other auxiliary files are 
+ stored, it will be located in the current work dir with the name **appimage-builder-cache**. 
+ It's safe to erase it and should not be included in your VCS tree.
 
 
-## Embed software tracking
 
-As the bundle is built using the packages from the host system 
-package manager it's possible to store the exact list of which
-software was embed and it's version. By retriving this information
-security tools can detect if there are vulnerabilities reported
-for such versions and warn the users about it.
+ #### files
+ The *files* is used to manipulate (include/exclude) files directly.
+ [Globing expressions](https://docs.python.org/3.6/library/glob.html#module-glob)
+ can be used to refer to a given set of file.
+ - **include**: list of absolute path to files. The file will be copied under the same
+ inside the AppDir. i.e.: `/usr/bin/xrandr` will end at `$APPDIR/usr/bin/randr`
+ - **exclude**: list of relative globing shell expressions to the files that will
+ not be included in the final AppDir. Expressions will be evaluated relative to the
+ AppDir. Use it to excluded un-required files such as man pages or development 
+ resources.      
+ 
+```yaml
+  files:
+    exclude:
+      - usr/share/man
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
+```
+ 
+ #### test
+ The test section is used to describe test cases for your final bundle. The AppDir
+ as it's can be already executed. Therefore it can be placed inside a docker container
+ and executed. This section facilitates the process. Notice that you will test
+ that your app is properly bundled and isolated therefore is recommended to use 
+ minimal Docker images (i.e.: with no desktop environment installed).
+ 
+ **IMPORTANT**: docker is required to be installed running to execute the tests
+ 
+ Each test case has a name, which could be any alphanumeric string and the 
+ following parameters:
+ - **image**: docker image to be used
+ - **command**: command to execute
+ - **use_host_x**: whether to share or not the host X11 session with the container.
+ This feature may not be supported by some containers as it depends on X11.
+ - **env**: list of environment variables to be passed to the docker container
+ 
+ ```yaml
+  test:
+    fedora:
+      image: fedora:26
+      command: "./AppRun main.qml"
+      use_host_x: True
+    ubuntu:
+      image: ubuntu:xenial
+      command: "./AppRun main.qml"
+      use_host_x: True
+```
+ 
+ #### runtime
+ 
+ Advanced runtime configuration. 
+ 
+ - **env**: map of the environment variables to be set at runtime.
+ 
+ ```yaml
+  runtime:
+    env:
+      PATH: '${APPDIR}/usr/bin:${PATH}'
+```
 
-## AppDir structure validation
+### AppImage
 
-To check whether the AppDir is properly formed and there are no
-missing resources.
+The AppImage section refers to the final bundle creation. It's basically a wrapper over `appimagetool`
 
-## Reproducible builds
-
-Recipes can be embed in the resulting bundle so users can recreate
-the package without major efforts and compare the results.
-
-## Assisted licensing compliance
-
-The host system package manager already include the licenses of
-every software piece therefore this information is also passed
-into the resulting bundle.
-
-## continuous integration ready
-
-Provide hooks to publish the resulting bundle into the different
-applications stores or binary hosting services.
+- **arch**: AppImage runtime arch. Usually it should match the embed binaries arch, but a different compatible one could
+be used. By example a amd64 runtime can be used with i386 embed binaries.
+- **update-indo**: AppImage update info. See [Making AppImages updateable](https://docs.appimage.org/packaging-guide/optional/updates.html).
+- **sign-key**: key to sign the bundle. See [Signing AppImage](https://docs.appimage.org/packaging-guide/optional/signatures.html).
+- **name**: use it to rename your final bundle. By default it will be named as follows: 
+`${AppDir.app_info.name}-${AppDir.app_info.version}-${AppImage.arch}.AppImage`. Variables are not supported yet and are 
+used only for illustrative purposes.
