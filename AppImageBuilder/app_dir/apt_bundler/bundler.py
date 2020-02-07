@@ -14,6 +14,7 @@ import os
 
 from AppImageBuilder.commands.apt_get import AptGet
 from AppImageBuilder.commands.dpkg_deb import DpkgDeb, DpkgDebError
+from .util import is_deb_file
 
 
 class AptBundler:
@@ -43,7 +44,9 @@ class AptBundler:
             'util-linux',
             'systemd',
             'shared-mime-info',
-            'mount'
+            'mount',
+            'xdg-user-dirs',
+            'coreutils'
         ]
 
     def deploy_packages(self, app_dir_path):
@@ -60,13 +63,10 @@ class AptBundler:
         archives_path = self.config.get_apt_archives_path()
 
         for file_name in os.listdir(archives_path):
-            if self._is_deb_file(file_name):
+            if is_deb_file(file_name):
                 logging.info("Deploying: %s" % file_name)
                 file_path = os.path.join(archives_path, file_name)
                 self._extract_deb(file_path, app_dir_path)
-
-    def _is_deb_file(self, file_name):
-        return file_name.endswith('.deb')
 
     def _extract_deb(self, file_path, app_dir_path):
         try:
