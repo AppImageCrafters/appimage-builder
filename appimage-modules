@@ -1,0 +1,80 @@
+#!/usr/bin/env python3
+#  Copyright  2020 Alexis Lopez Zubieta
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+import argparse
+import logging
+import os
+import subprocess
+
+from AppImageBuilder.app_dir.apt_bundler.config import Config as AptConfig
+from AppImageBuilder.commands.apt_get import AptGet
+from AppImageBuilder.app_dir.apt_bundler import util as apt_util
+from AppImageBuilder.recipe import Recipe
+
+
+def __main__():
+    parser = argparse.ArgumentParser(description='AppImage modules analisys tool')
+    parser.add_argument('--recipe', dest='recipe', default=os.path.join(os.getcwd(), "AppImageBuilder.yml"),
+                        help='recipe file path (default: $PWD/AppImageBuilder.yml)')
+    parser.add_argument('--log', dest='loglevel', default="INFO", help='logging level (default: INFO)')
+    parser.add_argument('--generate-apt-graph', dest='apt_graph', action="store_true",
+                        help='Generate apt dependencies graph', default=False)
+    parser.add_argument('--update-apt-cache', dest='apt_update', action="store_true",
+                        help='Update apt cache', default=False)
+
+    args = parser.parse_args()
+    configure_logging(args)
+
+    recipe = Recipe()
+    recipe.load_file(args.recipe)
+
+    if args.apt_graph:
+        return generate_deb_graph(recipe, args)
+
+
+def configure_logging(args):
+    numeric_level = getattr(logging, args.loglevel.upper())
+    if not isinstance(numeric_level, int):
+        logging.error('Invalid log level: %s' % args.loglevel)
+    logging.basicConfig(level=numeric_level)
+
+
+def generate_deb_graph(recipe, args):
+    app_dir = os.path.abspath(recipe.get_item('AppDir/path'))
+    apt_settings = recipe.get_item('AppDir/apt')
+
+    apt_config = AptConfig()
+    apt_config.load(apt_settings)
+    apt_config.generate()
+
+    if args.apt_update:
+        apt_command = AptGet(apt_config.apt_prefix, apt_config.get_apt_conf_path())
+        apt_command.update()
+
+    output = _run_apt_cache_depends_recursive(apt_config)
+    file_name = 'apt_graph.dot'
+    with open(file_name, 'w') as f:
+        f.write(output)
+        print("The apt dependencies graph have been written to: %s" % file_name)
+
+
+def _run_apt_cache_depends_recursive(apt_config):
+    command = ['apt-cache', '-c', apt_config.get_apt_conf_path(), '-i', '-q', '--recurse', 'dotty']
+    command.extend(apt_config.apt_include)
+    print(' '.join(command))
+    proc = subprocess.run(command, stdout=subprocess.PIPE)
+    apt_cache_output = proc.stdout.decode('utf-8')
+    return apt_cache_output
+
+
+if __name__ == '__main__':
+    __main__()
