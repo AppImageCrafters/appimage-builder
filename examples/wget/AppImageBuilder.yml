@@ -5,15 +5,15 @@ AppDir:
 
   app_info:
     id: org.gnu.wget
-    version: 1.9
+    version: !ENV '${APP_VERSION}'
     name: wget
     icon: utilities-terminal
     exec: usr/bin/wget
 
   apt:
-    arch: amd64
+    arch: !ENV ${TARGET_ARCH}
     sources:
-      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
+      - sourceline: !ENV 'deb [arch=${TARGET_ARCH}] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
 
     include:
@@ -56,3 +56,4 @@ AppImage:
   arch: x86_64
   update-information: None
   sign-key: None
+  file_name: !ENV 'wget-${APP_VERSION}-${TARGET_ARCH}.AppImage'

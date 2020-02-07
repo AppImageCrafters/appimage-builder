@@ -44,6 +44,25 @@ Additionally are provide a set of examples in the
 [project repository](https://github.com/AppImageCrafters/appimage-builder/tree/master/examples). 
 Please refer to them if you are looking for a template.
 
+### Environment variables
+
+Environment variables can be used at any place of the configuration file and
+must have !ENV before them and be in this format to be parsed: `${VAR_NAME}`.
+
+E.g.:
+```yaml
+AppDir:
+  app_info:
+    version: !ENV ${APP_VERSION}
+    exec: !ENV 'lib/${GNU_ARCH_TRIPLET}/qt5/bin/qmlscene'
+AppImage:
+  arch: !ENV '${TARGET_ARCH}'
+  file_name: !ENV 'myapp-${APP_VERSION}_${TIMESTAMP}-${ARCH}.AppImage'
+```
+
+To mix variables that must be parsed with other that not use the following
+sintax: `!ENV '${PARSED_VAR}-"$NON_PARSED_VAR"'`
+
 ### script
 
 The script section consists of a list of shell instructions. It should be used to deploy 
