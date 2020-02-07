@@ -61,7 +61,9 @@ AppImage:
 ```
 
 To mix variables that must be parsed with other that not use the following
-sintax: `!ENV '${PARSED_VAR}-"$NON_PARSED_VAR"'`
+syntax:
+
+`!ENV '${PARSED_VAR}-"$NON_PARSED_VAR"'`
 
 ### script
 
