@@ -35,7 +35,7 @@ sudo pip3 install appimage-builder
 
 ## Usage
 
-The packaging process will be defined in a YAML-formatted file named *AppImageBuilder.yml*.
+The packaging process will be defined in a YAML-formatted file named `AppImageBuilder.yml`.
 This file is made up of three main sections: **script**, **AppDir** and **AppImage**.
 Each corresponds to a different step of the AppImage creation process.
 
