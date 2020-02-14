@@ -24,7 +24,7 @@ class RepoQuery(Command):
         self.log_stdout = False
 
     def requires(self, packages, arch):
-        command = ['repoquery', '--requires', '--resolve', '--arch=%s' % arch]
+        command = ['repoquery', '--requires', '--exactdeps', '--resolve', '--arch=%s' % arch]
         command.extend(packages)
         self._run(command)
 
