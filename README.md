@@ -222,9 +222,13 @@ languages such as Java, Python or QML, it should point to the interpreter binary
  Advanced runtime configuration.
 
  - **env**: Environment variables to be set at runtime.
-
+ - **generator**: Runtime generator to be used
+   - proot: Use proot to run the application. It's required to bundle the system package.
+   - classic: Set's PT_RUNPATH y PT_INTERP to ELF files and other runtime configurations. 
+ 
  ```yaml
   runtime:
+    generator: proot
     env:
       PATH: '${APPDIR}/usr/bin:${PATH}'
 ```
