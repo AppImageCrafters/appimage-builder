@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #  Copyright  2020 Alexis Lopez Zubieta
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a
