@@ -62,7 +62,10 @@ class DynamicLoader(BaseHelper):
         return binary_path
 
     def _find_binary_by_name(self) -> str:
-        path = self._get_glob_relative_file_path('*/lib*/ld-*.so*')
+        path = self._get_glob_relative_file_path('*/lib/ld-*.so*')
+        if not path:
+            path = self._get_glob_relative_file_path('*/lib64/ld-*.so*')
+
         return os.path.join(self.app_dir, path)
 
     def get_library_dirs_paths(self):
