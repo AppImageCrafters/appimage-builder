@@ -30,6 +30,8 @@ sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/a
 sudo chmod +x /usr/local/bin/appimagetool
 
 sudo pip3 install appimage-builder
+# or
+sudo pip3 install git+https://github.com/AppImageCrafters/appimage-builder.git
 ```
 
 
