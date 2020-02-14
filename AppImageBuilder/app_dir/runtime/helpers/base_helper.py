@@ -60,3 +60,8 @@ class BaseHelper:
             if fnmatch.fnmatch(file, pattern):
                 dir_name = os.path.dirname(file)
                 return os.path.relpath(dir_name, self.app_dir)
+
+    def _get_glob_relative_file_path(self, pattern):
+        for file in self.app_dir_files:
+            if fnmatch.fnmatch(file, pattern):
+                return os.path.relpath(file, self.app_dir)

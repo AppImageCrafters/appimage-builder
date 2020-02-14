@@ -18,6 +18,7 @@ AppDir:
 
     include:
       - wget
+      - proot
       - libssl1.0.0
       # Domain name resolution lib
       - libnss-mdns
@@ -32,6 +33,7 @@ AppDir:
       - usr/share/doc/*/TODO.*
 
   runtime:
+    generator: proot
     env:
       PATH: '${APPDIR}/usr/bin:${PATH}'
 

@@ -13,6 +13,7 @@ import os
 
 from .apt_bundler.bundler import AptBundler
 from .apt_bundler.config import Config as AptConfig
+from AppImageBuilder.app_dir.proot_runtime.runtime import PRootRuntime
 from .yum_bundler.bundler import Bundler as YumBundler
 from .yum_bundler.config import Config as YumConfig
 from .file_bundler import FileBundler
@@ -20,7 +21,6 @@ from .metadata.desktop_entry_generator import DesktopEntryGenerator
 from .metadata.icon_bundler import IconBundler
 from .metadata.loader import AppInfoLoader
 from .runtime.runtime import Runtime
-
 
 
 class BuilderError(RuntimeError):
@@ -66,8 +66,13 @@ class Builder:
         self.file_bundler.bundle_included()
         self.file_bundler.remove_excluded()
 
-        runtime = Runtime(self.recipe)
-        runtime.generate()
+        runtime_generator = self.recipe.get_item('AppDir/runtime/generator', "classic")
+        if "proot" == runtime_generator:
+            runtime = PRootRuntime(self.recipe)
+            runtime.generate()
+        else:
+            runtime = Runtime(self.recipe)
+            runtime.generate()
 
         self._bundle_app_dir_icon()
         self._generate_app_dir_desktop_entry()

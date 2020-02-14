@@ -48,7 +48,7 @@ class Tester:
             environment = self.get_container_environment()
 
             ctr = self.client.containers.run(self.image, command, auto_remove=True, working_dir='/app',
-                                                   volumes=volumes, stdout=True, stderr=True,
+                                                   volumes=volumes, stdout=True, stderr=True, cap_add=['SYS_PTRACE'],
                                                    environment=environment, detach=True, devices=['/dev/snd'])
             return ctr
 
