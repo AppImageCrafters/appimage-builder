@@ -10,6 +10,7 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import logging
+import fnmatch
 import os
 
 from AppImageBuilder.commands.repoquery import RepoQuery
@@ -29,13 +30,21 @@ class Bundler:
         self.repoquery = RepoQuery()
         self.rpm_extract = RpmExtract()
 
-
-
     def deploy_packages(self, app_dir_path):
         download_list = self.repoquery.requires(self.config.include_list, self.config.arch)
+        download_list.extend(self.config.include_list)
+        download_list = [pkg for pkg in download_list if not self._is_excluded(pkg)]
+
         self.yum_downloader.download(download_list, self.config.archives_path)
 
         self._extract_packages_into_app_dir(app_dir_path)
+
+    def _is_excluded(self, pkg):
+        for exclude_expr in self.config.exclude_list:
+            if fnmatch.fnmatch(pkg, exclude_expr):
+                return True
+
+        return False
 
     def _extract_packages_into_app_dir(self, app_dir_path):
         for file_name in os.listdir(self.config.archives_path):
