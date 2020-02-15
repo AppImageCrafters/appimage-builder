@@ -21,19 +21,17 @@ class YumDownloader(Command):
     def __init__(self):
         super().__init__('yumdownloader')
 
-    def download(self, packages, dir, exclude=None, archlist=None):
+    def download(self, packages, dir, exclude=None):
         if exclude is None:
             exclude = []
 
-        command = self._get_yum_download_command(packages, exclude, dir, archlist)
+        command = self._get_yum_download_command(packages, exclude, dir)
         self._run(command)
         if self.return_code != 0:
             raise YumDownloaderError('yumdownloader failed')
 
-    def _get_yum_download_command(self, packages, exclude, dir, archlist=None):
+    def _get_yum_download_command(self, packages, exclude, dir):
         command = ['yumdownloader', '--resolve', '--destdir=%s' % dir]
-        if archlist:
-            command.extend(['--archlist=%s' % ','.join(archlist)])
         command.extend([['-x', pkg] for pkg in exclude])
         command.extend(packages)
 

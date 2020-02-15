@@ -35,7 +35,7 @@ class Bundler:
         download_list.extend(self.config.include_list)
         download_list = [pkg for pkg in download_list if not self._is_excluded(pkg)]
 
-        self.yum_downloader.download(download_list, self.config.archives_path, [self.config.arch])
+        self.yum_downloader.download(download_list, self.config.archives_path)
 
         self._extract_packages_into_app_dir(app_dir_path)
 
@@ -48,8 +48,7 @@ class Bundler:
 
     def _extract_packages_into_app_dir(self, app_dir_path):
         for file_name in os.listdir(self.config.archives_path):
-            package_name = self._get_package_name_from_fime(file_name)
-            if self._is_rpm_file(file_name) and not package_name in self.config.exclude_list:
+            if self._is_rpm_file(file_name) and not self._is_excluded(file_name):
                 logging.info("Deploying: %s" % file_name)
                 file_path = os.path.join(self.config.archives_path, file_name)
                 self.rpm_extract.extract(file_path, app_dir_path)
