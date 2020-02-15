@@ -35,7 +35,7 @@ class Bundler:
         download_list.extend(self.config.include_list)
         download_list = [pkg for pkg in download_list if not self._is_excluded(pkg)]
 
-        self.yum_downloader.download(download_list, self.config.archives_path)
+        self.yum_downloader.download(download_list, self.config.archives_path, [self.config.arch])
 
         self._extract_packages_into_app_dir(app_dir_path)
 
