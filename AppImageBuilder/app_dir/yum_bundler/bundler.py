@@ -57,7 +57,7 @@ class Bundler:
                 file_path = os.path.join(self.config.archives_path, file_name)
                 self.rpm_extract.extract(file_path, app_dir_path)
             else:
-                logging.info('Excluding rpm file: %s' % file_name)
+                logging.info('Excluding: %s' % file_name)
 
     def _is_rpm_file(self, file_name):
         return file_name.endswith('.rpm')

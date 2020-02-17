@@ -1,5 +1,8 @@
 version: 1
 
+script:
+  - rm -r ./AppDir
+
 AppDir:
   path: ./AppDir
 
@@ -19,6 +22,10 @@ AppDir:
 
     include:
       - vlc
+      - proot
+
+  runtime:
+    generator: proot
 
   test:
     debian:
