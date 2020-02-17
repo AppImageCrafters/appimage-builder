@@ -47,11 +47,17 @@ class Bundler:
         return False
 
     def _extract_packages_into_app_dir(self, app_dir_path):
-        for file_name in os.listdir(self.config.archives_path):
-            if self._is_rpm_file(file_name) and not self._is_excluded(file_name):
+        archives_dir_files = os.listdir(self.config.archives_path)
+        rpm_files = [file for file in archives_dir_files if self._is_rpm_file(file)]
+
+        for file_name in rpm_files:
+            if not self._is_excluded(file_name):
                 logging.info("Deploying: %s" % file_name)
+
                 file_path = os.path.join(self.config.archives_path, file_name)
                 self.rpm_extract.extract(file_path, app_dir_path)
+            else:
+                logging.info('Excluding rpm file: %s' % file_name)
 
     def _is_rpm_file(self, file_name):
         return file_name.endswith('.rpm')
