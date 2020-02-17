@@ -50,7 +50,7 @@ class Bundler:
         archives_dir_files = os.listdir(self.config.archives_path)
         rpm_files = [file for file in archives_dir_files if self._is_rpm_file(file)]
 
-        for file_name in rpm_files:
+        for file_name in sorted(rpm_files):
             if not self._is_excluded(file_name):
                 logging.info("Deploying: %s" % file_name)
 
