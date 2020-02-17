@@ -42,7 +42,9 @@ class PRootAppRun:
         'EXEC': [
             '# Launch application using only the bundled libraries',
             'exec "${LINKER_PATH}" --inhibit-cache --library-path "${LD_LIBRARY_DIRS}" \\',
-            '  ${PROOT_PATH} -R ${APPDIR} -b /:/host_root -b /usr/share/icons -b /usr/share/mime -w /host_root/$PWD /${BIN_PATH} ${EXEC_ARGS}',
+            '  ${PROOT_PATH} -R ${APPDIR} -b /:/host_root -b /usr/share/icons -b /usr/share/mime '
+            '-b /etc/machine-id -b /etc/pulse -b /var/run -b /var/cache -b /var/lib/dbus '
+            '-w /host_root/$PWD /${BIN_PATH} ${EXEC_ARGS}',
             ''
         ]
     }

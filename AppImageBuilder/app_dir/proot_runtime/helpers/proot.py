@@ -31,8 +31,9 @@ class PRoot(BaseHelper):
             if self._is_statically_linked(path):
                 app_run.sections['EXEC'] = [
                     '# Launch application using a fake root file system',
-                    '${PROOT_PATH} -R ${APPDIR} -b /:/host_root -b /usr/share/icons -b /usr/share/mime -w '
-                    '/host_root/$PWD /${BIN_PATH} ${EXEC_ARGS}',
+                    '${PROOT_PATH} -R ${APPDIR} -b /:/host_root -b /usr/share/icons -b /usr/share/mime '
+                    '-b /etc/machine-id -b /etc/pulse -b /var/run -b /var/cache -b /var/lib/dbus '
+                    '-w /host_root/$PWD /${BIN_PATH} ${EXEC_ARGS}',
                     ''
                 ]
         else:
