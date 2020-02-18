@@ -48,3 +48,19 @@ class PatchElf(Command):
 
         if self.return_code != 0:
             raise PatchElfError('\n'.join(self.stderr))
+
+    def set(self, file, run_path=None, interpreter=None):
+        command = ['patchelf']
+        if run_path:
+            command.append('--set-rpath')
+            command.append(':'.join(run_path))
+
+        if interpreter:
+            command.append('--set-interpreter')
+            command.append(interpreter)
+
+        command.append(file)
+        self._run(command)
+
+        if self.return_code != 0:
+            raise PatchElfError('\n'.join(self.stderr))

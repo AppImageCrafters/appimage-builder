@@ -16,8 +16,10 @@ import os
 from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
 from .base_helper import BaseHelper
 
+
 class DynamicLoaderError(RuntimeError):
     pass
+
 
 class DynamicLoader(BaseHelper):
     def __init__(self, app_dir, app_dir_files):
@@ -85,6 +87,8 @@ class DynamicLoader(BaseHelper):
         return library_files
 
     def _patch_elf(self, file, appimage_uuid):
+        run_path = None
+        interpreter_path = None
         try:
             self.patch_elf.log_stderr = False
             needed_libs = self.patch_elf.get_needed(file)
@@ -93,8 +97,6 @@ class DynamicLoader(BaseHelper):
                 logging.info("Setting RUN_PATHS to: %s" % os.path.relpath(file, self.app_dir))
                 run_path = self._create_elf_run_path_list(file, link_dirs)
 
-                self.patch_elf.log_stderr = True
-                self.patch_elf.set_run_path(file, run_path)
         except PatchElfError:
             pass
 
@@ -102,11 +104,17 @@ class DynamicLoader(BaseHelper):
             self.patch_elf.log_stderr = False
             interpreter = self.patch_elf.get_interpreter(file)
             if interpreter:
+                interpreter_path = '/tmp/appimage_%s.ld.so' % appimage_uuid
                 # https://docs.oracle.com/cd/E19957-01/806-0641/chapter6-71736/index.html
                 logging.info("Setting PT_INTERP to: %s" % os.path.relpath(file, self.app_dir))
-                self.patch_elf.log_stderr = True
-                self.patch_elf.set_interpreter(file, '/tmp/appimage_%s.ld.so' % appimage_uuid)
 
+        except PatchElfError:
+            pass
+
+        try:
+            if run_path or interpreter_path:
+                self.patch_elf.log_stderr = True
+                self.patch_elf.set(file, run_path=run_path, interpreter=interpreter_path)
         except PatchElfError:
             pass
 
