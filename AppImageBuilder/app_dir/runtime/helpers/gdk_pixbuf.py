@@ -24,13 +24,13 @@ class GdkPixbuf(BaseHelper):
 
             bin_path = self._get_gdk_pixbuf_query_loaders_path()
             if bin_path:
-                app_run.sections['GDK_PIXBUF'] = ['"$APPDIR"/%s' % bin_path, '--update-cache']
+                app_run.sections['GDK_PIXBUF'] = ['"$APPDIR"/%s --update-cache' % bin_path, '']
 
     def _get_gdk_pixbuf_loaders_path(self):
         return self._get_glob_relative_sub_dir_path('*/usr/*/gdk-pixbuf-2.0/*/loaders/*')
 
     def _get_gdk_pixbuf_query_loaders_path(self):
-        return self._get_relative_file_path('gdk-pixbuf-query-loaders*')
+        return self._get_glob_relative_file_path('*/gdk-pixbuf-query-loaders*')
 
     def _get_temp_unique_file_path(self):
         id = uuid.uuid4()
