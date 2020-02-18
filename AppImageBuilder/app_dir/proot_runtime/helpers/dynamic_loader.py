@@ -39,7 +39,7 @@ class DynamicLoader(BaseHelper):
     def configure(self, app_run):
         linker_path = self.get_binary_path()
         library_dirs_paths = self.get_library_dirs_paths()
-        app_run.env['LINKER_PATH'] = os.path.join('$APPDIR', linker_path)
+        app_run.env['LINKER_PATH'] = '$APPDIR/%s' % linker_path
         app_run.env['LD_LIBRARY_DIRS'] = library_dirs_paths
 
     def _make_path_relative_to_app_dir(self, binary_path):
