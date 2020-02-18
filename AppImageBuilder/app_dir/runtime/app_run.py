@@ -37,9 +37,11 @@ class AppRun:
             '    APPDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"',
             'fi'
         ],
-        'EXEC': [
+        'LINKER': [
             '# Work around for not supported $ORIGIN in the elf PT_INTERP segment',
             'ln -s ${LINKER_PATH} /tmp/appimage_$APPIMAGE_UUID.ld.so --force',
+        ],
+        'EXEC': [
             '# Launch application',
             'exec ${APPDIR}/${BIN_PATH} ${EXEC_ARGS}',
             ''
@@ -58,7 +60,7 @@ class AppRun:
     def save(self, path):
         lines = self._generate()
 
-        with  open(path, "w") as f:
+        with open(path, "w") as f:
             f.write("\n".join(lines))
 
         self._set_permissions(path)
@@ -70,8 +72,11 @@ class AppRun:
 
         file_lines.extend(self._generate_env_section())
 
+        if self.env['LINKER_PATH']:
+            file_lines.extend(self.sections['LINKER'])
+
         for k, v in self.sections.items():
-            if k not in ['HEADER', 'APPDIR', 'EXEC', 'EXEC_ARGS']:
+            if k not in ['HEADER', 'APPDIR', 'LINKER', 'EXEC', 'EXEC_ARGS']:
                 # avoid including any special section
                 file_lines.extend(['', '# %s' % k])
                 file_lines.extend(v)
