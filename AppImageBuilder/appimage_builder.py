@@ -48,7 +48,7 @@ class AppImageBuilder:
 
     def _get_runtime_path(self):
         os.makedirs('appimage-builder-cache', exist_ok=True)
-        runtime_path = "appimage-builder-cache/AppRun-%s" % self.target_arch
+        runtime_path = "appimage-builder-cache/runtime-%s" % self.target_arch
 
         return runtime_path
 
