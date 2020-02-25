@@ -9,9 +9,9 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import hashlib
 import logging
 import os
-import subprocess
 
 import requests
 
@@ -156,11 +156,36 @@ class Config:
             self._add_apt_key(key_url, keyring_path)
 
     def _add_apt_key(self, key_url, keyring_path):
-        logging.info('Importing key: %s' % key_url)
-        key = self._try_download_apt_key(key_url)
+        key = self._get_key_from_cache(key_url)
+
+        if not key:
+            key = self._download_key(key_url)
+            with open(self._get_apt_key_cache_path(key_url), 'bw') as f:
+                f.write(key)
 
         apt_key = AptKey()
         apt_key.add(key, keyring_path)
+
+    def _get_key_from_cache(self, key_url):
+        key_cache_path = self._get_apt_key_cache_path(key_url)
+
+        if os.path.exists(key_cache_path):
+            with open(key_cache_path, 'r') as f:
+                return f.read().encode()
+
+    def _get_md5(self, key_url):
+        m = hashlib.md5()
+        m.update(key_url.encode())
+        return m.hexdigest()
+
+    def _get_apt_key_cache_path(self, key_url):
+        hashed = self._get_md5(key_url)
+        return os.path.join(self.apt_prefix, 'etc', 'apt', 'key_%s' % hashed)
+
+    def _download_key(self, key_url):
+        logging.info('Importing key: %s' % key_url)
+        key = self._try_download_apt_key(key_url)
+        return key
 
     def _try_download_apt_key(self, key_url):
         key = requests.get(key_url)
