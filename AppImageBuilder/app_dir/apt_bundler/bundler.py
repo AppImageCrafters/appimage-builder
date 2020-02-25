@@ -46,7 +46,14 @@ class AptBundler:
             'shared-mime-info',
             'mount',
             'xdg-user-dirs',
-            'coreutils'
+            'coreutils',
+
+            # graphics stack
+            'libegl1',
+            'libgl1',
+            'libdrm2',
+            'libegl1-mesa',
+            'libgl1-mesa-dri'
         ]
 
     def deploy_packages(self, app_dir_path):
