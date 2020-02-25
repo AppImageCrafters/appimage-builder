@@ -57,7 +57,8 @@ class AptBundler:
         ]
 
     def deploy_packages(self, app_dir_path):
-        self.apt_get.update()
+        if not os.getenv('APPIMAGE_BUILDER_DISABLE_APT_UPDATE', False):
+            self.apt_get.update()
 
         exclusion_list = self._generate_exclusion_list()
         self.config.set_installed_packages(exclusion_list)
