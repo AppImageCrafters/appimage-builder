@@ -41,6 +41,7 @@ class AppRun:
         'LINKER': [
             '# Work around for not supported $ORIGIN in the elf PT_INTERP segment',
             'ln -s ${LINKER_PATH} /tmp/appimage_$APPIMAGE_UUID.ld.so --force',
+            ''
         ],
         'LIBC': [
             '###',
