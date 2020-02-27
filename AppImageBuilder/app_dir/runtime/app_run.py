@@ -23,6 +23,7 @@ class AppRun:
         'LINKER_PATH': None,
         'XDG_DATA_DIRS': '${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}',
         'XDG_CONFIG_DIRS': '$APPDIR/etc/xdg:$XDG_CONFIG_DIRS',
+        'PATH': '$APPDIR/bin:$APPDIR/sbin:$APPDIR/usr/bin:$PATH',
         'EXEC_ARGS': '$@',
     }
     sections = {
@@ -40,6 +41,39 @@ class AppRun:
         'LINKER': [
             '# Work around for not supported $ORIGIN in the elf PT_INTERP segment',
             'ln -s ${LINKER_PATH} /tmp/appimage_$APPIMAGE_UUID.ld.so --force',
+        ],
+        'LIBC': [
+            '###',
+            '# Select the greater libc to run the app',
+            '###',
+            '',
+            '# Configure appdir loader initially',
+            'ln -s ${LINKER_PATH} /tmp/appimage_$APPIMAGE_UUID.ld.so --force',
+            'echo "AppRun -- resolving greater libc --"',
+            '',
+            'SYSTEM_LIBC_PATH=$("${LINKER_PATH}" --list /bin/bash | grep "libc.so" | cut -f 3 -d " ")',
+            'SYSTEM_LIBC_VERSION=$(readlink -f "${SYSTEM_LIBC_PATH}" | rev | cut -d / -f 1 | cut -d "-" -f 1 | cut -d '
+            '"." -f 2- | rev)',
+            'echo "AppRun -- system libc: $SYSTEM_LIBC_PATH $SYSTEM_LIBC_VERSION"',
+            '',
+            'APPDIR_LIBC_PATH=$("${LINKER_PATH}" --list $APPDIR/$BIN_PATH | grep "libc.so" | cut -f 3 -d " ")',
+            'APPDIR_LIBC_VERSION=$(readlink -f "${APPDIR_LIBC_PATH}" | rev | cut -d / -f 1 | cut -d "-" -f 1 | cut -d '
+            '"." -f 2- | rev)',
+            'echo "AppRun -- appdir libc: $APPDIR_LIBC_PATH $APPDIR_LIBC_VERSION"',
+            '',
+            'GREATER_LIBC=$(printf "$SYSTEM_LIBC_VERSION\n$APPDIR_LIBC_VERSION"  | sort -V | tail -1)',
+            '',
+            'if [ "$SYSTEM_LIBC_VERSION" == "$GREATER_LIBC" ]; then',
+            '  echo "AppRun -- Using System libc version: $SYSTEM_LIBC_VERSION"',
+            '  LIBC_DIR=$(dirname $SYSTEM_LIBC_PATH)',
+            '  export LINKER_PATH=$LIBC_DIR/ld-*.so',
+            '  export LD_LIBRARY_PATH="$LIBC_DIR;$LD_LIBRARY_PATH"',
+            '',
+            '  # use system loader',
+            '  ln -s ${LINKER_PATH} /tmp/appimage_$APPIMAGE_UUID.ld.so --force',
+            'else',
+            '  echo "AppRun -- Using AppDir libc version: $APPDIR_LIBC_VERSION"',
+            'fi'
         ],
         'EXEC': [
             '# Launch application',
@@ -74,9 +108,10 @@ class AppRun:
 
         if self.env['LINKER_PATH']:
             file_lines.extend(self.sections['LINKER'])
+            file_lines.extend(self.sections['LIBC'])
 
         for k, v in self.sections.items():
-            if k not in ['HEADER', 'APPDIR', 'LINKER', 'EXEC', 'EXEC_ARGS']:
+            if k not in ['HEADER', 'APPDIR', 'LINKER', 'LIBC', 'EXEC', 'EXEC_ARGS']:
                 # avoid including any special section
                 file_lines.extend(['', '# %s' % k])
                 file_lines.extend(v)

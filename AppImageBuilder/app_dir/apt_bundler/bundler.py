@@ -41,12 +41,10 @@ class AptBundler:
             'systemd',
             'ucf',
             'iso-codes',
-            'util-linux',
             'systemd',
             'shared-mime-info',
             'mount',
             'xdg-user-dirs',
-            'coreutils',
 
             # graphics stack
             'libegl1',
@@ -62,6 +60,11 @@ class AptBundler:
 
         exclusion_list = self._generate_exclusion_list()
         self.config.set_installed_packages(exclusion_list)
+
+        install_list = self.config.apt_include
+
+        # required by AppRun
+        install_list.append('util-linux')
 
         self.apt_get.install(self.config.apt_include)
 
