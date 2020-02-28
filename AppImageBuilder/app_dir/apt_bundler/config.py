@@ -250,8 +250,22 @@ class Config:
                 status_entry = self._generate_pkg_status_installed_ok_entry(pkg)
                 f.write(status_entry)
 
+    def set_installed_packages2(self, pkg_list):
+        dpkg_status_path = self._get_dpkg_status_path()
+
+        with open(dpkg_status_path, 'w') as f:
+            for pkg in pkg_list:
+                status_entry = self._generate_pkg_status_installed_ok_entry(pkg[0], pkg[1])
+                f.write(status_entry)
+
+    def clear_installed_packages(self):
+        dpkg_status_path = self._get_dpkg_status_path()
+        os.unlink(dpkg_status_path)
+
+        self._generate_dpkg_status()
+
     @staticmethod
-    def _generate_pkg_status_installed_ok_entry(pkg_name):
+    def _generate_pkg_status_installed_ok_entry(pkg_name, pkg_version='9%9z.9.9-1appimage-builder-9'):
         return '\n'.join(['Package: %s' % pkg_name,
                           'Status: install ok installed',
                           'Priority: optional',
@@ -260,7 +274,7 @@ class Config:
                           'Maintainer: Maintainer <maintainer@none.org>',
                           'Architecture: all',
                           'Source: %s' % pkg_name,
-                          'Version: 9%9z.9.9-1appimage-builder-9',
+                          'Version: %s' % pkg_version,
                           'Depends:',
                           'Description: placeholder package',
                           ' None',

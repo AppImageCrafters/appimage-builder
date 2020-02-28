@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import re
 
 from .command import Command
 
@@ -30,7 +31,7 @@ class AptGet(Command):
             raise AptGetError('Unable to download packages')
 
     def _create_apt_get_install_download_only_command(self, packages):
-        command = [self.runnable, '-c', self.config, '--download-only', '-y', '--no-install-recommends', "install"]
+        command = [self.runnable, '-c', self.config, '--download-only', '-y', '--no-upgrade', '--no-install-recommends', "install"]
         command.extend(packages)
         return command
 
@@ -43,3 +44,29 @@ class AptGet(Command):
 
     def _create_apt_get_update_command(self):
         return [self.runnable, '-c', self.config, 'update']
+
+    def generate_install_list(self, packages):
+        command = self._create_apt_get_simulate_install_command(packages)
+        self._run(command)
+        if self.return_code != 0:
+            raise AptGetError('Unable to download packages')
+        packages_to_install = self._parse_package_list()
+        return packages_to_install
+
+    def _parse_package_list(self):
+        regex_pkg = 'Inst\s+(?P<pkg_name>[\w|\d|\-|\.]+)\s+\((?P<pkg_version>\S+)\s.*\)'
+        packages = []
+        for line in self.stdout:
+            pkg_search = re.search(regex_pkg, line, re.IGNORECASE)
+
+            if pkg_search:
+                info = pkg_search.groupdict()
+                packages.append((info['pkg_name'], info['pkg_version']))
+
+        return packages
+
+    def _create_apt_get_simulate_install_command(self, packages):
+        command = [self.runnable, '-c', self.config, '--download-only', '-y', '--no-install-recommends', '--simulate',
+                   "install"]
+        command.extend(packages)
+        return command

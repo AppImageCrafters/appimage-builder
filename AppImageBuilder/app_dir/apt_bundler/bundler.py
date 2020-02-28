@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import fnmatch
 import logging
 import os
 
@@ -45,26 +46,39 @@ class AptBundler:
             'shared-mime-info',
             'mount',
             'xdg-user-dirs',
+            'sysvinit-utils',
+            'debianutils',
+            'init-system-helpers',
+            'multiarch-support',
 
             # graphics stack
             'libegl1',
             'libgl1',
             'libdrm2',
+            'libdrm-amdgpu1',
             'libegl1-mesa',
-            'libgl1-mesa-dri'
+            'libgl1-mesa-dri',
+            'libgl1-mesa-dri',
+            'libgl1-mesa-glx',
+            'libglapi-mesa',
+            'libxcb1',
+            'libxcb-glx0',
         ]
 
     def deploy_packages(self, app_dir_path):
         if not os.getenv('APPIMAGE_BUILDER_DISABLE_APT_UPDATE', False):
             self.apt_get.update()
 
+        self.config.clear_installed_packages()
         exclusion_list = self._generate_exclusion_list()
-        self.config.set_installed_packages(exclusion_list)
+        self.config.set_installed_packages2(exclusion_list)
 
         install_list = self.config.apt_include
 
         # required by AppRun
+        install_list.append('grep')
         install_list.append('util-linux')
+        install_list.append('coreutils')
 
         self.apt_get.install(self.config.apt_include)
 
@@ -86,11 +100,28 @@ class AptBundler:
             logging.error(er)
 
     def _generate_exclusion_list(self):
-        exclusion_list = self.default_exclude_list
-        exclusion_list.extend(self.config.apt_exclude)
+        complete_install_list = self.apt_get.generate_install_list(self.config.apt_include)
 
-        for pkg in self.config.apt_include:
-            if pkg in exclusion_list:
-                exclusion_list.remove(pkg)
+        exclusion_list = []
+        for package in complete_install_list:
+            logging.info('Is excluded %s %s' % (package[0],self._is_excluded(package[0])))
+            if self._is_excluded(package[0]):
+                exclusion_list.append(package)
 
         return exclusion_list
+
+    def _is_excluded(self, package_name):
+        for package_exp in self.config.apt_include:
+            if fnmatch.fnmatch(package_name, package_exp):
+                return False
+
+        for package_exp in self.default_exclude_list:
+            if fnmatch.fnmatch(package_name, package_exp):
+                return True
+
+        for package_exp in self.config.apt_exclude:
+            if fnmatch.fnmatch(package_name, package_exp):
+                return True
+
+        return False
+
