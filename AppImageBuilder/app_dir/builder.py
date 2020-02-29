@@ -14,6 +14,7 @@ import os
 from .apt_bundler.bundler import AptBundler
 from .apt_bundler.config import Config as AptConfig
 from AppImageBuilder.app_dir.proot_runtime.runtime import PRootRuntime
+from .wrapper_runtime.runtime import WrapperRuntime
 from .yum_bundler.bundler import Bundler as YumBundler
 from .yum_bundler.config import Config as YumConfig
 from .file_bundler import FileBundler
@@ -69,6 +70,9 @@ class Builder:
         runtime_generator = self.recipe.get_item('AppDir/runtime/generator', "classic")
         if "proot" == runtime_generator:
             runtime = PRootRuntime(self.recipe)
+            runtime.generate()
+        elif "wrapper" == runtime_generator:
+            runtime = WrapperRuntime(self.recipe)
             runtime.generate()
         else:
             runtime = Runtime(self.recipe)
