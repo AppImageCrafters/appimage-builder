@@ -12,14 +12,17 @@ AppDir:
     name: qmlscene
     icon: text-x-qml
     version: 19.08.02
-    exec: usr/lib/x86_64-linux-gnu/qt5/bin/qmlscene
+    exec: usr/lib/qt5/bin/qmlscene
     exec_args: $@ $APPDIR/main.qml
 
   apt:
     arch: amd64
     sources:
-      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ xenial main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ bionic-updates main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+      - sourceline: 'deb http://archive.neon.kde.org/user bionic main'
+        key_url: 'http://archive.neon.kde.org/public.key'
 
     include:
       - qmlscene
@@ -31,6 +34,11 @@ AppDir:
       - liblzma5
       - libbsd0
       - libpng16-16
+      - libxdamage1
+      - libxxf86vm1
+      - libxshmfence1
+      - libxfixes3
+      - libxcursor1
     exclude:
       - perl-base
 

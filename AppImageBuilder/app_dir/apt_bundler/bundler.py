@@ -58,34 +58,37 @@ class AptBundler:
 
             # X11
             'libx11-*',
-            'libx11-xcb1*',
-            'libxcb*',
-            'libxcb-*',
-            'libxfixes*',
-            'libxrender*',
-            'libxcomposite*',
-            'libxdamage*',
-            'libxcursor*',
-            'libxdmcp6',
-
-            # wayland
-            'libwayland-server*',
-            'libwayland-cursor*',
-            'libwayland-client*',
-            'libwayland-egl1*',
+            'libxcb1',
+            'libxcb-xkb1',
+            'libxcb-shape0',
+            'libxcb-randr0',
+            'libxcb-util1',
+            'libxcb-shm0',
+            'libxcb-glx0',
+            'libxcb-xfixes0',
+            'libxcb-sync1',
+            'libxcb-present0',
+            'libxcb-render0',
+            'libxcb-dri2-0',
+            'libxcb-dri3-0',
 
             # graphics stack
+            'libgl1',
             'libgl1*',
+            'libgl1-*',
             'libdrm*',
             'libegl1*',
+            'libegl1-*',
             'libglapi*',
+            'libgles2*',
+            'libgbm*',
+            'mesa-*',
+
         ]
         self.partitions = {
             'opt/libc': [
                 'libc6',
                 'zlib1g',
-                'libbsd0',
-                'libglib2.0-0',
                 'libstdc++6',
             ],
         }
