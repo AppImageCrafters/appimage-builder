@@ -35,7 +35,9 @@ class WrapperAppRun:
         'APPDIR': [
             '# Fallback APPDIR variable setup for uncompressed usage',
             'if [ -z ${APPDIR+x} ]; then',
+            '    export APPIMAGE_ORIGINAL_APPDIR=""',
             '    export APPDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"',
+            '    export APPIMAGE_STARTUP_APPDIR="$APPDIR"',
             'fi'
         ],
         'LINKER': [
@@ -63,7 +65,9 @@ class WrapperAppRun:
             '',
             'echo "AppRun -- resolving greater libc --"',
             '',
+            'export APPIMAGE_ORIGINAL_LD_LIBRARY_PATH=""',
             'export LD_LIBRARY_PATH="$APPDIR_LIBRARY_PATH:$LIBC_LIBRARY_PATH"',
+            'export APPIMAGE_STARTUP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"',
             'SYSTEM_LIBC_PATH=$(extract_libc_path "$SYSTEM_COMMAND_NEEDS")',
             'SYSTEM_LIBC_VERSION=$(extract_libc_version "$SYSTEM_LIBC_PATH")',
             'echo "AppRun -- system libc: $SYSTEM_LIBC_PATH $SYSTEM_LIBC_VERSION"',
@@ -146,7 +150,7 @@ class WrapperAppRun:
     def _generate_env_section(self):
         lines = ['', '# Run Environment Setup']
         for k, v in self.env.items():
-            if k not in ['APPIMAGE_UUID', 'INTERPRETER', 'INTERPRETER_RELATIVE'] and v:
+            if 'LIBRARY_PATH' not in k and k not in ['APPIMAGE_UUID', 'INTERPRETER', 'INTERPRETER_RELATIVE'] and v:
                 lines.extend(self._generate_env(k, v))
 
         lines.append('')
