@@ -30,7 +30,9 @@ class WrapperAppRun:
         'HEADER': [
             '#!/bin/bash',
             '# This file was created by AppImageBuilder',
-            ''
+            '',
+            'if [ ! -z "$APPIMAGE_DEBUG" ]; then set -ex; fi',
+            '',
         ],
         'APPDIR': [
             '# Fallback APPDIR variable setup for uncompressed usage',
