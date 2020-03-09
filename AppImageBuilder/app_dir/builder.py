@@ -64,7 +64,6 @@ class Builder:
             yum = YumBundler(config)
             yum.deploy_packages(self.app_dir_path)
 
-        self.file_bundler.bundle_included()
         self.file_bundler.remove_excluded()
 
         runtime_generator = self.recipe.get_item('AppDir/runtime/generator', "classic")

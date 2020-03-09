@@ -43,6 +43,15 @@ AppDir:
       - perl-base
 
   files:
+    include:
+      - bin/ln
+      - bin/cp
+      - bin/cat
+      - bin/grep
+      - bin/echo
+      - bin/readlink
+      - usr/bin/rev
+      - usr/bin/[
     exclude:
       - usr/lib/x86_64-linux-gnu/gconv
       - usr/share/man
@@ -50,6 +59,10 @@ AppDir:
       - usr/share/doc/*/changelog.*
       - usr/share/doc/*/NEWS.*
       - usr/share/doc/*/TODO.*
+      - bin/*
+      - sbin/*
+      - usr/bin/*
+      - usr/sbin/*
 
   runtime:
     generator: wrapper

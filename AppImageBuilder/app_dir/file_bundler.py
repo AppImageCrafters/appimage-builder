@@ -9,7 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-
+import fnmatch
 import glob
 import logging
 import os
@@ -21,10 +21,6 @@ class FileBundler:
         self.app_dir = os.path.abspath(recipe.get_item('AppDir/path'))
         self.include_list = recipe.get_item('AppDir/files/include', [])
         self.exclude_list = recipe.get_item('AppDir/files/exclude', [])
-
-    def bundle_included(self):
-        for file in self._get_include_file_list():
-            shutil.copytree(file, os.path.join(self.app_dir, file))
 
     def _get_include_file_list(self):
         files_list = []
@@ -38,15 +34,37 @@ class FileBundler:
             if os.path.exists(path):
                 if os.path.isdir(path):
                     logging.info('Excluding dir: %s' % os.path.relpath(path, self.app_dir))
-                    shutil.rmtree(path)
+                    shutil.rmtree(path, ignore_errors=True)
                 else:
                     logging.info('Excluding file: %s' % os.path.relpath(path, self.app_dir))
                     os.remove(path)
 
     def _get_exclude_file_list(self):
         files_list = []
-        for path in self.exclude_list:
-            full_path = os.path.join(self.app_dir, path)
-            files_list.extend(glob.glob(full_path))
+
+        for root, dirs, files in os.walk(self.app_dir):
+            for name in files:
+                full_path = os.path.join(root, name)
+                if self.is_excluded(full_path):
+                    files_list.append(full_path)
+
+            for name in dirs:
+                full_path = os.path.join(root, name)
+                if self.is_excluded(full_path):
+                    files_list.append(full_path)
 
         return files_list
+
+    def is_excluded(self, path):
+        rel_path = path.replace(self.app_dir, '')
+        rel_path = rel_path.lstrip('/')
+
+        for pattern in self.include_list:
+            if fnmatch.fnmatch(rel_path, pattern):
+                return False
+
+        for pattern in self.exclude_list:
+            if fnmatch.fnmatch(rel_path, pattern):
+                return True
+
+        return False
