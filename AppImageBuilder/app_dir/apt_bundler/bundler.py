@@ -135,10 +135,8 @@ class AptBundler:
                 if os.path.isabs(link_target):
                     os.unlink(full_path)
 
-                    link_target = partition_path + link_target
-                    link_target = os.path.relpath(link_target, full_path)
-                    logging.info(
-                        "Correcting symlink: %s to %s" % (os.path.relpath(full_path, partition_path), link_target))
+                    new_link_target = os.path.relpath(link_target, os.path.join('/', os.path.dirname(file)))
+                    logging.info("Fixing symlink %s target: from %s to %s" % (file, link_target, new_link_target))
                     os.symlink(link_target, full_path)
 
     def _extract_deb(self, file_path, root):
