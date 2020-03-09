@@ -125,9 +125,9 @@ class AptBundler:
                 logging.info("Deploying: %s to %s" % (file_name, partition_path.replace(app_dir_path, 'AppDir')))
 
                 package_files = self._extract_deb(file_path, partition_path)
-                self._make_all_symlinks_relative(package_files, partition_path)
+                self._make_symlinks_relative(package_files, partition_path)
 
-    def _make_all_symlinks_relative(self, package_files, partition_path):
+    def _make_symlinks_relative(self, package_files, partition_path):
         for file in package_files:
             full_path = os.path.join(partition_path, file)
             if os.path.islink(full_path):
@@ -137,7 +137,7 @@ class AptBundler:
 
                     new_link_target = os.path.relpath(link_target, os.path.join('/', os.path.dirname(file)))
                     logging.info("Fixing symlink %s target: from %s to %s" % (file, link_target, new_link_target))
-                    os.symlink(link_target, full_path)
+                    os.symlink(new_link_target, full_path)
 
     def _extract_deb(self, file_path, root):
         try:
