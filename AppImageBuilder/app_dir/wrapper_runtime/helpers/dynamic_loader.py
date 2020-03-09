@@ -32,12 +32,11 @@ class DynamicLoader(BaseHelper):
         self.patch_elf = PatchElf()
         self.patch_elf.logger.level = logging.WARNING
 
-    def get_binary_path(self) -> str:
+    def get_loader_path(self) -> str:
         linker_dir = os.path.join(self.app_dir, 'lib')
         logging.debug("Looking linker binary at: %s\n" % linker_dir)
 
-        binary_path = self._find_binary_by_name(linker_dir)
-        binary_path = self._resolve_symlink(binary_path)
+        binary_path = self._find_loader_by_name()
         binary_path = self._make_path_relative_to_app_dir(binary_path)
 
         return binary_path
@@ -53,7 +52,7 @@ class DynamicLoader(BaseHelper):
                 app_run.env['%s_LIBRARY_PATH' % nane.upper()] = ':'.join(
                     ['$APPDIR/%s' % path for path in partition_library_path])
 
-        linker_path = self.get_binary_path()
+        linker_path = self.get_loader_path()
         appimage_id = app_run.env['APPIMAGE_UUID']
 
         interpreter = '/tmp/appimage_ld.so.%s' % appimage_id
@@ -63,33 +62,23 @@ class DynamicLoader(BaseHelper):
         self._set_executables_interpreter(interpreter)
 
     def _make_path_relative_to_app_dir(self, binary_path):
+        binary_path = os.path.realpath(binary_path)
         binary_path = os.path.abspath(binary_path)
         abs_app_dir_path = os.path.abspath(self.app_dir) + '/'
         binary_path = binary_path.replace(abs_app_dir_path, '')
 
         return binary_path
 
-    def _resolve_symlink(self, binary_path):
-        if os.path.islink((binary_path)):
-            link_target = os.readlink(binary_path)
-
-            if link_target.startswith('/'):
-                binary_path = os.path.join(self.app_dir, link_target)
-            else:
-                dir = os.path.dirname(binary_path)
-                binary_path = os.path.join(dir, link_target)
-
-        return binary_path
-
-    def _find_binary_by_name(self, linker_dir) -> str:
+    def _find_loader_by_name(self) -> str:
         for file in self.app_dir_files:
             if self._is_linker_file(file):
                 return file
+
         raise DynamicLoaderError('Unable to find \'ld.so\' in the AppDir')
 
     @staticmethod
     def _is_linker_file(file):
-        return fnmatch.fnmatch(file, '*/lib/*/ld-*.so*') or fnmatch.fnmatch(file, '*/lib64/ld-*.so*')
+        return fnmatch.fnmatch(file, '*/ld-*.so*')
 
     def _set_executables_interpreter(self, interpreter):
         for file in self.app_dir_files:
