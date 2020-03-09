@@ -34,11 +34,10 @@ class Qt(BaseHelper):
             if v:
                 qt_conf.append("%s=%s\n" % (k, v))
 
-        logging.info('Writing qt.conf file to: %s' % qt_conf_target_path)
         self._write_qt_conf(qt_conf, os.path.join(self.app_dir, qt_conf_target_path))
 
     def _write_qt_conf(self, qt_conf, qt_conf_target_path):
-        logging.info("Writing qt.conf to: %s" % qt_conf_target_path)
+        logging.info("Writing qt.conf to: %s" % os.path.relpath(qt_conf_target_path, self.app_dir))
         with open(qt_conf_target_path, "w") as f:
             f.writelines(qt_conf)
 

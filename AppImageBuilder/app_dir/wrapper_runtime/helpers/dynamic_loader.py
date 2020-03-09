@@ -63,7 +63,7 @@ class DynamicLoader(BaseHelper):
         for file in self.app_dir_files:
             if self._is_linker_file(file):
                 binary_path = os.path.realpath(file)
-                logging.info("Loader found at: %s" % binary_path)
+                logging.info("Loader found at: %s" % os.path.relpath(binary_path, self.app_dir))
 
                 return binary_path
 
@@ -78,13 +78,12 @@ class DynamicLoader(BaseHelper):
             if not os.path.islink(file):
                 self._set_interpreter(file, interpreter)
 
-    @staticmethod
-    def _set_interpreter(file, interpreter):
+    def _set_interpreter(self, file, interpreter):
         try:
             patchelf_command = PatchElf()
             patchelf_command.log_stderr = False
             if patchelf_command.get_interpreter(file):
-                logging.info('Setting interpreter to: %s' % file)
+                logging.info('Setting interpreter to: %s' % os.path.relpath(file, self.app_dir))
                 patchelf_command.set_interpreter(file, interpreter)
         except PatchElfError:
             pass
