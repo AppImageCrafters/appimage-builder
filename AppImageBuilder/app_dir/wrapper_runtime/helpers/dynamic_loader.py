@@ -34,7 +34,8 @@ class DynamicLoader(BaseHelper):
 
     def get_loader_path(self) -> str:
         binary_path = self._find_loader_by_name()
-        binary_path = self._make_path_relative_to_app_dir(binary_path)
+        binary_path = os.path.realpath(binary_path)
+        binary_path = os.path.relpath(binary_path, self.app_dir)
 
         return binary_path
 
@@ -49,21 +50,14 @@ class DynamicLoader(BaseHelper):
                 app_run.env['%s_LIBRARY_PATH' % nane.upper()] = ':'.join(
                     ['$APPDIR/%s' % path for path in partition_library_path])
 
-        linker_path = self.get_loader_path()
+        loader_path = self.get_loader_path()
         appimage_id = app_run.env['APPIMAGE_UUID']
 
         interpreter = '/tmp/appimage_ld.so.%s' % appimage_id
 
         app_run.env['INTERPRETER'] = interpreter
-        app_run.env['INTERPRETER_RELATIVE'] = '$APPDIR/%s' % linker_path
+        app_run.env['INTERPRETER_RELATIVE'] = '$APPDIR/%s' % loader_path
         self._set_executables_interpreter(interpreter)
-
-    def _make_path_relative_to_app_dir(self, binary_path):
-        binary_path = os.path.abspath(binary_path)
-        abs_app_dir_path = os.path.abspath(self.app_dir) + '/'
-        binary_path = binary_path.replace(abs_app_dir_path, '')
-        logging.info("Loader relative path: %s" % binary_path)
-        return binary_path
 
     def _find_loader_by_name(self) -> str:
         for file in self.app_dir_files:
