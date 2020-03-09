@@ -23,8 +23,6 @@ class AptBundler:
         self.config = config
 
         self.apt_get = AptGet(self.config.apt_prefix, self.config.get_apt_conf_path())
-        self.dpkg_deb = DpkgDeb()
-        self.dpkg_deb.log_command = False
 
         self.default_exclude_list = [
             'adduser',
@@ -126,12 +124,31 @@ class AptBundler:
                 partition_path = self._resolve_partition_path(package_name, app_dir_path)
                 logging.info("Deploying: %s to %s" % (file_name, partition_path.replace(app_dir_path, 'AppDir')))
 
-                self._extract_deb(file_path, partition_path)
+                package_files = self._extract_deb(file_path, partition_path)
+                self._make_all_symlinks_relative(package_files, partition_path)
+
+    def _make_all_symlinks_relative(self, package_files, partition_path):
+        for file in package_files:
+            full_path = os.path.join(partition_path, file)
+            if os.path.islink(full_path):
+                link_target = os.readlink(full_path)
+                if os.path.isabs(link_target):
+                    os.unlink(full_path)
+
+                    link_target = partition_path + link_target
+                    link_target = os.path.relpath(link_target, full_path)
+                    logging.info(
+                        "Correcting symlink: %s to %s" % (os.path.relpath(full_path, partition_path), link_target))
+                    os.symlink(link_target, full_path)
 
     def _extract_deb(self, file_path, root):
         try:
             os.makedirs(root, exist_ok=True)
-            self.dpkg_deb.extract(file_path, root)
+            dpkg_deb = DpkgDeb()
+            dpkg_deb.log_command = False
+            dpkg_deb.extract(file_path, root)
+
+            return dpkg_deb.extracted_files
         except DpkgDebError as er:
             logging.error(er)
 

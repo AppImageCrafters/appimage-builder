@@ -22,6 +22,7 @@ class DpkgDeb(Command):
     def __init__(self):
         super().__init__('dpkg-deb')
         self.log_stdout = False
+        self.extracted_files = []
 
     def extract(self, deb_file, target_dir):
         command = [self.runnable, '-X', deb_file, target_dir]
@@ -30,9 +31,12 @@ class DpkgDeb(Command):
         if self.return_code != 0:
             raise DpkgDebError("Package extraction failed")
 
+        self.extracted_files.clear()
         for line in self.stdout:
+
             if line.startswith('./'):
                 line = line[2:]
+                self.extracted_files.append(line)
 
             if line:
                 self.logger.debug('%s: %s' % (os.path.basename(deb_file), line))
