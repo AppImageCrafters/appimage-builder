@@ -37,7 +37,7 @@ class DynamicLoader(BaseHelper):
         binary_path = os.path.realpath(binary_path)
         binary_path = os.path.relpath(binary_path, self.app_dir)
 
-        logging.info("Loader found at: %s" % os.path.relpath(binary_path, self.app_dir))
+        logging.info("Loader found at: %s" % binary_path)
         return binary_path
 
     def configure(self, app_run):
