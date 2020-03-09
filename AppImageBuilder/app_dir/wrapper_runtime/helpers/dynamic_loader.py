@@ -37,6 +37,7 @@ class DynamicLoader(BaseHelper):
         binary_path = os.path.realpath(binary_path)
         binary_path = os.path.relpath(binary_path, self.app_dir)
 
+        logging.info("Loader found at: %s" % os.path.relpath(binary_path, self.app_dir))
         return binary_path
 
     def configure(self, app_run):
@@ -51,20 +52,16 @@ class DynamicLoader(BaseHelper):
                     ['$APPDIR/%s' % path for path in partition_library_path])
 
         loader_path = self.get_loader_path()
-        appimage_id = app_run.env['APPIMAGE_UUID']
-
-        interpreter = '/tmp/appimage_ld.so.%s' % appimage_id
-
-        app_run.env['INTERPRETER'] = interpreter
         app_run.env['INTERPRETER_RELATIVE'] = '$APPDIR/%s' % loader_path
+
+        interpreter = '/tmp/appimage_ld.so.%s' % app_run.env['APPIMAGE_UUID']
+        app_run.env['INTERPRETER'] = interpreter
         self._set_executables_interpreter(interpreter)
 
     def _find_loader_by_name(self) -> str:
         for file in self.app_dir_files:
             if self._is_linker_file(file):
                 binary_path = os.path.realpath(file)
-                logging.info("Loader found at: %s" % os.path.relpath(binary_path, self.app_dir))
-
                 return binary_path
 
         raise DynamicLoaderError('Unable to find \'ld.so\' in the AppDir')
