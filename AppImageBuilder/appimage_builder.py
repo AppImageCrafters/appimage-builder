@@ -38,6 +38,7 @@ class AppImageBuilder:
 
     def _generate_appimage(self, runtime_path):
         appimage_tool = AppImageToolCommand(self.app_dir, self.target_file)
+        appimage_tool.target_arch = self.target_arch
         appimage_tool.runtime_file = runtime_path
         appimage_tool.run()
 

@@ -26,10 +26,14 @@ class AppImageToolCommand(Command):
         self.update_information = None
         self.sign_key = None
         self.target_file = target_file
+        self.target_arch = None
 
     def run(self):
         logging.info("Generating AppImage from %s" % self.app_dir)
         command = self._generate_command()
+
+        if self.target_arch:
+            self.env['ARCH'] = self.target_arch
 
         self._run(command)
         if self.return_code != 0:

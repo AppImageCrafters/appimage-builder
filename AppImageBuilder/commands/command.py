@@ -26,6 +26,7 @@ class Command:
         self.log_command = True
         self.log_stdout = True
         self.log_stderr = True
+        self.env = os.environ.copy()
 
         self.logger = logger
         if not self.logger:
@@ -48,7 +49,7 @@ class Command:
         else:
             self.logger.debug(' '.join(command))
 
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd)
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd, env=self.env)
 
         self._poll_process(process)
 
