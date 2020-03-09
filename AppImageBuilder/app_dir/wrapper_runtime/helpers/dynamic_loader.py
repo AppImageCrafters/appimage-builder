@@ -33,9 +33,6 @@ class DynamicLoader(BaseHelper):
         self.patch_elf.logger.level = logging.WARNING
 
     def get_loader_path(self) -> str:
-        linker_dir = os.path.join(self.app_dir, 'lib')
-        logging.debug("Looking linker binary at: %s\n" % linker_dir)
-
         binary_path = self._find_loader_by_name()
         binary_path = self._make_path_relative_to_app_dir(binary_path)
 
@@ -62,17 +59,19 @@ class DynamicLoader(BaseHelper):
         self._set_executables_interpreter(interpreter)
 
     def _make_path_relative_to_app_dir(self, binary_path):
-        binary_path = os.path.realpath(binary_path)
         binary_path = os.path.abspath(binary_path)
         abs_app_dir_path = os.path.abspath(self.app_dir) + '/'
         binary_path = binary_path.replace(abs_app_dir_path, '')
-
+        logging.info("Loader relative path: %s" % binary_path)
         return binary_path
 
     def _find_loader_by_name(self) -> str:
         for file in self.app_dir_files:
             if self._is_linker_file(file):
-                return file
+                binary_path = os.path.realpath(file)
+                logging.info("Loader found at: %s" % binary_path)
+
+                return binary_path
 
         raise DynamicLoaderError('Unable to find \'ld.so\' in the AppDir')
 
