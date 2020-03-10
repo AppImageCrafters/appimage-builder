@@ -45,10 +45,11 @@ class IconBundler:
         return None
 
     def _search_icon(self, search_path):
+        path = None
         logging.info("Looking app icon at: %s" % search_path)
         for root, dirs, files in os.walk(search_path):
             for filename in files:
                 if self.icon in filename:
-                    return os.path.join(root, filename)
+                    path = os.path.join(root, filename)
 
-        return None
+        return path
