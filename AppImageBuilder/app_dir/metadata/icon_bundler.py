@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
+import re
 import shutil
 
 
@@ -45,11 +46,33 @@ class IconBundler:
         return None
 
     def _search_icon(self, search_path):
-        path = None
         logging.info("Looking app icon at: %s" % search_path)
+        path = None
+        size = 0
+
         for root, dirs, files in os.walk(search_path):
             for filename in files:
                 if self.icon in filename:
-                    path = os.path.join(root, filename)
+                    new_path = os.path.join(root, filename)
+
+                    # prefer svg files over png
+                    if new_path.lower().endswith('svg'):
+                        return new_path
+
+                    if new_path.lower().endswith('png'):
+                        new_size = self._extract_icon_size_from_path(new_path)
+
+                        if new_size > size:
+                            size = new_size
+                            path = new_path
 
         return path
+
+    def _extract_icon_size_from_path(self, path):
+        size_search = re.search('.*/(\d+)x\d+/.*', path, re.IGNORECASE)
+        if size_search:
+            return int(size_search.group(1))
+        else:
+            logging.warning('Icon size can not be guessed from path: %s' % path)
+
+        return 0
