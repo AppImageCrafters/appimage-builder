@@ -61,7 +61,7 @@ class WrapperAppRun:
             '}',
             'function extract_libc_version() {',
             '   LIBC_PATH="$1"',
-            '   readlink -f "${LIBC_PATH}" | rev | cut -d / -f 1 | cut -d "-" -f 1 | cut -d "." -f 2- | rev',
+            '   grep  -Eao \'GLIBC_[0-9]{1,4}.[0-9]{1,4}\' $LIBC_PATH | grep -Eao \'[0-9]{1,4}.[0-9]{1,4}\' | sort -V | tail -1',
             '}',
 
             '',
@@ -78,7 +78,7 @@ class WrapperAppRun:
             'APPDIR_LIBC_VERSION=$(extract_libc_version "$APPDIR_LIBC_PATH")',
             'echo "AppRun -- appdir libc: $APPDIR_LIBC_PATH $APPDIR_LIBC_VERSION"',
             '',
-            'GREATER_LIBC=$(printf "$SYSTEM_LIBC_VERSION\n$APPDIR_LIBC_VERSION"  | sort -V | tail -1)',
+            'GREATER_LIBC=$(echo -e "$SYSTEM_LIBC_VERSION\\n$APPDIR_LIBC_VERSION"  | sort -V | tail -1)',
             '',
             'if [ "$SYSTEM_LIBC_VERSION" == "$GREATER_LIBC" ]; then',
             '  echo "AppRun -- Using System libc version: $SYSTEM_LIBC_VERSION"',
