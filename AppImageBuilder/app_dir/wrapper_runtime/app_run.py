@@ -61,7 +61,7 @@ class WrapperAppRun:
             '}',
             'function extract_libc_version() {',
             '   LIBC_PATH="$1"',
-            '   grep  -Eao \'GLIBC_[0-9]{1,4}.[0-9]{1,4}\' $LIBC_PATH | grep -Eao \'[0-9]{1,4}.[0-9]{1,4}\' | sort -V | tail -1',
+            '   grep  -Eao \'GLIBC_[0-9]{1,4}\\.[0-9]{1,4}\' $LIBC_PATH | grep -Eao \'[0-9]{1,4}\\.[0-9]{1,4}\' | sort -V | tail -1',
             '}',
 
             '',
