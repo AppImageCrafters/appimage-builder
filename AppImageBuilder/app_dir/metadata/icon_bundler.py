@@ -30,6 +30,7 @@ class IconBundler:
 
         target_icon_path = os.path.join(self.app_dir, os.path.basename(source_icon_path))
         try:
+            logging.info("Setting AppDir: %s to %s" % (source_icon_path, os.path.relpath(target_icon_path, self.app_dir)))
             shutil.copyfile(source_icon_path, target_icon_path)
         except Exception:
             raise IconBundler.Error("Unable to copy icon from: %s to %s" % (source_icon_path, target_icon_path))
