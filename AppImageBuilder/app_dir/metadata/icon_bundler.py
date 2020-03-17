@@ -30,7 +30,8 @@ class IconBundler:
 
         target_icon_path = os.path.join(self.app_dir, os.path.basename(source_icon_path))
         try:
-            logging.info("Setting AppDir: %s to %s" % (source_icon_path, os.path.relpath(target_icon_path, self.app_dir)))
+            logging.info(
+                "Setting AppDir: %s to %s" % (source_icon_path, os.path.relpath(target_icon_path, self.app_dir)))
             shutil.copyfile(source_icon_path, target_icon_path)
         except Exception:
             raise IconBundler.Error("Unable to copy icon from: %s to %s" % (source_icon_path, target_icon_path))
@@ -51,21 +52,21 @@ class IconBundler:
         path = None
         size = 0
 
+        svg_icon_name = "%s.svg" % self.icon
+        png_icon_name = "%s.png" % self.icon
+
         for root, dirs, files in os.walk(search_path):
-            for filename in files:
-                if self.icon in filename:
-                    new_path = os.path.join(root, filename)
+            # prefer svg files over png
+            if svg_icon_name in files:
+                return os.path.join(root, svg_icon_name)
 
-                    # prefer svg files over png
-                    if new_path.lower().endswith('svg'):
-                        return new_path
+            if png_icon_name in files:
+                new_path = os.path.join(root, svg_icon_name)
+                new_size = self._extract_icon_size_from_path(new_path)
 
-                    if new_path.lower().endswith('png'):
-                        new_size = self._extract_icon_size_from_path(new_path)
-
-                        if new_size > size:
-                            size = new_size
-                            path = new_path
+                if new_size > size:
+                    size = new_size
+                    path = new_path
 
         return path
 
