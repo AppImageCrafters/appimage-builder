@@ -24,11 +24,20 @@ class Qt(BaseHelper):
         qt_lib_path = self._get_qt_libs_path()
         if qt_lib_path:
             qt_dirs = self._get_qt_dirs(app_run)
-            self._generate_qt_conf(qt_dirs, app_run)
+            bin_path = os.path.join(self.app_dir, app_run.env['BIN_PATH'])
+            bin_dir_path = os.path.dirname(bin_path)
 
-    def _generate_qt_conf(self, qt_dirs, app_run):
-        qt_conf_target_path = self._get_qt_conf_path(app_run)
+            qt_conf_target_path = self._get_qt_conf_path(bin_dir_path)
 
+            self._generate_qt_conf(qt_dirs, qt_conf_target_path)
+            if qt_dirs['LibraryExecutables']:
+                libexec_path = os.path.join(self.app_dir, qt_dirs['LibraryExecutables'])
+                qt_dirs['Prefix'] = self._get_qt_conf_prefix_path(libexec_path)
+
+                qt_conf_target_path = self._get_qt_conf_path(libexec_path)
+                self._generate_qt_conf(qt_dirs, qt_conf_target_path)
+
+    def _generate_qt_conf(self, qt_dirs, qt_conf_target_path):
         qt_conf = ['[Paths]\n']
         for k, v in qt_dirs.items():
             if v:
@@ -42,7 +51,10 @@ class Qt(BaseHelper):
             f.writelines(qt_conf)
 
     def _get_qt_dirs(self, app_run):
-        qt_conf_target_path = self._get_qt_conf_path(app_run)
+        bin_path = os.path.join(self.app_dir, app_run.env['BIN_PATH'])
+        bin_dir_path = os.path.dirname(bin_path)
+
+        qt_conf_target_path = self._get_qt_conf_path(bin_dir_path)
         qt_conf_dir_path = os.path.dirname(qt_conf_target_path)
 
         return {
@@ -74,11 +86,10 @@ class Qt(BaseHelper):
     def _get_qt_conf_prefix_path(self, qt_conf_dir_path):
         return os.path.relpath(self.app_dir, qt_conf_dir_path)
 
-    def _get_qt_conf_path(self, app_run):
-        liker_dir = os.path.dirname(os.path.join(self.app_dir, app_run.env['BIN_PATH']))
+    def _get_qt_conf_path(self, bin_dir):
+        full_path = os.path.join(bin_dir, "qt.conf")
 
-        qt_conf_target_path = os.path.join(liker_dir, "qt.conf")
-        return qt_conf_target_path
+        return full_path
 
     def _get_qt_translations_path(self):
         return self._get_relative_sub_dir_path('qt5/translations')
