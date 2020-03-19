@@ -51,6 +51,7 @@ AppDir:
       - bin/echo
       - bin/readlink
       - usr/bin/rev
+      - usr/bin/dirname
       - usr/bin/[
     exclude:
       - usr/lib/x86_64-linux-gnu/gconv
