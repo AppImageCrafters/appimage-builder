@@ -71,9 +71,11 @@ class DynamicLoader(BaseHelper):
         return fnmatch.fnmatch(file, '*/ld-*.so*')
 
     def _set_executables_interpreter(self, interpreter):
-        for file in self.app_dir_files:
-            if not os.path.islink(file):
-                self._set_interpreter(file, interpreter)
+        for root, dirs, files in os.walk(self.app_dir):
+            for file_name in files:
+                path = os.path.join(root, file_name)
+                if not os.path.islink(path) and self.is_elf_file(path):
+                    self._set_interpreter(path, interpreter)
 
     def _set_interpreter(self, file, interpreter):
         try:
@@ -104,3 +106,12 @@ class DynamicLoader(BaseHelper):
 
     def _set_execution_permissions(self, path):
         os.chmod(path, stat.S_IRWXU | stat.S_IXGRP | stat.S_IRGRP | stat.S_IXOTH | stat.S_IROTH)
+
+    @staticmethod
+    def is_elf_file(path):
+        with open(path, "rb") as f:
+            bits = f.read(4)
+            if bits == b'\x7fELF':
+                return True
+
+        return False
