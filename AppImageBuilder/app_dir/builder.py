@@ -11,12 +11,12 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from .apt_bundler.bundler import AptBundler
-from .apt_bundler.config import Config as AptConfig
+from AppImageBuilder.app_dir.bundlers.apt.bundler import AptBundler
+from AppImageBuilder.app_dir.bundlers.apt.config import Config as AptConfig
 from AppImageBuilder.app_dir.proot_runtime.runtime import PRootRuntime
 from .wrapper_runtime.runtime import WrapperRuntime
-from .yum_bundler.bundler import Bundler as YumBundler
-from .yum_bundler.config import Config as YumConfig
+from AppImageBuilder.app_dir.bundlers.yum.bundler import YumBundler
+from AppImageBuilder.app_dir.bundlers.yum.config import Config as YumConfig
 from .file_bundler import FileBundler
 from .metadata.desktop_entry_generator import DesktopEntryGenerator
 from .metadata.icon_bundler import IconBundler

@@ -15,9 +15,8 @@ import logging
 import os
 import subprocess
 
-from AppImageBuilder.app_dir.apt_bundler.config import Config as AptConfig
+from AppImageBuilder.app_dir.bundlers.apt.config import Config as AptConfig
 from AppImageBuilder.commands.apt_get import AptGet
-from AppImageBuilder.app_dir.apt_bundler import util as apt_util
 from AppImageBuilder.recipe import Recipe
 
 

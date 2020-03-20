@@ -14,7 +14,7 @@ import tempfile
 import unittest
 
 from AppImageBuilder.commands.apt_get import AptGet
-from AppImageBuilder.app_dir.apt_bundler.config import Config
+from AppImageBuilder.app_dir.bundlers.apt.config import Config
 
 
 class AptGetUpdateTestCase(unittest.TestCase):

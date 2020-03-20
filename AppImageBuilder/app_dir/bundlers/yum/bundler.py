@@ -22,7 +22,7 @@ class YumError(RuntimeError):
     pass
 
 
-class Bundler:
+class YumBundler:
     def __init__(self, config):
         self.config = config
 
