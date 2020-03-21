@@ -9,12 +9,10 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import fnmatch
-import logging
 import os
 import subprocess
 
-from AppImageBuilder.app_dir.runtime.helpers.base_helper import BaseHelper
+from AppImageBuilder.app_dir.runtimes.classic.helpers.base_helper import BaseHelper
 
 
 class PRootError(RuntimeError):

@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import unittest
 
-from AppImageBuilder.app_dir.runtime.helpers.dynamic_loader import DynamicLoader
+from AppImageBuilder.app_dir.runtimes.classic import DynamicLoader
 
 
 class DynamicLoaderTestCase(unittest.TestCase):

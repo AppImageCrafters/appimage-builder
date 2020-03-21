@@ -18,7 +18,7 @@ from .helpers.factory import HelperFactory
 from AppImageBuilder.app_dir.metadata.loader import AppInfoLoader
 
 
-class Runtime():
+class ClassicRuntime():
     def __init__(self, recipe: Recipe):
         self._configure(recipe)
         self.app_run_constructor = AppRun

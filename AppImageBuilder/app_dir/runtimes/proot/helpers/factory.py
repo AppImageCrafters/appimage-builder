@@ -10,8 +10,8 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-from AppImageBuilder.app_dir.runtime.helpers.base_helper import BaseHelper
-from AppImageBuilder.app_dir.runtime.helpers.factory import HelperFactoryError
+from AppImageBuilder.app_dir.runtimes.classic.helpers.base_helper import BaseHelper
+from AppImageBuilder.app_dir.runtimes.classic.helpers.factory import HelperFactoryError
 
 from .dynamic_loader import DynamicLoader
 from .gdk_pixbuf import GdkPixbuf

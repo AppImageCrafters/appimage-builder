@@ -11,9 +11,8 @@
 #  all copies or substantial portions of the Software.
 import os
 import subprocess
-import uuid
 
-from AppImageBuilder.app_dir.runtime.helpers.base_helper import BaseHelper
+from AppImageBuilder.app_dir.runtimes.classic.helpers.base_helper import BaseHelper
 
 
 class GdkPixbuf(BaseHelper):

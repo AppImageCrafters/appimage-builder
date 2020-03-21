@@ -9,19 +9,14 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import fnmatch
-import logging
-import os
 
-from AppImageBuilder.app_dir.metadata.loader import AppInfoLoader
 from AppImageBuilder.recipe import Recipe
 from .app_run import PRootAppRun
 from .helpers.factory import PRootHelperFactory
-from ..runtime.helpers.dynamic_loader import DynamicLoaderError
-from ..runtime.runtime import Runtime
+from AppImageBuilder.app_dir.runtimes.classic.runtime import ClassicRuntime
 
 
-class PRootRuntime(Runtime):
+class PRootRuntime(ClassicRuntime):
     def __init__(self, recipe: Recipe):
         super().__init__(recipe)
 

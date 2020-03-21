@@ -13,15 +13,15 @@ import os
 
 from AppImageBuilder.app_dir.bundlers.apt.bundler import AptBundler
 from AppImageBuilder.app_dir.bundlers.apt.config import Config as AptConfig
-from AppImageBuilder.app_dir.proot_runtime.runtime import PRootRuntime
-from .wrapper_runtime.runtime import WrapperRuntime
+from AppImageBuilder.app_dir.runtimes.proot.runtime import PRootRuntime
+from AppImageBuilder.app_dir.runtimes.wrapper.runtime import WrapperRuntime
 from AppImageBuilder.app_dir.bundlers.yum.bundler import YumBundler
 from AppImageBuilder.app_dir.bundlers.yum.config import Config as YumConfig
 from .file_bundler import FileBundler
 from .metadata.desktop_entry_generator import DesktopEntryGenerator
 from .metadata.icon_bundler import IconBundler
 from .metadata.loader import AppInfoLoader
-from .runtime.runtime import Runtime
+from AppImageBuilder.app_dir.runtimes.classic.runtime import ClassicRuntime
 
 
 class BuilderError(RuntimeError):
@@ -74,7 +74,7 @@ class Builder:
             runtime = WrapperRuntime(self.recipe)
             runtime.generate()
         else:
-            runtime = Runtime(self.recipe)
+            runtime = ClassicRuntime(self.recipe)
             runtime.generate()
 
         self._bundle_app_dir_icon()
