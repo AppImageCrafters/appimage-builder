@@ -66,14 +66,16 @@ class Builder:
 
         self.file_bundler.remove_excluded()
 
-        runtime_generator = self.recipe.get_item('AppDir/runtime/generator', "classic")
+        runtime_generator = self.recipe.get_item('AppDir/runtime/generator', "wrapper")
         if "proot" == runtime_generator:
             runtime = PRootRuntime(self.recipe)
             runtime.generate()
-        elif "wrapper" == runtime_generator:
+
+        if "wrapper" == runtime_generator:
             runtime = WrapperRuntime(self.recipe)
             runtime.generate()
-        else:
+
+        if "classic" == runtime_generator:
             runtime = Runtime(self.recipe)
             runtime.generate()
 
