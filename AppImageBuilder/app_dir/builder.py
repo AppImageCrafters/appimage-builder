@@ -75,10 +75,12 @@ class Builder:
         if "proot" == runtime_generator:
             runtime = PRootRuntime(self.recipe)
             runtime.generate()
-        elif "wrapper" == runtime_generator:
+
+        if "wrapper" == runtime_generator:
             runtime = WrapperRuntime(self.recipe)
             runtime.generate()
-        else:
+
+        if "classic" == runtime_generator:
             runtime = ClassicRuntime(self.recipe)
             runtime.generate()
 
