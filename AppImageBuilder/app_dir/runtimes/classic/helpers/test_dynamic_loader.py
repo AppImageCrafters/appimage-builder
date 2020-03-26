@@ -40,6 +40,3 @@ class DynamicLoaderTestCase(unittest.TestCase):
     def test_list_libs(self):
         dl = DynamicLoader('AppDir', ['/path/to/file', 'path/to/shared_lib.so', 'path/to/shared_lib.so.1'])
         self.assertEqual(dl._list_libs(), ['path/to/shared_lib.so', 'path/to/shared_lib.so.1'])
-
-if __name__ == '__main__':
-    unittest.main()

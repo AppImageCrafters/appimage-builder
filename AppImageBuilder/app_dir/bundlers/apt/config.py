@@ -24,10 +24,10 @@ class AptConfigError(RuntimeError):
 
 
 class Config:
-    def __init__(self):
+    def __init__(self, apt_root):
         self.settings = {}
 
-        self.apt_prefix = None
+        self.apt_prefix = apt_root
         self.apt_conf_path = None
         self.apt_source_lines = []
         self.apt_source_key_urls = []
@@ -43,9 +43,6 @@ class Config:
         self._load_apt_excludes()
 
     def generate(self):
-        if not self.apt_prefix:
-            self.apt_prefix = self.get_apt_prefix_path()
-
         self._generate_apt_work_dirs()
         self._generate_apt_conf()
         self._generate_apt_source_list()
@@ -111,9 +108,6 @@ class Config:
             raise AptConfigError('exclude list expected instead of: "%s".' % self.settings['exclude'])
 
         self.apt_exclude = self.settings['exclude']
-
-    def get_apt_prefix_path(self):
-        return os.path.join(os.getcwd(), 'appimage-builder-cache')
 
     def get_apt_conf_path(self):
         return os.path.join(self.apt_prefix, "etc", "apt", "apt.conf")
@@ -243,14 +237,6 @@ class Config:
             os.mknod(path)
 
     def set_installed_packages(self, pkg_list):
-        dpkg_status_path = self._get_dpkg_status_path()
-
-        with open(dpkg_status_path, 'w') as f:
-            for pkg in pkg_list:
-                status_entry = self._generate_pkg_status_installed_ok_entry(pkg)
-                f.write(status_entry)
-
-    def set_installed_packages2(self, pkg_list):
         dpkg_status_path = self._get_dpkg_status_path()
 
         with open(dpkg_status_path, 'w') as f:

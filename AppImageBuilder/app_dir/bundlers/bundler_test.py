@@ -9,3 +9,16 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+
+import unittest
+
+from .bundler import Bundler
+
+
+class BundlerTestCase(unittest.TestCase):
+    def test_resolve_partition_path(self):
+        bundler = Bundler(None)
+
+        bundler.partitions = {'test': ['package']}
+        self.assertEqual('/test', bundler._resolve_partition_path('package', '/'))
+        self.assertEqual('/', bundler._resolve_partition_path('package_2', '/'))

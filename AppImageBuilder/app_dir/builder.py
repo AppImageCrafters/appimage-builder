@@ -11,17 +11,14 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from AppImageBuilder.app_dir.bundlers.apt.bundler import AptBundler
-from AppImageBuilder.app_dir.bundlers.apt.config import Config as AptConfig
 from AppImageBuilder.app_dir.runtimes.proot.runtime import PRootRuntime
 from AppImageBuilder.app_dir.runtimes.wrapper.runtime import WrapperRuntime
-from AppImageBuilder.app_dir.bundlers.yum.bundler import YumBundler
-from AppImageBuilder.app_dir.bundlers.yum.config import Config as YumConfig
-from .file_bundler import FileBundler
+from AppImageBuilder.app_dir.bundlers.file_bundler import FileBundler
 from .metadata.desktop_entry_generator import DesktopEntryGenerator
 from .metadata.icon_bundler import IconBundler
 from .metadata.loader import AppInfoLoader
 from AppImageBuilder.app_dir.runtimes.classic.runtime import ClassicRuntime
+from AppImageBuilder.app_dir.bundlers.factory import BundlerFactory
 
 
 class BuilderError(RuntimeError):
@@ -31,42 +28,41 @@ class BuilderError(RuntimeError):
 class Builder:
     def __init__(self, recipe):
         self.recipe = recipe
+        self.bundlers = []
+        self.generator = None
         self._load_config()
 
     def _load_config(self):
         self.app_dir_conf = self.recipe.get_item('AppDir')
-        self.app_dir_path = os.path.abspath(self.recipe.get_item('AppDir/path'))
+        self.cache_dir = os.path.join(os.path.curdir, 'appimage-builder-cache')
+        self._load_app_dir_path()
         self._load_app_info_config()
 
-        if 'apt' in self.app_dir_conf:
-            self.apt_config = AptConfig()
-            self.apt_config.apt_prefix = ''
-            self.apt_config.load(self.app_dir_conf['apt'])
+        bundler_factory = BundlerFactory(self.app_dir_path, self.cache_dir)
+        bundler_factory.runtime = self.recipe.get_item('AppDir/runtime/generator', "wrapper")
+
+        for bundler_name in bundler_factory.list_bundlers():
+            if bundler_name in self.app_dir_conf:
+                bundler_settings = self.app_dir_conf[bundler_name]
+                bundler = bundler_factory.create(bundler_name, bundler_settings)
+                self.bundlers.append(bundler)
 
         self.file_bundler = FileBundler(self.recipe)
+
+    def _load_app_dir_path(self):
+        self.app_dir_path = os.path.abspath(self.recipe.get_item('AppDir/path'))
+        os.makedirs(self.app_dir_path, exist_ok=True)
 
     def _load_app_info_config(self):
         loader = AppInfoLoader()
         self.app_info = loader.load(self.recipe)
 
     def build(self):
-        os.makedirs(self.app_dir_path, exist_ok=True)
+        runtime_generator = self.recipe.get_item('AppDir/runtime/generator', "wrapper")
 
-        if 'apt' in self.app_dir_conf:
-            self.apt_config.generate()
-            apt = AptBundler(self.apt_config)
-            apt.deploy_packages(self.app_dir_path)
+        for bundler in self.bundlers:
+            bundler.run()
 
-        if 'yum' in self.app_dir_conf:
-            config = YumConfig(self.recipe)
-            config.configure()
-
-            yum = YumBundler(config)
-            yum.deploy_packages(self.app_dir_path)
-
-        self.file_bundler.remove_excluded()
-
-        runtime_generator = self.recipe.get_item('AppDir/runtime/generator', "classic")
         if "proot" == runtime_generator:
             runtime = PRootRuntime(self.recipe)
             runtime.generate()

@@ -13,6 +13,7 @@ import logging
 import fnmatch
 import os
 
+from AppImageBuilder.app_dir.bundlers.bundler import Bundler
 from AppImageBuilder.commands.repoquery import RepoQuery
 from AppImageBuilder.commands.rpm_extract import RpmExtract
 from AppImageBuilder.commands.yumdownloader import YumDownloader
@@ -22,15 +23,15 @@ class YumError(RuntimeError):
     pass
 
 
-class YumBundler:
+class YumBundler(Bundler):
     def __init__(self, config):
-        self.config = config
+        super().__init__(config)
 
         self.yum_downloader = YumDownloader()
         self.repoquery = RepoQuery()
         self.rpm_extract = RpmExtract()
 
-    def deploy_packages(self, app_dir_path):
+    def run(self):
         download_list = self.repoquery.requires(self.config.include_list, self.config.arch)
         download_list.extend(self.config.include_list)
         download_list = [pkg for pkg in download_list if not self._is_excluded(pkg)]
