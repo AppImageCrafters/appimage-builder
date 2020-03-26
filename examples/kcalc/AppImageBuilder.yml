@@ -21,7 +21,12 @@ AppDir:
     include:
       - kcalc
     exclude:
+      - core-packages
+      - graphics-stack-packages
+      - xclient-packages
+
       - phonon4qt5
+      - perl-base
 
   files:
     exclude:
@@ -31,20 +36,22 @@ AppDir:
       - usr/share/doc/*/changelog.*
       - usr/share/doc/*/NEWS.*
       - usr/share/doc/*/TODO.*
+  runtime:
+    generator: classic
 
   test:
+    debian:
+      image: debian:stable
+      command: "./AppRun"
+      use_host_x: True
+      env:
+        - QT_DEBUG_PLUGINS=1
     centos:
       image: centos:6
       command: "./AppRun --help"
       use_host_x: True
       env:
         - QT_QPA_PLATFORM=minimal
-        - QT_DEBUG_PLUGINS=1
-    debian:
-      image: debian:stable
-      command: "./AppRun"
-      use_host_x: True
-      env:
         - QT_DEBUG_PLUGINS=1
     arch:
       image: archlinux
