@@ -23,8 +23,7 @@ class BundlerFactoryError(RuntimeError):
 class BundlerFactory:
     def __init__(self, app_dir, cache_dir):
         self.bundlers = {
-            'apt': AptBundler,
-            'yum': YumBundler
+            'apt': AptBundler
         }
         self.app_dir = app_dir
         self.cache_dir = cache_dir
