@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import logging
 import os
 
 from AppImageBuilder.app_dir.runtimes.proot.runtime import PRootRuntime
@@ -60,8 +61,16 @@ class Builder:
     def build(self):
         runtime_generator = self.recipe.get_item('AppDir/runtime/generator', "wrapper")
 
+        logging.info("_____________________")
+        logging.info("Bundling dependencies")
+        logging.info("")
+
         for bundler in self.bundlers:
             bundler.run()
+
+        logging.info("___________________")
+        logging.info("Generating runtime")
+        logging.info("")
 
         if "proot" == runtime_generator:
             runtime = PRootRuntime(self.recipe)
@@ -75,6 +84,10 @@ class Builder:
 
         self._bundle_app_dir_icon()
         self._generate_app_dir_desktop_entry()
+
+        logging.info("----------------------")
+        logging.info("AppDir build completed")
+        logging.info("----------------------")
 
     def _bundle_app_dir_icon(self):
         icon_bundler = IconBundler(self.app_dir_path, self.app_info.icon)

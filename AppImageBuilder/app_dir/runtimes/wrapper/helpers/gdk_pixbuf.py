@@ -9,7 +9,9 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import uuid
+import logging
+import os
+import subprocess
 
 from .base_helper import BaseHelper
 
@@ -19,19 +21,41 @@ class GdkPixbuf(BaseHelper):
     def configure(self, app_run):
         path = self._get_gdk_pixbuf_loaders_path()
         if path:
-            app_run.env['GDK_PIXBUF_MODULEDIR'] = '${APPDIR}/%s' % path
-            app_run.env['GDK_PIXBUF_MODULE_FILE'] = self._get_temp_unique_file_path()
+            loaders_cache_path = os.path.join(self.app_dir, os.path.dirname(path), 'loaders.cache')
 
-            bin_path = self._get_gdk_pixbuf_query_loaders_path()
-            if bin_path:
-                app_run.sections['GDK_PIXBUF'] = ['"$APPDIR"/%s --update-cache' % bin_path, '']
+            self._generate_loaders_cache(path, loaders_cache_path)
+
+            app_run.env['GDK_PIXBUF_MODULEDIR'] = '${APPDIR}/%s' % path
+            app_run.env['GDK_PIXBUF_MODULE_FILE'] = loaders_cache_path.replace(self.app_dir, '${APPDIR}')
+
+            app_run.sections['GDK_PIXBUF'] = [
+                'export LD_LIBRARY_PATH="$GDK_PIXBUF_MODULEDIR:$LD_LIBRARY_PATH"',
+                'export APPIMAGE_STARTUP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"'
+            ]
+
+    def _generate_loaders_cache(self, loaders_path, loaders_cache_path):
+        proc = subprocess.run(['gdk-pixbuf-query-loaders'], cwd=self.app_dir, stdout=subprocess.PIPE)
+        query_output = proc.stdout.decode('utf-8')
+
+        logging.info("GDK loaders cache modules dir: %s" % loaders_path)
+        modified_output = self._remove_loaders_path_prefixes(query_output.splitlines())
+
+        with open(loaders_cache_path, 'w') as f:
+            f.write('\n'.join(modified_output))
+
+        logging.info("GDK loaders cache wrote to: %s" % loaders_cache_path)
 
     def _get_gdk_pixbuf_loaders_path(self):
         return self._get_glob_relative_sub_dir_path('*/usr/*/gdk-pixbuf-2.0/*/loaders/*')
 
-    def _get_gdk_pixbuf_query_loaders_path(self):
-        return self._get_glob_relative_file_path('*/gdk-pixbuf-query-loaders*')
+    def _remove_loaders_path_prefixes(self, loaders_cache):
+        output = []
+        for line in loaders_cache:
+            if line.startswith('"/'):
+                line = line.strip('"')
+                line = os.path.basename(line)
+                line = '"%s"' % line
 
-    def _get_temp_unique_file_path(self):
-        id = uuid.uuid4()
-        return '/tmp/appimage_gdk_pixbuf_loaders.cache.%s' % str(id.time)
+            output.append(line)
+
+        return output

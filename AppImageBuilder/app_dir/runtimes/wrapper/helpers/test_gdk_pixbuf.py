@@ -17,13 +17,55 @@ from .gdk_pixbuf import GdkPixbuf
 
 class GdkPixbufTestCase(unittest.TestCase):
     def setUp(self) -> None:
-        self.helper = GdkPixbuf('/AppDir', [
+        self.helper = GdkPixbuf('/AppDir/', [
             '/AppDir/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so'
         ])
 
     def test_get_gdk_pixbud_loaders_path(self):
-        path = self.helper._get_gdk_pixbud_loaders_path()
+        path = self.helper._get_gdk_pixbuf_loaders_path()
         self.assertEqual(path, 'usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders')
+
+    def test_remove_loaders_path_prefixes(self):
+        input = '''# GdkPixbuf Image Loader Modules file
+# Automatically generated file, do not edit
+# Created by gdk-pixbuf-query-loaders from gdk-pixbuf-2.36.11
+#
+# LoaderDir = /usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders
+#
+"/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-ani.so"
+"ani" 4 "gdk-pixbuf" "Windows animated cursor" "LGPL"
+"application/x-navi-animation" ""
+"ani" ""
+"RIFF    ACON" "    xxxx    " 100
+
+"/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-bmp.so"
+"bmp" 5 "gdk-pixbuf" "BMP" "LGPL"
+"image/bmp" "image/x-bmp" "image/x-MS-bmp" ""
+"bmp" ""
+"BM" "" 100
+
+'''
+        expected = '''# GdkPixbuf Image Loader Modules file
+# Automatically generated file, do not edit
+# Created by gdk-pixbuf-query-loaders from gdk-pixbuf-2.36.11
+#
+# LoaderDir = /usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders
+#
+"libpixbufloader-ani.so"
+"ani" 4 "gdk-pixbuf" "Windows animated cursor" "LGPL"
+"application/x-navi-animation" ""
+"ani" ""
+"RIFF    ACON" "    xxxx    " 100
+
+"libpixbufloader-bmp.so"
+"bmp" 5 "gdk-pixbuf" "BMP" "LGPL"
+"image/bmp" "image/x-bmp" "image/x-MS-bmp" ""
+"bmp" ""
+"BM" "" 100
+
+'''
+        output = self.helper._remove_loaders_path_prefixes(input.splitlines())
+        self.assertEqual(output, expected.splitlines())
 
 
 if __name__ == '__main__':
