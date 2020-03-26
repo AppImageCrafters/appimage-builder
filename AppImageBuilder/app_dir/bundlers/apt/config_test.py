@@ -18,7 +18,7 @@ from AppImageBuilder.app_dir.bundlers.apt.config import Config, AptConfigError
 
 class LoadAptConfigTestCase(unittest.TestCase):
     def setUp(self):
-        self.conf = Config()
+        self.conf = Config('/tmp')
 
     def test_load_arch(self):
         self.conf.settings = {'arch': 'arm64'}
