@@ -48,8 +48,6 @@ class WrapperAppRun:
             '',
             '# Query executables PT_NEEED to resolve libc.so paths',
             'SYSTEM_COMMAND_NEEDS=$("${INTERPRETER}" --list /bin/bash)',
-            'APPDIR_COMMAND_NEEDS=$(LD_LIBRARY_PATH="$APPDIR_LIBRARY_PATH:$LIBC_LIBRARY_PATH" "$INTERPRETER" '
-                '--list $APPDIR/bin/ln)',
         ],
         'LIBC': [
             '###',
@@ -73,10 +71,6 @@ class WrapperAppRun:
             'SYSTEM_LIBC_PATH=$(extract_libc_path "$SYSTEM_COMMAND_NEEDS")',
             'SYSTEM_LIBC_VERSION=$(extract_libc_version "$SYSTEM_LIBC_PATH")',
             'echo "AppRun -- system libc: $SYSTEM_LIBC_PATH $SYSTEM_LIBC_VERSION"',
-            '',
-            'APPDIR_LIBC_PATH=$(extract_libc_path "$APPDIR_COMMAND_NEEDS")',
-            'APPDIR_LIBC_VERSION=$(extract_libc_version "$APPDIR_LIBC_PATH")',
-            'echo "AppRun -- appdir libc: $APPDIR_LIBC_PATH $APPDIR_LIBC_VERSION"',
             '',
             'GREATER_LIBC=$(echo -e "$SYSTEM_LIBC_VERSION\\n$APPDIR_LIBC_VERSION"  | sort -V | tail -1)',
             '',

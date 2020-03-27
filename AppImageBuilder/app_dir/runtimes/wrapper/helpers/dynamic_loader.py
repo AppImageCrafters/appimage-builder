@@ -12,12 +12,13 @@
 import fnmatch
 import logging
 import os
-import shutil
+import re
 import stat
 
-from AppImageBuilder.commands.file import File
-from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
+from packaging import version
+from functools import reduce
 from .base_helper import BaseHelper
+from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
 
 
 class DynamicLoaderError(RuntimeError):
@@ -40,6 +41,16 @@ class DynamicLoader(BaseHelper):
         logging.info("Loader found at: %s" % binary_path)
         return binary_path
 
+    def get_glibc_path(self) -> str:
+        path = self._get_glob_relative_file_path('*/libc.so.*')
+        if not path:
+            raise DynamicLoaderError('Unable to find libc.so')
+        path = os.path.join(self.app_dir, path)
+        path = os.path.realpath(path)
+
+        logging.info("Libc found at: %s" % os.path.relpath(path, self.app_dir))
+        return path
+
     def configure(self, app_run):
         library_paths = self._get_library_paths()
         app_run.env['APPDIR_LIBRARY_PATH'] = ':'.join(['$APPDIR%s' % path for path in library_paths])
@@ -53,6 +64,10 @@ class DynamicLoader(BaseHelper):
 
         loader_path = self.get_loader_path()
         app_run.env['INTERPRETER_RELATIVE'] = '$APPDIR/%s' % loader_path
+
+        glibc_path = self.get_glibc_path()
+        glibc_version = self.gess_libc_version(glibc_path)
+        app_run.env['APPDIR_LIBC_VERSION'] = glibc_version
 
         interpreter = '/tmp/appimage_ld.so.%s' % app_run.env['APPIMAGE_UUID']
         app_run.env['INTERPRETER'] = interpreter
@@ -115,3 +130,19 @@ class DynamicLoader(BaseHelper):
                 return True
 
         return False
+
+    def gess_libc_version(self, loader_path):
+        glib_version_re = re.compile(r'GLIBC_(?P<version>\d+\.\d+\.?\d*)')
+        with open(loader_path, 'rb') as f:
+            content = str(f.read())
+            glibc_version_strings = glib_version_re.findall(content)
+            if glibc_version_strings:
+                glibc_version_strings = map(version.parse, glibc_version_strings)
+                max_glibc_version = reduce((lambda x, y: max(x, y)), glibc_version_strings)
+                return str(max_glibc_version)
+            else:
+                raise DynamicLoaderError('Unable to determine glibc version')
+
+
+
+
