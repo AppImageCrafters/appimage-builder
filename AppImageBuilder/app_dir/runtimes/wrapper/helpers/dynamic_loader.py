@@ -63,15 +63,11 @@ class DynamicLoader(BaseHelper):
                     ['$APPDIR/%s' % path for path in partition_library_path])
 
         loader_path = self.get_loader_path()
-        app_run.env['INTERPRETER_RELATIVE'] = '$APPDIR/%s' % loader_path
+        app_run.env['INTERPRETER'] = '$APPDIR/%s' % loader_path
 
         glibc_path = self.get_glibc_path()
         glibc_version = self.gess_libc_version(glibc_path)
         app_run.env['APPDIR_LIBC_VERSION'] = glibc_version
-
-        interpreter = '/tmp/appimage_ld.so.%s' % app_run.env['APPIMAGE_UUID']
-        app_run.env['INTERPRETER'] = interpreter
-        self._set_executables_interpreter(interpreter)
 
     def _find_loader_by_name(self) -> str:
         for file in self.app_dir_files:
@@ -84,23 +80,6 @@ class DynamicLoader(BaseHelper):
     @staticmethod
     def _is_linker_file(file):
         return fnmatch.fnmatch(file, '*/ld-*.so*')
-
-    def _set_executables_interpreter(self, interpreter):
-        for root, dirs, files in os.walk(self.app_dir):
-            for file_name in files:
-                path = os.path.join(root, file_name)
-                if not os.path.islink(path) and self.is_elf_file(path):
-                    self._set_interpreter(path, interpreter)
-
-    def _set_interpreter(self, file, interpreter):
-        try:
-            patchelf_command = PatchElf()
-            patchelf_command.log_stderr = False
-            if patchelf_command.get_interpreter(file):
-                logging.info('Setting interpreter to: %s' % os.path.relpath(file, self.app_dir))
-                patchelf_command.set_interpreter(file, interpreter)
-        except PatchElfError:
-            pass
 
     def _get_library_paths(self):
         paths = set()

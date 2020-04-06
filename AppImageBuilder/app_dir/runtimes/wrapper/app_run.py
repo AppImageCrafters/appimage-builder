@@ -37,61 +37,62 @@ class WrapperAppRun:
         'APPDIR': [
             '# Fallback APPDIR variable setup for uncompressed usage',
             'if [ -z ${APPDIR+x} ]; then',
-            '    export APPIMAGE_ORIGINAL_APPDIR=""',
+            '    export APPRUN_ORIGINAL_APPDIR=""',
             '    export APPDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"',
-            '    export APPIMAGE_STARTUP_APPDIR="$APPDIR"',
+            '    export APPRUN_STARTUP_APPDIR="$APPDIR"',
             'fi'
         ],
         'LINKER': [
             '',
-            'cp -f "$INTERPRETER_RELATIVE" "$INTERPRETER"',
-            '',
             '# Query executables PT_NEEED to resolve libc.so paths',
-            'SYSTEM_COMMAND_NEEDS=$("${INTERPRETER}" --list /bin/bash)',
+            'SYSTEM_COMMAND_NEEDS=$("${INTERPRETER}" --library-path $APPDIR_LIBRARY_PATH:$LD_LIBRARY_PATH --list "$APPDIR/$BIN_PATH")',
         ],
         'LIBC': [
+            'GREP="$INTERPRETER $APPDIR/bin/grep"',
+            'CUT="$INTERPRETER $APPDIR/usr/bin/cut"',
+            'SORT="$INTERPRETER $APPDIR/usr/bin/sort"',
+            'TAIL="$INTERPRETER $APPDIR/usr/bin/tail"',
+            'DIRNAME="$INTERPRETER $APPDIR/usr/bin/dirname"',
+
             '###',
             '# Select the greater libc to run the app',
             '###',
             'function extract_libc_path() {',
             '   LD_LIST_OUTPUT="$1"',
-            '   echo "$LD_LIST_OUTPUT" | grep "libc.so" | cut -f 3 -d " "',
+            '   echo "$LD_LIST_OUTPUT" | $GREP "libc.so" | $CUT -f 3 -d " "',
             '}',
             'function extract_libc_version() {',
             '   LIBC_PATH="$1"',
-            '   grep  -Eao \'GLIBC_[0-9]{1,4}\\.[0-9]{1,4}\' $LIBC_PATH | grep -Eao \'[0-9]{1,4}\\.[0-9]{1,4}\' | sort -V | tail -1',
+            '   $GREP  -Eao \'GLIBC_[0-9]{1,4}\\.[0-9]{1,4}\' $LIBC_PATH | $GREP -Eao \'[0-9]{1,4}\\.[0-9]{1,4}\' | $SORT -V | $TAIL -1',
             '}',
 
             '',
             'echo "AppRun -- resolving greater libc --"',
             '',
-            'export APPIMAGE_ORIGINAL_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"',
-            'export LD_LIBRARY_PATH="$APPDIR_LIBRARY_PATH:$LIBC_LIBRARY_PATH:$APPIMAGE_ORIGINAL_LD_LIBRARY_PATH"',
-            'export APPIMAGE_STARTUP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"',
+            'export APPRUN_ORIGINAL_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"',
+            'export LD_LIBRARY_PATH="$APPDIR_LIBRARY_PATH:$LIBC_LIBRARY_PATH:$APPRUN_ORIGINAL_LD_LIBRARY_PATH"',
+            'export APPRUN_STARTUP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"',
             'SYSTEM_LIBC_PATH=$(extract_libc_path "$SYSTEM_COMMAND_NEEDS")',
             'SYSTEM_LIBC_VERSION=$(extract_libc_version "$SYSTEM_LIBC_PATH")',
             'echo "AppRun -- system libc: $SYSTEM_LIBC_PATH $SYSTEM_LIBC_VERSION"',
             '',
-            'GREATER_LIBC=$(echo -e "$SYSTEM_LIBC_VERSION\\n$APPDIR_LIBC_VERSION"  | sort -V | tail -1)',
+            'GREATER_LIBC=$(echo -e "$SYSTEM_LIBC_VERSION\\n$APPDIR_LIBC_VERSION"  | $SORT -V | $TAIL -1)',
             '',
             'if [ "$SYSTEM_LIBC_VERSION" == "$GREATER_LIBC" ]; then',
             '  echo "AppRun -- Using System libc version: $SYSTEM_LIBC_VERSION"',
-            '  LIBC_DIR=$(dirname $SYSTEM_LIBC_PATH)',
-            '  export SYSTEM_INTERPRETER=$(echo $LIBC_DIR/ld-*.so)',
-            '  export APPIMAGE_STARTUP_SYSTEM_INTERPRETER=$SYSTEM_INTERPRETER',
-            '',
-            '  # use system loader',
-            '  cp -f "$SYSTEM_INTERPRETER" "$INTERPRETER"',
-            '',
-            '  export LD_LIBRARY_PATH="$APPDIR_LIBRARY_PATH:$APPIMAGE_ORIGINAL_LD_LIBRARY_PATH"',
-            '  export APPIMAGE_STARTUP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"',
+            '  LIBC_DIR=$($DIRNAME $SYSTEM_LIBC_PATH)',
+            '  export INTERPRETER=$(echo $LIBC_DIR/ld-*.so)',
+            '  export APPRUN_STARTUP_SYSTEM_INTERPRETER=$SYSTEM_INTERPRETER',
+
+            '  export LD_LIBRARY_PATH="$APPDIR_LIBRARY_PATH:$APPRUN_ORIGINAL_LD_LIBRARY_PATH"',
+            '  export APPRUN_STARTUP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"',
             'else',
             '  echo "AppRun -- Using AppDir libc version: $APPDIR_LIBC_VERSION"',
             'fi'
         ],
         'EXEC': [
             '# Launch application',
-            'exec ${APPDIR}/${BIN_PATH} ${EXEC_ARGS}',
+            'exec $INTERPRETER ${APPDIR}/${BIN_PATH} ${EXEC_ARGS}',
             ''
         ]
     }
@@ -121,7 +122,7 @@ class WrapperAppRun:
         if self.env['INTERPRETER']:
             file_lines.append('# Guess libc to use')
 
-            for env in ['APPIMAGE_UUID', 'INTERPRETER', 'INTERPRETER_RELATIVE']:
+            for env in ['APPIMAGE_UUID', 'INTERPRETER', 'BIN_PATH']:
                 file_lines.extend(self._generate_env(env, self.env[env]))
 
             for k in self.env:
@@ -139,6 +140,7 @@ class WrapperAppRun:
                 file_lines.extend(['', '# %s' % k])
                 file_lines.extend(v)
 
+        file_lines.extend(self._generate_env('LD_PRELOAD', self.env['LD_PRELOAD']))
         file_lines.extend(self.sections['EXEC'])
 
         return file_lines
@@ -146,7 +148,8 @@ class WrapperAppRun:
     def _generate_env_section(self):
         lines = ['', '# Run Environment Setup']
         for k, v in self.env.items():
-            if 'LIBRARY_PATH' not in k and k not in ['APPIMAGE_UUID', 'INTERPRETER', 'INTERPRETER_RELATIVE'] and v:
+            if 'LIBRARY_PATH' not in k and k not in ['APPIMAGE_UUID', 'INTERPRETER', 'INTERPRETER_RELATIVE',
+                                                     'LD_PRELOAD'] and v:
                 lines.extend(self._generate_env(k, v))
 
         lines.append('')
@@ -154,9 +157,9 @@ class WrapperAppRun:
 
     def _generate_env(self, k, v):
         lines = [
-            'export APPIMAGE_ORIGINAL_%s="$%s"' % (k, k),
+            'export APPRUN_ORIGINAL_%s="$%s"' % (k, k),
             'export %s="%s"' % (k, v),
-            'export APPIMAGE_STARTUP_%s="$%s"' % (k, k),
+            'export APPRUN_STARTUP_%s="$%s"' % (k, k),
         ]
 
         return lines

@@ -30,7 +30,7 @@ class GdkPixbuf(BaseHelper):
 
             app_run.sections['GDK_PIXBUF'] = [
                 'export LD_LIBRARY_PATH="$GDK_PIXBUF_MODULEDIR:$LD_LIBRARY_PATH"',
-                'export APPIMAGE_STARTUP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"'
+                'export APPRUN_STARTUP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"'
             ]
 
     def _generate_loaders_cache(self, loaders_path, loaders_cache_path):

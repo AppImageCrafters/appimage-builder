@@ -1,6 +1,6 @@
 version: 1
 script:
-  - rm -r ./AppDir
+  - rm -r ./AppDir || true
 
 AppDir:
   path: ./AppDir
@@ -20,7 +20,6 @@ AppDir:
 
     include:
       - wget
-      - proot
       - libssl1.0.0
       # Domain name resolution lib
       - libnss-mdns
@@ -37,7 +36,7 @@ AppDir:
   runtime:
     generator: wrapper
     env:
-      PATH: '${APPDIR}/usr/bin:${PATH}'
+      PATH: '${APPDIR}/usr/bin:${APPDIR}/bin:${PATH}'
 
   test:
     centos:
