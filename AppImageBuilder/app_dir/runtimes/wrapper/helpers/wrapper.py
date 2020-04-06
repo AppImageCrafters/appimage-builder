@@ -34,8 +34,8 @@ class Wrapper(BaseHelper):
     def _download_wrappers(self):
         self.wrappers = []
         for arch in ['amd64', 'arm64', 'armhf', 'i386']:
-            file_path = os.path.join(os.curdir, 'appimage-builder-cache', 'libappimage_exec_wrapper-%s.so' % arch)
-            url = 'https://github.com/AppImageCrafters/appimage-exec-wrapper/releases/download/continuous/libappimage_exec_wrapper-%s.so' % arch
+            file_path = os.path.join(os.curdir, 'appimage-builder-cache', 'libapprun_hooks-%s.so' % arch)
+            url = 'https://github.com/AppImageCrafters/AppRun/releases/download/v0.9.0/libapprun_hooks-%s.so' % arch
 
             if not os.path.exists(file_path):
                 logging.info('Downloading exec wrapper: %s' % url)
