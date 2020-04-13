@@ -32,6 +32,7 @@ class DynamicLoader(BaseHelper):
         self.priority = 100
         self.patch_elf = PatchElf()
         self.patch_elf.logger.level = logging.WARNING
+        self.system_interpreter = None
 
     def get_loader_path(self) -> str:
         binary_path = self._find_loader_by_name()
@@ -63,11 +64,17 @@ class DynamicLoader(BaseHelper):
                     ['$APPDIR/%s' % path for path in partition_library_path])
 
         loader_path = self.get_loader_path()
-        app_run.env['INTERPRETER'] = '$APPDIR/%s' % loader_path
+        app_run.env['APPDIR_INTERP'] = '$APPDIR/%s' % loader_path
 
         glibc_path = self.get_glibc_path()
         glibc_version = self.gess_libc_version(glibc_path)
         app_run.env['APPDIR_LIBC_VERSION'] = glibc_version
+
+        interpreter = '/tmp/appimage-%s-ld-linux.so.2' % app_run.env['APPIMAGE_UUID']
+        app_run.env['RUNTIME_INTERP'] = interpreter
+
+        self._set_executables_interpreter(interpreter)
+        app_run.env['SYSTEM_INTERP'] = self.system_interpreter
 
     def _find_loader_by_name(self) -> str:
         for file in self.app_dir_files:
@@ -122,6 +129,21 @@ class DynamicLoader(BaseHelper):
             else:
                 raise DynamicLoaderError('Unable to determine glibc version')
 
+    def _set_executables_interpreter(self, interpreter):
+        for root, dirs, files in os.walk(self.app_dir):
+            for file_name in files:
+                path = os.path.join(root, file_name)
+                if not os.path.islink(path) and self.is_elf_file(path):
+                    self._set_interpreter(path, interpreter)
 
-
-
+    def _set_interpreter(self, file, interpreter):
+        try:
+            patchelf_command = PatchElf()
+            patchelf_command.log_stderr = False
+            bin_interpreter = patchelf_command.get_interpreter(file)
+            if bin_interpreter:
+                self.system_interpreter = bin_interpreter
+                logging.info('Setting interpreter to: %s' % os.path.relpath(file, self.app_dir))
+                patchelf_command.set_interpreter(file, interpreter)
+        except PatchElfError:
+            pass

@@ -1,7 +1,7 @@
 version: 1
 
 script:
-  - rm -r ./AppDir
+  - rm -r ./AppDir || true
 
 AppDir:
   path: ./AppDir
@@ -14,43 +14,38 @@ AppDir:
     exec: usr/bin/vlc
 
   apt:
-    arch: i386
+    arch: amd64
     sources:
-      - sourceline: 'deb [arch=i386] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
-      - sourceline: 'deb [arch=i386] http://mx.archive.ubuntu.com/ubuntu/ bionic-updates main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ bionic-updates main restricted universe multiverse'
 
     include:
       - vlc
-      - proot
-
-  runtime:
-    generator: proot
 
   test:
     debian:
       image: debian:stable
       command: "./AppRun"
       use_host_x: True
-#    centos:
-#      image: centos:6
-#      command: "./AppRun --help"
-#      use_host_x: True
-#      env:
-#        - QT_QPA_PLATFORM=minimal
-#    arch:
-#      image: archlinux
-#      command: "./AppRun --help"
-#      use_host_x: True
-#    fedora:
-#      image: fedora:26
-#      command: "./AppRun --help"
-#      use_host_x: True
-#    ubuntu:
-#      image: ubuntu:xenial
-#      command: "./AppRun --help"
-#      use_host_x: True
-
+    centos:
+      image: centos:6
+      command: "./AppRun --help"
+      use_host_x: True
+      env:
+        - QT_QPA_PLATFORM=minimal
+    arch:
+      image: archlinux
+      command: "./AppRun --help"
+      use_host_x: True
+    fedora:
+      image: fedora:26
+      command: "./AppRun --help"
+      use_host_x: True
+    ubuntu:
+      image: ubuntu:xenial
+      command: "./AppRun --help"
+      use_host_x: True
 
 AppImage:
   arch: x86_64

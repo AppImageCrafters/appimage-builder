@@ -93,7 +93,7 @@ class AptBundler(Bundler):
         #   packages required by the runtime generators
         self.proot_apprun_packages = ['proot', 'coreutils']
         self.classic_apprun_packages = ['coreutils']
-        self.wrapper_apprun_packages = ['grep', 'util-linux', 'coreutils']
+        self.wrapper_apprun_packages = []
 
     def validate_configuration(self):
         validator = AptSettingsValidator(self.settings)

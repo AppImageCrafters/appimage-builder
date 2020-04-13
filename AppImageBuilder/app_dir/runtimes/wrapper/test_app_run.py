@@ -29,12 +29,12 @@ class AppRunTestCase(unittest.TestCase):
         'export XDG_DATA_DIRS="${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}"',
         'export XDG_CONFIG_DIRS="$APPDIR/etc/xdg:$XDG_CONFIG_DIRS"',
         'export EXEC_ARGS="$@"',
-        'export BIN_PATH="usr/bin/exec"',
+        'export EXEC_PATH="usr/bin/exec"',
         '',
         '# Launch application using only the bundled libraries',
         'exec "${INTERPRETER}" \\',
         '   --inhibit-cache --library-path "${LD_LIBRARY_DIRS}" \\',
-        '  ${APPDIR}/${BIN_PATH} ${EXEC_ARGS}',
+        '  ${APPDIR}/${EXEC_PATH} ${EXEC_ARGS}',
         '']
 
     def test_minimal_script_generation(self):

@@ -19,7 +19,6 @@ from .openssl import OpenSSL
 from .qt import Qt
 from .gdk_pixbuf import GdkPixbuf
 from .glib_schemas import GLibSchemas
-from .wrapper import Wrapper
 
 
 class HelperFactoryError(RuntimeError):
@@ -41,7 +40,6 @@ class HelperFactory:
             'gdk_pixbuf': GdkPixbuf,
             'glib_schemas': GLibSchemas,
             'java': Java,
-            'wrapper': Wrapper,
         }
 
     def get(self, id) -> BaseHelper:

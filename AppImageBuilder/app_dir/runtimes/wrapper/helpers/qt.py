@@ -24,7 +24,8 @@ class Qt(BaseHelper):
         qt_lib_path = self._get_qt_libs_path()
         if qt_lib_path:
             qt_dirs = self._get_qt_dirs(app_run)
-            bin_path = os.path.join(self.app_dir, app_run.env['BIN_PATH'])
+            bin_path = app_run.env['EXEC_PATH']
+            bin_path = bin_path.replace("$APPDIR", self.app_dir)
             bin_dir_path = os.path.dirname(bin_path)
 
             qt_conf_target_path = self._get_qt_conf_path(bin_dir_path)
@@ -50,7 +51,7 @@ class Qt(BaseHelper):
             if v:
                 qt_conf.append("%s=%s\n" % (k, v))
 
-        self._write_qt_conf(qt_conf, os.path.join(self.app_dir, qt_conf_target_path))
+        self._write_qt_conf(qt_conf, qt_conf_target_path)
 
     def _write_qt_conf(self, qt_conf, qt_conf_target_path):
         logging.info("Writing qt.conf to: %s" % os.path.relpath(qt_conf_target_path, self.app_dir))
@@ -58,7 +59,8 @@ class Qt(BaseHelper):
             f.writelines(qt_conf)
 
     def _get_qt_dirs(self, app_run):
-        bin_path = os.path.join(self.app_dir, app_run.env['BIN_PATH'])
+        bin_path = app_run.env['EXEC_PATH']
+        bin_path = bin_path.replace("$APPDIR", self.app_dir)
         bin_dir_path = os.path.dirname(bin_path)
 
         qt_conf_target_path = self._get_qt_conf_path(bin_dir_path)

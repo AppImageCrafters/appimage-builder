@@ -12,10 +12,14 @@
 import logging
 import os
 
-from .app_run import WrapperAppRun
-from AppImageBuilder.recipe import Recipe, RecipeError
-from .helpers.factory import HelperFactory
 from AppImageBuilder.app_dir.metadata.loader import AppInfoLoader
+from AppImageBuilder.recipe import Recipe
+from .app_run import WrapperAppRun
+from .helpers.factory import HelperFactory
+
+
+class WrapperRuntimeError(RuntimeError):
+    pass
 
 
 class WrapperRuntime():
@@ -33,17 +37,11 @@ class WrapperRuntime():
         self.env = recipe.get_item('AppDir/runtime/env', {})
 
     def generate(self):
-        app_run = self.app_run_constructor(self.app_info.exec, self.app_info.exec_args)
+        app_run = self.app_run_constructor(self.app_dir, self.app_info.exec, self.app_info.exec_args)
         self._configure_runtime(app_run)
-
-        app_run_path = self._get_app_run_path()
-
         self._add_user_defined_settings(app_run)
-        app_run.save(app_run_path)
 
-    def _get_app_run_path(self):
-        app_run_path = os.path.join(self.app_dir, 'AppRun')
-        return app_run_path
+        app_run.deploy()
 
     def _configure_runtime(self, app_run):
         app_dir_files = self._get_app_dir_file_list()

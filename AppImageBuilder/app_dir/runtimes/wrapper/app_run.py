@@ -9,160 +9,125 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-
-
+import fnmatch
 import os
+import shutil
 import stat
+import subprocess
 import uuid
+import logging
+from urllib import request
+
+
+class AppRunError(RuntimeError):
+    pass
 
 
 class WrapperAppRun:
     env = {
         'APPIMAGE_UUID': None,
-        'LIBRARY_PATH': '',
-        'INTERPRETER': None,
+        'SYSTEM_INTERP': None,
+        'APPDIR_INTERP': None,
+        'RUNTIME_INTERP': None,
         'XDG_DATA_DIRS': '${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}',
         'XDG_CONFIG_DIRS': '$APPDIR/etc/xdg:$XDG_CONFIG_DIRS',
-        'PATH': '$APPDIR/bin:$APPDIR/sbin:$APPDIR/usr/bin:$PATH',
-        'EXEC_ARGS': '$@',
-    }
-    sections = {
-        'HEADER': [
-            '#!/bin/bash',
-            '# This file was created by AppImageBuilder',
-            '',
-            'if [ ! -z "$APPIMAGE_DEBUG" ]; then set -ex; fi',
-            '',
-        ],
-        'APPDIR': [
-            '# Fallback APPDIR variable setup for uncompressed usage',
-            'if [ -z ${APPDIR+x} ]; then',
-            '    export APPRUN_ORIGINAL_APPDIR=""',
-            '    export APPDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"',
-            '    export APPRUN_STARTUP_APPDIR="$APPDIR"',
-            'fi'
-        ],
-        'LINKER': [
-            '',
-            '# Query executables PT_NEEED to resolve libc.so paths',
-            'SYSTEM_COMMAND_NEEDS=$("${INTERPRETER}" --library-path $APPDIR_LIBRARY_PATH:$LD_LIBRARY_PATH --list "$APPDIR/$BIN_PATH")',
-        ],
-        'LIBC': [
-            'GREP="$INTERPRETER $APPDIR/bin/grep"',
-            'CUT="$INTERPRETER $APPDIR/usr/bin/cut"',
-            'SORT="$INTERPRETER $APPDIR/usr/bin/sort"',
-            'TAIL="$INTERPRETER $APPDIR/usr/bin/tail"',
-            'DIRNAME="$INTERPRETER $APPDIR/usr/bin/dirname"',
-
-            '###',
-            '# Select the greater libc to run the app',
-            '###',
-            'function extract_libc_path() {',
-            '   LD_LIST_OUTPUT="$1"',
-            '   echo "$LD_LIST_OUTPUT" | $GREP "libc.so" | $CUT -f 3 -d " "',
-            '}',
-            'function extract_libc_version() {',
-            '   LIBC_PATH="$1"',
-            '   $GREP  -Eao \'GLIBC_[0-9]{1,4}\\.[0-9]{1,4}\' $LIBC_PATH | $GREP -Eao \'[0-9]{1,4}\\.[0-9]{1,4}\' | $SORT -V | $TAIL -1',
-            '}',
-
-            '',
-            'echo "AppRun -- resolving greater libc --"',
-            '',
-            'export APPRUN_ORIGINAL_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"',
-            'export LD_LIBRARY_PATH="$APPDIR_LIBRARY_PATH:$LIBC_LIBRARY_PATH:$APPRUN_ORIGINAL_LD_LIBRARY_PATH"',
-            'export APPRUN_STARTUP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"',
-            'SYSTEM_LIBC_PATH=$(extract_libc_path "$SYSTEM_COMMAND_NEEDS")',
-            'SYSTEM_LIBC_VERSION=$(extract_libc_version "$SYSTEM_LIBC_PATH")',
-            'echo "AppRun -- system libc: $SYSTEM_LIBC_PATH $SYSTEM_LIBC_VERSION"',
-            '',
-            'GREATER_LIBC=$(echo -e "$SYSTEM_LIBC_VERSION\\n$APPDIR_LIBC_VERSION"  | $SORT -V | $TAIL -1)',
-            '',
-            'if [ "$SYSTEM_LIBC_VERSION" == "$GREATER_LIBC" ]; then',
-            '  echo "AppRun -- Using System libc version: $SYSTEM_LIBC_VERSION"',
-            '  LIBC_DIR=$($DIRNAME $SYSTEM_LIBC_PATH)',
-            '  export INTERPRETER=$(echo $LIBC_DIR/ld-*.so)',
-            '  export APPRUN_STARTUP_SYSTEM_INTERPRETER=$SYSTEM_INTERPRETER',
-
-            '  export LD_LIBRARY_PATH="$APPDIR_LIBRARY_PATH:$APPRUN_ORIGINAL_LD_LIBRARY_PATH"',
-            '  export APPRUN_STARTUP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"',
-            'else',
-            '  echo "AppRun -- Using AppDir libc version: $APPDIR_LIBC_VERSION"',
-            'fi'
-        ],
-        'EXEC': [
-            '# Launch application',
-            'exec $INTERPRETER ${APPDIR}/${BIN_PATH} ${EXEC_ARGS}',
-            ''
-        ]
+        'PATH': '$APPDIR/bin:$APPDIR/usr/bin:$PATH',
     }
 
-    def __init__(self, bin_path, exec_args=None):
-        assert bin_path
+    sections = {}
 
-        self.env['BIN_PATH'] = bin_path
-        if exec_args:
-            self.env['EXEC_ARGS'] = exec_args
-
+    def __init__(self, app_dir, exec_path, exec_args='$@'):
+        self.app_dir = app_dir
         self.env['APPIMAGE_UUID'] = str(uuid.uuid4())
+        self.env['EXEC_PATH'] = "$APPDIR/%s" % exec_path
+        self.env['EXEC_ARGS'] = exec_args
 
-    def save(self, path):
-        lines = self._generate()
+    def deploy(self):
+        self._download_wrapper_binaries()
+        self._download_apprun_binaries()
 
-        with open(path, "w") as f:
-            f.write("\n".join(lines))
+        libc_signature = self._get_embed_libc_signature()
 
-        self._set_permissions(path)
+        wrapper_path = self._find_wrapper_path(libc_signature)
+        apprun_path = self._find_apprun_path(libc_signature)
 
-    def _generate(self):
-        file_lines = []
-        file_lines.extend(self.sections['HEADER'])
-        file_lines.extend(self.sections['APPDIR'])
+        shutil.copy(apprun_path, os.path.join(self.app_dir, "AppRun"))
+        self._set_execution_permissions(os.path.join(self.app_dir, "AppRun"))
 
-        if self.env['INTERPRETER']:
-            file_lines.append('# Guess libc to use')
+        shutil.copy(wrapper_path, os.path.join(self.app_dir, "libapprun_hooks.so"))
 
-            for env in ['APPIMAGE_UUID', 'INTERPRETER', 'BIN_PATH']:
-                file_lines.extend(self._generate_env(env, self.env[env]))
+        self.env['LD_PRELOAD'] = '${APPDIR}/libapprun_hooks.so'
+        self._generate_env_file()
 
-            for k in self.env:
-                if '_LIBRARY_PATH' in k:
-                    file_lines.extend(self._generate_env(k, self.env[k]))
+    def _get_embed_libc_signature(self):
+        libc_path = self._find_libc_path()
+        if not libc_path:
+            raise AppRunError('Unable to locate libc at: %s' % self.app_dir)
 
-            file_lines.extend(self.sections['LINKER'])
+        return self._get_elf_arch_signature(libc_path)
 
-        file_lines.extend(self._generate_env_section())
-        file_lines.extend(self.sections['LIBC'])
+    def _generate_env_file(self):
+        with open(os.path.join(self.app_dir, '.env'), 'w') as f:
+            for k, v in self.env.items():
+                f.write("%s=%s\n" % (k, v))
 
-        for k, v in self.sections.items():
-            if k not in ['HEADER', 'APPDIR', 'LINKER', 'LIBC', 'EXEC', 'EXEC_ARGS']:
-                # avoid including any special section
-                file_lines.extend(['', '# %s' % k])
-                file_lines.extend(v)
+    def _get_elf_arch_signature(self, file):
+        proc_env = os.environ.copy()
+        proc_env['LC_ALL'] = 'C'
+        proc = subprocess.run(['file', '-b', file], stdout=subprocess.PIPE, env=proc_env)
+        output = proc.stdout.decode('utf-8')
+        parts = output.split(',')
+        signature = ','.join(parts[:2])
+        signature = signature.replace('shared object', '')
+        signature = signature.replace('executable', '')
+        return signature
 
-        file_lines.extend(self._generate_env('LD_PRELOAD', self.env['LD_PRELOAD']))
-        file_lines.extend(self.sections['EXEC'])
+    def _download_wrapper_binaries(self):
+        self.wrapper_binaries = []
+        for arch in ['amd64', 'arm64', 'armhf', 'i386']:
+            file_path = os.path.join(os.curdir, 'appimage-builder-cache', 'libapprun_hooks-%s.so' % arch)
+            url = 'https://github.com/AppImageCrafters/AppRun/releases/download/continuous/libapprun_hooks-%s.so' % arch
 
-        return file_lines
+            if not os.path.exists(file_path):
+                logging.info('Downloading libapprun_hooks binary: %s' % url)
+                request.urlretrieve(url, file_path)
 
-    def _generate_env_section(self):
-        lines = ['', '# Run Environment Setup']
-        for k, v in self.env.items():
-            if 'LIBRARY_PATH' not in k and k not in ['APPIMAGE_UUID', 'INTERPRETER', 'INTERPRETER_RELATIVE',
-                                                     'LD_PRELOAD'] and v:
-                lines.extend(self._generate_env(k, v))
+            self.wrapper_binaries.append(file_path)
 
-        lines.append('')
-        return lines
+    def _download_apprun_binaries(self):
+        self.apprun_binaries = []
+        for arch in ['amd64', 'arm64', 'armhf', 'i386']:
+            file_path = os.path.join(os.curdir, 'appimage-builder-cache', 'AppRun-%s' % arch)
+            url = 'https://github.com/AppImageCrafters/AppRun/releases/download/continuous/AppRun-%s' % arch
 
-    def _generate_env(self, k, v):
-        lines = [
-            'export APPRUN_ORIGINAL_%s="$%s"' % (k, k),
-            'export %s="%s"' % (k, v),
-            'export APPRUN_STARTUP_%s="$%s"' % (k, k),
-        ]
+            if not os.path.exists(file_path):
+                logging.info('Downloading AppRun binary: %s' % url)
+                request.urlretrieve(url, file_path)
 
-        return lines
+            self.apprun_binaries.append(file_path)
 
-    def _set_permissions(self, path):
+    def _find_libc_path(self):
+        for base_path, dirs, files in os.walk(self.app_dir):
+            for file in files:
+                abs_path = os.path.join(base_path, file)
+                if fnmatch.fnmatch(abs_path, '*/libc-*.so'):
+                    return abs_path
+
+    def _find_wrapper_path(self, libc_signature):
+        for wrapper in self.wrapper_binaries:
+            signature = self._get_elf_arch_signature(wrapper)
+            if libc_signature == signature:
+                return wrapper
+
+        raise AppRunError('Unable to find a wrapper for: %s' % libc_signature)
+
+    def _find_apprun_path(self, libc_signature):
+        for apprun in self.apprun_binaries:
+            signature = self._get_elf_arch_signature(apprun)
+            if libc_signature == signature:
+                return apprun
+
+        raise AppRunError('Unable to find a AppRun for: %s' % libc_signature)
+
+    def _set_execution_permissions(self, path):
         os.chmod(path, stat.S_IRWXU | stat.S_IXGRP | stat.S_IRGRP | stat.S_IXOTH | stat.S_IROTH)
