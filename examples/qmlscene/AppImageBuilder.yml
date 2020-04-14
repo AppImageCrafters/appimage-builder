@@ -65,9 +65,6 @@ AppDir:
       - usr/bin/*
       - usr/sbin/*
 
-  runtime:
-    generator: wrapper
-
   test:
     debian:
       image: debian:stable

@@ -1,0 +1,52 @@
+version: 1
+
+AppDir:
+  path: ./AppDir
+
+  app_info:
+    id: org.gnu.bash
+    name: bash
+    icon: utilities-terminal
+    version: 4.4.20
+    exec: bin/bash
+    exec_args: $@
+
+  apt:
+    arch: arm64
+    sources:
+      - sourceline: 'deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports bionic main'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+
+    include:
+      - bash
+      - coreutils
+    exclude:
+      - libpcre3
+
+  test:
+    centos:
+      image: centos:6
+      command: "./AppRun -c \"echo Hello World\""
+      use_host_x: True
+    debian:
+      image: debian:stable
+      command: "./AppRun -c \"echo Hello World\""
+      use_host_x: True
+    arch:
+      image: archlinux
+      command: "./AppRun -c \"echo Hello World\""
+      use_host_x: True
+    fedora:
+      image: fedora:26
+      command: "./AppRun -c \"echo Hello World\""
+      use_host_x: True
+    ubuntu:
+      image: ubuntu:xenial
+      command: "./AppRun -c \"echo Hello World\""
+      use_host_x: True
+
+
+AppImage:
+  update-information: None
+  sign-key: None
+  arch: aarch64

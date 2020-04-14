@@ -61,7 +61,7 @@ class IconBundler:
                 return os.path.join(root, svg_icon_name)
 
             if png_icon_name in files:
-                new_path = os.path.join(root, svg_icon_name)
+                new_path = os.path.join(root, png_icon_name)
                 new_size = self._extract_icon_size_from_path(new_path)
 
                 if new_size > size:

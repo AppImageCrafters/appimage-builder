@@ -32,9 +32,6 @@ AppDir:
       - usr/share/doc/*/NEWS.*
       - usr/share/doc/*/TODO.*
 
-  runtime:
-    generator: wrapper
-
   test:
     debian:
       image: debian:stable
