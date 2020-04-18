@@ -25,13 +25,9 @@ class GdkPixbuf(BaseHelper):
 
             self._generate_loaders_cache(path, loaders_cache_path)
 
-            app_run.env['GDK_PIXBUF_MODULEDIR'] = '${APPDIR}/%s' % path
-            app_run.env['GDK_PIXBUF_MODULE_FILE'] = loaders_cache_path.replace(self.app_dir, '${APPDIR}')
-
-            app_run.sections['GDK_PIXBUF'] = [
-                'export LD_LIBRARY_PATH="$GDK_PIXBUF_MODULEDIR:$LD_LIBRARY_PATH"',
-                'export APPRUN_STARTUP_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"'
-            ]
+            app_run.env['GDK_PIXBUF_MODULEDIR'] = '$APPDIR/%s' % path
+            app_run.env['GDK_PIXBUF_MODULE_FILE'] = loaders_cache_path.replace(self.app_dir, '$APPDIR')
+            app_run.env['APPDIR_LIBRARY_PATH'] = '$APPDIR/%s:%s' % (path, app_run.env['APPDIR_LIBRARY_PATH'])
 
     def _generate_loaders_cache(self, loaders_path, loaders_cache_path):
         proc = subprocess.run(['gdk-pixbuf-query-loaders'], cwd=self.app_dir, stdout=subprocess.PIPE)
