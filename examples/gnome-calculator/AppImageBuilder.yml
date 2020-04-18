@@ -11,15 +11,19 @@ AppDir:
     exec: usr/bin/gnome-calculator
 
   apt:
-    arch: i386
+    arch: amd64
     sources:
-      - sourceline: 'deb [arch=i386] http://mx.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
 
     include:
       - gnome-calculator
       - librsvg2-common
     exclude:
+      - core-packages
+      - graphics-stack-packages
+      - xclient-packages
+
       - adwaita-icon-theme
       - humanity-icon-theme
 
@@ -34,28 +38,28 @@ AppDir:
 
   test:
     debian:
-      image: debian:stable
+      image: appimage-builder/test-env:debian-stable
       command: "./AppRun"
       use_host_x: True
     centos:
-      image: centos:6
-      command: "./AppRun --help"
+      image: appimage-builder/test-env:centos-7
+      command: "./AppRun"
       use_host_x: True
     arch:
-      image: archlinux
-      command: "./AppRun --help"
+      image: appimage-builder/test-env:archlinux-latest
+      command: "./AppRun"
       use_host_x: True
     fedora:
-      image: fedora:26
-      command: "./AppRun --help"
+      image: appimage-builder/test-env:fedora-30
+      command: "./AppRun"
       use_host_x: True
     ubuntu:
-      image: ubuntu:xenial
-      command: "./AppRun --help"
+      image: appimage-builder/test-env:ubuntu-xenial
+      command: "./AppRun"
       use_host_x: True
 
 
 AppImage:
   update-information: None
   sign-key: None
-  arch: i686
+  arch: x86_64
