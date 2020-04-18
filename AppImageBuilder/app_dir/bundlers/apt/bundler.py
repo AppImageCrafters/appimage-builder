@@ -31,6 +31,8 @@ class AptBundler(Bundler):
 
     def _set_package_lists(self):
         self.core_packages = [
+            'util-linux',
+            'coreutils',
             'adduser',
             'avahi-daemon',
             'base-files',
@@ -45,6 +47,7 @@ class AptBundler(Bundler):
             'multiarch-support',
             'passwd',
             'systemd',
+            'systemd-sysv',
             'ucf',
             'iso-codes',
             'shared-mime-info',
@@ -53,6 +56,9 @@ class AptBundler(Bundler):
             'sysvinit-utils',
             'debianutils',
             'init-system-helpers',
+            'libpam-runtime',
+            'libpam-modules-bin',
+
         ]
         self.font_config_packages = [
             'libfontconfig*',
@@ -61,16 +67,14 @@ class AptBundler(Bundler):
             'libfreetype*',
         ]
         self.xclient_packages = [
+            'x11-common',
             'libx11-*',
             'libxcb1',
-            'libxcb-xkb1',
             'libxcb-shape0',
             'libxcb-randr0',
-            'libxcb-util1',
             'libxcb-shm0',
             'libxcb-glx0',
             'libxcb-xfixes0',
-            'libxcb-sync1',
             'libxcb-present0',
             'libxcb-render0',
             'libxcb-dri2-0',
@@ -117,11 +121,6 @@ class AptBundler(Bundler):
         self.config.set_installed_packages(exclusion_list)
 
         install_list = self.config.apt_include
-
-        # required by AppRun
-        install_list.append('grep')
-        install_list.append('util-linux')
-        install_list.append('coreutils')
 
         self.apt_get.install(self.config.apt_include)
 
