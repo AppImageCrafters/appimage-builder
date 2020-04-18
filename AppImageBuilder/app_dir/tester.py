@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
+import re
 import stat
 import tempfile
 
@@ -33,14 +34,17 @@ class Tester:
             self.temp_dir = None
             self.tests_wrapper_path = None
             self.client = None
+            self.logger = logging.getLogger("TEST CASE '%s'" % self.name)
 
         def run(self):
+            self.logger.info("Executing: %s" % self.command)
             ctr = self._run_container()
             self._print_container_logs(ctr)
             result = ctr.wait()
 
             if result['StatusCode'] != 0:
                 raise Tester.TestFailed(result['Error'])
+            logging.info("-------")
 
         def _run_container(self):
             volumes = self._get_container_volumes()
@@ -48,14 +52,14 @@ class Tester:
             environment = self.get_container_environment()
 
             ctr = self.client.containers.run(self.image, command, auto_remove=True, working_dir='/app',
-                                                   volumes=volumes, stdout=True, stderr=True, cap_add=['SYS_PTRACE'],
-                                                   environment=environment, detach=True, devices=['/dev/snd'])
+                                             volumes=volumes, stdout=True, stderr=True, cap_add=['SYS_PTRACE'],
+                                             environment=environment, detach=True, devices=['/dev/snd'])
             return ctr
 
         def _print_container_logs(self, ctr):
             logs = ctr.logs(stream=True)
             for line in logs:
-                logging.info(line.decode('utf-8').strip())
+                self.logger.info(line.decode('utf-8').strip())
 
         def _get_container_volumes(self):
             volumes = {self.app_dir: {'bind': '/app', 'mode': 'ro'}}
@@ -63,6 +67,14 @@ class Tester:
             if self.use_host_x:
                 volumes['/tmp/.X11-unix'] = {'bind': '/tmp/.X11-unix', 'mode': 'rw'}
                 volumes[self.temp_dir.name] = {'bind': self.temp_dir.name, 'mode': 'rw'}
+
+            dbus_session_address = os.getenv('DBUS_SESSION_BUS_ADDRESS')
+
+            if dbus_session_address:
+                regex = re.compile('unix:path=(?P<dbus_path>(\/\w+)+)')
+                search_result = regex.search(dbus_session_address)
+                if search_result:
+                    volumes[search_result.group(1)] = {'bind': search_result.group(1), 'mode': 'rw'}
 
             return volumes
 
@@ -79,10 +91,12 @@ class Tester:
         def _write_host_x_share_wrapper(self):
             with open(self.tests_wrapper_path, 'w') as f:
                 f.write('\n'.join([
-                    '#!/bin/bash',
+                    '#!/bin/sh',
                     'set -e',
-                    'useradd test',
-                    'su test -c "$@"',
+                    'useradd -u $UID $UNAME',
+                    'export HOME=/home/$UNAME'
+                    'export XDG_DATA_DIRS=/usr/share',
+                    'su $UNAME -c "$@"',
                 ]))
 
             os.chmod(self.tests_wrapper_path, stat.S_IRWXU | stat.S_IXGRP | stat.S_IRGRP | stat.S_IXOTH | stat.S_IROTH)
@@ -96,6 +110,13 @@ class Tester:
         def get_container_environment(self):
             if self.use_host_x:
                 self.env.append('DISPLAY=%s' % os.getenv('DISPLAY'))
+
+            dbus_session_address = os.getenv('DBUS_SESSION_BUS_ADDRESS')
+            if dbus_session_address:
+                self.env.append('DBUS_SESSION_BUS_ADDRESS=%s' % dbus_session_address)
+
+            self.env.append('UID=%s' % os.getuid())
+            self.env.append('UNAME=%s' % os.getenv("USER"))
             return self.env
 
     def __init__(self, recipe):

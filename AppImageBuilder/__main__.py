@@ -54,8 +54,11 @@ def __main__():
         builder.build()
 
     if not args.skip_tests:
-        tester = Tester(recipe)
-        tester.run_tests()
+        try:
+            tester = Tester(recipe)
+            tester.run_tests()
+        except Tester.TestFailed:
+            exit(1)
 
     if not args.skip_appimage:
         builder = AppImageBuilder(recipe)
