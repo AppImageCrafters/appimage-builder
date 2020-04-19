@@ -22,6 +22,9 @@ class AppImageBuilder:
         self.target_arch = recipe.get_item('AppImage/arch')
         self.app_name = recipe.get_item('AppDir/app_info/name')
         self.app_version = recipe.get_item('AppDir/app_info/version')
+        self.update_information = recipe.get_item('AppImage/update-information', 'None')
+        if self.update_information == 'None':
+            self.update_information = None
 
         fallback_file_name = os.path.join(os.getcwd(),
                                           '%s-%s-%s.AppImage' % (self.app_name, self.app_version, self.target_arch))
@@ -39,6 +42,7 @@ class AppImageBuilder:
     def _generate_appimage(self, runtime_path):
         appimage_tool = AppImageToolCommand(self.app_dir, self.target_file)
         appimage_tool.target_arch = self.target_arch
+        appimage_tool.update_information = self.update_information
         appimage_tool.runtime_file = runtime_path
         appimage_tool.run()
 
