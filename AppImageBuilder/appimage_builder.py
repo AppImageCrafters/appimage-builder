@@ -26,6 +26,10 @@ class AppImageBuilder:
         if self.update_information == 'None':
             self.update_information = None
 
+        self.sing_key = recipe.get_item('AppImage/sign-key', 'None')
+        if self.sing_key == 'None':
+            self.sing_key = None
+
         fallback_file_name = os.path.join(os.getcwd(),
                                           '%s-%s-%s.AppImage' % (self.app_name, self.app_version, self.target_arch))
         self.target_file = recipe.get_item('AppImage/file_name', fallback_file_name)
@@ -43,6 +47,7 @@ class AppImageBuilder:
         appimage_tool = AppImageToolCommand(self.app_dir, self.target_file)
         appimage_tool.target_arch = self.target_arch
         appimage_tool.update_information = self.update_information
+        appimage_tool.sign_key = self.sing_key
         appimage_tool.runtime_file = runtime_path
         appimage_tool.run()
 

@@ -47,7 +47,7 @@ class AppImageToolCommand(Command):
             command.extend(['--runtime-file', self.runtime_file])
 
         if self.sign_key:
-            command.extend(['--sign-key', self.sign_key])
+            command.extend(['--sign', '--sign-key', self.sign_key])
 
         if self.update_information:
             command.extend(['--updateinformation', self.update_information])
