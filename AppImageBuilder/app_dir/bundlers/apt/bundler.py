@@ -122,21 +122,22 @@ class AptBundler(Bundler):
 
         self.apt_get.install(self.config.apt_include)
 
-        self._extract_packages_into_app_dir(self.app_dir)
+        self._extract_packages_into_app_dir(self.app_dir, exclusion_list)
 
-    def _extract_packages_into_app_dir(self, app_dir_path):
+    def _extract_packages_into_app_dir(self, app_dir_path, exclusion_list):
         archives_path = self.config.get_apt_archives_path()
 
         for file_name in os.listdir(archives_path):
             if is_deb_file(file_name):
-                file_path = os.path.join(archives_path, file_name)
-
                 package_name = self._get_package_name(file_name)
-                partition_path = self._resolve_partition_path(package_name, app_dir_path)
-                logging.info("Deploying: %s to %s" % (file_name, partition_path.replace(app_dir_path, 'AppDir')))
 
-                package_files = self._extract_deb(file_path, partition_path)
-                self._make_symlinks_relative(package_files, partition_path)
+                if not self._is_excluded(package_name):
+                    file_path = os.path.join(archives_path, file_name)
+                    partition_path = self._resolve_partition_path(package_name, app_dir_path)
+                    logging.info("Deploying: %s to %s" % (file_name, partition_path.replace(app_dir_path, 'AppDir')))
+
+                    package_files = self._extract_deb(file_path, partition_path)
+                    self._make_symlinks_relative(package_files, partition_path)
 
     def _make_symlinks_relative(self, package_files, partition_path):
         for file in package_files:
