@@ -120,8 +120,6 @@ class AptBundler(Bundler):
 
         self.config.set_installed_packages(exclusion_list)
 
-        install_list = self.config.apt_include
-
         self.apt_get.install(self.config.apt_include)
 
         self._extract_packages_into_app_dir(self.app_dir)
