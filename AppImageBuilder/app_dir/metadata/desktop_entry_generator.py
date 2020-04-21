@@ -65,7 +65,7 @@ class DesktopEntryGenerator:
     def _load_app_desktop_entry(self, app_id):
         desktop_entry_path = self._find_app_desktop_entry_path(self.app_dir, app_id)
 
-        with open(desktop_entry_path, 'r') as f:
+        with open(desktop_entry_path, 'r', encoding='utf-8') as f:
             self.contents = f.readlines()
 
     def _find_app_desktop_entry_path(self, app_dir, app_id):
