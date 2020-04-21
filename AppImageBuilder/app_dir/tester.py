@@ -93,7 +93,7 @@ class Tester:
                 f.write('\n'.join([
                     '#!/bin/sh',
                     'set -e',
-                    'useradd -u $UID $UNAME',
+                    'useradd -mu $UID $UNAME',
                     'export HOME=/home/$UNAME'
                     'export XDG_DATA_DIRS=/usr/share',
                     'su $UNAME -c "$@"',
