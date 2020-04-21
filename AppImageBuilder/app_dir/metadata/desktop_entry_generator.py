@@ -82,7 +82,7 @@ class DesktopEntryGenerator:
     def _save_app_dir_desktop_entry(self, app_id):
         file_name = os.path.join(self.app_dir, app_id + '.desktop')
 
-        with open(file_name, 'w') as f:
+        with open(file_name, 'w', encoding='utf-8') as f:
             f.writelines(self.contents)
 
     def _generate_minimal_desktop_entry(self, app_info):
