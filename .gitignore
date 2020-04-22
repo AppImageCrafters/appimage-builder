@@ -5,6 +5,10 @@
 /examples/*/AppDir
 /examples/*/appimage-builder-cache
 
+# Build results
+*.AppImage
+*.AppImage.zsync
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -33,7 +37,6 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-*.AppImage
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
