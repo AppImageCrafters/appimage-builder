@@ -1,0 +1,36 @@
+version: 1
+
+AppDir:
+  path: ./AppDir
+
+  app_info:
+    id: !Var app_info_id
+    name: !Var app_info_name
+    icon: !Var app_info_icon
+    version: !Var app_info_version
+    exec: !Var app_info_exec
+    exec_args: !Var app_info_exec_args
+
+  runtime:
+    generator: !Var runtime_generator
+    env:
+      !Var runtime_env
+
+  apt:
+    arch: !Var apt_arch
+    sources:
+      !Var apt_sources
+    include:
+      !Var apt_includes
+    exclude:
+      !Var apt_excludes
+
+  files:
+    exclude:
+      !Var files_excludes
+
+AppImage:
+  arch: !Var appimage_arch
+  update-information: None
+  sign-key: None
+  file_name: !Var appimage_filename

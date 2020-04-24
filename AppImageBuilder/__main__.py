@@ -20,6 +20,7 @@ from AppImageBuilder.app_dir.builder import Builder
 from AppImageBuilder.app_dir.tester import Tester
 from AppImageBuilder.recipe import Recipe
 from AppImageBuilder.script import Script
+from AppImageBuilder.generator.generator import RecipeGenerator
 
 
 def __main__():
@@ -36,12 +37,19 @@ def __main__():
                         help='Skip AppDir testing')
     parser.add_argument('--skip-appimage', dest='skip_appimage', action="store_true",
                         help='Skip AppImage generation')
+    parser.add_argument('--generate', dest='generate', action="store_true",
+                        help='Generate recipe from an AppDir')
 
     args = parser.parse_args()
     numeric_level = getattr(logging, args.loglevel.upper())
     if not isinstance(numeric_level, int):
         logging.error('Invalid log level: %s' % args.loglevel)
     logging.basicConfig(level=numeric_level)
+
+    if args.generate:
+        generator = RecipeGenerator()
+        generator.generate()
+        exit(0)
 
     recipe = Recipe()
     recipe.load_file(args.recipe)
