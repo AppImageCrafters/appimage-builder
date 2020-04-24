@@ -19,85 +19,26 @@ from .settings_validator import AptSettingsValidator
 from .util import is_deb_file
 from ..bundler import Bundler
 from .config import Config
+from .package_lists import *
 
 
 class AptBundler(Bundler):
     def __init__(self, settings):
         super().__init__(settings)
 
-        self._set_package_lists()
-        self.config = None
-        self.apt_get = None
-
-    def _set_package_lists(self):
-        self.core_packages = [
-            'util-linux',
-            'coreutils',
-            'adduser',
-            'avahi-daemon',
-            'base-files',
-            'bind9-host',
-            'consolekit',
-            'dbus',
-            'debconf',
-            'dpkg',
-            'lsb-base',
-            'libcap2-bin',
-            'libinput-bin',
-            'multiarch-support',
-            'passwd',
-            'systemd',
-            'systemd-sysv',
-            'ucf',
-            'iso-codes',
-            'shared-mime-info',
-            'mount',
-            'xdg-user-dirs',
-            'sysvinit-utils',
-            'debianutils',
-            'init-system-helpers',
-            'libpam-runtime',
-            'libpam-modules-bin',
-
-        ]
-        self.font_config_packages = [
-            'libfontconfig*',
-            'fontconfig',
-            'fontconfig-config',
-            'libfreetype*',
-        ]
-        self.xclient_packages = [
-            'x11-common',
-            'libx11-*',
-            'libxcb1',
-            'libxcb-shape0',
-            'libxcb-randr0',
-            'libxcb-shm0',
-            'libxcb-glx0',
-            'libxcb-xfixes0',
-            'libxcb-present0',
-            'libxcb-render0',
-            'libxcb-dri2-0',
-            'libxcb-dri3-0',
-        ]
-        self.graphics_stack_packages = [
-            'libgl1',
-            'libgl1*',
-            'libgl1-*',
-            'libdrm*',
-            'libegl1*',
-            'libegl1-*',
-            'libglapi*',
-            'libgles2*',
-            'libgbm*',
-            'mesa-*',
-        ]
-        self.glibc_packages = ['libc6', 'zlib1g', 'libstdc++6']
+        self.core_packages = apt_core_packages
+        self.font_config_packages = apt_font_config_packages
+        self.xclient_packages = apt_xclient_packages
+        self.graphics_stack_packages = apt_graphics_stack_packages
+        self.glibc_packages = apt_glibc_packages
 
         #   packages required by the runtime generators
-        self.proot_apprun_packages = ['proot', 'coreutils']
-        self.classic_apprun_packages = ['coreutils']
-        self.wrapper_apprun_packages = []
+        self.proot_apprun_packages = apt_proot_apprun_packages
+        self.classic_apprun_packages = apt_classic_apprun_packages
+        self.wrapper_apprun_packages = apt_wrapper_apprun_packages
+
+        self.config = None
+        self.apt_get = None
 
     def validate_configuration(self):
         validator = AptSettingsValidator(self.settings)
