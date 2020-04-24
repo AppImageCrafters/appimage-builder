@@ -13,12 +13,15 @@
 
 import logging
 import os
+import shutil
+
 import questionary
 import time
 import configparser
 from emrichen import Context, Template
 from progress.spinner import Spinner
 
+from AppImageBuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
 from AppImageBuilder.generator.desktop_entry_parser import DesktopFileParser
 
 
@@ -29,22 +32,26 @@ class RecipeGeneratorError(RuntimeError):
 class RecipeGenerator:
     def __init__(self):
         self.app_dir = self._locate_app_dir()
-        self.app_info_id = ''
-        self.app_info_name = ''
-        self.app_info_icon = ''
-        self.app_info_version = ''
-        self.app_info_exec = ''
-        self.app_info_exec_args = ''
+        self.app_info_id = None
+        self.app_info_name = None
+        self.app_info_icon = None
+        self.app_info_version = None
+        self.app_info_exec = None
+        self.app_info_exec_args = None
 
         self._setup_app_info()
 
-        self.runtime_generator = ''
-        self.runtime_env = []
+        self.runtime_generator = None
+        self.runtime_env = None
 
-        self.apt_arch = ''
-        self.apt_sources = []
-        self.apt_includes = []
-        self.apt_excludes = []
+        runtime_analyser = AppRuntimeAnalyser(self.app_dir, self.app_info_exec, self.app_info_exec_args)
+        runtime_analyser.run_app_analysis()
+
+        if shutil.which('apt-get'):
+            self.apt_arch = None
+            self.apt_sources = []
+            self.apt_includes = []
+            self.apt_excludes = []
 
         self.files_excludes = []
 
