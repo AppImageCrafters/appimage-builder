@@ -14,7 +14,6 @@ schema = "*"
 packaging = "*"
 questionary = "*"
 emrichen = "*"
-progress = "*"
 
 [requires]
 python_version = "3.6"

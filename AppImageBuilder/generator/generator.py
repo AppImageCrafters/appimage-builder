@@ -16,12 +16,11 @@ import os
 import shutil
 
 import questionary
-import time
-import configparser
 from emrichen import Context, Template
-from progress.spinner import Spinner
 
+from AppImageBuilder.commands.file import File
 from AppImageBuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
+from AppImageBuilder.generator.apt_recipe_generator import AptRecipeGenerator
 from AppImageBuilder.generator.desktop_entry_parser import DesktopFileParser
 
 
@@ -31,130 +30,60 @@ class RecipeGeneratorError(RuntimeError):
 
 class RecipeGenerator:
     def __init__(self):
-        self.app_dir = self._locate_app_dir()
-        self.app_info_id = None
-        self.app_info_name = None
-        self.app_info_icon = None
-        self.app_info_version = None
-        self.app_info_exec = None
-        self.app_info_exec_args = None
+        self.logger = logging.getLogger("Generator")
 
-        self._setup_app_info()
+        self.logger.info("Searching AppDir")
+        self.app_dir = self._locate_app_dir()
+        self.app_info_id = ''
+        self.app_info_name = ''
+        self.app_info_icon = ''
+        self.app_info_version = 'latest'
+        self.app_info_exec = ''
+        self.app_info_exec_args = ''
 
         self.runtime_generator = None
         self.runtime_env = None
+        self.appimage_arch = None
 
+        self._setup_app_info()
+
+        self.logger.info("Analysing application runtime dependencies")
         runtime_analyser = AppRuntimeAnalyser(self.app_dir, self.app_info_exec, self.app_info_exec_args)
         runtime_analyser.run_app_analysis()
 
         if shutil.which('apt-get'):
-            self.apt_arch = None
-            self.apt_sources = []
-            self.apt_includes = []
-            self.apt_excludes = []
+            self.logger.info("Guessing APT configuration")
+            self.apt_arch = AptRecipeGenerator.get_arch()
+            self.apt_sources = AptRecipeGenerator.get_sources()
+            self.apt_includes = AptRecipeGenerator.resolve_includes(runtime_analyser.runtime_libs)
+            self.apt_excludes = AptRecipeGenerator.resolve_excludes()
 
-        self.files_excludes = []
+        self.files_excludes = [
+            'usr/share/man',
+            'usr/share/doc/*/README.*',
+            'usr/share/doc/*/changelog.*',
+            'usr/share/doc/*/NEWS.*',
+            'usr/share/doc/*/TODO.*',
+        ]
 
-        self.appimage_arch = ''
-        self.appimage_filename = ''
+        self.logger.info("No desktop entries found")
+        self.appimage_arch = self._guess_appimage_runtime_arch()
+        self.runtime_env = {'APPDIR_LIBRARY_PATH': self._define_appdir_library_path(runtime_analyser.runtime_libs)}
 
         self.setup_questions()
 
     def setup_questions(self):
         # AppDir -> app_info
         print('Basic Information :')
-        self.app_info_id = questionary.text('ID [Eg: com.example.app] :').ask()
-        self.app_info_name = questionary.text('Application Name :').ask()
-        self.app_info_icon = questionary.text('Icon :').ask()
-        self.app_info_version = questionary.text('Version :').ask()
-        self.app_info_exec = questionary.text('Executable path relative to AppDir [usr/bin/app] :').ask()
-        self.app_info_exec_args = questionary.text('Arguments [Default: $@] :', default='$@').ask()
-        self.apt_arch = questionary.select('Architecture :', ['amd64', 'arm64']).ask()
-
-        self.runtime_generator = questionary.select('Generator [Select `Wrapper` if unsure]',
-                                                    ['wrapper', 'classic', 'proot']).ask()
-
-        print('\nInput Environment Variables to be set while running the AppImage (One per line)')
-        while True:
-            env = questionary.text('Environment Variable [Eg: VAR=value] <Enter empty value to break> :').ask()
-
-            if len(env.strip()) == 0:
-                break
-
-            self.runtime_env.append(env)
-        print('')
-
-        print('\nInput Apt Sources URLs (One per line) '
-              '<Eg: deb http://archive.ubuntu.com/ubuntu/ bionic main>')
-
-        while True:
-            source_line = questionary.text('Apt source line <Enter empty value to break> :').ask()
-
-            if len(source_line.strip()) == 0:
-                break
-
-            key_url = questionary.text(
-                '    Public key url <Enter empty value if key is already added previously> :').ask()
-
-            if len(key_url.strip()) == 0:
-                self.apt_sources.append({'sourceline': source_line})
-            else:
-                self.apt_sources.append({
-                    'sourceline': source_line,
-                    'key_url': key_url
-                })
-
-        print('')
-        spinner = Spinner('Fetching dependencies ')
-        for i in range(50):
-            spinner.next()
-            time.sleep(0.1)
-        spinner.finish()
-        print('')
-
-        add_packages_str = 'Add More Custom Packages'
-        dependencies = ['p1', 'p2', 'p3', 'p4', add_packages_str]
-        choices = questionary.checkbox('Dependencies', dependencies).ask()
-
-        print('\nInput Extra Packages to be included in the AppDir (One per line)')
-        if add_packages_str in choices:
-            while True:
-                package = questionary.text('Apt Package <Enter empty value to break> :').ask()
-
-                if len(package.strip()) == 0:
-                    break
-
-                self.apt_includes.append(package)
-
-            choices.remove(add_packages_str)
-            self.apt_includes.extend(choices)
-
-        print('\nInput Packages to be excluded from AppDir (One per line)')
-        while True:
-            package = questionary.text('Exclude Apt Package <Enter empty value to break> :').ask()
-
-            if len(package.strip()) == 0:
-                break
-
-            self.apt_excludes.append(package)
-
-        # AppDir -> files
-        print('\nInput Files to be excluded from AppDir (One per line)')
-        while True:
-            file = questionary.text('File to be excluded form AppDir <Enter empty value to break> :').ask()
-
-            if len(file.strip()) == 0:
-                break
-
-            self.files_excludes.append(file)
-
-        # AppImage
-        if self.apt_arch == 'amd64':
-            self.appimage_arch = 'amd64'
-        elif self.apt_arch == 'arm64':
-            self.appimage_arch = 'aarch64'
-
-        self.appimage_filename = questionary.text('AppImage File Name :').ask()
+        self.app_info_id = questionary.text('ID [Eg: com.example.app] :', default=self.app_info_id).ask()
+        self.app_info_name = questionary.text('Application Name :', default=self.app_info_name).ask()
+        self.app_info_icon = questionary.text('Icon :', default=self.app_info_icon).ask()
+        self.app_info_version = questionary.text('Version :', default=self.app_info_version).ask()
+        self.app_info_exec = questionary.text('Executable path relative to AppDir [usr/bin/app] :',
+                                              default=self.app_info_exec).ask()
+        self.app_info_exec_args = questionary.text('Arguments [Default: $@] :', default=self.app_info_exec_args).ask()
+        self.apt_arch = questionary.select('Architecture :', ['amd64', 'arm64', 'i386', 'armhf'],
+                                           default=self.apt_arch).ask()
 
     def generate(self):
         appimage_builder_yml_template_path = os.path.realpath(os.path.join(
@@ -184,10 +113,16 @@ class RecipeGenerator:
             'files_excludes': self.files_excludes,
 
             'appimage_arch': self.appimage_arch,
-            'appimage_filename': self.appimage_filename
         })
 
-        logging.debug(appimage_builder_yml_template.render(appimage_builder_yml_ctx))
+        rendered_yml = appimage_builder_yml_template.render(appimage_builder_yml_ctx)
+        logging.info(rendered_yml)
+
+        with open('AppImageBuilder.yml', 'w') as f:
+            f.write(rendered_yml)
+
+        self.logger.info("Recipe generation completed.")
+        self.logger.info("Please manually fill any blank field left before calling appimage-builder")
 
     @staticmethod
     def _locate_app_dir():
@@ -198,6 +133,7 @@ class RecipeGenerator:
         raise RecipeGeneratorError('Unable to find an AppDir, this is required to create a recipe.')
 
     def _setup_app_info(self):
+        self.logger.info("Searching desktop entries")
         desktop_files = self._find_desktop_entry_files()
         desktop_file = None
         if len(desktop_files) == 1:
@@ -207,12 +143,18 @@ class RecipeGenerator:
             desktop_file = questionary.select('Main desktop entry :', desktop_files).ask()
 
         if desktop_file:
+            self.logger.info("Reading desktop entry: %s" % desktop_file)
             parser = DesktopFileParser(desktop_file)
+            self.app_info_id = parser.get_id()
             self.app_info_name = parser.get_name()
             self.app_info_icon = parser.get_icon()
             exec = parser.get_exec_path()
             self.app_info_exec = self._resolve_exec_path(exec)
             self.app_info_exec_args = parser.get_exec_args()
+            if not self.app_info_exec_args:
+                self.app_info_exec_args = '$@'
+        else:
+            self.logger.info("No desktop entries found")
 
     def _find_desktop_entry_files(self):
         desktop_entries = []
@@ -239,3 +181,33 @@ class RecipeGenerator:
                     return os.path.relpath(full_path, absolute_app_dir)
 
         raise RecipeGeneratorError('Unable to find executable: %s' % exec)
+
+    def _guess_appimage_runtime_arch(self):
+        file = File()
+        signature = file.query(os.path.join(self.app_dir, self.app_info_exec))
+        if 'x86-64' in signature:
+            return 'x86_64'
+
+        if 'Intel 80386,' in signature:
+            return 'i686'
+
+        if 'ARM aarch64,' in signature:
+            return 'aarch64'
+
+        if 'ARM,' in signature:
+            return 'armhf'
+
+        return None
+
+    @staticmethod
+    def _define_appdir_library_path(runtime_libs):
+        lib_dirs = set()
+        for lib in runtime_libs:
+            dirname = os.path.dirname(lib)
+            if not dirname.endswith('/dri') and \
+                    'qt5/qml' not in dirname and \
+                    'qt5/plugins' not in lib:
+                lib_dirs.add(dirname)
+
+        runtime_env = ':'.join('$APPDIR%s' % dir for dir in lib_dirs)
+        return runtime_env

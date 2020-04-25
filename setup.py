@@ -38,7 +38,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License"
     ],
     license='MIT',
-    install_requires=['pyyaml>=5', 'docker', 'bash.py', 'requests', 'schema', 'packaging', 'questionary', 'emrichen',
-                      'progress'],
+    install_requires=['pyyaml>=5', 'docker', 'bash.py', 'requests', 'schema', 'packaging', 'questionary', 'emrichen'],
     python_requires='>=3.6',
 )

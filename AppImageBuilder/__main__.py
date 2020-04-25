@@ -38,7 +38,7 @@ def __main__():
     parser.add_argument('--skip-appimage', dest='skip_appimage', action="store_true",
                         help='Skip AppImage generation')
     parser.add_argument('--generate', dest='generate', action="store_true",
-                        help='Generate recipe from an AppDir')
+                        help='Try to generate recipe from an AppDir')
 
     args = parser.parse_args()
     numeric_level = getattr(logging, args.loglevel.upper())

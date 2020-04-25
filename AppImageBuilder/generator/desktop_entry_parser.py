@@ -11,10 +11,12 @@
 #  all copies or substantial portions of the Software.
 
 import configparser
+import os
 
 
 class DesktopFileParser:
     def __init__(self, file_path):
+        self.file_path = file_path
         self.parser = configparser.ConfigParser()
         self.parser.read(file_path)
 
@@ -61,3 +63,7 @@ class DesktopFileParser:
 
     def get_exec_args(self):
         return self.exec_args
+
+    def get_id(self):
+        filename, file_extension = os.path.splitext(os.path.basename(self.file_path))
+        return filename
