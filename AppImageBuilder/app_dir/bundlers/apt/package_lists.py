@@ -53,7 +53,6 @@ apt_xclient_packages = [
     'libx11-*',
     'libxcb1',
     'libxcb-shape0',
-    'libxcb-randr0',
     'libxcb-shm0',
     'libxcb-glx0',
     'libxcb-xfixes0',
@@ -64,9 +63,9 @@ apt_xclient_packages = [
 ]
 
 apt_graphics_stack_packages = [
-    'libgl1',
+    'libglvnd*',
+    'libglx*',
     'libgl1*',
-    'libgl1-*',
     'libdrm*',
     'libegl1*',
     'libegl1-*',
