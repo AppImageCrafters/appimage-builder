@@ -29,7 +29,7 @@ setuptools.setup(
     url="https://github.com/AppImageCrafters/AppImageBuilder",
     project_urls={
         "Bug Tracker": "https://github.com/AppImageCrafters/AppImageBuilder/issues",
-        "Documentation": "https://github.com/AppImageCrafters/AppImageBuilder/wiki",
+        "Documentation": "https://appimage-builder.readthedocs.io",
         "Source Code": "https://github.com/AppImageCrafters/AppImageBuilder",
     },
     packages=setuptools.find_packages(),
