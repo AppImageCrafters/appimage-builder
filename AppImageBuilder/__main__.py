@@ -41,6 +41,7 @@ def __main__():
                         help='Try to generate recipe from an AppDir')
 
     args = parser.parse_args()
+    logger = logging.getLogger('appimage-builder')
     numeric_level = getattr(logging, args.loglevel.upper())
     if not isinstance(numeric_level, int):
         logging.error('Invalid log level: %s' % args.loglevel)
@@ -65,7 +66,12 @@ def __main__():
         try:
             tester = Tester(recipe)
             tester.run_tests()
-        except Tester.TestFailed:
+        except Tester.TestFailed as error:
+
+            logger.error("Tests failed")
+            if error:
+                logger.error(error)
+
             exit(1)
 
     if not args.skip_appimage:
