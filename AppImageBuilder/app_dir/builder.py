@@ -67,10 +67,6 @@ class Builder:
         self._generate_runtime()
         self._write_bundle_information()
 
-        logging.info("===========================")
-        logging.info("AppDir generation completed")
-        logging.info("===========================")
-
     def _bundle_dependencies(self):
         logging.info("")
         logging.info("Bundling dependencies")

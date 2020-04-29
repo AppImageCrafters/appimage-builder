@@ -37,6 +37,10 @@ class Tester:
             self.logger = logging.getLogger("TEST CASE '%s'" % self.name)
 
         def run(self):
+            logging.info("")
+            logging.info("Running test: %s" % self.name)
+            logging.info("-----------------------------")
+
             self.logger.info("Executing: %s" % self.command)
             ctr = self._run_container()
             self._print_container_logs(ctr)
@@ -44,7 +48,6 @@ class Tester:
 
             if result['StatusCode'] != 0:
                 raise Tester.TestFailed(result['Error'])
-            logging.info("-------")
 
         def _run_container(self):
             volumes = self._get_container_volumes()
@@ -142,6 +145,10 @@ class Tester:
         return test_case
 
     def run_tests(self):
+        logging.info("============")
+        logging.info("AppDir tests")
+        logging.info("============")
+
         for test in self.tests:
             try:
                 test.setup()
@@ -152,3 +159,5 @@ class Tester:
                 raise Tester.TestFailed("Execution failed. Error message: %s" % e)
             finally:
                 test.teardown()
+
+
