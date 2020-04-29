@@ -46,11 +46,14 @@ class AptGet(Command):
         return [self.runnable, '-c', self.config, 'update']
 
     def generate_install_list(self, packages):
+        self.log_stdout = False
         command = self._create_apt_get_simulate_install_command(packages)
         self._run(command)
         if self.return_code != 0:
             raise AptGetError('Unable to download packages')
         packages_to_install = self._parse_package_list()
+
+        self.log_stdout = True
         return packages_to_install
 
     def _parse_package_list(self):
