@@ -70,12 +70,15 @@ class AptBundler(Bundler):
 
         for file_name in os.listdir(archives_path):
             if is_deb_file(file_name):
-                package_name = self._get_package_name(file_name)
+                package_name, package_version, package_arch = self._extract_package_info(file_name)
 
                 if not self._is_excluded(package_name):
                     file_path = os.path.join(archives_path, file_name)
                     partition_path = self._resolve_partition_path(package_name, app_dir_path)
-                    logging.info("Deploying: %s to %s" % (file_name, partition_path.replace(app_dir_path, 'AppDir')))
+                    logging.info("Deploying: %s %s %s => %s" %
+                                 (package_name, package_version, package_arch,
+                                  partition_path.replace(app_dir_path, 'AppDir'))
+                                 )
 
                     package_files = self._extract_deb(file_path, partition_path)
                     self._make_symlinks_relative(package_files, partition_path)
@@ -135,7 +138,10 @@ class AptBundler(Bundler):
             self.partitions[name].extend(package_names)
 
     @staticmethod
-    def _get_package_name(file_name):
+    def _extract_package_info(file_name):
+        file_name, file_extension = os.path.splitext(file_name)
+
         reversed_file_name = file_name[::-1]
-        extension, version, name = reversed_file_name.split('_', 2)
-        return name[::-1]
+        arch, version, name = reversed_file_name.split('_', 2)
+
+        return name[::-1], version[::-1], arch[::-1]

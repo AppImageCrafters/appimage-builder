@@ -59,37 +59,49 @@ class Builder:
         self.app_info = loader.load(self.recipe)
 
     def build(self):
-        runtime_generator = self.recipe.get_item('AppDir/runtime/generator', "wrapper")
+        logging.info("=================")
+        logging.info("Generating AppDir")
+        logging.info("=================")
 
-        logging.info("_____________________")
-        logging.info("Bundling dependencies")
+        self._bundle_dependencies()
+        self._generate_runtime()
+        self._write_bundle_information()
+
+        logging.info("===========================")
+        logging.info("AppDir generation completed")
+        logging.info("===========================")
+
+    def _bundle_dependencies(self):
         logging.info("")
+        logging.info("Bundling dependencies")
+        logging.info("---------------------")
 
         for bundler in self.bundlers:
             bundler.run()
 
-        logging.info("___________________")
-        logging.info("Generating runtime")
+    def _generate_runtime(self):
+        runtime_generator = self.recipe.get_item('AppDir/runtime/generator', "wrapper")
         logging.info("")
+        logging.info("Generating runtime")
+        logging.info("__________________")
 
         if "proot" == runtime_generator:
             runtime = PRootRuntime(self.recipe)
             runtime.generate()
-
         if "wrapper" == runtime_generator:
             runtime = WrapperRuntime(self.recipe)
             runtime.generate()
-
         if "classic" == runtime_generator:
             runtime = ClassicRuntime(self.recipe)
             runtime.generate()
 
+    def _write_bundle_information(self):
+        logging.info("")
+        logging.info("Generating metadata")
+        logging.info("___________________")
+
         self._bundle_app_dir_icon()
         self._generate_app_dir_desktop_entry()
-
-        logging.info("----------------------")
-        logging.info("AppDir build completed")
-        logging.info("----------------------")
 
     def _bundle_app_dir_icon(self):
         icon_bundler = IconBundler(self.app_dir_path, self.app_info.icon)
