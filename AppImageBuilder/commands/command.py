@@ -44,6 +44,9 @@ class Command:
                                               'and available in the environment variable PATH.' % runnable)
 
     def _run(self, command):
+        self.stdout.clear()
+        self.stderr.clear()
+
         if self.log_command:
             self.logger.info(' '.join(command))
         else:
