@@ -23,4 +23,4 @@ RUN wget https://github.com/AppImage/AppImageKit/releases/download/continuous/ap
     rm /tmp/appimagetool-x86_64.AppImage
 
 WORKDIR /
-RUN apt-get -y purge wget && apt-get -y autoclean
+RUN apt-get -y autoclean
