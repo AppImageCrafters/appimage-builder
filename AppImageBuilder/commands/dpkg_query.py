@@ -36,3 +36,32 @@ class DpkgQuery(Command):
             packages.add(line[:split])
 
         return packages
+
+    def depends(self, packages):
+        command = [self.runnable, '-W', '-f=${binary:Package}: ${Depends}\\n']
+        command.extend(packages)
+
+        self._run(command)
+
+        if self.return_code != 0:
+            raise DpkgQueryError("Package lockup failed")
+
+        dependencies = dict()
+        for line in self.stdout:
+            line = line.strip()
+            line = line.strip('\\')
+            pkg_name_end = line.find(':')
+            pkg_name = line[:pkg_name_end]
+            dependencies[pkg_name] = []
+
+            deps_start = line.find(' ')
+            deps = line[deps_start:]
+            deps = deps.strip()
+
+            for dep in deps.split(','):
+                dep = dep.strip()
+                dep_name_end = dep.find(' ')
+                dep_name = dep[:dep_name_end]
+                dependencies[pkg_name].append(dep_name)
+
+        return dependencies
