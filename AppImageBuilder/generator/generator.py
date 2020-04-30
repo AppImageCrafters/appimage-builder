@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #  Copyright 2020 Anupam Basak <anupam.basak27@gmail.com>
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a
@@ -39,13 +38,15 @@ class RecipeGenerator:
         self.app_info_icon = ''
         self.app_info_version = 'latest'
         self.app_info_exec = ''
-        self.app_info_exec_args = ''
+        self.app_info_exec_args = '$@'
 
         self.runtime_generator = None
         self.runtime_env = None
         self.appimage_arch = None
 
+        self.apt_arch = None
         self._setup_app_info()
+        self.setup_questions()
 
         self.logger.info("Analysing application runtime dependencies")
         runtime_analyser = AppRuntimeAnalyser(self.app_dir, self.app_info_exec, self.app_info_exec_args)
@@ -70,7 +71,6 @@ class RecipeGenerator:
         self.appimage_arch = self._guess_appimage_runtime_arch()
         self.runtime_env = {'APPDIR_LIBRARY_PATH': self._define_appdir_library_path(runtime_analyser.runtime_libs)}
 
-        self.setup_questions()
 
     def setup_questions(self):
         # AppDir -> app_info
