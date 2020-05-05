@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+#  Copyright  2020 Alexis Lopez Zubieta
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+import argparse
+import logging
+import os
+import subprocess
+
+from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
+from AppImageBuilder.common.file_test import is_elf
+
+
+def appimage_mount(target):
+    abs_target_path = os.path.abspath(target)
+    process = subprocess.Popen([abs_target_path, '--appimage-mount'], stdout=subprocess.PIPE)
+    app_dir = process.stdout.readline().decode('utf-8').strip()
+    ret_code = process.poll()
+
+    if ret_code == None:
+        logging.info("AppImage mounted at: %s" % app_dir)
+        return app_dir, process
+    else:
+        raise RuntimeError("Unable to run: %s --appimage-mount" % target)
+
+
+def appimage_umount(process):
+    process.kill()
+    process.wait()
+
+
+def print_needed(app_dir):
+    libs_needed = set()
+    bundle_libs = set()
+    for root, dirs, files in os.walk(app_dir):
+        if 'opt/libc' in root:
+            continue
+
+        for file in files:
+            bundle_libs.add(file)
+            abs_path = os.path.join(root, file)
+            try:
+                if is_elf(abs_path):
+                    patch_elf = PatchElf()
+                    patch_elf.log_stdout = False
+                    patch_elf.log_stderr = False
+                    patch_elf.log_command = False
+
+                    libs_needed.update(patch_elf.get_needed(abs_path))
+            except FileNotFoundError:
+                pass
+            except PatchElfError:
+                pass
+
+    bundle_needed = libs_needed - bundle_libs
+    for lib in sorted(bundle_needed):
+        print("%s" % lib)
+
+
+def configure_logging(args):
+    numeric_level = getattr(logging, args.loglevel.upper())
+    if not isinstance(numeric_level, int):
+        logging.error('Invalid log level: %s' % args.loglevel)
+    logging.basicConfig(level=numeric_level)
+
+
+def __main__():
+    parser = argparse.ArgumentParser(description='AppImage modules analysis tool')
+    parser.add_argument('target', help='AppImage or AppDir to be inspected')
+    parser.add_argument('--log', dest='loglevel', default="INFO", help='logging level (default: INFO)')
+    parser.add_argument('--print-needed', dest='do_print_needed', action='store_true',
+                        help='Print bundle needed libraries')
+
+    args = parser.parse_args()
+    configure_logging(args)
+
+    if os.path.isfile(args.target):
+        app_dir, appimage_proc = appimage_mount(args.target)
+    else:
+        app_dir = args.target
+        appimage_proc = None
+
+    if args.do_print_needed:
+        print_needed(app_dir)
+
+    if appimage_proc:
+        appimage_umount(appimage_proc)
+
+
+if __name__ == '__main__':
+    __main__()
