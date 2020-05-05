@@ -24,7 +24,7 @@ def configure_logging(args):
 
 
 def __main__():
-    parser = argparse.ArgumentParser(description='AppImage modules analysis tool')
+    parser = argparse.ArgumentParser(description='AppImage/AppDir analysis tool')
     parser.add_argument('target', help='AppImage or AppDir to be inspected')
     parser.add_argument('--log', dest='loglevel', default="INFO", help='logging level (default: INFO)')
     parser.add_argument('--print-needed', dest='do_print_needed', action='store_true',
