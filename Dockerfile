@@ -1,7 +1,6 @@
 FROM ubuntu:bionic
 
-RUN apt-get update
-RUN apt-get -y install python3 python3-setuptools python3-pip wget patchelf fakeroot gnupg2 libglib2.0-bin file \
+RUN apt-get update && apt-get -y install python3 python3-setuptools python3-pip wget patchelf fakeroot gnupg2 libglib2.0-bin file \
  desktop-file-utils libgdk-pixbuf2.0-dev zsync
 
 ADD AppImageBuilder /opt/appimage-builder/AppImageBuilder
