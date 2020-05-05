@@ -12,57 +12,8 @@
 #  all copies or substantial portions of the Software.
 import argparse
 import logging
-import os
-import subprocess
 
-from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
-from AppImageBuilder.common.file_test import is_elf
-
-
-def appimage_mount(target):
-    abs_target_path = os.path.abspath(target)
-    process = subprocess.Popen([abs_target_path, '--appimage-mount'], stdout=subprocess.PIPE)
-    app_dir = process.stdout.readline().decode('utf-8').strip()
-    ret_code = process.poll()
-
-    if ret_code == None:
-        logging.info("AppImage mounted at: %s" % app_dir)
-        return app_dir, process
-    else:
-        raise RuntimeError("Unable to run: %s --appimage-mount" % target)
-
-
-def appimage_umount(process):
-    process.kill()
-    process.wait()
-
-
-def print_needed(app_dir):
-    libs_needed = set()
-    bundle_libs = set()
-    for root, dirs, files in os.walk(app_dir):
-        if 'opt/libc' in root:
-            continue
-
-        for file in files:
-            bundle_libs.add(file)
-            abs_path = os.path.join(root, file)
-            try:
-                if is_elf(abs_path):
-                    patch_elf = PatchElf()
-                    patch_elf.log_stdout = False
-                    patch_elf.log_stderr = False
-                    patch_elf.log_command = False
-
-                    libs_needed.update(patch_elf.get_needed(abs_path))
-            except FileNotFoundError:
-                pass
-            except PatchElfError:
-                pass
-
-    bundle_needed = libs_needed - bundle_libs
-    for lib in sorted(bundle_needed):
-        print("%s" % lib)
+from AppImageBuilder.inspector.inspector import Inspector
 
 
 def configure_logging(args):
@@ -79,20 +30,22 @@ def __main__():
     parser.add_argument('--print-needed', dest='do_print_needed', action='store_true',
                         help='Print bundle needed libraries')
 
+    parser.add_argument('--print-dependants', dest='do_print_dependants',
+                        help='Print bundle libraries that depends on')
+
     args = parser.parse_args()
     configure_logging(args)
 
-    if os.path.isfile(args.target):
-        app_dir, appimage_proc = appimage_mount(args.target)
-    else:
-        app_dir = args.target
-        appimage_proc = None
-
+    inspector = Inspector(args.target)
     if args.do_print_needed:
-        print_needed(app_dir)
+        needed = inspector.get_bundle_needed_libs()
+        for lib in sorted(needed):
+            print("%s" % lib)
 
-    if appimage_proc:
-        appimage_umount(appimage_proc)
+    if args.do_print_dependants:
+        dependants = inspector.get_dependants_of(args.do_print_dependants)
+        for lib in sorted(dependants):
+            print("%s" % lib)
 
 
 if __name__ == '__main__':
