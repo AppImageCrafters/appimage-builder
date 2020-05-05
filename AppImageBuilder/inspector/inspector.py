@@ -15,6 +15,7 @@ import os
 import subprocess
 
 from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
+from AppImageBuilder.common.appimage_mount import appimage_mount, appimage_umount
 from AppImageBuilder.common.file_test import is_elf
 
 
@@ -22,32 +23,14 @@ class Inspector():
     def __init__(self, target):
         self.target = target
         if os.path.isfile(self.target):
-            self.app_dir, self.appimage_process = self._appimage_mount()
+            self.app_dir, self.appimage_process = appimage_mount(target)
         else:
             self.app_dir = target
             self.appimage_process = None
 
     def __del__(self):
         if self.appimage_process:
-            self._appimage_umount()
-
-    def _appimage_mount(self):
-        abs_target_path = os.path.abspath(self.target)
-        process = subprocess.Popen([abs_target_path, '--appimage-mount'], stdout=subprocess.PIPE)
-        app_dir = process.stdout.readline().decode('utf-8').strip()
-        ret_code = process.poll()
-
-        if ret_code == None:
-            logging.info("AppImage mounted at: %s" % app_dir)
-            return app_dir, process
-        else:
-            raise RuntimeError("Unable to run: %s --appimage-mount" % self.target)
-
-    def _appimage_umount(self):
-        self.appimage_process.kill()
-        self.appimage_process.wait()
-
-        logging.info("AppImage unmounted")
+            appimage_umount(self.appimage_process)
 
     def get_app_dir(self):
         return self.app_dir

@@ -40,6 +40,7 @@ setuptools.setup(
     license='MIT',
     install_requires=['pyyaml>=5', 'docker', 'bash.py', 'requests', 'schema', 'packaging', 'questionary', 'emrichen'],
     python_requires='>=3.6',
-    package_data={'': ['AppImageBuilder/generator/templates/AppImageBuilder.yml.in']},
+    package_data={'': ['AppImageBuilder/generator/templates/AppImageBuilder.yml.in',
+                       'AppImageBuilder/tester/utils/entry_point.sh']},
     include_package_data=True
 )
