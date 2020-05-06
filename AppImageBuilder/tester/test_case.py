@@ -9,7 +9,7 @@ class TestFailed(RuntimeError):
     pass
 
 
-class DockerTestCase:
+class TestCase:
     def __init__(self, app_dir, name):
         self.app_dir = app_dir
         self.name = name

@@ -41,6 +41,7 @@ setuptools.setup(
     install_requires=['pyyaml>=5', 'docker', 'bash.py', 'requests', 'schema', 'packaging', 'questionary', 'emrichen'],
     python_requires='>=3.6',
     package_data={'': ['AppImageBuilder/generator/templates/AppImageBuilder.yml.in',
-                       'AppImageBuilder/tester/utils/entry_point.sh']},
+                       'AppImageBuilder/tester/utils/entry_point.sh',
+                       'AppImageBuilder/tester/utils/static_test.sh']},
     include_package_data=True
 )

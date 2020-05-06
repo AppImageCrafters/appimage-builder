@@ -34,14 +34,27 @@ def __main__():
     parser.add_argument('--test', dest='do_test', action='store_true',
                         help='Test running the target on given docker images')
 
+    parser.add_argument('--static-test', dest='do_static_test', action='store_true',
+                        help='Test running the target on given docker images')
+
     args = parser.parse_args()
     configure_logging(args)
 
     if args.do_test:
-        tester = Tester(args.target)
-        for docker_image in args.docker_images:
-            tester.run_test(docker_image)
+        try:
+            tester = Tester(args.target)
+            for docker_image in args.docker_images:
+                tester.run_test(docker_image)
+        except Exception as e:
+            logging.error("Tests failed. %s" % e)
 
+    if args.do_static_test:
+        try:
+            tester = Tester(args.target)
+            for docker_image in args.docker_images:
+                tester.run_static_test(docker_image)
+        except Exception as e:
+            logging.error("Tests failed. %s" % e)
 
 if __name__ == '__main__':
     __main__()
