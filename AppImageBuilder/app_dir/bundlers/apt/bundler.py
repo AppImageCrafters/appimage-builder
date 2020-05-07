@@ -40,9 +40,19 @@ class AptBundler(Bundler):
         self.config = None
         self.apt_get = None
 
+        self.deployed_packages = []
+
     def validate_configuration(self):
         validator = AptSettingsValidator(self.settings)
         validator.validate()
+
+    def get_run_report(self):
+        return {
+            'apt': {
+                'sources': sorted(self.config.apt_source_lines),
+                'packages': sorted(self.deployed_packages)
+            }
+        }
 
     def run(self):
         self.config = Config(self.cache_dir)
@@ -79,6 +89,8 @@ class AptBundler(Bundler):
                                  (package_name, package_version, package_arch,
                                   partition_path.replace(app_dir_path, 'AppDir'))
                                  )
+
+                    self.deployed_packages.append("%s %s %s" % (package_name, package_version, package_arch))
 
                     package_files = self._extract_deb(file_path, partition_path)
                     self._make_symlinks_relative(package_files, partition_path)
