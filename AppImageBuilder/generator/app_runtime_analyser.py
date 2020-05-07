@@ -19,7 +19,7 @@ class AppRuntimeAnalyser:
         self.abs_app_dir = os.path.abspath(app_dir)
         self.bin = os.path.join(self.abs_app_dir, bin)
         self.args = args
-        self.runtime_libs = []
+        self.runtime_libs = set()
         self.logger = logging.getLogger('AppRuntimeAnalyser')
 
     def run_app_analysis(self):
@@ -27,7 +27,7 @@ class AppRuntimeAnalyser:
 
         env = os.environ.copy()
         env['LD_DEBUG'] = 'libs'
-        self.logger.info("Running: %s %s" % (self.bin, self.args))
+        self.logger.debug("Running: %s %s" % (self.bin, self.args))
         process = subprocess.Popen([self.bin, self.args], stderr=subprocess.PIPE, env=env)
 
         while process.poll() is None:
@@ -40,8 +40,8 @@ class AppRuntimeAnalyser:
                     lib_path = lib_path.strip()
 
                     if not lib_path.startswith(self.abs_app_dir):
-                        self.runtime_libs.append(lib_path)
-                        self.logger.info("Runtime lib found: %s" % lib_path)
+                        self.runtime_libs.add(lib_path)
+                        self.logger.debug("Runtime lib found: %s" % lib_path)
 
                 stderr_line = process.stderr.readline()
 

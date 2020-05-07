@@ -17,6 +17,7 @@ import subprocess
 from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
 from AppImageBuilder.common.appimage_mount import appimage_mount, appimage_umount
 from AppImageBuilder.common.file_test import is_elf
+from AppImageBuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
 
 
 class Inspector():
@@ -60,6 +61,11 @@ class Inspector():
 
         bundle_needed = libs_needed - bundle_libs
         return bundle_needed
+
+    def get_bundle_runtime_needed_libs(self):
+        analyser = AppRuntimeAnalyser(self.app_dir, 'AppRun', '')
+        analyser.run_app_analysis()
+        return analyser.runtime_libs
 
     def get_dependants_of(self, lib_name):
         dependants = set()
