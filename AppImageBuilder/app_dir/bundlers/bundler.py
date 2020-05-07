@@ -38,6 +38,9 @@ class Bundler:
     def validate_configuration(self):
         pass
 
+    def get_run_report(self):
+        return {}
+
     def run(self):
         pass
 

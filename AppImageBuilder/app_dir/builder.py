@@ -15,6 +15,7 @@ import os
 from AppImageBuilder.app_dir.runtimes.proot.runtime import PRootRuntime
 from AppImageBuilder.app_dir.runtimes.wrapper.runtime import WrapperRuntime
 from AppImageBuilder.app_dir.bundlers.file_bundler import FileBundler
+from .metadata.bundle_info import BundleInfo
 from .metadata.desktop_entry_generator import DesktopEntryGenerator
 from .metadata.icon_bundler import IconBundler
 from .metadata.loader import AppInfoLoader
@@ -98,6 +99,7 @@ class Builder:
 
         self._bundle_app_dir_icon()
         self._generate_app_dir_desktop_entry()
+        self._generate_bundle_info()
 
     def _bundle_app_dir_icon(self):
         icon_bundler = IconBundler(self.app_dir_path, self.app_info.icon)
@@ -106,3 +108,7 @@ class Builder:
     def _generate_app_dir_desktop_entry(self):
         desktop_entry_editor = DesktopEntryGenerator(self.app_dir_path)
         desktop_entry_editor.generate(self.app_info)
+
+    def _generate_bundle_info(self):
+        info = BundleInfo(self.app_dir_path, self.bundlers)
+        info.generate()
