@@ -27,7 +27,7 @@ class DpkgQuery(Command):
         command.extend(files)
         self._run(command)
 
-        if self.return_code != 0:
+        if not self.stdout and self.return_code != 0:
             raise DpkgQueryError("Package lockup failed")
 
         packages = set()
