@@ -1,0 +1,2 @@
+include AppImageBuilder/generator/templates/*.yml.in
+include AppImageBuilder/tester/utils/*
