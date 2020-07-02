@@ -5,6 +5,7 @@ RUN apt-get update && apt-get -y install python3 python3-setuptools python3-pip 
 
 ADD AppImageBuilder /opt/appimage-builder/AppImageBuilder
 ADD appimage-builder /opt/appimage-builder
+ADD appimage-inspector /opt/appimage-builder
 ADD appimage-modules /opt/appimage-builder
 ADD README.md /opt/appimage-builder
 ADD LICENSE /opt/appimage-builder
