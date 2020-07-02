@@ -77,7 +77,7 @@ class WrapperAppRun:
         proc = subprocess.run(['file', '-b', file], stdout=subprocess.PIPE, env=proc_env)
         output = proc.stdout.decode('utf-8')
         parts = output.split(',')
-        signature = ','.join(parts[:2])
+        signature = ','.join(parts[1:2])
         signature = signature.replace('shared object', '')
         signature = signature.replace('executable', '')
         return signature
