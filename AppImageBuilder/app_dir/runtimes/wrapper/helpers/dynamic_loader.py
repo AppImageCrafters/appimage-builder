@@ -110,8 +110,6 @@ class DynamicLoader(BaseHelper):
     def _set_execution_permissions(self, path):
         os.chmod(path, stat.S_IRWXU | stat.S_IXGRP | stat.S_IRGRP | stat.S_IXOTH | stat.S_IROTH)
 
-
-
     def gess_libc_version(self, loader_path):
         glib_version_re = re.compile(r'GLIBC_(?P<version>\d+\.\d+\.?\d*)')
         with open(loader_path, 'rb') as f:
@@ -136,7 +134,7 @@ class DynamicLoader(BaseHelper):
             patchelf_command = PatchElf()
             patchelf_command.log_stderr = False
             bin_interpreter = patchelf_command.get_interpreter(file)
-            if bin_interpreter:
+            if bin_interpreter and bin_interpreter != interpreter:
                 self.system_interpreter = bin_interpreter
                 logging.info('Setting interpreter to: %s' % os.path.relpath(file, self.app_dir))
                 patchelf_command.set_interpreter(file, interpreter)
