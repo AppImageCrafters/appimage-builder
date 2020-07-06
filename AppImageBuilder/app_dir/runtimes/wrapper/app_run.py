@@ -48,15 +48,15 @@ class WrapperAppRun:
 
         libc_signature = self._get_embed_libc_signature()
 
-        wrapper_path = self._find_wrapper_path(libc_signature)
         apprun_path = self._find_apprun_path(libc_signature)
-
         shutil.copy(apprun_path, os.path.join(self.app_dir, "AppRun"))
         self._set_execution_permissions(os.path.join(self.app_dir, "AppRun"))
 
-        shutil.copy(wrapper_path, os.path.join(self.app_dir, "libapprun_hooks.so"))
+        wrapper_path = self._find_wrapper_path(libc_signature)
+        lib_paths = self.env['APPDIR_LIBRARY_PATH'].replace("$APPDIR/", "").split(":")
+        shutil.copy(wrapper_path, os.path.join(self.app_dir, lib_paths[0], "libapprun_hooks.so"))
 
-        self.env['LD_PRELOAD'] = '${APPDIR}/libapprun_hooks.so'
+        self.env['LD_PRELOAD'] = 'libapprun_hooks.so'
         self._generate_env_file()
 
     def _get_embed_libc_signature(self):
