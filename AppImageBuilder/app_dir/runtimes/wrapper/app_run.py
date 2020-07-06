@@ -53,7 +53,10 @@ class WrapperAppRun:
         self._set_execution_permissions(os.path.join(self.app_dir, "AppRun"))
 
         wrapper_path = self._find_wrapper_path(libc_signature)
-        lib_paths = self.env['APPDIR_LIBRARY_PATH'].replace("$APPDIR/", "").split(":")
+        lib_paths = self.env['APPDIR_LIBRARY_PATH'].replace("$APPDIR", self.app_dir)
+        lib_paths = lib_paths.replace("${APPDIR}", self.app_dir)
+        lib_paths = lib_paths.split(":")
+        os.makedirs(os.path.join(self.app_dir, lib_paths[0]), exist_ok=True)
         shutil.copy(wrapper_path, os.path.join(self.app_dir, lib_paths[0], "libapprun_hooks.so"))
 
         self.env['LD_PRELOAD'] = 'libapprun_hooks.so'
