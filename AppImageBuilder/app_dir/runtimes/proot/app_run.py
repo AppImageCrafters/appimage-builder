@@ -9,8 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-
-
+import logging
 import os
 import stat
 import uuid
@@ -67,6 +66,10 @@ class PRootAppRun:
         self._set_permissions(path)
 
     def _generate(self):
+        logging.warning("====================================================")
+        logging.warning("THE PROOT RUNTIME IS DEPRECATED AND WILL BE REMOVED!")
+        logging.warning("====================================================")
+
         file_lines = []
         file_lines.extend(self.sections['HEADER'])
         file_lines.extend(self.sections['APPDIR'])

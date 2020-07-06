@@ -33,6 +33,10 @@ class ClassicRuntime():
         self.env = recipe.get_item('AppDir/runtime/env', {})
 
     def generate(self):
+        logging.warning("======================================================")
+        logging.warning("THE CLASSIC RUNTIME IS DEPRECATED AND WILL BE REMOVED!")
+        logging.warning("======================================================")
+
         app_run = self.app_run_constructor(self.app_info.exec, self.app_info.exec_args)
         self._configure_runtime(app_run)
 
