@@ -142,6 +142,9 @@ class Tester:
         test_case.command = self.recipe.get_item('%s/%s/command' % (tests_path, k), './AppRun')
         test_case.use_host_x = self.recipe.get_item('%s/%s/use_host_x' % (tests_path, k), False)
         test_case.env = self.recipe.get_item('%s/%s/env' % (tests_path, k), [])
+        if isinstance(test_case.env, dict):
+            test_case.env = ["%s=%s" % (k, v) for k, v in test_case.env.items()]
+
         return test_case
 
     def run_tests(self):
@@ -159,5 +162,3 @@ class Tester:
                 raise Tester.TestFailed("Execution failed. Error message: %s" % e)
             finally:
                 test.teardown()
-
-
