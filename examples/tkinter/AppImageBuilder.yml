@@ -49,7 +49,7 @@ AppDir:
       # https://docs.python.org/3/faq/gui.html?highlight=tcl_library#how-do-i-freeze-tkinter-applications
       APPDIR_LIBRARY_PATH: '${APPDIR}/usr/lib:${APPDIR}/usr/lib/x86_64-linux-gnu:${APPDIR}/lib/x86_64-linux-gnu'
       TCL_LIBRARY: '${APPDIR}/usr/share/tcltk/tcl8.6'
-      # TK_LIBRARY: '${APPDIR}/usr/lib/tcltk/x86_64-linux-gnu/tk8.6'
+      TK_LIBRARY: '${APPDIR}/usr/lib/tcltk/x86_64-linux-gnu/tk8.6'
   test:
     arch:
       image: appimagecrafters/tests-env:archlinux-latest
