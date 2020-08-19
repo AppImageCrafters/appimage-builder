@@ -35,11 +35,14 @@ class WrapperRuntime():
         app_info_loader = AppInfoLoader()
         self.app_info = app_info_loader.load(recipe)
         self.env = recipe.get_item('AppDir/runtime/env', {})
+        self.path_mappings = recipe.get_item('AppDir/runtime/path_mappings', [])
 
     def generate(self):
         app_run = self.app_run_constructor(self.app_dir, self.app_info.exec, self.app_info.exec_args)
         self._configure_runtime(app_run)
         self._add_user_defined_settings(app_run)
+
+        self._set_path_mappings(app_run)
 
         app_run.deploy()
 
@@ -64,3 +67,11 @@ class WrapperRuntime():
                 logging.info('Overriding runtime env: %s' % k)
 
             app_run.env[k] = v
+
+    def _set_path_mappings(self, app_run: WrapperAppRun):
+        if self.path_mappings:
+            path_mappings_env = ""
+            for path_mapping in self.path_mappings:
+                path_mappings_env += path_mapping + ';'
+
+            app_run.env['APPRUN_PATH_MAPPINGS'] = path_mappings_env

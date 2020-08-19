@@ -84,6 +84,9 @@ AppDir:
       - usr/share/doc/*/TODO.*
       - usr/include
   runtime:
+    path_mappings:
+      - /etc/gimp/2.0/:$APPDIR/etc/gimp/2.0/
+      - /usr/share/gimp/2.0/:$APPDIR/usr/share/gimp/2.0/
     env:
       APPDIR_LIBRARY_PATH: '$APPDIR/usr/lib/x86_64-linux-gnu:$APPDIR/lib/x86_64-linux-gnu:$APPDIR/usr/lib:$APPDIR/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders'
       GTK_EXE_PREFIX: $APPDIR/usr
@@ -94,7 +97,6 @@ AppDir:
       XDG_DATA_DIRS: $APPDIR/share:$XDG_DATA_DIRS
       BABL_PATH: $APPDIR/usr/lib/x86_64-linux-gnu/babl-0.1
       GEGL_PATH: $APPDIR/usr/lib/x86_64-linux-gnu/gegl-0.4
-      APPRUN_PATH_MAPPINGS: /etc/gimp/2.0/:$APPDIR/etc/gimp/2.0/;/usr/share/gimp/2.0/:$APPDIR/usr/share/gimp/2.0/;
   test:
     debian:
       image: appimagecrafters/tests-env:debian-stable
