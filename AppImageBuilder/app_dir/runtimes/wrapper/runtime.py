@@ -34,11 +34,13 @@ class WrapperRuntime():
 
         app_info_loader = AppInfoLoader()
         self.app_info = app_info_loader.load(recipe)
+        self.apprun_version = recipe.get_item('AppDir/runtime/version', "v1.1.1")
         self.env = recipe.get_item('AppDir/runtime/env', {})
         self.path_mappings = recipe.get_item('AppDir/runtime/path_mappings', [])
 
     def generate(self):
-        app_run = self.app_run_constructor(self.app_dir, self.app_info.exec, self.app_info.exec_args)
+        app_run = self.app_run_constructor(self.apprun_version, self.app_dir, self.app_info.exec,
+                                           self.app_info.exec_args)
         self._configure_runtime(app_run)
         self._add_user_defined_settings(app_run)
 

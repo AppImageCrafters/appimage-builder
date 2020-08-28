@@ -36,8 +36,9 @@ class WrapperAppRun:
 
     sections = {}
 
-    def __init__(self, app_dir, exec_path, exec_args='$@'):
+    def __init__(self, version, app_dir, exec_path, exec_args="$@"):
         self.app_dir = app_dir
+        self.apprun_version = version
         self.env['APPIMAGE_UUID'] = str(uuid.uuid4())
         self.env['EXEC_PATH'] = "$APPDIR/%s" % exec_path
         self.env['EXEC_ARGS'] = exec_args
@@ -88,8 +89,10 @@ class WrapperAppRun:
     def _download_wrapper_binaries(self):
         self.wrapper_binaries = []
         for arch in ['amd64', 'arm64', 'armhf', 'i386']:
-            file_path = os.path.join(os.curdir, 'appimage-builder-cache', 'libapprun_hooks-%s.so' % arch)
-            url = 'https://github.com/AppImageCrafters/AppRun/releases/download/v1.1.0/libapprun_hooks-%s.so' % arch
+            file_path = os.path.join(os.curdir, 'appimage-builder-cache',
+                                     'libapprun_hooks-%s-%s.so' % (self.apprun_version, arch))
+            url = 'https://github.com/AppImageCrafters/AppRun/releases/download/%s/libapprun_hooks-%s.so' % \
+                  (self.apprun_version, arch)
 
             if not os.path.exists(file_path):
                 logging.info('Downloading libapprun_hooks binary: %s' % url)
@@ -100,8 +103,9 @@ class WrapperAppRun:
     def _download_apprun_binaries(self):
         self.apprun_binaries = []
         for arch in ['amd64', 'arm64', 'armhf', 'i386']:
-            file_path = os.path.join(os.curdir, 'appimage-builder-cache', 'AppRun-%s' % arch)
-            url = 'https://github.com/AppImageCrafters/AppRun/releases/download/v1.1.0/AppRun-%s' % arch
+            file_path = os.path.join(os.curdir, 'appimage-builder-cache', 'AppRun-%s-%s' % (self.apprun_version, arch))
+            url = 'https://github.com/AppImageCrafters/AppRun/releases/download/%s/AppRun-%s' % \
+                  (self.apprun_version, arch)
 
             if not os.path.exists(file_path):
                 logging.info('Downloading AppRun binary: %s' % url)
