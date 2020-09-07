@@ -30,7 +30,7 @@ class GdkPixbuf(BaseHelper):
             app_run.env['APPDIR_LIBRARY_PATH'] = '$APPDIR/%s:%s' % (path, app_run.env['APPDIR_LIBRARY_PATH'])
 
     def _generate_loaders_cache(self, loaders_path, loaders_cache_path):
-        proc = subprocess.run(['gdk-pixbuf-query-loaders'], cwd=self.app_dir, stdout=subprocess.PIPE)
+        proc = subprocess.run(self._get_gdk_pixbuf_query_loaders_bin(), cwd=self.app_dir, stdout=subprocess.PIPE)
         query_output = proc.stdout.decode('utf-8')
 
         logging.info("GDK loaders cache modules dir: %s" % loaders_path)
@@ -40,6 +40,12 @@ class GdkPixbuf(BaseHelper):
             f.write('\n'.join(modified_output))
 
         logging.info("GDK loaders cache wrote to: %s" % loaders_cache_path)
+
+    def _get_gdk_pixbuf_query_loaders_bin(self):
+        for root, dirs, files in os.walk("/usr/lib"):
+            if "gdk-pixbuf-query-loaders" in files:
+                return os.path.join(root, "gdk-pixbuf-query-loaders")
+        raise RuntimeError("Missing 'gdk-pixbuf-query-loaders' executable")
 
     def _get_gdk_pixbuf_loaders_path(self):
         return self._get_glob_relative_sub_dir_path('*/usr/*/gdk-pixbuf-2.0/*/loaders/*')
