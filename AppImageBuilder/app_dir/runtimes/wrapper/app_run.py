@@ -19,7 +19,7 @@ import logging
 from urllib import request
 
 
-class AppRunError(RuntimeError):
+class AppRunSetupError(RuntimeError):
     pass
 
 
@@ -48,35 +48,38 @@ class WrapperAppRun:
         self._download_wrapper_binaries()
         self._download_apprun_binaries()
 
-        libc_signature = self._get_embed_libc_signature()
-
-        apprun_path = self._find_apprun_path(libc_signature)
+        embed_archs = self._get_embed_libc_archs()
+        apprun_path = self._find_apprun(embed_archs[0])
         shutil.copy(apprun_path, os.path.join(self.app_dir, "AppRun"))
         self._set_execution_permissions(os.path.join(self.app_dir, "AppRun"))
 
-        wrapper_path = self._find_wrapper_path(libc_signature)
-        lib_paths = self.env['APPDIR_LIBRARY_PATH'].replace("$APPDIR", self.app_dir)
-        lib_paths = lib_paths.replace("${APPDIR}", self.app_dir)
-        lib_paths = lib_paths.split(":")
-        os.makedirs(os.path.join(self.app_dir, lib_paths[0]), exist_ok=True)
-        shutil.copy(wrapper_path, os.path.join(self.app_dir, lib_paths[0], "libapprun_hooks.so"))
+        for arch in embed_archs:
+            hooks_lib = self._find_hooks_lib(arch)
+            target_lib_dir = self._find_hooks_lib_target_lib_dir(arch)
+            if not target_lib_dir:
+                raise AppRunSetupError("Unable to find a lib dir for deploying: %s " % arch)
+            logging.info('Deploying: %s => %s' % (hooks_lib, target_lib_dir))
+            shutil.copy(hooks_lib, os.path.join(target_lib_dir, "libapprun_hooks.so"))
 
         self.env['LD_PRELOAD'] = 'libapprun_hooks.so'
         self._generate_env_file()
 
-    def _get_embed_libc_signature(self):
-        libc_path = self._find_libc_path()
-        if not libc_path:
-            raise AppRunError('Unable to locate libc at: %s' % self.app_dir)
+    def _get_embed_libc_archs(self):
+        libc_paths = self._find_libc_paths()
+        if not libc_paths:
+            raise AppRunSetupError('Unable to locate libc at: %s' % self.app_dir)
 
-        return self._get_elf_arch_signature(libc_path)
+        arch = set()
+        for path in libc_paths:
+            arch.add(self._get_elf_arch(path))
+        return list(arch)
 
     def _generate_env_file(self):
         with open(os.path.join(self.app_dir, '.env'), 'w') as f:
             for k, v in self.env.items():
                 f.write("%s=%s\n" % (k, v))
 
-    def _get_elf_arch_signature(self, file):
+    def _get_elf_arch(self, file):
         proc_env = os.environ.copy()
         proc_env['LC_ALL'] = 'C'
         proc = subprocess.run(['file', '-b', file], stdout=subprocess.PIPE, env=proc_env)
@@ -106,7 +109,8 @@ class WrapperAppRun:
         self.apprun_binaries = []
         for arch in ['amd64', 'arm64', 'armhf', 'i386']:
             postfix = "debug-%s" % arch if self.apprun_debug else "%s" % arch
-            file_path = os.path.join(os.curdir, 'appimage-builder-cache', 'AppRun-%s-%s' % (self.apprun_version, postfix))
+            file_path = os.path.join(os.curdir, 'appimage-builder-cache',
+                                     'AppRun-%s-%s' % (self.apprun_version, postfix))
             url = 'https://github.com/AppImageCrafters/AppRun/releases/download/%s/AppRun-%s' % \
                   (self.apprun_version, postfix)
 
@@ -116,28 +120,43 @@ class WrapperAppRun:
 
             self.apprun_binaries.append(file_path)
 
-    def _find_libc_path(self):
+    def _find_libc_paths(self):
+        paths = []
         for base_path, dirs, files in os.walk(self.app_dir):
             for file in files:
                 abs_path = os.path.join(base_path, file)
                 if fnmatch.fnmatch(abs_path, '*/libc-*.so'):
-                    return abs_path
+                    paths.append(abs_path)
+        return paths
 
-    def _find_wrapper_path(self, libc_signature):
+    def _find_hooks_lib(self, libc_arch):
         for wrapper in self.wrapper_binaries:
-            signature = self._get_elf_arch_signature(wrapper)
-            if libc_signature == signature:
+            signature = self._get_elf_arch(wrapper)
+            if libc_arch == signature:
                 return wrapper
 
-        raise AppRunError('Unable to find a wrapper for: %s' % libc_signature)
+        raise AppRunSetupError('Unable to find a wrapper for: %s' % libc_arch)
 
-    def _find_apprun_path(self, libc_signature):
+    def _find_apprun(self, libc_arch):
         for apprun in self.apprun_binaries:
-            signature = self._get_elf_arch_signature(apprun)
-            if libc_signature == signature:
+            arch = self._get_elf_arch(apprun)
+            if libc_arch == arch:
                 return apprun
 
-        raise AppRunError('Unable to find a AppRun for: %s' % libc_signature)
+        raise AppRunSetupError('Unable to find a AppRun for: %s' % libc_arch)
 
     def _set_execution_permissions(self, path):
         os.chmod(path, stat.S_IRWXU | stat.S_IXGRP | stat.S_IRGRP | stat.S_IXOTH | stat.S_IROTH)
+
+    def _find_hooks_lib_target_lib_dir(self, arch):
+        lib_dirs = self.env['APPDIR_LIBRARY_PATH']
+        lib_dirs = lib_dirs.replace("$APPDIR", self.app_dir)
+        lib_dirs = lib_dirs.replace("${APPDIR}", self.app_dir)
+        lib_dirs = lib_dirs.split(":")
+        for lib_dir in lib_dirs:
+            for file in os.listdir(lib_dir):
+                file_path = os.path.join(lib_dir, file)
+                if os.path.isfile(file_path):
+                    file_arch = self._get_elf_arch(file_path)
+                    if file_arch == arch:
+                        return lib_dir

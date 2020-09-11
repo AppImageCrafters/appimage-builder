@@ -13,7 +13,7 @@ import logging
 import os
 
 from .base_helper import BaseHelper
-from .dynamic_loader import DynamicLoader
+from .interpreter import Interpreter
 
 
 class Qt(BaseHelper):

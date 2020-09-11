@@ -23,31 +23,23 @@ from .base_helper import BaseHelper
 from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
 
 
-class DynamicLoaderError(RuntimeError):
+class InterpreterHandlerError(RuntimeError):
     pass
 
 
-class DynamicLoader(BaseHelper):
+class Interpreter(BaseHelper):
     def __init__(self, app_dir, app_dir_files):
         super().__init__(app_dir, app_dir_files)
 
         self.priority = 100
         self.patch_elf = PatchElf()
         self.patch_elf.logger.level = logging.WARNING
-        self.system_interpreter = None
-
-    def get_loader_path(self) -> str:
-        binary_path = self._find_loader_by_name()
-        binary_path = os.path.realpath(binary_path)
-        binary_path = os.path.relpath(binary_path, self.app_dir)
-
-        logging.info("Loader found at: %s" % binary_path)
-        return binary_path
+        self.interpreters = {}
 
     def get_glibc_path(self) -> str:
         path = self._get_glob_relative_file_path('*/libc.so.*')
         if not path:
-            raise DynamicLoaderError('Unable to find libc.so')
+            raise InterpreterHandlerError('Unable to find libc.so')
         path = os.path.join(self.app_dir, path)
         path = os.path.realpath(path)
 
@@ -65,18 +57,23 @@ class DynamicLoader(BaseHelper):
                 app_run.env['%s_LIBRARY_PATH' % nane.upper()] = ':'.join(
                     ['$APPDIR/%s' % path for path in partition_library_path])
 
-        loader_path = self.get_loader_path()
-        app_run.env['APPDIR_INTERP'] = '$APPDIR/%s' % loader_path
-
         glibc_path = self.get_glibc_path()
         glibc_version = self.gess_libc_version(glibc_path)
         app_run.env['APPDIR_LIBC_VERSION'] = glibc_version
 
-        interpreter = '/tmp/appimage-%s-ld-linux.so.2' % app_run.env['APPIMAGE_UUID']
-        app_run.env['RUNTIME_INTERP'] = interpreter
+        self._patch_executables_interpreter(app_run.env['APPIMAGE_UUID'])
+        app_run.env['SYSTEM_INTERP'] = ":".join(self.interpreters.keys())
 
-        self._set_executables_interpreter(interpreter)
-        app_run.env['SYSTEM_INTERP'] = self.system_interpreter
+
+    def _resolve_appdir_interpreters(self):
+        appdir_interp = []
+        for path in self.interpreters.keys():
+            rel_path = self._get_relative_file_path(path)
+            if rel_path:
+                appdir_interp.append('$APPDIR/%s' % rel_path)
+            else:
+                raise InterpreterHandlerError('Interpreter not being bundled: %s' % path)
+        return appdir_interp
 
     def _find_loader_by_name(self) -> str:
         for file in self.app_dir_files:
@@ -84,7 +81,7 @@ class DynamicLoader(BaseHelper):
                 binary_path = os.path.realpath(file)
                 return binary_path
 
-        raise DynamicLoaderError('Unable to find \'ld.so\' in the AppDir')
+        raise InterpreterHandlerError('Unable to find \'ld.so\' in the AppDir')
 
     @staticmethod
     def _is_linker_file(file):
@@ -120,23 +117,29 @@ class DynamicLoader(BaseHelper):
                 max_glibc_version = reduce((lambda x, y: max(x, y)), glibc_version_strings)
                 return str(max_glibc_version)
             else:
-                raise DynamicLoaderError('Unable to determine glibc version')
+                raise InterpreterHandlerError('Unable to determine glibc version')
 
-    def _set_executables_interpreter(self, interpreter):
+    def _patch_executables_interpreter(self, uuid):
         for root, dirs, files in os.walk(self.app_dir):
             for file_name in files:
                 path = os.path.join(root, file_name)
                 if not os.path.islink(path) and is_elf(path):
-                    self._set_interpreter(path, interpreter)
+                    self._set_interpreter(path, uuid)
 
-    def _set_interpreter(self, file, interpreter):
+    def _set_interpreter(self, file, uuid):
         try:
             patchelf_command = PatchElf()
             patchelf_command.log_stderr = False
-            bin_interpreter = patchelf_command.get_interpreter(file)
-            if bin_interpreter and bin_interpreter != interpreter:
-                self.system_interpreter = bin_interpreter
-                logging.info('Setting interpreter to: %s' % os.path.relpath(file, self.app_dir))
-                patchelf_command.set_interpreter(file, interpreter)
+            real_interpreter = patchelf_command.get_interpreter(file)
+            apprun_interpreter = self._gen_interpreter_link_path(real_interpreter, uuid)
+            if real_interpreter and real_interpreter != apprun_interpreter:
+                self.interpreters[real_interpreter] = apprun_interpreter
+                logging.info('Replacing PT_INTERP on: %s' % os.path.relpath(file, self.app_dir))
+                logging.info('\t"%s"  => "%s"' % (real_interpreter, apprun_interpreter))
+                patchelf_command.set_interpreter(file, apprun_interpreter)
         except PatchElfError:
             pass
+
+    @staticmethod
+    def _gen_interpreter_link_path(real_interpreter, uuid):
+        return "/tmp/appimage-%s-%s" % (uuid, os.path.basename(real_interpreter))
