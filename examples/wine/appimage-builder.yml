@@ -1,0 +1,72 @@
+version: 1
+
+AppDir:
+  path: ./AppDir
+
+  app_info:
+    id: org.winehq.wine
+    name: wine
+    icon: wine-stable
+    version: 17.12.3
+    exec: usr/bin/wine-stable
+
+  apt:
+    arch: amd64
+    sources:
+      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse'
+      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse'
+      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+
+    include:
+      - wine
+      - wine32
+      - libc6:i386
+      - libfreetype6
+      - libfreetype6:i386
+      - libfontconfig1
+      - libfontconfig1:i386
+    exclude: []
+
+  files:
+    exclude:
+      - usr/lib/x86_64-linux-gnu/gconv
+      - usr/share/man
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
+  runtime:
+    env:
+      APPDIR_LIBRARY_PATH: $APPDIR/lib/x86_64-linux-gnu:$APPDIR/usr/lib/x86_64-linux-gnu:$APPDIR/usr/lib/x86_64-linux-gnu/pulseaudio:$APPDIR/lib/i386-linux-gnu:$APPDIR/usr/lib/i386-linux-gnu
+    path_mappings:
+    - /usr/lib/wine:$APPDIR/usr/lib/wine
+
+  test:
+    debian:
+      image: appimagecrafters/tests-env:debian-stable
+      command: "./AppRun --version"
+      use_host_x: True
+    centos:
+      image: appimagecrafters/tests-env:centos-7
+      command: "./AppRun --version"
+      use_host_x: True
+    arch:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: "./AppRun --version"
+      use_host_x: True
+    fedora:
+      image: appimagecrafters/tests-env:fedora-30
+      command: "./AppRun --version"
+      use_host_x: True
+    ubuntu:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: "./AppRun --version"
+      use_host_x: True
+
+
+AppImage:
+  update-information: None
+  sign-key: None
+  arch: x86_64
+

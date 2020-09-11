@@ -9,7 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from .dynamic_loader import DynamicLoader
+from .interpreter import Interpreter
 from .base_helper import BaseHelper
 from .fontconfig import FontConfig
 from .gstreamer import GStreamer
@@ -31,7 +31,7 @@ class HelperFactory:
         self.app_dir_files = app_dir_files
 
         self.helpers = {
-            'loader': DynamicLoader,
+            'loader': Interpreter,
             'fontconfig': FontConfig,
             'openssl': OpenSSL,
             'qt': Qt,
