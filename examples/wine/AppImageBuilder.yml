@@ -6,9 +6,9 @@ AppDir:
   app_info:
     id: org.winehq.wine
     name: wine
-    icon: wine-stable
-    version: 17.12.3
-    exec: usr/bin/wine-stable
+    icon: wine
+    version: stable
+    exec: opt/wine-stable/bin/wine64
 
   apt:
     arch: amd64
@@ -17,15 +17,13 @@ AppDir:
       - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse'
       - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+      - sourceline: 'deb https://dl.winehq.org/wine-builds/ubuntu/ focal main'
+        key_url: 'https://dl.winehq.org/wine-builds/winehq.key'
 
     include:
-      - wine
-      - wine32
-      - libc6:i386
+      - winehq-stable
       - libfreetype6
-      - libfreetype6:i386
       - libfontconfig1
-      - libfontconfig1:i386
     exclude: []
 
   files:
@@ -40,7 +38,7 @@ AppDir:
     env:
       APPDIR_LIBRARY_PATH: $APPDIR/lib/x86_64-linux-gnu:$APPDIR/usr/lib/x86_64-linux-gnu:$APPDIR/usr/lib/x86_64-linux-gnu/pulseaudio:$APPDIR/lib/i386-linux-gnu:$APPDIR/usr/lib/i386-linux-gnu
     path_mappings:
-    - /usr/lib/wine:$APPDIR/usr/lib/wine
+    - /opt/wine-stable:$APPDIR/opt/wine-stable
 
   test:
     debian:
