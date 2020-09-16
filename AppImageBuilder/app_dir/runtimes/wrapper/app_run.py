@@ -17,6 +17,7 @@ import subprocess
 import uuid
 import logging
 from urllib import request
+from github import Github
 
 
 class AppRunSetupError(RuntimeError):
@@ -45,7 +46,6 @@ class WrapperAppRun:
         self.env['EXEC_ARGS'] = exec_args
 
     def deploy(self):
-        self._download_wrapper_binaries()
         self._download_apprun_binaries()
 
         embed_archs = self._get_embed_libc_archs()
@@ -90,35 +90,32 @@ class WrapperAppRun:
         signature = signature.replace('executable', '')
         return signature
 
-    def _download_wrapper_binaries(self):
-        self.wrapper_binaries = []
-        for arch in ['amd64', 'arm64', 'armhf', 'i386']:
-            postfix = "debug-%s" % arch if self.apprun_debug else "%s" % arch
-            file_path = os.path.join(os.curdir, 'appimage-builder-cache',
-                                     'libapprun_hooks-%s-%s.so' % (self.apprun_version, postfix))
-            url = 'https://github.com/AppImageCrafters/AppRun/releases/download/%s/libapprun_hooks-%s.so' % \
-                  (self.apprun_version, postfix)
-
-            if not os.path.exists(file_path):
-                logging.info('Downloading libapprun_hooks binary: %s' % url)
-                request.urlretrieve(url, file_path)
-
-            self.wrapper_binaries.append(file_path)
-
     def _download_apprun_binaries(self):
         self.apprun_binaries = []
-        for arch in ['amd64', 'arm64', 'armhf', 'i386']:
-            postfix = "debug-%s" % arch if self.apprun_debug else "%s" % arch
+        self.wrapper_binaries = []
+
+        gh = Github()
+        gh_repo = gh.get_repo('AppImageCrafters/AppRun')
+        gh_release = gh_repo.get_release(self.apprun_version)
+        for asset in gh_release.get_assets():
+            if not self.apprun_debug and 'debug' in asset.name.lower():
+                continue
+
+            if self.apprun_debug and 'debug' not in asset.name.lower():
+                continue
+
             file_path = os.path.join(os.curdir, 'appimage-builder-cache',
-                                     'AppRun-%s-%s' % (self.apprun_version, postfix))
-            url = 'https://github.com/AppImageCrafters/AppRun/releases/download/%s/AppRun-%s' % \
-                  (self.apprun_version, postfix)
+                                     '%s-%s' % (self.apprun_version, asset.name))
 
             if not os.path.exists(file_path):
-                logging.info('Downloading AppRun binary: %s' % url)
-                request.urlretrieve(url, file_path)
+                logging.info('Downloading "%s" from: %s' % (asset.name, asset.browser_download_url))
+                request.urlretrieve(asset.browser_download_url, file_path)
 
-            self.apprun_binaries.append(file_path)
+            if 'AppRun' in asset.name:
+                self.apprun_binaries.append(file_path)
+
+            if 'libapprun_hooks' in asset.name:
+                self.wrapper_binaries.append(file_path)
 
     def _find_libc_paths(self):
         paths = []
