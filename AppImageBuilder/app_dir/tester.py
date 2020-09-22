@@ -95,6 +95,7 @@ class Tester:
 
             self.env.append('UID=%s' % os.getuid())
             self.env.append('UNAME=%s' % os.getenv("USER"))
+            self.env.append('XDG_DATA_DIRS=/usr/share:/usr/local/share')
             return self.env
 
     def __init__(self, recipe):
