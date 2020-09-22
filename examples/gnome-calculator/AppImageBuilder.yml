@@ -20,10 +20,6 @@ AppDir:
       - gnome-calculator
       - librsvg2-common
     exclude:
-      - core-packages
-      - graphics-stack-packages
-      - xclient-packages
-
       - adwaita-icon-theme
       - humanity-icon-theme
 
