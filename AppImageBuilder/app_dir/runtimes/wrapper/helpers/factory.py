@@ -18,6 +18,7 @@ from .libgl import LibGL
 from .openssl import OpenSSL
 from .qt import Qt
 from .gdk_pixbuf import GdkPixbuf
+from .gtk import Gtk
 from .glib_schemas import GLibSchemas
 
 
@@ -38,6 +39,7 @@ class HelperFactory:
             'libgl': LibGL,
             'gstreamer': GStreamer,
             'gdk_pixbuf': GdkPixbuf,
+            'gtk': Gtk,
             'glib_schemas': GLibSchemas,
             'java': Java,
         }
