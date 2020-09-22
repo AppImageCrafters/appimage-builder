@@ -131,6 +131,10 @@ class Interpreter(BaseHelper):
             patchelf_command = PatchElf()
             patchelf_command.log_stderr = False
             real_interpreter = patchelf_command.get_interpreter(file)
+            if real_interpreter.startswith('/tmp/appimage-'):
+                # skip, the binary has been patched already
+                return
+
             apprun_interpreter = self._gen_interpreter_link_path(real_interpreter, uuid)
             if real_interpreter and real_interpreter != apprun_interpreter:
                 self.interpreters[real_interpreter] = apprun_interpreter
