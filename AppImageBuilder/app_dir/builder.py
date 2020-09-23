@@ -12,7 +12,6 @@
 import logging
 import os
 
-from AppImageBuilder.app_dir.runtimes.proot.runtime import PRootRuntime
 from AppImageBuilder.app_dir.runtimes.wrapper.runtime import WrapperRuntime
 from AppImageBuilder.app_dir.bundlers.file_bundler import FileBundler
 from .metadata.bundle_info import BundleInfo
@@ -82,9 +81,6 @@ class Builder:
         logging.info("Generating runtime")
         logging.info("__________________")
 
-        if "proot" == runtime_generator:
-            runtime = PRootRuntime(self.recipe)
-            runtime.generate()
         if "wrapper" == runtime_generator:
             runtime = WrapperRuntime(self.recipe)
             runtime.generate()
