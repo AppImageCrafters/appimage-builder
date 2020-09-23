@@ -12,7 +12,7 @@
 import logging
 import os
 
-from AppImageBuilder.app_dir.runtimes.wrapper.runtime import WrapperRuntime
+from AppImageBuilder.app_dir.runtime.generator import RuntimeGenerator
 from AppImageBuilder.app_dir.bundlers.file_bundler import FileBundler
 from .metadata.bundle_info import BundleInfo
 from .metadata.desktop_entry_generator import DesktopEntryGenerator
@@ -75,14 +75,12 @@ class Builder:
             bundler.run()
 
     def _generate_runtime(self):
-        runtime_generator = self.recipe.get_item('AppDir/runtime/generator', "wrapper")
         logging.info("")
         logging.info("Generating runtime")
         logging.info("__________________")
 
-        if "wrapper" == runtime_generator:
-            runtime = WrapperRuntime(self.recipe)
-            runtime.generate()
+        runtime = RuntimeGenerator(self.recipe)
+        runtime.generate()
 
     def _write_bundle_information(self):
         logging.info("")

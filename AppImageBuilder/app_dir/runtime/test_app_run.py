@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 
 import unittest
-from .app_run import AppRun
+from .app_run import WrapperAppRun
 
 
 class AppRunTestCase(unittest.TestCase):
@@ -38,7 +38,7 @@ class AppRunTestCase(unittest.TestCase):
         '']
 
     def test_minimal_script_generation(self):
-        app_run = AppRun('usr/bin/exec')
+        app_run = WrapperAppRun('usr/bin/exec')
 
         lines = app_run._generate()
         self.assertEqual(self.base_script, lines)
