@@ -18,7 +18,6 @@ from .metadata.bundle_info import BundleInfo
 from .metadata.desktop_entry_generator import DesktopEntryGenerator
 from .metadata.icon_bundler import IconBundler
 from .metadata.loader import AppInfoLoader
-from AppImageBuilder.app_dir.runtimes.classic.runtime import ClassicRuntime
 from AppImageBuilder.app_dir.bundlers.factory import BundlerFactory
 
 
@@ -83,9 +82,6 @@ class Builder:
 
         if "wrapper" == runtime_generator:
             runtime = WrapperRuntime(self.recipe)
-            runtime.generate()
-        if "classic" == runtime_generator:
-            runtime = ClassicRuntime(self.recipe)
             runtime.generate()
 
     def _write_bundle_information(self):
