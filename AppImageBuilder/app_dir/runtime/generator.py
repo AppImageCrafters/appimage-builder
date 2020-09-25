@@ -12,7 +12,7 @@
 import logging
 import os
 
-from AppImageBuilder.app_dir.metadata.loader import AppInfoLoader
+from AppImageBuilder.app_dir.app_info.loader import AppInfoLoader
 from AppImageBuilder.recipe import Recipe
 from .app_run import WrapperAppRun
 from .helpers.factory import HelperFactory

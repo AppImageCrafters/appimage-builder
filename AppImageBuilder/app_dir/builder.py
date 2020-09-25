@@ -14,10 +14,10 @@ import os
 
 from AppImageBuilder.app_dir.runtime.generator import RuntimeGenerator
 from AppImageBuilder.app_dir.bundlers.file_bundler import FileBundler
-from .metadata.bundle_info import BundleInfo
-from .metadata.desktop_entry_generator import DesktopEntryGenerator
-from .metadata.icon_bundler import IconBundler
-from .metadata.loader import AppInfoLoader
+from .app_info.bundle_info import BundleInfo
+from .app_info.desktop_entry_generator import DesktopEntryGenerator
+from .app_info.icon_bundler import IconBundler
+from .app_info.loader import AppInfoLoader
 from AppImageBuilder.app_dir.bundlers.factory import BundlerFactory
 
 

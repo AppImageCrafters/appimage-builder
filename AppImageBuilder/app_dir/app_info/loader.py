@@ -15,7 +15,7 @@ class MissingConfigurationField(RuntimeError):
     pass
 
 
-from AppImageBuilder.app_dir.metadata.app_info import AppInfo
+from AppImageBuilder.app_dir.app_info.app_info import AppInfo
 
 class AppInfoLoader:
     def load(self, config):
