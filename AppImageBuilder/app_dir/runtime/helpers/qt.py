@@ -38,13 +38,6 @@ class Qt(BaseHelper):
                 qt_conf_target_path = self._get_qt_conf_path(libexec_path)
                 self._generate_qt_conf(qt_dirs, qt_conf_target_path)
 
-            app_run.sections['FORCE QT WAYLAND'] = [
-                'if [ "$XDG_SESSION_TYPE" == "wayland" ]; then',
-                '  export QT_QPA_PLATFORM=wayland;',
-                'fi',
-                '',
-            ]
-
     def _generate_qt_conf(self, qt_dirs, qt_conf_target_path):
         qt_conf = ['[Paths]\n']
         for k, v in qt_dirs.items():
