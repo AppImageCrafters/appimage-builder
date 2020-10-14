@@ -12,8 +12,9 @@
 import logging
 import os
 
+from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
+from AppImageBuilder.common.file_test import is_elf
 from .base_helper import BaseHelper
-from .interpreter import Interpreter
 
 
 class Qt(BaseHelper):
@@ -23,20 +24,15 @@ class Qt(BaseHelper):
     def configure(self, app_run):
         qt_lib_path = self._get_qt_libs_path()
         if qt_lib_path:
-            qt_dirs = self._get_qt_dirs(app_run)
-            bin_path = app_run.env['EXEC_PATH']
-            bin_path = bin_path.replace("$APPDIR", self.app_dir)
-            bin_dir_path = os.path.dirname(bin_path)
+            for root, dirs, files in os.walk(self.app_dir):
+                for file_name in files:
+                    qt_conf_target_path = self._get_qt_conf_path(root)
+                    if not os.path.exists(qt_conf_target_path):
+                        path = os.path.join(root, file_name)
+                        if not os.path.islink(path) and self._is_executable(path):
+                            qt_dirs = self._get_qt_dirs(root)
 
-            qt_conf_target_path = self._get_qt_conf_path(bin_dir_path)
-
-            self._generate_qt_conf(qt_dirs, qt_conf_target_path)
-            if qt_dirs['LibraryExecutables']:
-                libexec_path = os.path.join(self.app_dir, qt_dirs['LibraryExecutables'])
-                qt_dirs['Prefix'] = self._get_qt_conf_prefix_path(libexec_path)
-
-                qt_conf_target_path = self._get_qt_conf_path(libexec_path)
-                self._generate_qt_conf(qt_dirs, qt_conf_target_path)
+                            self._generate_qt_conf(qt_dirs, qt_conf_target_path)
 
     def _generate_qt_conf(self, qt_dirs, qt_conf_target_path):
         qt_conf = ['[Paths]\n']
@@ -51,17 +47,10 @@ class Qt(BaseHelper):
         with open(qt_conf_target_path, "w") as f:
             f.writelines(qt_conf)
 
-    def _get_qt_dirs(self, app_run):
-        bin_path = app_run.env['EXEC_PATH']
-        bin_path = bin_path.replace("$APPDIR", self.app_dir)
-        bin_dir_path = os.path.dirname(bin_path)
-
-        qt_conf_target_path = self._get_qt_conf_path(bin_dir_path)
-        qt_conf_dir_path = os.path.dirname(qt_conf_target_path)
-
+    def _get_qt_dirs(self, exec_dir):
         return {
-            'Prefix': self._get_qt_conf_prefix_path(qt_conf_dir_path),
-            'Settings': self._get_qt_conf_etc_path(qt_conf_dir_path),
+            'Prefix': self._get_qt_conf_prefix_path(exec_dir),
+            'Settings': self._get_qt_conf_etc_path(exec_dir),
             'Libraries': self._get_qt_libs_path(),
             'LibraryExecutables': self._get_qt_lib_exec_path(),
             'Plugins': self._get_qt_plugins_path(),
@@ -86,6 +75,7 @@ class Qt(BaseHelper):
         return os.path.relpath(os.path.join(self.app_dir, 'etc'), qt_conf_dir_path)
 
     def _get_qt_conf_prefix_path(self, qt_conf_dir_path):
+        qt_conf_dir_path = os.path.realpath(qt_conf_dir_path)
         return os.path.relpath(self.app_dir, qt_conf_dir_path)
 
     def _get_qt_conf_path(self, bin_dir):
@@ -98,3 +88,19 @@ class Qt(BaseHelper):
 
     def _get_qt_data_dir(self):
         return self._get_relative_sub_dir_path('share/qt5')
+
+    def _is_executable(self, path):
+        if not is_elf(path):
+            return False
+
+        try:
+            patchelf = PatchElf()
+            patchelf.log_stdout = False
+            patchelf.log_stderr = False
+            if patchelf.get_interpreter(path):
+              return True
+
+        except PatchElfError:
+            pass
+
+        return False
