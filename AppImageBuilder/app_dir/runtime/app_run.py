@@ -28,8 +28,6 @@ class WrapperAppRun:
     env = {
         'APPIMAGE_UUID': None,
         'SYSTEM_INTERP': None,
-        'APPDIR_INTERP': None,
-        'RUNTIME_INTERP': None,
         'XDG_DATA_DIRS': '${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}',
         'XDG_CONFIG_DIRS': '$APPDIR/etc/xdg:$XDG_CONFIG_DIRS',
         'PATH': '$APPDIR/bin:$APPDIR/usr/bin:$PATH',
