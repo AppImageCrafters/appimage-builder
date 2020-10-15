@@ -28,7 +28,7 @@ class WrapperAppRun:
     env = {
         'APPIMAGE_UUID': None,
         'SYSTEM_INTERP': None,
-        'XDG_DATA_DIRS': '${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}',
+        'XDG_DATA_DIRS': '$APPDIR/usr/local/share:$APPDIR/usr/share:${XDG_DATA_DIRS}',
         'XDG_CONFIG_DIRS': '$APPDIR/etc/xdg:$XDG_CONFIG_DIRS',
     }
 
@@ -145,7 +145,7 @@ class WrapperAppRun:
     def _find_hooks_lib_target_lib_dir(self, arch):
         lib_dirs = self.env['APPDIR_LIBRARY_PATH']
         lib_dirs = lib_dirs.replace("$APPDIR", self.app_dir)
-        lib_dirs = lib_dirs.replace("${APPDIR}", self.app_dir)
+        lib_dirs = lib_dirs.replace("$APPDIR", self.app_dir)
         lib_dirs = lib_dirs.split(":")
         for lib_dir in lib_dirs:
             for file in os.listdir(lib_dir):

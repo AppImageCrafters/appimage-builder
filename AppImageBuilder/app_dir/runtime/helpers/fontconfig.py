@@ -24,9 +24,9 @@ class FontConfig(BaseHelper):
         font_conf_files = self.app_dir_cache.find('*/etc/fonts/font.conf')
         for file in font_conf_files:
             rel_path = os.path.relpath(file, self.app_dir)
-            app_run.env['FONTCONFIG_FILE'] = '${APPDIR}/%s' % rel_path
-            app_run.env['FONTCONFIG_PATH'] = '${APPDIR}/usr/share/fontconfig'
-            app_run.env['FONTCONFIG_SYSROOT'] = '${APPDIR}'
+            app_run.env['FONTCONFIG_FILE'] = '$APPDIR/%s' % rel_path
+            app_run.env['FONTCONFIG_PATH'] = '$APPDIR/usr/share/fontconfig'
+            app_run.env['FONTCONFIG_SYSROOT'] = '$APPDIR'
 
             self._include_app_dir_fonts_dir_in_font_conf()
 

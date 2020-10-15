@@ -21,7 +21,7 @@ class Java(BaseHelper):
     def configure(self, app_run):
         try:
             java_home = self._get_java_home_dir()
-            app_run.env['JAVA_HOME'] = '${APPDIR}/%s' % java_home
+            app_run.env['JAVA_HOME'] = '$APPDIR/%s' % java_home
         except Java.Error:
             pass
 

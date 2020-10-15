@@ -21,7 +21,7 @@ class GLibSchemas(BaseHelper):
         path = self._get_glib_schemas_path()
         if path:
             subprocess.run(['glib-compile-schemas', path], cwd=self.app_dir)
-            app_run.env['GSETTINGS_SCHEMA_DIR'] = '${APPDIR}/%s' % path
+            app_run.env['GSETTINGS_SCHEMA_DIR'] = '$APPDIR/%s' % path
 
     def _get_glib_schemas_path(self):
         paths = self.app_dir_cache.find('*/usr/share/glib-2.0/schemas', attrs=['is_dir'])

@@ -25,5 +25,5 @@ class Gtk(BaseHelper):
     def configure(self, app_run):
         libgtk_path = self.app_dir_cache.find('*/libgtk-*')
         if libgtk_path:
-            app_run.env['GTK_EXE_PREFIX'] = "${APPDIR}"
-            app_run.env['GTK_DATA_PREFIX'] = "${APPDIR}"
+            app_run.env['GTK_EXE_PREFIX'] = "$APPDIR"
+            app_run.env['GTK_DATA_PREFIX'] = "$APPDIR"
