@@ -48,7 +48,12 @@ class GdkPixbuf(BaseHelper):
         raise RuntimeError("Missing 'gdk-pixbuf-query-loaders' executable")
 
     def _get_gdk_pixbuf_loaders_path(self):
-        return self._get_glob_relative_sub_dir_path('*/usr/*/gdk-pixbuf-2.0/*/loaders/*')
+        paths = self.app_dir_cache.find('*/usr/*/gdk-pixbuf-2.0/*/loaders', attrs=['is_dir'])
+        if paths:
+            rel_path = os.path.relpath(paths[0], self.app_dir)
+            return rel_path
+        
+        return None
 
     def _remove_loaders_path_prefixes(self, loaders_cache):
         output = []

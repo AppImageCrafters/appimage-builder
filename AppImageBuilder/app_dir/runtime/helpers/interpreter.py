@@ -28,8 +28,8 @@ class InterpreterHandlerError(RuntimeError):
 
 
 class Interpreter(BaseHelper):
-    def __init__(self, app_dir, app_dir_files):
-        super().__init__(app_dir, app_dir_files)
+    def __init__(self, app_dir, app_dir_cache):
+        super().__init__(app_dir, app_dir_cache)
 
         self.priority = 100
         self.patch_elf = PatchElf()
@@ -37,25 +37,19 @@ class Interpreter(BaseHelper):
         self.interpreters = {}
 
     def get_glibc_path(self) -> str:
-        path = self._get_glob_relative_file_path('*/libc.so.*')
-        if not path:
+        paths = self.app_dir_cache.find('*/libc.so.*')
+        if not paths:
             raise InterpreterHandlerError('Unable to find libc.so')
-        path = os.path.join(self.app_dir, path)
-        path = os.path.realpath(path)
+        path = paths[0]
 
         logging.info("Libc found at: %s" % os.path.relpath(path, self.app_dir))
         return path
 
     def configure(self, app_run):
-        library_paths = self._get_library_paths()
-        app_run.env['APPDIR_LIBRARY_PATH'] = ':'.join(['$APPDIR%s' % path for path in library_paths])
+        app_run.env['PATH'] = ':'.join(['$APPDIR/%s' % path for path in self._get_bin_paths()])
 
-        partitions_path = os.path.join(self.app_dir, 'opt')
-        for nane in os.listdir(partitions_path):
-            if os.path.isdir(os.path.join(partitions_path, nane)):
-                partition_library_path = ['opt/%s%s' % (nane, path) for path in library_paths]
-                app_run.env['%s_LIBRARY_PATH' % nane.upper()] = ':'.join(
-                    ['$APPDIR/%s' % path for path in partition_library_path])
+        app_run.env['APPDIR_LIBRARY_PATH'] = ':'.join(['$APPDIR/%s' % path for path in self._get_appdir_library_paths()])
+        app_run.env['LIBC_LIBRARY_PATH'] = ':'.join(['$APPDIR/%s' % path for path in self._get_libc_library_paths()])
 
         glibc_path = self.get_glibc_path()
         glibc_version = self.gess_libc_version(glibc_path)
@@ -64,35 +58,41 @@ class Interpreter(BaseHelper):
         self._patch_executables_interpreter(app_run.env['APPIMAGE_UUID'])
         app_run.env['SYSTEM_INTERP'] = ":".join(self.interpreters.keys())
 
-
-    def _resolve_appdir_interpreters(self):
-        appdir_interp = []
-        for path in self.interpreters.keys():
-            rel_path = self._get_relative_file_path(path)
-            if rel_path:
-                appdir_interp.append('$APPDIR/%s' % rel_path)
-            else:
-                raise InterpreterHandlerError('Interpreter not being bundled: %s' % path)
-        return appdir_interp
-
-    def _find_loader_by_name(self) -> str:
-        for file in self.app_dir_files:
-            if self._is_linker_file(file):
-                binary_path = os.path.realpath(file)
-                return binary_path
-
-        raise InterpreterHandlerError('Unable to find \'ld.so\' in the AppDir')
-
     @staticmethod
     def _is_linker_file(file):
         return fnmatch.fnmatch(file, '*/ld-*.so*')
 
-    def _get_library_paths(self):
-        paths = set()
-        for file in self.app_dir_files:
-            if fnmatch.fnmatch(file, '*/etc/ld.so.conf.d/*.conf') or fnmatch.fnmatch(file, '*/etc/ld.so.conf'):
-                new_paths = self._load_ld_conf_file(file)
-                paths = paths.union(new_paths)
+    def _get_appdir_library_paths(self):
+        paths = self.app_dir_cache.find('*', attrs=['is_lib'])
+        # only dir names are relevant
+        paths = set(os.path.dirname(path) for path in paths)
+
+        # make all paths relative to app_dir
+        paths = [os.path.relpath(path, self.app_dir) for path in paths]
+
+        # exclude libc partition paths
+        paths = [path for path in paths if not path.startswith('opt/libc')]
+
+        # exclude qt5 plugins paths
+        paths = [path for path in paths if 'qt5/plugins' not in path]
+
+        # exclude perl paths
+        paths = [path for path in paths if '/perl/' not in path]
+        paths = [path for path in paths if '/perl-base/' not in path]
+
+        return paths
+
+    def _get_libc_library_paths(self):
+        paths = self.app_dir_cache.find('*', attrs=['is_lib'])
+
+        # only dir names are relevant
+        paths = set(os.path.dirname(path) for path in paths)
+
+        # make all paths relative to app_dir
+        paths = [os.path.relpath(path, self.app_dir) for path in paths]
+
+        # exclude libc partition paths
+        paths = [path for path in paths if path.startswith('opt/libc')]
 
         return paths
 
@@ -120,20 +120,18 @@ class Interpreter(BaseHelper):
                 raise InterpreterHandlerError('Unable to determine glibc version')
 
     def _patch_executables_interpreter(self, uuid):
-        for root, dirs, files in os.walk(self.app_dir):
-            for file_name in files:
-                path = os.path.join(root, file_name)
-                if not os.path.islink(path) and is_elf(path):
-                    self._set_interpreter(path, uuid)
+        for bin in self.app_dir_cache.find('*', attrs=['pt_interp']):
+            self._set_interpreter(bin, uuid)
 
     def _set_interpreter(self, file, uuid):
+        real_interpreter = self.app_dir_cache.cache[file]['pt_interp']
+        if real_interpreter.startswith('/tmp/appimage-'):
+            # skip, the binary has been patched already
+            return
         try:
             patchelf_command = PatchElf()
             patchelf_command.log_stderr = False
-            real_interpreter = patchelf_command.get_interpreter(file)
-            if real_interpreter.startswith('/tmp/appimage-'):
-                # skip, the binary has been patched already
-                return
+            patchelf_command.log_stdout = False
 
             apprun_interpreter = self._gen_interpreter_link_path(real_interpreter, uuid)
             if real_interpreter and real_interpreter != apprun_interpreter:
@@ -141,9 +139,23 @@ class Interpreter(BaseHelper):
                 logging.info('Replacing PT_INTERP on: %s' % os.path.relpath(file, self.app_dir))
                 logging.info('\t"%s"  => "%s"' % (real_interpreter, apprun_interpreter))
                 patchelf_command.set_interpreter(file, apprun_interpreter)
+                self.app_dir_cache.cache[file]['pt_interp'] = apprun_interpreter
         except PatchElfError:
             pass
 
     @staticmethod
     def _gen_interpreter_link_path(real_interpreter, uuid):
         return "/tmp/appimage-%s-%s" % (uuid, os.path.basename(real_interpreter))
+
+    def _get_bin_paths(self):
+        paths = self.app_dir_cache.find('*', attrs=['is_bin'])
+        # only dir names are relevant
+        paths = set(os.path.dirname(path) for path in paths)
+
+        # make all paths relative to app_dir
+        paths = [os.path.relpath(path, self.app_dir) for path in paths]
+
+        # exclude libc partition paths
+        paths = [path for path in paths if not path.startswith('opt/libc')]
+
+        return paths

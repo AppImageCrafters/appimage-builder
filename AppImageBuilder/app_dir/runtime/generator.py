@@ -14,11 +14,12 @@ import os
 
 from AppImageBuilder.app_dir.app_info.loader import AppInfoLoader
 from AppImageBuilder.recipe import Recipe
+from .file_info_cache import FileInfoCache
 from .app_run import WrapperAppRun
 from .helpers.factory import HelperFactory
 
 
-class WrapperRuntimeError(RuntimeError):
+class RuntimeGeneratorError(RuntimeError):
     pass
 
 
@@ -50,8 +51,10 @@ class RuntimeGenerator():
         app_run.deploy()
 
     def _configure_runtime(self, app_run):
-        app_dir_files = self._get_app_dir_file_list()
-        factory = self.helper_factory_constructor(self.app_dir, app_dir_files)
+        app_dir_cache = FileInfoCache(self.app_dir)
+        app_dir_cache.update()
+
+        factory = self.helper_factory_constructor(self.app_dir, app_dir_cache)
         for id in factory.list():
             h = factory.get(id)
             h.configure(app_run)

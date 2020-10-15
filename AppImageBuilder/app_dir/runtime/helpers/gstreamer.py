@@ -44,7 +44,9 @@ class GStreamer(BaseHelper):
             # app_run.env['GST_PTP_HELPER_1_0'] = '${APPDIR}/%s' % gst_ptp_helper_path
 
     def _get_gst_1_lib_path(self):
-        return self._get_relative_file_path('libgstreamer-1.0.so.0')
+        path = self.app_dir_cache.find('*/libgstreamer-1.0.so.0', attrs=['is_file'])
+        if path:
+            return os.path.relpath(path[0], self.app_dir)
 
     def _get_gst_plugins_path(self, gst_1_lib_path):
         if gst_1_lib_path:
@@ -53,7 +55,11 @@ class GStreamer(BaseHelper):
         return None
 
     def _get_gst_plugins_scanner_path(self):
-        return self._get_relative_file_path('gst-plugin-scanner')
+        path = self.app_dir_cache.find('*/gst-plugin-scanner', attrs=['is_bin'])
+        if path:
+            return os.path.relpath(path[0], self.app_dir)
 
     def _get_gst_ptp_helper_path(self):
-        return self._get_relative_file_path('gst-ptp-helper')
+        path = self.app_dir_cache.find('*/gst-ptp-helper', attrs=['is_bin'])
+        if path:
+            return os.path.relpath(path[0], self.app_dir)

@@ -27,9 +27,9 @@ class HelperFactoryError(RuntimeError):
 
 
 class HelperFactory:
-    def __init__(self, app_dir, app_dir_files):
+    def __init__(self, app_dir, app_dir_cache):
         self.app_dir = app_dir
-        self.app_dir_files = app_dir_files
+        self.app_dir_cache = app_dir_cache
 
         self.helpers = {
             'loader': Interpreter,
@@ -46,7 +46,7 @@ class HelperFactory:
 
     def get(self, id) -> BaseHelper:
         if id in self.helpers:
-            obj = self.helpers[id](self.app_dir, self.app_dir_files)
+            obj = self.helpers[id](self.app_dir, self.app_dir_cache)
             return obj
         else:
             raise HelperFactoryError('%s: unknown helper id' % id)
