@@ -24,7 +24,7 @@ class Qt(BaseHelper):
     def configure(self, app_run):
         qt_lib_path = self._get_qt_libs_path()
         if qt_lib_path:
-            for path in self.app_dir_cache.find('*', attrs='is_bin'):
+            for path in self.app_dir_cache.find('*', attrs=['is_bin']):
                 dir_name = os.path.dirname(path)
                 qt_conf_target_path = self._get_qt_conf_path(dir_name)
                 if not os.path.exists(qt_conf_target_path):
@@ -58,7 +58,7 @@ class Qt(BaseHelper):
         }
 
     def _get_qt_libs_path(self):
-        paths = self.app_dir_cache.find('*/libQt5Core.so.5', attrs=['is_file'])
+        paths = self.app_dir_cache.find('*/libQt5Core.so.5')
         if paths:
             parent_dir = os.path.dirname(paths[0])
             return os.path.relpath(parent_dir, self.app_dir)
