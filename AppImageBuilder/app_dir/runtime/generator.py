@@ -59,14 +59,6 @@ class RuntimeGenerator():
             h = factory.get(id)
             h.configure(app_run)
 
-    def _get_app_dir_file_list(self):
-        app_dir_files = []
-        for root, dirs, files in os.walk(self.app_dir):
-            for file in files:
-                app_dir_files.append(os.path.join(root, file))
-
-        return app_dir_files
-
     def _add_user_defined_settings(self, app_run: WrapperAppRun) -> None:
         for k, v in self.env.items():
             if k in app_run.env:
