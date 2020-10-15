@@ -19,7 +19,7 @@ class LibGL(BaseHelper):
     def configure(self, app_run):
         dri_path = self._get_dri_path()
         if dri_path:
-            app_run.env['LIBGL_DRIVERS_PATH'] = '${APPDIR}/%s' % dri_path
+            app_run.env['LIBGL_DRIVERS_PATH'] = '$APPDIR/%s' % dri_path
 
     def _get_dri_path(self):
         paths = self.app_dir_cache.find('*/dri', attrs=['is_dir'])

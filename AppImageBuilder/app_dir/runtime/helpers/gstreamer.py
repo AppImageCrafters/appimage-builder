@@ -25,23 +25,23 @@ class GStreamer(BaseHelper):
         gst_1_lib_path = self._get_gst_1_lib_path()
         gst_plugins_path = self._get_gst_plugins_path(gst_1_lib_path)
         if gst_1_lib_path:
-            app_run.env['GST_PLUGIN_PATH'] = '${APPDIR}/%s' % gst_plugins_path
-            # app_run.env['GST_PLUGIN_PATH_1_0'] = '${APPDIR}/%s' % gst_plugins_path
-            app_run.env['GST_PLUGIN_SYSTEM_PATH'] = '${APPDIR}/%s' % gst_plugins_path
-            # app_run.env['GST_PLUGIN_SYSTEM_PATH_1_0'] = '${APPDIR}/%s' % gst_plugins_path
+            app_run.env['GST_PLUGIN_PATH'] = '$APPDIR/%s' % gst_plugins_path
+            # app_run.env['GST_PLUGIN_PATH_1_0'] = '$APPDIR/%s' % gst_plugins_path
+            app_run.env['GST_PLUGIN_SYSTEM_PATH'] = '$APPDIR/%s' % gst_plugins_path
+            # app_run.env['GST_PLUGIN_SYSTEM_PATH_1_0'] = '$APPDIR/%s' % gst_plugins_path
 
     def _set_gst_plugins_scanner_path(self, app_run):
         gst_plugins_scanner_path = self._get_gst_plugins_scanner_path()
         if gst_plugins_scanner_path:
             app_run.env['GST_REGISTRY_REUSE_PLUGIN_SCANNER'] = 'no'
-            app_run.env['GST_PLUGIN_SCANNER'] = '${APPDIR}/%s' % gst_plugins_scanner_path
-            # app_run.env['GST_PLUGIN_SCANNER_1_0'] = '${APPDIR}/%s' % gst_plugins_scanner_path
+            app_run.env['GST_PLUGIN_SCANNER'] = '$APPDIR/%s' % gst_plugins_scanner_path
+            # app_run.env['GST_PLUGIN_SCANNER_1_0'] = '$APPDIR/%s' % gst_plugins_scanner_path
 
     def _set_ptp_helper_path(self, app_run):
         gst_ptp_helper_path = self._get_gst_ptp_helper_path()
         if gst_ptp_helper_path:
-            app_run.env['GST_PTP_HELPER'] = '${APPDIR}/%s' % gst_ptp_helper_path
-            # app_run.env['GST_PTP_HELPER_1_0'] = '${APPDIR}/%s' % gst_ptp_helper_path
+            app_run.env['GST_PTP_HELPER'] = '$APPDIR/%s' % gst_ptp_helper_path
+            # app_run.env['GST_PTP_HELPER_1_0'] = '$APPDIR/%s' % gst_ptp_helper_path
 
     def _get_gst_1_lib_path(self):
         path = self.app_dir_cache.find('*/libgstreamer-1.0.so.0', attrs=['is_file'])
