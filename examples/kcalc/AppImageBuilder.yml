@@ -38,8 +38,6 @@ AppDir:
       - usr/share/doc/*/TODO.*
   runtime:
     debug: Yes
-    env:
-      APPDIR_LIBRARY_PATH: $APPDIR/lib/x86_64-linux-gnu:$APPDIR/usr/lib/x86_64-linux-gnu:$APPDIR/usr/lib/x86_64-linux-gnu/pulseaudio
 
   test:
     debian:

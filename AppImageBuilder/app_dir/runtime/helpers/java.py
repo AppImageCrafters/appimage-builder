@@ -26,8 +26,12 @@ class Java(BaseHelper):
             pass
 
     def _get_java_home_dir(self):
-        java_bin_dir = self._get_relative_parent_dir_of('bin/java')
-        if not java_bin_dir:
-            raise Java.Error('Missing jave binary')
+        java_bin = self.app_dir_cache.find('*/bin/java', attrs=['is_bin'])
+        if not java_bin:
+            raise Java.Error('Missing java binary')
 
-        return os.path.dirname(java_bin_dir)
+        bin_dir = os.path.dirname(java_bin)
+        java_home = os.path.dirname(bin_dir)
+        rel_java_home = os.path.relpath(java_home, self.app_dir)
+
+        return rel_java_home

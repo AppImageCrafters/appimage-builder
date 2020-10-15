@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import os
 
 from .base_helper import BaseHelper
 
@@ -21,4 +22,6 @@ class LibGL(BaseHelper):
             app_run.env['LIBGL_DRIVERS_PATH'] = '${APPDIR}/%s' % dri_path
 
     def _get_dri_path(self):
-        return self._get_relative_sub_dir_path('/dri/')
+        paths = self.app_dir_cache.find('*/dri', attrs=['is_dir'])
+        if paths:
+            return os.path.relpath(paths[0], self.app_dir)

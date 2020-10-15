@@ -30,7 +30,6 @@ class WrapperAppRun:
         'SYSTEM_INTERP': None,
         'XDG_DATA_DIRS': '${APPDIR}/usr/local/share:${APPDIR}/usr/share:${XDG_DATA_DIRS}',
         'XDG_CONFIG_DIRS': '$APPDIR/etc/xdg:$XDG_CONFIG_DIRS',
-        'PATH': '$APPDIR/bin:$APPDIR/usr/bin:$PATH',
     }
 
     sections = {}

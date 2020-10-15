@@ -14,9 +14,9 @@ import os
 
 
 class BaseHelper:
-    def __init__(self, app_dir, app_dir_files):
+    def __init__(self, app_dir, app_dir_cache):
         self.app_dir = app_dir
-        self.app_dir_files = app_dir_files
+        self.app_dir_cache = app_dir_cache
 
         self.priority = 0
         self.env = {}
@@ -30,38 +30,3 @@ class BaseHelper:
         if text.startswith(prefix):
             return text[len(prefix):]
         return text
-
-    def _get_relative_sub_dir_path(self, sub_dir):
-        for file in self.app_dir_files:
-            if sub_dir in file:
-                idx = file.index(sub_dir) + len(sub_dir)
-                dir = file[0:idx]
-                return os.path.relpath(dir, self.app_dir)
-
-        return None
-
-    def _get_relative_parent_dir_of(self, file_name):
-        for file in self.app_dir_files:
-            if file.endswith(file_name):
-                dir = os.path.dirname(file)
-                return os.path.relpath(dir, self.app_dir)
-
-        return None
-
-    def _get_relative_file_path(self, file_name):
-        for file in self.app_dir_files:
-            if file.endswith(file_name):
-                return os.path.relpath(file, self.app_dir)
-
-        return None
-
-    def _get_glob_relative_sub_dir_path(self, pattern):
-        for file in self.app_dir_files:
-            if fnmatch.fnmatch(file, pattern):
-                dir_name = os.path.dirname(file)
-                return os.path.relpath(dir_name, self.app_dir)
-
-    def _get_glob_relative_file_path(self, pattern):
-        for file in self.app_dir_files:
-            if fnmatch.fnmatch(file, pattern):
-                return os.path.relpath(file, self.app_dir)

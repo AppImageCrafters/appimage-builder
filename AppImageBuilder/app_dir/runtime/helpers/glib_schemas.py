@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import os
 import subprocess
 
 from .base_helper import BaseHelper
@@ -23,4 +24,7 @@ class GLibSchemas(BaseHelper):
             app_run.env['GSETTINGS_SCHEMA_DIR'] = '${APPDIR}/%s' % path
 
     def _get_glib_schemas_path(self):
-        return self._get_glob_relative_sub_dir_path('*/usr/share/glib-2.0/schemas/*')
+        paths = self.app_dir_cache.find('*/usr/share/glib-2.0/schemas', attrs=['is_dir'])
+        if paths:
+            rel_path = os.path.relpath(paths[0], self.app_dir)
+            return rel_path
