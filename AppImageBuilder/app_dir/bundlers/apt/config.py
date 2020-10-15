@@ -27,7 +27,7 @@ class Config:
     def __init__(self, apt_root):
         self.settings = {}
 
-        self.apt_prefix = apt_root
+        self.apt_prefix = os.path.abspath(apt_root)
         self.apt_conf_path = None
         self.apt_source_lines = []
         self.apt_source_key_urls = []
