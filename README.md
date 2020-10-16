@@ -24,3 +24,9 @@ Features:
 - [Tutorial](https://appimage-builder.readthedocs.io/en/latest/intro/tutorial.html)
 - [Documentation](https://appimage-builder.readthedocs.io)
 
+
+## Projects using appimage-builder
+
+[![Zeal](https://raw.githubusercontent.com/zealdocs/zeal/master/assets/freedesktop/128-apps-zeal.png)](https://github.com/zealdocs/zeal/)
+[![Kstars](https://invent.kde.org/education/kstars/-/raw/master/logo.png)](https://invent.kde.org/education/kstars)
+[![Glimpse](https://raw.githubusercontent.com/glimpse-editor/Glimpse/dev-g210/icons/Color/128/glimpse-icon.png)](https://github.com/glimpse-editor/Glimpse)
