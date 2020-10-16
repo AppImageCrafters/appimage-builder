@@ -31,3 +31,4 @@ Features:
 [![Kstars](https://invent.kde.org/education/kstars/-/raw/master/logo.png)](https://invent.kde.org/education/kstars)
 [![Glimpse](https://raw.githubusercontent.com/glimpse-editor/Glimpse/dev-g210/icons/Color/128/glimpse-icon.png)](https://github.com/glimpse-editor/Glimpse)
 [![MystiQ](https://raw.githubusercontent.com/swl-x/MystiQ/master/icons/mystiq_128x128.png)](https://github.com/swl-x/MystiQ)
+[![MAUI](https://invent.kde.org/uploads/-/system/group/avatar/1557/avatar.png?width=64)](https://invent.kde.org/maui)
