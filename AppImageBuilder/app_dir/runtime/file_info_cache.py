@@ -120,10 +120,3 @@ class FileInfoCache:
                 file_info['is_lib'] = True
 
         return file_info
-
-
-if __name__ == '__main__':
-    # execute only if run as the entry point into the program
-    appdir_cache = FileInfoCache('/home/alexis/Workspace/third_party/kontact-appimage/AppDir')
-    appdir_cache.update()
-    print(appdir_cache.find('*/libc.so.*'))
