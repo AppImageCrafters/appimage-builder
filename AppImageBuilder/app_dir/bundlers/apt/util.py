@@ -12,11 +12,11 @@
 
 
 def is_deb_file(file_name):
-    return file_name.endswith('.deb')
+    return file_name.endswith(".deb")
 
 
 def get_package_name_from_file_name(file_name):
     reverse_file_name = file_name[::-1]
-    deb_name_parts = reverse_file_name.split('_', 2)
+    deb_name_parts = reverse_file_name.split("_", 2)
     reverse_package_name = deb_name_parts[2]
     return reverse_package_name[::-1]

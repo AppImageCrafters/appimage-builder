@@ -19,7 +19,7 @@ from .command import Command
 
 class AppImageToolCommand(Command):
     def __init__(self, app_dir, target_file):
-        super().__init__('appimagetool')
+        super().__init__("appimagetool")
 
         self.app_dir = app_dir
         self.runtime_file = None
@@ -33,7 +33,7 @@ class AppImageToolCommand(Command):
         command = self._generate_command()
 
         if self.target_arch:
-            self.env['ARCH'] = self.target_arch
+            self.env["ARCH"] = self.target_arch
 
         self._run(command)
         if self.return_code != 0:
@@ -44,13 +44,13 @@ class AppImageToolCommand(Command):
     def _generate_command(self):
         command = ["appimagetool"]
         if self.runtime_file:
-            command.extend(['--runtime-file', self.runtime_file])
+            command.extend(["--runtime-file", self.runtime_file])
 
         if self.sign_key:
-            command.extend(['--sign', '--sign-key', self.sign_key])
+            command.extend(["--sign", "--sign-key", self.sign_key])
 
         if self.update_information:
-            command.extend(['--updateinformation', self.update_information])
+            command.extend(["--updateinformation", self.update_information])
 
         command.extend([self.app_dir, self.target_file])
         return command

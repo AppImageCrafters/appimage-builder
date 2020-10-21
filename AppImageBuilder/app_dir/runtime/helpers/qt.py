@@ -24,7 +24,7 @@ class Qt(BaseHelper):
     def configure(self, app_run):
         qt_lib_path = self._get_qt_libs_path()
         if qt_lib_path:
-            for path in self.app_dir_cache.find('*', attrs=['is_bin']):
+            for path in self.app_dir_cache.find("*", attrs=["is_bin"]):
                 dir_name = os.path.dirname(path)
                 qt_conf_target_path = self._get_qt_conf_path(dir_name)
                 if not os.path.exists(qt_conf_target_path):
@@ -33,7 +33,7 @@ class Qt(BaseHelper):
                     self._generate_qt_conf(qt_dirs, qt_conf_target_path)
 
     def _generate_qt_conf(self, qt_dirs, qt_conf_target_path):
-        qt_conf = ['[Paths]\n']
+        qt_conf = ["[Paths]\n"]
         for k, v in qt_dirs.items():
             if v:
                 qt_conf.append("%s=%s\n" % (k, v))
@@ -41,45 +41,48 @@ class Qt(BaseHelper):
         self._write_qt_conf(qt_conf, qt_conf_target_path)
 
     def _write_qt_conf(self, qt_conf, qt_conf_target_path):
-        logging.info("Writing qt.conf to: %s" % os.path.relpath(qt_conf_target_path, self.app_dir))
+        logging.info(
+            "Writing qt.conf to: %s"
+            % os.path.relpath(qt_conf_target_path, self.app_dir)
+        )
         with open(qt_conf_target_path, "w") as f:
             f.writelines(qt_conf)
 
     def _get_qt_dirs(self, exec_dir):
         return {
-            'Prefix': self._get_qt_conf_prefix_path(exec_dir),
-            'Settings': self._get_qt_conf_etc_path(exec_dir),
-            'Libraries': self._get_qt_libs_path(),
-            'LibraryExecutables': self._get_qt_lib_exec_path(),
-            'Plugins': self._get_qt_plugins_path(),
-            'Qml2Imports': self._get_qt_qml_path(),
-            'Translations': self._get_qt_translations_path(),
-            'Data': self._get_qt_data_dir()
+            "Prefix": self._get_qt_conf_prefix_path(exec_dir),
+            "Settings": self._get_qt_conf_etc_path(exec_dir),
+            "Libraries": self._get_qt_libs_path(),
+            "LibraryExecutables": self._get_qt_lib_exec_path(),
+            "Plugins": self._get_qt_plugins_path(),
+            "Qml2Imports": self._get_qt_qml_path(),
+            "Translations": self._get_qt_translations_path(),
+            "Data": self._get_qt_data_dir(),
         }
 
     def _get_qt_libs_path(self):
-        paths = self.app_dir_cache.find('*/libQt5Core.so.5')
+        paths = self.app_dir_cache.find("*/libQt5Core.so.5")
         if paths:
             parent_dir = os.path.dirname(paths[0])
             return os.path.relpath(parent_dir, self.app_dir)
 
     def _get_qt_lib_exec_path(self):
-        paths = self.app_dir_cache.find('*/qt5/libexec', attrs=['is_dir'])
+        paths = self.app_dir_cache.find("*/qt5/libexec", attrs=["is_dir"])
         if paths:
             return os.path.relpath(paths[0], self.app_dir)
 
     def _get_qt_plugins_path(self):
-        paths = self.app_dir_cache.find('*/qt5/plugins', attrs=['is_dir'])
+        paths = self.app_dir_cache.find("*/qt5/plugins", attrs=["is_dir"])
         if paths:
             return os.path.relpath(paths[0], self.app_dir)
 
     def _get_qt_qml_path(self):
-        paths = self.app_dir_cache.find('*/qt5/qml', attrs=['is_dir'])
+        paths = self.app_dir_cache.find("*/qt5/qml", attrs=["is_dir"])
         if paths:
             return os.path.relpath(paths[0], self.app_dir)
 
     def _get_qt_conf_etc_path(self, qt_conf_dir_path):
-        return os.path.relpath(os.path.join(self.app_dir, 'etc'), qt_conf_dir_path)
+        return os.path.relpath(os.path.join(self.app_dir, "etc"), qt_conf_dir_path)
 
     def _get_qt_conf_prefix_path(self, qt_conf_dir_path):
         qt_conf_dir_path = os.path.realpath(qt_conf_dir_path)
@@ -91,11 +94,11 @@ class Qt(BaseHelper):
         return full_path
 
     def _get_qt_translations_path(self):
-        paths = self.app_dir_cache.find('*/qt5/translations', attrs=['is_dir'])
+        paths = self.app_dir_cache.find("*/qt5/translations", attrs=["is_dir"])
         if paths:
             return os.path.relpath(paths[0], self.app_dir)
 
     def _get_qt_data_dir(self):
-        paths = self.app_dir_cache.find('*/share/qt5', attrs=['is_dir'])
+        paths = self.app_dir_cache.find("*/share/qt5", attrs=["is_dir"])
         if paths:
             return os.path.relpath(paths[0], self.app_dir)

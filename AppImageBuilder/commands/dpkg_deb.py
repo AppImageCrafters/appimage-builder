@@ -20,12 +20,12 @@ class DpkgDebError(RuntimeError):
 
 class DpkgDeb(Command):
     def __init__(self):
-        super().__init__('dpkg-deb')
+        super().__init__("dpkg-deb")
         self.log_stdout = False
         self.extracted_files = []
 
     def extract(self, deb_file, target_dir):
-        command = [self.runnable, '-X', deb_file, target_dir]
+        command = [self.runnable, "-X", deb_file, target_dir]
         self._run(command)
 
         if self.return_code != 0:
@@ -34,9 +34,9 @@ class DpkgDeb(Command):
         self.extracted_files.clear()
         for line in self.stdout:
 
-            if line.startswith('./'):
+            if line.startswith("./"):
                 line = line[2:]
                 self.extracted_files.append(line)
 
             if line:
-                self.logger.debug('%s: %s' % (os.path.basename(deb_file), line))
+                self.logger.debug("%s: %s" % (os.path.basename(deb_file), line))

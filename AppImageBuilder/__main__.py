@@ -24,27 +24,52 @@ from AppImageBuilder.generator.generator import RecipeGenerator
 
 
 def __main__():
-    parser = argparse.ArgumentParser(description='AppImage crafting tool')
-    parser.add_argument('--recipe', dest='recipe', default=os.path.join(os.getcwd(), "AppImageBuilder.yml"),
-                        help='recipe file path (default: $PWD/AppImageBuilder.yml)')
-    parser.add_argument('--log', dest='loglevel', default="INFO",
-                        help='logging level (default: INFO)')
-    parser.add_argument('--skip-script', dest='skip_script', action="store_true",
-                        help='Skip script execution')
-    parser.add_argument('--skip-build', dest='skip_build', action="store_true",
-                        help='Skip AppDir building')
-    parser.add_argument('--skip-tests', dest='skip_tests', action="store_true",
-                        help='Skip AppDir testing')
-    parser.add_argument('--skip-appimage', dest='skip_appimage', action="store_true",
-                        help='Skip AppImage generation')
-    parser.add_argument('--generate', dest='generate', action="store_true",
-                        help='Try to generate recipe from an AppDir')
+    parser = argparse.ArgumentParser(description="AppImage crafting tool")
+    parser.add_argument(
+        "--recipe",
+        dest="recipe",
+        default=os.path.join(os.getcwd(), "AppImageBuilder.yml"),
+        help="recipe file path (default: $PWD/AppImageBuilder.yml)",
+    )
+    parser.add_argument(
+        "--log", dest="loglevel", default="INFO", help="logging level (default: INFO)"
+    )
+    parser.add_argument(
+        "--skip-script",
+        dest="skip_script",
+        action="store_true",
+        help="Skip script execution",
+    )
+    parser.add_argument(
+        "--skip-build",
+        dest="skip_build",
+        action="store_true",
+        help="Skip AppDir building",
+    )
+    parser.add_argument(
+        "--skip-tests",
+        dest="skip_tests",
+        action="store_true",
+        help="Skip AppDir testing",
+    )
+    parser.add_argument(
+        "--skip-appimage",
+        dest="skip_appimage",
+        action="store_true",
+        help="Skip AppImage generation",
+    )
+    parser.add_argument(
+        "--generate",
+        dest="generate",
+        action="store_true",
+        help="Try to generate recipe from an AppDir",
+    )
 
     args = parser.parse_args()
-    logger = logging.getLogger('appimage-builder')
+    logger = logging.getLogger("appimage-builder")
     numeric_level = getattr(logging, args.loglevel.upper())
     if not isinstance(numeric_level, int):
-        logging.error('Invalid log level: %s' % args.loglevel)
+        logging.error("Invalid log level: %s" % args.loglevel)
     logging.basicConfig(level=numeric_level)
 
     if args.generate:
@@ -79,6 +104,6 @@ def __main__():
         builder.build()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # execute only if run as the entry point into the program
     __main__()

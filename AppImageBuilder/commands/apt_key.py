@@ -19,13 +19,13 @@ class AptKeyError(AptGetError):
 
 class AptKey(Command):
     def __init__(self):
-        super().__init__('apt-key')
+        super().__init__("apt-key")
 
     def add(self, key_data, keyring_file_path):
         command = self._get_apt_key_add_command(keyring_file_path)
         self._run_with_input(command, key_data)
         if self.return_code != 0:
-            raise AptKeyError('apt-key add failed')
+            raise AptKeyError("apt-key add failed")
 
     def _get_apt_key_add_command(self, keyring_path):
         return ["fakeroot", "apt-key", "--keyring", keyring_path, "add", "-"]

@@ -32,16 +32,16 @@ class HelperFactory:
         self.app_dir_cache = app_dir_cache
 
         self.helpers = {
-            'loader': Interpreter,
-            'fontconfig': FontConfig,
-            'openssl': OpenSSL,
-            'qt': Qt,
-            'libgl': LibGL,
-            'gstreamer': GStreamer,
-            'gdk_pixbuf': GdkPixbuf,
-            'gtk': Gtk,
-            'glib_schemas': GLibSchemas,
-            'java': Java,
+            "loader": Interpreter,
+            "fontconfig": FontConfig,
+            "openssl": OpenSSL,
+            "qt": Qt,
+            "libgl": LibGL,
+            "gstreamer": GStreamer,
+            "gdk_pixbuf": GdkPixbuf,
+            "gtk": Gtk,
+            "glib_schemas": GLibSchemas,
+            "java": Java,
         }
 
     def get(self, id) -> BaseHelper:
@@ -49,7 +49,7 @@ class HelperFactory:
             obj = self.helpers[id](self.app_dir, self.app_dir_cache)
             return obj
         else:
-            raise HelperFactoryError('%s: unknown helper id' % id)
+            raise HelperFactoryError("%s: unknown helper id" % id)
 
     def list(self):
         return self.helpers.keys()

@@ -20,23 +20,25 @@ class AppRuntimeAnalyser:
         self.bin = os.path.join(self.abs_app_dir, bin)
         self.args = args
         self.runtime_libs = set()
-        self.logger = logging.getLogger('AppRuntimeAnalyser')
+        self.logger = logging.getLogger("AppRuntimeAnalyser")
 
     def run_app_analysis(self):
         self.runtime_libs.clear()
 
         env = os.environ.copy()
-        env['LD_DEBUG'] = 'libs'
+        env["LD_DEBUG"] = "libs"
         self.logger.debug("Running: %s %s" % (self.bin, self.args))
-        process = subprocess.Popen([self.bin, self.args], stderr=subprocess.PIPE, env=env)
+        process = subprocess.Popen(
+            [self.bin, self.args], stderr=subprocess.PIPE, env=env
+        )
 
         while process.poll() is None:
             stderr_line = process.stderr.readline()
             while stderr_line:
-                stderr_line = stderr_line.decode('utf-8').strip()
-                path_start = stderr_line.find('init: ')
+                stderr_line = stderr_line.decode("utf-8").strip()
+                path_start = stderr_line.find("init: ")
                 if path_start != -1:
-                    lib_path = stderr_line[path_start + len('init: '):]
+                    lib_path = stderr_line[path_start + len("init: ") :]
                     lib_path = lib_path.strip()
 
                     if not lib_path.startswith(self.abs_app_dir):

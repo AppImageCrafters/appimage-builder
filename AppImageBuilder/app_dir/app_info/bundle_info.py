@@ -17,7 +17,7 @@ import os
 from AppImageBuilder.inspector.inspector import Inspector
 
 
-class BundleInfo():
+class BundleInfo:
     def __init__(self, app_dir, bundlers):
         self.app_dir = app_dir
         self.bundlers = bundlers
@@ -28,15 +28,17 @@ class BundleInfo():
         self._fetch_dependencies()
 
         path = self.get_file_name()
-        with open(path, 'w') as f:
-            logging.info('Writing bundle info to: %s' % os.path.relpath(path, self.app_dir))
+        with open(path, "w") as f:
+            logging.info(
+                "Writing bundle info to: %s" % os.path.relpath(path, self.app_dir)
+            )
 
             app_yaml = yaml.dump(self.data)
             f.write(app_yaml)
 
     def _fetch_dependencies(self):
         inspector = Inspector(self.app_dir)
-        self.data['dependencies'] = list(inspector.get_bundle_needed_libs())
+        self.data["dependencies"] = list(inspector.get_bundle_needed_libs())
 
     def _fetch_bundlers_report(self):
         for bundler in self.bundlers:
@@ -45,4 +47,4 @@ class BundleInfo():
                 self.data.update(report)
 
     def get_file_name(self):
-        return os.path.join(self.app_dir, '.bundle.yml')
+        return os.path.join(self.app_dir, ".bundle.yml")

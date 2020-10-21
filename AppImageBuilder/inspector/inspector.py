@@ -20,7 +20,7 @@ from AppImageBuilder.common.file_test import is_elf
 from AppImageBuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
 
 
-class Inspector():
+class Inspector:
     def __init__(self, target):
         self.target = target
         if os.path.isfile(self.target):
@@ -40,7 +40,7 @@ class Inspector():
         libs_needed = set()
         bundle_libs = set()
         for root, dirs, files in os.walk(self.app_dir):
-            if 'opt/libc' in root:
+            if "opt/libc" in root:
                 continue
 
             for file in files:
@@ -63,14 +63,14 @@ class Inspector():
         return bundle_needed
 
     def get_bundle_runtime_needed_libs(self):
-        analyser = AppRuntimeAnalyser(self.app_dir, 'AppRun', '')
+        analyser = AppRuntimeAnalyser(self.app_dir, "AppRun", "")
         analyser.run_app_analysis()
         return analyser.runtime_libs
 
     def get_dependants_of(self, lib_name):
         dependants = set()
         for root, dirs, files in os.walk(self.app_dir):
-            if 'opt/libc' in root:
+            if "opt/libc" in root:
                 continue
 
             for file in files:

@@ -26,10 +26,12 @@ class AptRecipeGenerator:
     @staticmethod
     def get_sources():
         sources = []
-        for root, dir, files in os.walk('/etc/apt/'):
+        for root, dir, files in os.walk("/etc/apt/"):
             for file_name in files:
-                if file_name.endswith('list'):
-                    new_sources = AptRecipeGenerator._read_sources_list_file(os.path.join(root, file_name))
+                if file_name.endswith("list"):
+                    new_sources = AptRecipeGenerator._read_sources_list_file(
+                        os.path.join(root, file_name)
+                    )
                     sources.extend(new_sources)
 
         return sources
@@ -80,10 +82,10 @@ class AptRecipeGenerator:
     @staticmethod
     def _read_sources_list_file(path):
         sources = []
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             for line in f.readlines():
-                if line.startswith('deb '):
-                    sources.append({'sourceline': line.strip(), 'key_url': ''})
+                if line.startswith("deb "):
+                    sources.append({"sourceline": line.strip(), "key_url": ""})
 
         return sources
 

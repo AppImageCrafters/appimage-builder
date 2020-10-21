@@ -60,6 +60,11 @@ class Bundler:
                 if os.path.isabs(link_target):
                     os.unlink(full_path)
 
-                    new_link_target = os.path.relpath(link_target, os.path.join('/', os.path.dirname(file)))
-                    logging.info("Fixing symlink %s target: from %s to %s" % (file, link_target, new_link_target))
+                    new_link_target = os.path.relpath(
+                        link_target, os.path.join("/", os.path.dirname(file))
+                    )
+                    logging.info(
+                        "Fixing symlink %s target: from %s to %s"
+                        % (file, link_target, new_link_target)
+                    )
                     os.symlink(new_link_target, full_path)

@@ -9,12 +9,11 @@ from pyfiglet import Figlet
 
 # Subclass QMainWindow to customise your application's main window
 class MainWindow(QMainWindow):
-
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
 
         self.setWindowTitle("My Awesome App")
-        f = Figlet(font='digital')
+        f = Figlet(font="digital")
         label = QLabel(f.renderText("Hello World!"))
         label.setFont(QtGui.QFont("monospace", 14, QtGui.QFont.Black))
 

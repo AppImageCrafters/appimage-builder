@@ -20,15 +20,22 @@ class RpmExtractError(RuntimeError):
 
 class RpmExtract(Command):
     def __init__(self):
-        super().__init__('rpm2cpio')
-        Command.assert_runnable_exists('cpio')
+        super().__init__("rpm2cpio")
+        Command.assert_runnable_exists("cpio")
 
         self.log_stdout = False
         self.log_stderr = False
 
     def extract(self, rpm_file, target_dir):
         command = self._get_rpm_extract_command(rpm_file)
-        subprocess.run(command, shell=True, check=True, cwd=target_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(
+            command,
+            shell=True,
+            check=True,
+            cwd=target_dir,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
 
     def _get_rpm_extract_command(self, rpm_file):
-        return 'rpm2cpio %s | cpio -idmv' % rpm_file
+        return "rpm2cpio %s | cpio -idmv" % rpm_file

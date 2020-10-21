@@ -33,13 +33,15 @@ class Builder:
         self._load_config()
 
     def _load_config(self):
-        self.app_dir_conf = self.recipe.get_item('AppDir')
-        self.cache_dir = os.path.join(os.path.curdir, 'appimage-builder-cache')
+        self.app_dir_conf = self.recipe.get_item("AppDir")
+        self.cache_dir = os.path.join(os.path.curdir, "appimage-builder-cache")
         self._load_app_dir_path()
         self._load_app_info_config()
 
         bundler_factory = BundlerFactory(self.app_dir_path, self.cache_dir)
-        bundler_factory.runtime = self.recipe.get_item('AppDir/runtime/generator', "wrapper")
+        bundler_factory.runtime = self.recipe.get_item(
+            "AppDir/runtime/generator", "wrapper"
+        )
 
         for bundler_name in bundler_factory.list_bundlers():
             if bundler_name in self.app_dir_conf:
@@ -50,7 +52,7 @@ class Builder:
         self.file_bundler = FileBundler(self.recipe)
 
     def _load_app_dir_path(self):
-        self.app_dir_path = os.path.abspath(self.recipe.get_item('AppDir/path'))
+        self.app_dir_path = os.path.abspath(self.recipe.get_item("AppDir/path"))
         os.makedirs(self.app_dir_path, exist_ok=True)
 
     def _load_app_info_config(self):

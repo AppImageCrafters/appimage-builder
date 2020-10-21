@@ -21,11 +21,11 @@ class ExecutionFailed(RuntimeError):
 
 class Script:
     def __init__(self, recipe):
-        self.instructions = recipe.get_item('script', [])
+        self.instructions = recipe.get_item("script", [])
 
     def execute(self):
         bash = Bash()
-        logger = logging.getLogger('script')
+        logger = logging.getLogger("script")
         for instruction in self.instructions:
             logger.info(" + %s" % instruction)
             command = bash.command(instruction)
@@ -36,4 +36,6 @@ class Script:
                 logger.warning(" %s" % line)
 
             if command.return_code != 0:
-                raise ExecutionFailed("%s exited with code %s" % (instruction, command.return_code))
+                raise ExecutionFailed(
+                    "%s exited with code %s" % (instruction, command.return_code)
+                )

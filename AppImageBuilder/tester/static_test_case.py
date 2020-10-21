@@ -32,22 +32,31 @@ class StaticTestCase:
         self._print_container_logs(ctr)
         result = ctr.wait()
 
-        if result['StatusCode'] != 0:
-            raise TestFailed(result['Error'])
+        if result["StatusCode"] != 0:
+            raise TestFailed(result["Error"])
 
     def _run_container(self):
-        command = ['/utils/static_test.sh']
+        command = ["/utils/static_test.sh"]
         command.extend(self.needed_libs)
 
-        ctr = self.client.containers.run(self.docker_image, command, auto_remove=True, stdout=True, stderr=True,
-                                         detach=True, volumes={self.tests_utils_dir: {'bind': '/utils', 'mode': 'ro'}})
+        ctr = self.client.containers.run(
+            self.docker_image,
+            command,
+            auto_remove=True,
+            stdout=True,
+            stderr=True,
+            detach=True,
+            volumes={self.tests_utils_dir: {"bind": "/utils", "mode": "ro"}},
+        )
         return ctr
 
     def _print_container_logs(self, ctr):
         logs = ctr.logs(stream=True)
         for line in logs:
-            self.logger.info(line.decode('utf-8').strip())
+            self.logger.info(line.decode("utf-8").strip())
 
     def setup(self):
-        self.tests_utils_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), 'utils'))
+        self.tests_utils_dir = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "utils")
+        )
         self.client = docker.from_env()

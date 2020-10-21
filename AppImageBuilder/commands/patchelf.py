@@ -20,47 +20,47 @@ class PatchElfError(RuntimeError):
 
 class PatchElf(Command):
     def __init__(self):
-        super().__init__('patchelf')
+        super().__init__("patchelf")
 
     def get_interpreter(self, file):
-        self._run(['patchelf', '--print-interpreter', file])
+        self._run(["patchelf", "--print-interpreter", file])
         if self.return_code != 0:
-            raise PatchElfError('\n'.join(self.stderr))
+            raise PatchElfError("\n".join(self.stderr))
 
-        return '\n'.join(self.stdout).strip()
+        return "\n".join(self.stdout).strip()
 
     def set_interpreter(self, file, interpreter):
-        self._run(['patchelf', '--set-interpreter', interpreter, file])
+        self._run(["patchelf", "--set-interpreter", interpreter, file])
 
         if self.return_code != 0:
-            raise PatchElfError('\n'.join(self.stderr))
+            raise PatchElfError("\n".join(self.stderr))
 
     def get_needed(self, file):
-        self._run(['patchelf', '--print-needed', file])
+        self._run(["patchelf", "--print-needed", file])
 
         if self.return_code != 0:
-            raise PatchElfError('\n'.join(self.stderr))
+            raise PatchElfError("\n".join(self.stderr))
 
         return self.stdout
 
     def set_run_path(self, file, run_paths):
-        self._run(['patchelf', '--set-rpath', ':'.join(run_paths), file])
+        self._run(["patchelf", "--set-rpath", ":".join(run_paths), file])
 
         if self.return_code != 0:
-            raise PatchElfError('\n'.join(self.stderr))
+            raise PatchElfError("\n".join(self.stderr))
 
     def set(self, file, run_path=None, interpreter=None):
-        command = ['patchelf']
+        command = ["patchelf"]
         if run_path:
-            command.append('--set-rpath')
-            command.append(':'.join(run_path))
+            command.append("--set-rpath")
+            command.append(":".join(run_path))
 
         if interpreter:
-            command.append('--set-interpreter')
+            command.append("--set-interpreter")
             command.append(interpreter)
 
         command.append(file)
         self._run(command)
 
         if self.return_code != 0:
-            raise PatchElfError('\n'.join(self.stderr))
+            raise PatchElfError("\n".join(self.stderr))

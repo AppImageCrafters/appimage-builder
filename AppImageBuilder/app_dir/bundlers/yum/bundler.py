@@ -32,7 +32,9 @@ class YumBundler(Bundler):
         self.rpm_extract = RpmExtract()
 
     def run(self):
-        download_list = self.repoquery.requires(self.config.include_list, self.config.arch)
+        download_list = self.repoquery.requires(
+            self.config.include_list, self.config.arch
+        )
         download_list.extend(self.config.include_list)
         download_list = [pkg for pkg in download_list if not self._is_excluded(pkg)]
 
@@ -58,12 +60,12 @@ class YumBundler(Bundler):
                 file_path = os.path.join(self.config.archives_path, file_name)
                 self.rpm_extract.extract(file_path, app_dir_path)
             else:
-                logging.info('Excluding: %s' % file_name)
+                logging.info("Excluding: %s" % file_name)
 
     def _is_rpm_file(self, file_name):
-        return file_name.endswith('.rpm')
+        return file_name.endswith(".rpm")
 
     def _get_package_name_from_fime(self, file_name):
         # http://ftp.rpm.org/max-rpm/ch-rpm-file-format.html
         # name-version-release.architecture.rpm
-        return file_name[::-1].split('-', 2)[-1][::-1]
+        return file_name[::-1].split("-", 2)[-1][::-1]

@@ -40,24 +40,39 @@ class Tester:
             volumes = self._get_container_volumes()
             environment = self.get_container_environment()
 
-            container = self.client.containers.run(self.image, '/bin/sh', working_dir='/app',
-                                                   volumes=volumes, environment=environment, devices=['/dev/snd'],
-                                                   cap_add=['SYS_PTRACE'], tty=True, detach=True, auto_remove=True)
+            container = self.client.containers.run(
+                self.image,
+                "/bin/sh",
+                working_dir="/app",
+                volumes=volumes,
+                environment=environment,
+                devices=["/dev/snd"],
+                cap_add=["SYS_PTRACE"],
+                tty=True,
+                detach=True,
+                auto_remove=True,
+            )
 
             try:
                 self.logger.info("before command")
-                self._run_command('useradd -mu %s %s' % (os.getuid(), os.getenv("USER")), container)
-                self._run_command('mkdir -p /home/%s/.config' % os.getenv("USER"), container, user=os.getenv("USER"))
+                self._run_command(
+                    "useradd -mu %s %s" % (os.getuid(), os.getenv("USER")), container
+                )
+                self._run_command(
+                    "mkdir -p /home/%s/.config" % os.getenv("USER"),
+                    container,
+                    user=os.getenv("USER"),
+                )
 
                 self.logger.info("command")
                 self._run_command(self.command, container, user=os.getenv("USER"))
             finally:
                 container.kill()
 
-        def _run_command(self, command, container, user='root'):
+        def _run_command(self, command, container, user="root"):
             print("$ %s" % command)
             exit_code, output = container.exec_run(command, user=user, tty=True)
-            for line in output.decode('utf-8').splitlines():
+            for line in output.decode("utf-8").splitlines():
                 print(line)
 
             if exit_code != 0:
@@ -67,46 +82,49 @@ class Tester:
         def _print_container_logs(self, ctr):
             logs = ctr.logs(stream=True)
             for line in logs:
-                self.logger.info(line.decode('utf-8').strip())
+                self.logger.info(line.decode("utf-8").strip())
 
         def _get_container_volumes(self):
-            volumes = {self.app_dir: {'bind': '/app', 'mode': 'ro'}}
+            volumes = {self.app_dir: {"bind": "/app", "mode": "ro"}}
 
             if self.use_host_x:
-                volumes['/tmp/.X11-unix'] = {'bind': '/tmp/.X11-unix', 'mode': 'rw'}
+                volumes["/tmp/.X11-unix"] = {"bind": "/tmp/.X11-unix", "mode": "rw"}
 
-            dbus_session_address = os.getenv('DBUS_SESSION_BUS_ADDRESS')
+            dbus_session_address = os.getenv("DBUS_SESSION_BUS_ADDRESS")
 
             if dbus_session_address:
-                regex = re.compile('unix:path=(?P<dbus_path>(\/\w+)+)')
+                regex = re.compile("unix:path=(?P<dbus_path>(\/\w+)+)")
                 search_result = regex.search(dbus_session_address)
                 if search_result:
-                    volumes[search_result.group(1)] = {'bind': search_result.group(1), 'mode': 'rw'}
+                    volumes[search_result.group(1)] = {
+                        "bind": search_result.group(1),
+                        "mode": "rw",
+                    }
 
             return volumes
 
         def get_container_environment(self):
             if self.use_host_x:
-                self.env.append('DISPLAY=%s' % os.getenv('DISPLAY'))
+                self.env.append("DISPLAY=%s" % os.getenv("DISPLAY"))
 
-            dbus_session_address = os.getenv('DBUS_SESSION_BUS_ADDRESS')
+            dbus_session_address = os.getenv("DBUS_SESSION_BUS_ADDRESS")
             if dbus_session_address:
-                self.env.append('DBUS_SESSION_BUS_ADDRESS=%s' % dbus_session_address)
+                self.env.append("DBUS_SESSION_BUS_ADDRESS=%s" % dbus_session_address)
 
-            self.env.append('UID=%s' % os.getuid())
-            self.env.append('UNAME=%s' % os.getenv("USER"))
-            self.env.append('XDG_DATA_DIRS=/usr/share:/usr/local/share')
+            self.env.append("UID=%s" % os.getuid())
+            self.env.append("UNAME=%s" % os.getenv("USER"))
+            self.env.append("XDG_DATA_DIRS=/usr/share:/usr/local/share")
             return self.env
 
     def __init__(self, recipe):
         self.recipe = recipe
-        self.app_dir = os.path.abspath(recipe.get_item('AppDir/path'))
+        self.app_dir = os.path.abspath(recipe.get_item("AppDir/path"))
 
         self.tests = []
         self._load_config()
 
     def _load_config(self):
-        tests_path = 'AppDir/test'
+        tests_path = "AppDir/test"
         tests_conf = self.recipe.get_item(tests_path, [])
         for k, v in tests_conf.items():
             test_case = self._create_test_case(k, tests_path)
@@ -114,10 +132,14 @@ class Tester:
 
     def _create_test_case(self, k, tests_path):
         test_case = Tester.TestCase(self.app_dir, k)
-        test_case.image = self.recipe.get_item('%s/%s/image' % (tests_path, k))
-        test_case.command = self.recipe.get_item('%s/%s/command' % (tests_path, k), './AppRun')
-        test_case.use_host_x = self.recipe.get_item('%s/%s/use_host_x' % (tests_path, k), False)
-        test_case.env = self.recipe.get_item('%s/%s/env' % (tests_path, k), [])
+        test_case.image = self.recipe.get_item("%s/%s/image" % (tests_path, k))
+        test_case.command = self.recipe.get_item(
+            "%s/%s/command" % (tests_path, k), "./AppRun"
+        )
+        test_case.use_host_x = self.recipe.get_item(
+            "%s/%s/use_host_x" % (tests_path, k), False
+        )
+        test_case.env = self.recipe.get_item("%s/%s/env" % (tests_path, k), [])
         if isinstance(test_case.env, dict):
             test_case.env = ["%s=%s" % (k, v) for k, v in test_case.env.items()]
 

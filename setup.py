@@ -25,7 +25,7 @@ setuptools.setup(
     description="Recipe based AppImage creation meta-tool",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    scripts=['appimage-builder', 'appimage-modules', 'appimage-inspector'],
+    scripts=["appimage-builder", "appimage-modules", "appimage-inspector"],
     url="https://github.com/AppImageCrafters/AppImageBuilder",
     project_urls={
         "Bug Tracker": "https://github.com/AppImageCrafters/AppImageBuilder/issues",
@@ -35,13 +35,27 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License"
+        "License :: OSI Approved :: MIT License",
     ],
-    license='MIT',
-    install_requires=['pyyaml>=5', 'docker', 'bash.py', 'requests', 'schema', 'packaging', 'questionary', 'emrichen', 'PyGithub'],
-    python_requires='>=3.6',
-    package_data={'': ['AppImageBuilder/generator/templates/AppImageBuilder.yml.in',
-                       'AppImageBuilder/tester/utils/entry_point.sh',
-                       'AppImageBuilder/tester/utils/static_test.sh']},
-    include_package_data=True
+    license="MIT",
+    install_requires=[
+        "pyyaml>=5",
+        "docker",
+        "bash.py",
+        "requests",
+        "schema",
+        "packaging",
+        "questionary",
+        "emrichen",
+        "PyGithub",
+    ],
+    python_requires=">=3.6",
+    package_data={
+        "": [
+            "AppImageBuilder/generator/templates/AppImageBuilder.yml.in",
+            "AppImageBuilder/tester/utils/entry_point.sh",
+            "AppImageBuilder/tester/utils/static_test.sh",
+        ]
+    },
+    include_package_data=True,
 )

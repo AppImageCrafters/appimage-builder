@@ -14,7 +14,7 @@
 def is_elf(path):
     with open(path, "rb") as f:
         bits = f.read(4)
-        if bits == b'\x7fELF':
+        if bits == b"\x7fELF":
             return True
 
     return False

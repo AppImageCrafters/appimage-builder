@@ -23,26 +23,31 @@ class RuntimeGeneratorError(RuntimeError):
     pass
 
 
-class RuntimeGenerator():
+class RuntimeGenerator:
     def __init__(self, recipe: Recipe):
         self._configure(recipe)
         self.app_run_constructor = WrapperAppRun
         self.helper_factory_constructor = HelperFactory
 
     def _configure(self, recipe):
-        self.app_dir = recipe.get_item('AppDir/path')
+        self.app_dir = recipe.get_item("AppDir/path")
         self.app_dir = os.path.abspath(self.app_dir)
 
         app_info_loader = AppInfoLoader()
         self.app_info = app_info_loader.load(recipe)
-        self.apprun_version = recipe.get_item('AppDir/runtime/version', "v1.2.0")
-        self.apprun_debug = recipe.get_item('AppDir/runtime/debug', False)
-        self.env = recipe.get_item('AppDir/runtime/env', {})
-        self.path_mappings = recipe.get_item('AppDir/runtime/path_mappings', [])
+        self.apprun_version = recipe.get_item("AppDir/runtime/version", "v1.2.0")
+        self.apprun_debug = recipe.get_item("AppDir/runtime/debug", False)
+        self.env = recipe.get_item("AppDir/runtime/env", {})
+        self.path_mappings = recipe.get_item("AppDir/runtime/path_mappings", [])
 
     def generate(self):
-        app_run = self.app_run_constructor(self.apprun_version, self.apprun_debug,
-                                           self.app_dir, self.app_info.exec, self.app_info.exec_args)
+        app_run = self.app_run_constructor(
+            self.apprun_version,
+            self.apprun_debug,
+            self.app_dir,
+            self.app_info.exec,
+            self.app_info.exec_args,
+        )
         self._configure_runtime(app_run)
         self._add_user_defined_settings(app_run)
 
@@ -62,7 +67,7 @@ class RuntimeGenerator():
     def _add_user_defined_settings(self, app_run: WrapperAppRun) -> None:
         for k, v in self.env.items():
             if k in app_run.env:
-                logging.info('Overriding runtime env: %s' % k)
+                logging.info("Overriding runtime env: %s" % k)
 
             app_run.env[k] = v
 
@@ -70,6 +75,6 @@ class RuntimeGenerator():
         if self.path_mappings:
             path_mappings_env = ""
             for path_mapping in self.path_mappings:
-                path_mappings_env += path_mapping + ';'
+                path_mappings_env += path_mapping + ";"
 
-            app_run.env['APPRUN_PATH_MAPPINGS'] = path_mappings_env
+            app_run.env["APPRUN_PATH_MAPPINGS"] = path_mappings_env

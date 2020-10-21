@@ -40,26 +40,39 @@ class Command:
     @staticmethod
     def assert_runnable_exists(runnable):
         if not runnable:
-            raise Command.CommandMissingError('Unable to locate \'%s\' runnable. Please make sure it is installed '
-                                              'and available in the environment variable PATH.' % runnable)
+            raise Command.CommandMissingError(
+                "Unable to locate '%s' runnable. Please make sure it is installed "
+                "and available in the environment variable PATH." % runnable
+            )
 
     def _run(self, command):
         self.stdout.clear()
         self.stderr.clear()
 
         if self.log_command:
-            self.logger.info(' '.join(command))
+            self.logger.info(" ".join(command))
         else:
-            self.logger.debug(' '.join(command))
+            self.logger.debug(" ".join(command))
 
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self.cwd, env=self.env)
+        process = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=self.cwd,
+            env=self.env,
+        )
 
         self._poll_process(process)
 
     def _run_with_input(self, command, input):
-        self.logger.info(' '.join(command))
-        process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                   cwd=self.cwd)
+        self.logger.info(" ".join(command))
+        process = subprocess.Popen(
+            command,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=self.cwd,
+        )
         process.communicate(input)
 
         self._poll_process(process)
@@ -77,7 +90,7 @@ class Command:
     def _process_stderr_lines(self, process):
         stderr_line = process.stderr.readline()
         while stderr_line:
-            stderr_line = stderr_line.decode('utf-8').strip()
+            stderr_line = stderr_line.decode("utf-8").strip()
             self.stderr.append(stderr_line)
             if self.log_stderr:
                 self.logger.warning(stderr_line)
@@ -87,7 +100,7 @@ class Command:
     def _process_stdout_lines(self, process):
         stdout_line = process.stdout.readline()
         while stdout_line:
-            stdout_line = stdout_line.decode('utf-8').strip()
+            stdout_line = stdout_line.decode("utf-8").strip()
             self.stdout.append(stdout_line)
             if self.log_stdout:
                 self.logger.info(stdout_line)

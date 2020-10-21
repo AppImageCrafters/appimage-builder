@@ -21,7 +21,7 @@ class FileInfoCache:
     def __init__(self, path):
         self.path = os.path.realpath(path)
         self.cache = {}
-        self.logger = logging.getLogger('AppDir')
+        self.logger = logging.getLogger("AppDir")
 
     def update(self):
         self.logger.info("Updating files cache")
@@ -29,24 +29,24 @@ class FileInfoCache:
             for dir_name in dirs:
                 abs_path = os.path.join(root, dir_name)
                 self.cache[abs_path] = {
-                    'path': abs_path,
-                    'mtime': os.path.getmtime(abs_path),
-                    'is_dir': True,
+                    "path": abs_path,
+                    "mtime": os.path.getmtime(abs_path),
+                    "is_dir": True,
                 }
 
             for file_name in files:
                 abs_path = os.path.join(root, file_name)
                 if os.path.islink(abs_path):
                     self.cache[abs_path] = {
-                        'path': abs_path,
-                        'is_link': True,
+                        "path": abs_path,
+                        "is_link": True,
                     }
                 else:
                     if abs_path not in self.cache:
                         self.cache[abs_path] = self.inspect_file(abs_path)
                     else:
                         os.path.getmtime(abs_path)
-                        if os.path.getmtime(abs_path) != self.cache[abs_path]['mtme']:
+                        if os.path.getmtime(abs_path) != self.cache[abs_path]["mtme"]:
                             self.cache[abs_path] = self.inspect_file(abs_path)
 
                     logging.debug(self.cache[abs_path])
@@ -87,36 +87,33 @@ class FileInfoCache:
         return True
 
     def inspect_file(self, path):
-        file_info = {
-            'path': path,
-            'is_file': True
-        }
+        file_info = {"path": path, "is_file": True}
 
         mtime = os.path.getmtime(path)
         # don't inspect files if they haven't been modified since last update
         if path in self.cache:
             file_info = self.cache[path]
-            if mtime == file_info['mtime']:
+            if mtime == file_info["mtime"]:
                 return file_info
 
-        file_info['mtime'] = mtime
+        file_info["mtime"] = mtime
 
         if is_elf(path):
-            file_info['is_elf'] = True
+            file_info["is_elf"] = True
             try:
                 patchelf = PatchElf()
                 patchelf.logger.level = logging.WARNING
                 patchelf.log_stderr = False
-                file_info['pt_needed'] = patchelf.get_needed(path)
+                file_info["pt_needed"] = patchelf.get_needed(path)
 
                 # an exception is raised if the elf has no PT_INTERP section
-                file_info['pt_interp'] = patchelf.get_interpreter(path)
+                file_info["pt_interp"] = patchelf.get_interpreter(path)
             except PatchElfError:
                 pass
 
             if os.access(path, os.X_OK):
-                file_info['is_bin'] = True
+                file_info["is_bin"] = True
             else:
-                file_info['is_lib'] = True
+                file_info["is_lib"] = True
 
         return file_info

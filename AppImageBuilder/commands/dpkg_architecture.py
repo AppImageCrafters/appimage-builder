@@ -17,14 +17,18 @@ from .command import Command
 
 class DpkgArchitecture(Command):
     def __init__(self):
-        super().__init__('dpkg-architecture')
+        super().__init__("dpkg-architecture")
 
     def get_deb_host_arch(self):
-        return self._query('DEB_HOST_ARCH')
+        return self._query("DEB_HOST_ARCH")
 
     def _query(self, var_name):
-        result = subprocess.run(['dpkg-architecture', '-q', var_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(
+            ["dpkg-architecture", "-q", var_name],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         if result.returncode == 0:
-            return result.stdout.decode('utf-8').strip()
+            return result.stdout.decode("utf-8").strip()
         else:
             return None

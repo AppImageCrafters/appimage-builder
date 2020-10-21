@@ -17,6 +17,7 @@ class MissingConfigurationField(RuntimeError):
 
 from AppImageBuilder.app_dir.app_info.app_info import AppInfo
 
+
 class AppInfoLoader:
     def load(self, config):
         app_info = self._read_config_fields(config)
@@ -25,12 +26,12 @@ class AppInfoLoader:
 
     def _read_config_fields(self, recipe):
         app_info = AppInfo()
-        app_info.id = recipe.get_item('AppDir/app_info/id')
-        app_info.name = recipe.get_item('AppDir/app_info/name')
-        app_info.version = recipe.get_item('AppDir/app_info/version')
-        app_info.icon = recipe.get_item('AppDir/app_info/icon')
-        app_info.exec = recipe.get_item('AppDir/app_info/exec')
-        app_info.exec_args = recipe.get_item('AppDir/app_info/exec_args', '$@')
+        app_info.id = recipe.get_item("AppDir/app_info/id")
+        app_info.name = recipe.get_item("AppDir/app_info/name")
+        app_info.version = recipe.get_item("AppDir/app_info/version")
+        app_info.icon = recipe.get_item("AppDir/app_info/icon")
+        app_info.exec = recipe.get_item("AppDir/app_info/exec")
+        app_info.exec_args = recipe.get_item("AppDir/app_info/exec_args", "$@")
         return app_info
 
     @staticmethod

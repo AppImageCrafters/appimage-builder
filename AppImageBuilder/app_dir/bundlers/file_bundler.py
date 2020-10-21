@@ -18,9 +18,9 @@ import shutil
 
 class FileBundler:
     def __init__(self, recipe):
-        self.app_dir = os.path.abspath(recipe.get_item('AppDir/path'))
-        self.include_list = recipe.get_item('AppDir/files/include', [])
-        self.exclude_list = recipe.get_item('AppDir/files/exclude', [])
+        self.app_dir = os.path.abspath(recipe.get_item("AppDir/path"))
+        self.include_list = recipe.get_item("AppDir/files/include", [])
+        self.exclude_list = recipe.get_item("AppDir/files/exclude", [])
 
     def _get_include_file_list(self):
         files_list = []
@@ -33,10 +33,14 @@ class FileBundler:
         for path in self._get_exclude_file_list():
             if os.path.exists(path):
                 if os.path.isdir(path):
-                    logging.info('Excluding dir: %s' % os.path.relpath(path, self.app_dir))
+                    logging.info(
+                        "Excluding dir: %s" % os.path.relpath(path, self.app_dir)
+                    )
                     shutil.rmtree(path, ignore_errors=True)
                 else:
-                    logging.info('Excluding file: %s' % os.path.relpath(path, self.app_dir))
+                    logging.info(
+                        "Excluding file: %s" % os.path.relpath(path, self.app_dir)
+                    )
                     os.remove(path)
 
     def _get_exclude_file_list(self):
@@ -56,8 +60,8 @@ class FileBundler:
         return files_list
 
     def is_excluded(self, path):
-        rel_path = path.replace(self.app_dir, '')
-        rel_path = rel_path.lstrip('/')
+        rel_path = path.replace(self.app_dir, "")
+        rel_path = rel_path.lstrip("/")
 
         for pattern in self.include_list:
             if fnmatch.fnmatch(rel_path, pattern):

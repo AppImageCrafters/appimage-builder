@@ -28,19 +28,28 @@ class IconBundler:
         if not source_icon_path:
             raise IconBundler.Error("Unable to find any app icon named: %s" % self.icon)
 
-        target_icon_path = os.path.join(self.app_dir, os.path.basename(source_icon_path))
+        target_icon_path = os.path.join(
+            self.app_dir, os.path.basename(source_icon_path)
+        )
         try:
             logging.info(
-                "Setting AppDir: %s to %s" % (source_icon_path, os.path.relpath(target_icon_path, self.app_dir)))
+                "Setting AppDir: %s to %s"
+                % (source_icon_path, os.path.relpath(target_icon_path, self.app_dir))
+            )
             shutil.copyfile(source_icon_path, target_icon_path)
         except Exception:
-            raise IconBundler.Error("Unable to copy icon from: %s to %s" % (source_icon_path, target_icon_path))
+            raise IconBundler.Error(
+                "Unable to copy icon from: %s to %s"
+                % (source_icon_path, target_icon_path)
+            )
 
     def _get_icon_path(self):
-        search_paths = [os.path.join(self.app_dir, 'usr', 'share', 'icons'),
-                        os.path.join(self.app_dir, 'usr', 'share', 'pixmaps'),
-                        os.path.join('/', 'usr', 'share', 'icons'),
-                        os.path.join('/', 'usr', 'share', 'pixmaps')]
+        search_paths = [
+            os.path.join(self.app_dir, "usr", "share", "icons"),
+            os.path.join(self.app_dir, "usr", "share", "pixmaps"),
+            os.path.join("/", "usr", "share", "icons"),
+            os.path.join("/", "usr", "share", "pixmaps"),
+        ]
 
         for path in search_paths:
             path = self._search_icon(path)
@@ -73,10 +82,10 @@ class IconBundler:
         return path
 
     def _extract_icon_size_from_path(self, path):
-        size_search = re.search('.*/(\d+)x\d+/.*', path, re.IGNORECASE)
+        size_search = re.search(".*/(\d+)x\d+/.*", path, re.IGNORECASE)
         if size_search:
             return int(size_search.group(1))
         else:
-            logging.warning('Icon size can not be guessed from path: %s' % path)
+            logging.warning("Icon size can not be guessed from path: %s" % path)
 
         return 0

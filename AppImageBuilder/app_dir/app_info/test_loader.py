@@ -20,14 +20,14 @@ class LoaderTest(unittest.TestCase):
     def setUp(self) -> None:
         self.recipe = Recipe()
         self.recipe.recipe = {
-            'AppDir': {
-                'metadata': {
-                    'id': 'org.gnu.echo',
-                    'name': 'echo',
-                    'icon': 'utilities-terminal',
-                    'version': '2.7.1',
+            "AppDir": {
+                "metadata": {
+                    "id": "org.gnu.echo",
+                    "name": "echo",
+                    "icon": "utilities-terminal",
+                    "version": "2.7.1",
                     "exec": "bin/echo",
-                    'exec_args': '$@'
+                    "exec_args": "$@",
                 }
             }
         }
@@ -36,23 +36,23 @@ class LoaderTest(unittest.TestCase):
         loader = AppInfoLoader()
         app_info = loader.load(self.recipe)
 
-        self.assertEqual(app_info.id, 'org.gnu.echo')
-        self.assertEqual(app_info.name, 'echo')
-        self.assertEqual(app_info.icon, 'utilities-terminal')
-        self.assertEqual(app_info.version, '2.7.1')
-        self.assertEqual(app_info.exec, 'bin/echo')
-        self.assertEqual(app_info.exec_args, '$@')
+        self.assertEqual(app_info.id, "org.gnu.echo")
+        self.assertEqual(app_info.name, "echo")
+        self.assertEqual(app_info.icon, "utilities-terminal")
+        self.assertEqual(app_info.version, "2.7.1")
+        self.assertEqual(app_info.exec, "bin/echo")
+        self.assertEqual(app_info.exec_args, "$@")
 
     def test_load_incomplete_config(self):
         app_info = AppInfoLoader()
         self.recipe.recipe = {
-            'AppDir': {
-                'metadata': {
-                    'name': 'echo',
-                    'icon': 'utilities-terminal',
-                    'version': '2.7.1',
+            "AppDir": {
+                "metadata": {
+                    "name": "echo",
+                    "icon": "utilities-terminal",
+                    "version": "2.7.1",
                     "exec": "bin/echo",
-                    'exec_args': '$@'
+                    "exec_args": "$@",
                 }
             }
         }

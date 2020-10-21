@@ -14,16 +14,19 @@ from schema import Schema, And, Use, Optional
 
 
 class AptSettingsValidator:
-
     def __init__(self, settigns):
         self.settings = settigns
 
-        self.schema = Schema({
-            Optional('arch'): And(str, len),
-            'sources': [{'sourceline': And(str, len), Optional('key_url'): And(str, len)}],
-            'include': [And(str, len)],
-            Optional('exclude'): [And(str, len)]
-        })
+        self.schema = Schema(
+            {
+                Optional("arch"): And(str, len),
+                "sources": [
+                    {"sourceline": And(str, len), Optional("key_url"): And(str, len)}
+                ],
+                "include": [And(str, len)],
+                Optional("exclude"): [And(str, len)],
+            }
+        )
 
     def validate(self):
         self.schema.validate(self.settings)

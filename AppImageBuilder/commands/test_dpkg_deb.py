@@ -19,15 +19,17 @@ from .dpkg_deb import DpkgDeb
 
 class DpkgDebTestCase(unittest.TestCase):
     def setUp(self):
-        url = 'http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-8/gcc-8-multilib_8.2.0-7ubuntu1_amd64.deb'
+        url = "http://archive.ubuntu.com/ubuntu/pool/main/g/gcc-8/gcc-8-multilib_8.2.0-7ubuntu1_amd64.deb"
         response = urllib.request.urlopen(url)
 
         self.assertTrue(response.code, 200)
 
         self.temp_prefix_dir = tempfile.TemporaryDirectory()
-        self.deb_file_path = os.path.join(self.temp_prefix_dir.name, 'gcc-8-multilib_8.2.0-7ubuntu1_amd64.deb')
+        self.deb_file_path = os.path.join(
+            self.temp_prefix_dir.name, "gcc-8-multilib_8.2.0-7ubuntu1_amd64.deb"
+        )
 
-        with open(self.deb_file_path, 'wb') as f:
+        with open(self.deb_file_path, "wb") as f:
             data = response.read()
             f.write(data)
 
@@ -42,5 +44,5 @@ class DpkgDebTestCase(unittest.TestCase):
         self.assertTrue(os.path.exists(extracted_file_path))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

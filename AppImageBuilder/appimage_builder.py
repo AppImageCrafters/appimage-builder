@@ -18,21 +18,23 @@ from AppImageBuilder.commands.appimagetool import AppImageToolCommand
 
 class AppImageBuilder:
     def __init__(self, recipe):
-        self.app_dir = recipe.get_item('AppDir/path')
-        self.target_arch = recipe.get_item('AppImage/arch')
-        self.app_name = recipe.get_item('AppDir/app_info/name')
-        self.app_version = recipe.get_item('AppDir/app_info/version')
-        self.update_information = recipe.get_item('AppImage/update-information', 'None')
-        if self.update_information == 'None':
+        self.app_dir = recipe.get_item("AppDir/path")
+        self.target_arch = recipe.get_item("AppImage/arch")
+        self.app_name = recipe.get_item("AppDir/app_info/name")
+        self.app_version = recipe.get_item("AppDir/app_info/version")
+        self.update_information = recipe.get_item("AppImage/update-information", "None")
+        if self.update_information == "None":
             self.update_information = None
 
-        self.sing_key = recipe.get_item('AppImage/sign-key', 'None')
-        if self.sing_key == 'None':
+        self.sing_key = recipe.get_item("AppImage/sign-key", "None")
+        if self.sing_key == "None":
             self.sing_key = None
 
-        fallback_file_name = os.path.join(os.getcwd(),
-                                          '%s-%s-%s.AppImage' % (self.app_name, self.app_version, self.target_arch))
-        self.target_file = recipe.get_item('AppImage/file_name', fallback_file_name)
+        fallback_file_name = os.path.join(
+            os.getcwd(),
+            "%s-%s-%s.AppImage" % (self.app_name, self.app_version, self.target_arch),
+        )
+        self.target_file = recipe.get_item("AppImage/file_name", fallback_file_name)
 
     def build(self):
         self._assert_target_architecture()
@@ -57,7 +59,7 @@ class AppImageBuilder:
             request.urlretrieve(runtime_url, runtime_path)
 
     def _get_runtime_path(self):
-        os.makedirs('appimage-builder-cache', exist_ok=True)
+        os.makedirs("appimage-builder-cache", exist_ok=True)
         runtime_path = "appimage-builder-cache/runtime-%s" % self.target_arch
 
         return runtime_path
@@ -70,5 +72,8 @@ class AppImageBuilder:
     def _assert_target_architecture(self):
         supported_architectures = ["i686", "aarch64", "armhf", "x86_64"]
         if self.target_arch not in supported_architectures:
-            logging.error("There is not a prebuild runtime for the %s architecture."
-                          " You will have to build the AppImage runtime manually." % self.target_arch)
+            logging.error(
+                "There is not a prebuild runtime for the %s architecture."
+                " You will have to build the AppImage runtime manually."
+                % self.target_arch
+            )

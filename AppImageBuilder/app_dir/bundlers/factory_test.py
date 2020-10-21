@@ -23,13 +23,13 @@ class BundlerFactoryTestCase(unittest.TestCase):
             self.config_validated = False
             self.run_executed = True
 
-            self.wrapper_apprun_packages = ['wrapper']
-            self.proot_apprun_packages = ['proot']
-            self.classic_apprun_packages = ['classic']
-            self.core_packages = ['core']
-            self.font_config_packages = ['fontconfig']
-            self.graphics_stack_packages = ['graphics']
-            self.xclient_packages = ['xclient']
+            self.wrapper_apprun_packages = ["wrapper"]
+            self.proot_apprun_packages = ["proot"]
+            self.classic_apprun_packages = ["classic"]
+            self.core_packages = ["core"]
+            self.font_config_packages = ["fontconfig"]
+            self.graphics_stack_packages = ["graphics"]
+            self.xclient_packages = ["xclient"]
 
         def validate_configuration(self):
             self.config_validated = True
@@ -38,15 +38,15 @@ class BundlerFactoryTestCase(unittest.TestCase):
             self.run_executed = True
 
     def setUp(self) -> None:
-        self.factory = BundlerFactory('/', '/tmp')
-        self.factory.bundlers = {'dummy': BundlerFactoryTestCase.DummyBundler}
+        self.factory = BundlerFactory("/", "/tmp")
+        self.factory.bundlers = {"dummy": BundlerFactoryTestCase.DummyBundler}
 
     def test_list_bundlers(self):
-        self.assertEqual(['dummy'], list(self.factory.list_bundlers()))
+        self.assertEqual(["dummy"], list(self.factory.list_bundlers()))
 
     def test_create_bundler_for_classic_type_runtime(self):
-        self.factory.runtime = 'classic'
-        bundler = self.factory.create('dummy', [])
+        self.factory.runtime = "classic"
+        bundler = self.factory.create("dummy", [])
 
         self.assertTrue(bundler.config_validated)
         self.assertEqual(bundler.app_dir, self.factory.app_dir)
@@ -58,8 +58,8 @@ class BundlerFactoryTestCase(unittest.TestCase):
         self.assertEqual(bundler.partitions, {})
 
     def test_create_bundler_for_proot_type_runtime(self):
-        self.factory.runtime = 'proot'
-        bundler = self.factory.create('dummy', [])
+        self.factory.runtime = "proot"
+        bundler = self.factory.create("dummy", [])
 
         self.assertTrue(bundler.config_validated)
         self.assertEqual(bundler.app_dir, self.factory.app_dir)
@@ -71,20 +71,27 @@ class BundlerFactoryTestCase(unittest.TestCase):
         self.assertEqual(bundler.partitions, {})
 
     def test_create_bundler_for_wrapper_type_runtime(self):
-        self.factory.runtime = 'wrapper'
-        bundler = self.factory.create('dummy', [])
+        self.factory.runtime = "wrapper"
+        bundler = self.factory.create("dummy", [])
 
         self.assertTrue(bundler.config_validated)
         self.assertEqual(bundler.app_dir, self.factory.app_dir)
         self.assertEqual(bundler.cache_dir, self.factory.cache_dir)
 
         self.assertEqual(bundler.included_packages, bundler.wrapper_apprun_packages)
-        self.assertEqual(bundler.excluded_packages, [*bundler.core_packages, *bundler.font_config_packages,
-                                                     *bundler.graphics_stack_packages, *bundler.xclient_packages])
+        self.assertEqual(
+            bundler.excluded_packages,
+            [
+                *bundler.core_packages,
+                *bundler.font_config_packages,
+                *bundler.graphics_stack_packages,
+                *bundler.xclient_packages,
+            ],
+        )
 
-        self.assertEqual(bundler.partitions, {'opt/libc': bundler.glibc_packages})
+        self.assertEqual(bundler.partitions, {"opt/libc": bundler.glibc_packages})
 
     def test_run(self):
-        bundler = self.factory.create('dummy', [])
+        bundler = self.factory.create("dummy", [])
         bundler.run()
         self.assertTrue(bundler.run_executed)

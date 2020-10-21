@@ -20,7 +20,7 @@ class RecipeError(RuntimeError):
 
 
 class Recipe:
-    class ItemResolver():
+    class ItemResolver:
         def __init__(self, dict, path, fallback=None):
             self.root = dict
             self.path = path
@@ -34,7 +34,7 @@ class Recipe:
         def resolve(self):
             self.cur = self.root
             self.left = []
-            self.right = self.path.split('/')
+            self.right = self.path.split("/")
             try:
                 self._resolve_item()
             except KeyError:
@@ -53,7 +53,9 @@ class Recipe:
             if self.fallback is not None:
                 self.cur = self.fallback
             else:
-                raise RecipeError('\'%s\' key required in: %s' % (self.key, '/'.join(self.left)))
+                raise RecipeError(
+                    "'%s' key required in: %s" % (self.key, "/".join(self.left))
+                )
 
     def __init__(self):
         self.path = None
@@ -84,7 +86,7 @@ class Recipe:
         resolver = Recipe.ItemResolver(self.recipe, path, fallback)
         return resolver.resolve()
 
-    def _parse_config(self, path=None, data=None, tag='!ENV'):
+    def _parse_config(self, path=None, data=None, tag="!ENV"):
         """
         Load a yaml configuration file and resolve any environment variables
         The environment variables must have !ENV before them and be in this format
@@ -105,7 +107,7 @@ class Recipe:
         reference: https://medium.com/swlh/python-yaml-configuration-with-environment-variables-parsing-77930f4273ac
         """
         # pattern for global vars: look for ${word}
-        pattern = re.compile('.*?\${(\w+)}.*?')
+        pattern = re.compile(".*?\${(\w+)}.*?")
         loader = yaml.SafeLoader
 
         # the tag will be used to mark where to start searching for the pattern
@@ -127,9 +129,11 @@ class Recipe:
                 for g in match:
                     value = os.environ.get(g, g)
                     if value == g:
-                        raise RecipeError('Unable to resolve environment variable: %s' % g)
+                        raise RecipeError(
+                            "Unable to resolve environment variable: %s" % g
+                        )
 
-                    full_value = full_value.replace(f'${{{g}}}', value)
+                    full_value = full_value.replace(f"${{{g}}}", value)
                 return full_value
             return value
 
@@ -141,4 +145,4 @@ class Recipe:
         elif data:
             return yaml.load(data, Loader=loader)
         else:
-            raise ValueError('Either a path or data should be defined as input')
+            raise ValueError("Either a path or data should be defined as input")

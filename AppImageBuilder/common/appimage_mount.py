@@ -16,8 +16,10 @@ import subprocess
 
 def appimage_mount(target):
     abs_target_path = os.path.abspath(target)
-    process = subprocess.Popen([abs_target_path, '--appimage-mount'], stdout=subprocess.PIPE)
-    app_dir = process.stdout.readline().decode('utf-8').strip()
+    process = subprocess.Popen(
+        [abs_target_path, "--appimage-mount"], stdout=subprocess.PIPE
+    )
+    app_dir = process.stdout.readline().decode("utf-8").strip()
     ret_code = process.poll()
 
     if ret_code == None:

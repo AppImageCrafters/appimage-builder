@@ -19,7 +19,7 @@ class DesktopEntryGenerator:
         pass
 
     def __init__(self, app_dir):
-        self._desktop_entry_header = '[Desktop Entry]\n'
+        self._desktop_entry_header = "[Desktop Entry]\n"
         self.contents = []
         self.app_dir = app_dir
 
@@ -37,62 +37,68 @@ class DesktopEntryGenerator:
         self._save_app_dir_desktop_entry(app_info.id)
 
     def _match_desktop_entry(self, app_id, file_name):
-        return (app_id + '.desktop') in file_name
+        return (app_id + ".desktop") in file_name
 
     def _add_appimage_name(self, name):
         idx = self._get_desktop_entry_header_index()
-        self.contents.insert(idx + 1, 'X-AppImage-Name=%s\n' % name)
+        self.contents.insert(idx + 1, "X-AppImage-Name=%s\n" % name)
 
     def _get_desktop_entry_header_index(self):
         if self._desktop_entry_header in self.contents:
             return self.contents.index(self._desktop_entry_header)
         else:
-            raise DesktopEntryGenerator.Error('Unable to locate the desktop entry header')
+            raise DesktopEntryGenerator.Error(
+                "Unable to locate the desktop entry header"
+            )
 
     def _add_appimage_version(self, version):
         idx = self._get_desktop_entry_header_index()
-        self.contents.insert(idx + 1, 'X-AppImage-Version=%s\n' % version)
+        self.contents.insert(idx + 1, "X-AppImage-Version=%s\n" % version)
 
     def _add_appimage_arch(self, arch):
         idx = self._get_desktop_entry_header_index()
-        self.contents.insert(idx + 1, 'X-AppImage-Arch=%s\n' % arch)
+        self.contents.insert(idx + 1, "X-AppImage-Arch=%s\n" % arch)
 
     def _add_appimage_entries(self):
-        self._add_appimage_name('Ark')
-        self._add_appimage_version('0.1')
-        self._add_appimage_arch('amd64')
+        self._add_appimage_name("Ark")
+        self._add_appimage_version("0.1")
+        self._add_appimage_arch("amd64")
 
     def _load_app_desktop_entry(self, app_id):
         desktop_entry_path = self._find_app_desktop_entry_path(self.app_dir, app_id)
 
-        with open(desktop_entry_path, 'r', encoding='utf-8') as f:
+        with open(desktop_entry_path, "r", encoding="utf-8") as f:
             self.contents = f.readlines()
 
     def _find_app_desktop_entry_path(self, app_dir, app_id):
-        apps_dir = os.path.join(app_dir, 'usr', 'share', 'applications')
+        apps_dir = os.path.join(app_dir, "usr", "share", "applications")
         try:
             for file_name in os.listdir(apps_dir):
                 if self._match_desktop_entry(app_id, file_name):
                     return os.path.join(apps_dir, file_name)
         except FileNotFoundError:
-            raise DesktopEntryGenerator.Error('Unable to locate the application desktop entry: %s.desktop' % app_id)
+            raise DesktopEntryGenerator.Error(
+                "Unable to locate the application desktop entry: %s.desktop" % app_id
+            )
 
-        raise DesktopEntryGenerator.Error('Unable to locate the application desktop entry: %s.desktop' % app_id)
+        raise DesktopEntryGenerator.Error(
+            "Unable to locate the application desktop entry: %s.desktop" % app_id
+        )
 
     def _save_app_dir_desktop_entry(self, app_id):
-        file_name = os.path.join(self.app_dir, app_id + '.desktop')
+        file_name = os.path.join(self.app_dir, app_id + ".desktop")
 
-        with open(file_name, 'w', encoding='utf-8') as f:
+        with open(file_name, "w", encoding="utf-8") as f:
             f.writelines(self.contents)
 
     def _generate_minimal_desktop_entry(self, app_info):
         return [
-            '[Desktop Entry]\n',
-            'Name=%s\n' % app_info.name,
-            'Exec=%s\n' % app_info.exec,
-            'Icon=%s\n' % app_info.icon,
-            'Type=Application\n',
-            'Terminal=false\n',
-            'Categories=Utility;\n',
-            'Comment=\n'
+            "[Desktop Entry]\n",
+            "Name=%s\n" % app_info.name,
+            "Exec=%s\n" % app_info.exec,
+            "Icon=%s\n" % app_info.icon,
+            "Type=Application\n",
+            "Terminal=false\n",
+            "Categories=Utility;\n",
+            "Comment=\n",
         ]

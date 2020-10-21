@@ -48,9 +48,9 @@ class AptBundler(Bundler):
 
     def get_run_report(self):
         return {
-            'apt': {
-                'sources': sorted(self.config.apt_source_lines),
-                'packages': sorted(self.deployed_packages)
+            "apt": {
+                "sources": sorted(self.config.apt_source_lines),
+                "packages": sorted(self.deployed_packages),
             }
         }
 
@@ -61,7 +61,7 @@ class AptBundler(Bundler):
 
         self.apt_get = AptGet(self.config.apt_prefix, self.config.get_apt_conf_path())
 
-        if not os.getenv('AB_APT_NO_UPDATE', False):
+        if not os.getenv("AB_APT_NO_UPDATE", False):
             self.apt_get.update()
 
         self.config.clear_installed_packages()
@@ -80,17 +80,30 @@ class AptBundler(Bundler):
 
         for file_name in os.listdir(archives_path):
             if is_deb_file(file_name):
-                package_name, package_version, package_arch = self._extract_package_info(file_name)
+                (
+                    package_name,
+                    package_version,
+                    package_arch,
+                ) = self._extract_package_info(file_name)
 
                 if not self._is_excluded(package_name):
                     file_path = os.path.join(archives_path, file_name)
-                    partition_path = self._resolve_partition_path(package_name, app_dir_path)
-                    logging.info("Deploying: %s %s %s => %s" %
-                                 (package_name, package_version, package_arch,
-                                  partition_path.replace(app_dir_path, 'AppDir'))
-                                 )
+                    partition_path = self._resolve_partition_path(
+                        package_name, app_dir_path
+                    )
+                    logging.info(
+                        "Deploying: %s %s %s => %s"
+                        % (
+                            package_name,
+                            package_version,
+                            package_arch,
+                            partition_path.replace(app_dir_path, "AppDir"),
+                        )
+                    )
 
-                    self.deployed_packages.append("%s %s %s" % (package_name, package_version, package_arch))
+                    self.deployed_packages.append(
+                        "%s %s %s" % (package_name, package_version, package_arch)
+                    )
 
                     package_files = self._extract_deb(file_path, partition_path)
                     self._make_symlinks_relative(package_files, partition_path)
@@ -107,7 +120,9 @@ class AptBundler(Bundler):
             logging.error(er)
 
     def _generate_exclusion_list(self):
-        complete_install_list = self.apt_get.generate_install_list(self.config.apt_include)
+        complete_install_list = self.apt_get.generate_install_list(
+            self.config.apt_include
+        )
 
         exclusion_list = []
         for package in complete_install_list:
@@ -142,6 +157,6 @@ class AptBundler(Bundler):
         file_name, file_extension = os.path.splitext(file_name)
 
         reversed_file_name = file_name[::-1]
-        arch, version, name = reversed_file_name.split('_', 2)
+        arch, version, name = reversed_file_name.split("_", 2)
 
         return name[::-1], version[::-1], arch[::-1]

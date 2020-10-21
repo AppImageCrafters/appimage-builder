@@ -11,73 +11,72 @@
 #  all copies or substantial portions of the Software.
 
 apt_core_packages = [
-    'util-linux',
-    'coreutils',
-    'adduser',
-    'avahi-daemon',
-    'base-files',
-    'bind9-host',
-    'consolekit',
-    'dbus',
-    'debconf',
-    'dpkg',
-    'lsb-base',
-    'libcap2-bin',
-    'libinput-bin',
-    'multiarch-support',
-    'passwd',
-    'systemd',
-    'systemd-sysv',
-    'ucf',
-    'iso-codes',
-    'shared-mime-info',
-    'mount',
-    'xdg-user-dirs',
-    'sysvinit-utils',
-    'debianutils',
-    'init-system-helpers',
-    'libpam-runtime',
-    'libpam-modules-bin',
-
+    "util-linux",
+    "coreutils",
+    "adduser",
+    "avahi-daemon",
+    "base-files",
+    "bind9-host",
+    "consolekit",
+    "dbus",
+    "debconf",
+    "dpkg",
+    "lsb-base",
+    "libcap2-bin",
+    "libinput-bin",
+    "multiarch-support",
+    "passwd",
+    "systemd",
+    "systemd-sysv",
+    "ucf",
+    "iso-codes",
+    "shared-mime-info",
+    "mount",
+    "xdg-user-dirs",
+    "sysvinit-utils",
+    "debianutils",
+    "init-system-helpers",
+    "libpam-runtime",
+    "libpam-modules-bin",
 ]
 
 apt_font_config_packages = [
-    'libfontconfig*',
-    'fontconfig',
-    'fontconfig-config',
-    'libfreetype*',
+    "libfontconfig*",
+    "fontconfig",
+    "fontconfig-config",
+    "libfreetype*",
 ]
 
 apt_xclient_packages = [
-    'x11-common',
-    'libx11-*',
-    'libxcb1',
-    'libxcb-shape0',
-    'libxcb-shm0',
-    'libxcb-glx0',
-    'libxcb-xfixes0',
-    'libxcb-present0',
-    'libxcb-render0',
-    'libxcb-dri2-0',
-    'libxcb-dri3-0',
+    "x11-common",
+    "libx11-*",
+    "libxcb1",
+    "libxcb-shape0",
+    "libxcb-shm0",
+    "libxcb-glx0",
+    "libxcb-xfixes0",
+    "libxcb-present0",
+    "libxcb-render0",
+    "libxcb-dri2-0",
+    "libxcb-dri3-0",
 ]
 
 apt_graphics_stack_packages = [
-    'libglvnd*',
-    'libglx*',
-    'libgl1*',
-    'libdrm*',
-    'libegl1*',
-    'libegl1-*',
-    'libglapi*',
-    'libgles2*',
-    'libgbm*',
-    'mesa-*',
+    "libglvnd*",
+    "libglx*",
+    "libgl1*",
+    "libdrm*",
+    "libegl1*",
+    "libegl1-*",
+    "libglapi*",
+    "libgles2*",
+    "libgbm*",
+    "mesa-*",
 ]
 
-apt_glibc_packages = ['libc6', 'zlib1g', 'libstdc++6']
+apt_glibc_packages = ["libc6", "zlib1g", "libstdc++6"]
 
 #   packages required by the runtime generators
-apt_proot_apprun_packages = ['proot', 'coreutils']
-apt_classic_apprun_packages = ['coreutils']
+apt_proot_apprun_packages = ["proot", "coreutils"]
+apt_classic_apprun_packages = ["coreutils"]
 apt_wrapper_apprun_packages = []

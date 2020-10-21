@@ -19,7 +19,6 @@ from AppImageBuilder.tester.test_case import TestCase, TestFailed
 
 
 class Tester:
-
     def __init__(self, target):
         self.target = target
         self.needed_libs = None
@@ -34,7 +33,9 @@ class Tester:
         if self.appimage_process:
             appimage_umount(self.appimage_process)
 
-    def _create_test_case(self, docker_image, command='./AppRun', use_host_x=True, env=None):
+    def _create_test_case(
+        self, docker_image, command="./AppRun", use_host_x=True, env=None
+    ):
         if env is None:
             env = []
 

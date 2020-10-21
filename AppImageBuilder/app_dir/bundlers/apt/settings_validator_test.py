@@ -19,35 +19,38 @@ from AppImageBuilder.app_dir.bundlers.apt.settings_validator import AptSettingsV
 
 class AptSettingsValidatorTestCase(unittest.TestCase):
     def test_validate_broken_sources(self):
-        validator = AptSettingsValidator({
-            'arch': 'i386',
-            'sources': [
-                {'as': 'asd'}
-            ],
-            'include': [],
-        })
+        validator = AptSettingsValidator(
+            {
+                "arch": "i386",
+                "sources": [{"as": "asd"}],
+                "include": [],
+            }
+        )
 
         self.assertRaises(schema.SchemaError, validator.validate)
 
     def test_validate_missing_include(self):
-        validator = AptSettingsValidator({
-            'arch': 'i386',
-            'sources': [],
-
-        })
+        validator = AptSettingsValidator(
+            {
+                "arch": "i386",
+                "sources": [],
+            }
+        )
 
         self.assertRaises(schema.SchemaError, validator.validate)
 
     def test_validate_correct(self):
-        validator = AptSettingsValidator({
-            'arch': 'i386',
-            'sources': [
-                {
-                    'sourceline': 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse',
-                    'key_url': 'http://archive.neon.kde.org/public.key'
-                }
-            ],
-            'include': ['package']
-        })
+        validator = AptSettingsValidator(
+            {
+                "arch": "i386",
+                "sources": [
+                    {
+                        "sourceline": "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse",
+                        "key_url": "http://archive.neon.kde.org/public.key",
+                    }
+                ],
+                "include": ["package"],
+            }
+        )
 
         validator.validate()

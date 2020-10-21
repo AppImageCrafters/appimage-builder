@@ -19,11 +19,11 @@ class DpkgQueryError(RuntimeError):
 
 class DpkgQuery(Command):
     def __init__(self):
-        super().__init__('dpkg-query')
+        super().__init__("dpkg-query")
         self.log_stdout = False
 
     def search(self, files):
-        command = [self.runnable, '-S']
+        command = [self.runnable, "-S"]
         command.extend(files)
         self._run(command)
 
@@ -32,13 +32,13 @@ class DpkgQuery(Command):
 
         packages = set()
         for line in self.stdout:
-            split = line.find(':')
+            split = line.find(":")
             packages.add(line[:split])
 
         return packages
 
     def depends(self, packages):
-        command = [self.runnable, '-W', '-f=${binary:Package}: ${Depends}\\n']
+        command = [self.runnable, "-W", "-f=${binary:Package}: ${Depends}\\n"]
         command.extend(packages)
 
         self._run(command)
@@ -49,18 +49,18 @@ class DpkgQuery(Command):
         dependencies = dict()
         for line in self.stdout:
             line = line.strip()
-            line = line.strip('\\')
-            pkg_name_end = line.find(':')
+            line = line.strip("\\")
+            pkg_name_end = line.find(":")
             pkg_name = line[:pkg_name_end]
             dependencies[pkg_name] = []
 
-            deps_start = line.find(' ')
+            deps_start = line.find(" ")
             deps = line[deps_start:]
             deps = deps.strip()
 
-            for dep in deps.split(','):
+            for dep in deps.split(","):
                 dep = dep.strip()
-                dep_name_end = dep.find(' ')
+                dep_name_end = dep.find(" ")
                 dep_name = dep[:dep_name_end]
                 dependencies[pkg_name].append(dep_name)
 

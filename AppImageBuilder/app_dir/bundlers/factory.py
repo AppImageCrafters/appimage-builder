@@ -22,13 +22,11 @@ class BundlerFactoryError(RuntimeError):
 
 class BundlerFactory:
     def __init__(self, app_dir, cache_dir):
-        self.bundlers = {
-            'apt': AptBundler
-        }
+        self.bundlers = {"apt": AptBundler}
         self.app_dir = app_dir
         self.cache_dir = cache_dir
 
-        self.glibc_partition = 'opt/libc'
+        self.glibc_partition = "opt/libc"
         self.runtime = None
 
     def list_bundlers(self):
@@ -52,11 +50,13 @@ class BundlerFactory:
 
     def _validate_bundler_name(self, name):
         if name not in self.bundlers:
-            raise BundlerFactoryError("Unknown bundler: %s. Allowed values are %s"
-                                      % (name, ', '.join(self.bundlers.keys())))
+            raise BundlerFactoryError(
+                "Unknown bundler: %s. Allowed values are %s"
+                % (name, ", ".join(self.bundlers.keys()))
+            )
 
     def _configure_packages(self, bundler):
-        if self.runtime == 'wrapper':
+        if self.runtime == "wrapper":
             bundler.included_packages = bundler.wrapper_apprun_packages
 
             bundler.excluded_packages = [
@@ -66,14 +66,14 @@ class BundlerFactory:
                 *bundler.xclient_packages,
             ]
 
-        if self.runtime == 'proot':
+        if self.runtime == "proot":
             bundler.included_packages = bundler.proot_apprun_packages
             bundler.excluded_packages = bundler.core_packages
 
-        if self.runtime == 'classic':
+        if self.runtime == "classic":
             bundler.included_packages = bundler.classic_apprun_packages
             bundler.excluded_packages = bundler.core_packages
 
     def _configure_partitions(self, bundler):
-        if self.runtime == 'wrapper':
+        if self.runtime == "wrapper":
             bundler.partitions[self.glibc_partition] = bundler.glibc_packages

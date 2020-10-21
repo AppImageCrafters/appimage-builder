@@ -16,15 +16,16 @@ from .base_helper import BaseHelper
 
 
 class GLibSchemas(BaseHelper):
-
     def configure(self, app_run):
         path = self._get_glib_schemas_path()
         if path:
-            subprocess.run(['glib-compile-schemas', path], cwd=self.app_dir)
-            app_run.env['GSETTINGS_SCHEMA_DIR'] = '$APPDIR/%s' % path
+            subprocess.run(["glib-compile-schemas", path], cwd=self.app_dir)
+            app_run.env["GSETTINGS_SCHEMA_DIR"] = "$APPDIR/%s" % path
 
     def _get_glib_schemas_path(self):
-        paths = self.app_dir_cache.find('*/usr/share/glib-2.0/schemas', attrs=['is_dir'])
+        paths = self.app_dir_cache.find(
+            "*/usr/share/glib-2.0/schemas", attrs=["is_dir"]
+        )
         if paths:
             rel_path = os.path.relpath(paths[0], self.app_dir)
             return rel_path

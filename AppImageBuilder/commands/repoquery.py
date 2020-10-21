@@ -20,11 +20,17 @@ class RepoQueryError(RuntimeError):
 
 class RepoQuery(Command):
     def __init__(self):
-        super().__init__('repoquery')
+        super().__init__("repoquery")
         self.log_stdout = False
 
     def requires(self, packages, arch):
-        command = ['repoquery', '--exactdeps', '--resolve', '--requires', '--arch=%s' % arch]
+        command = [
+            "repoquery",
+            "--exactdeps",
+            "--resolve",
+            "--requires",
+            "--arch=%s" % arch,
+        ]
         command.extend(packages)
         self._run(command)
 
