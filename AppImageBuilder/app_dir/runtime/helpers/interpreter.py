@@ -47,7 +47,7 @@ class Interpreter(BaseHelper):
 
     def configure(self, app_run):
         app_run.env["PATH"] = ":".join(
-            ["$APPDIR/%s" % path for path in self._get_bin_paths()]
+            ["$APPDIR/%s:$PATH" % path for path in self._get_bin_paths()]
         )
 
         app_run.env["APPDIR_LIBRARY_PATH"] = ":".join(
