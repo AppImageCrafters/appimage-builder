@@ -80,8 +80,9 @@ def __main__():
     recipe = Recipe()
     recipe.load_file(args.recipe)
     if not args.skip_script:
-        script = Script(recipe)
-        script.execute()
+        script_instructions = recipe.get_item("script", [])
+        script_runner = Script()
+        script_runner.execute(script_instructions)
 
     if not args.skip_build:
         builder = Builder(recipe)

@@ -20,13 +20,19 @@ class ExecutionFailed(RuntimeError):
 
 
 class Script:
-    def __init__(self, recipe):
-        self.instructions = recipe.get_item("script", [])
+    def __init__(self):
+        self.namespace = "script"
 
-    def execute(self):
+    def execute(self, instructions):
+        if not instructions:
+            return
+
         bash = Bash()
-        logger = logging.getLogger("script")
-        for instruction in self.instructions:
+        logger = logging.getLogger(self.namespace)
+        if isinstance(instructions, str):
+            instructions = instructions.splitlines()
+
+        for instruction in instructions:
             logger.info(" + %s" % instruction)
             command = bash.command(instruction)
             for line in command.output.splitlines():
