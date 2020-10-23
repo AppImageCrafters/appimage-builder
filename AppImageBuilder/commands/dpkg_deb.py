@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from .command import Command
+from .dpkg_query import Command
 
 
 class DpkgDebError(RuntimeError):
@@ -40,3 +40,20 @@ class DpkgDeb(Command):
 
             if line:
                 self.logger.debug("%s: %s" % (os.path.basename(deb_file), line))
+
+    def list_dependencies(self, pkg):
+        command = [self.runnable, "-I", pkg]
+        self._run(command)
+
+        if self.return_code != 0:
+            raise DpkgDebError("Package inspection failed")
+
+        dependencies = []
+        for line in self.stdout:
+            if line.startswith("Depends:"):
+                line = line[9:]
+                parts = line.split(", ")
+                for part in parts:
+                    dependencies.append(part.split(" ")[0])
+
+        return dependencies

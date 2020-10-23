@@ -17,6 +17,7 @@ import requests
 
 from AppImageBuilder.commands.apt_key import AptKey
 from AppImageBuilder.commands.dpkg_architecture import DpkgArchitecture
+from AppImageBuilder.commands.dpkg_deb import DpkgDeb
 
 
 class AptConfigError(RuntimeError):
@@ -32,6 +33,7 @@ class Config:
         self.apt_source_lines = []
         self.apt_source_key_urls = []
         self.apt_include = []
+        self.apt_include_files = []
         self.apt_exclude = []
 
     def load(self, settings):
@@ -107,7 +109,16 @@ class Config:
                 'include list expected instead of: "%s".' % self.settings["include"]
             )
 
-        self.apt_include = self.settings["include"]
+        dpkg_deb = DpkgDeb()
+        dpkg_deb.log_command = False
+        for pkg in self.settings["include"]:
+            if os.path.exists(pkg):
+                self.apt_include_files.append(pkg)
+                pkg_depends = dpkg_deb.list_dependencies(pkg)
+
+                self.apt_include.extend(pkg_depends)
+            else:
+                self.apt_include.append(pkg)
 
     def _load_apt_excludes(self):
         if "exclude" not in self.settings:

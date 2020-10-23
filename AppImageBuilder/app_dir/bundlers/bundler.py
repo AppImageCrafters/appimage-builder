@@ -30,10 +30,8 @@ class Bundler:
         self.graphics_stack_packages = []
         self.glibc_packages = []
 
-        #   packages required by the runtime generators
-        self.proot_apprun_packages = []
+        #   packages required by the runtime generator
         self.wrapper_apprun_packages = []
-        self.classic_apprun_packages = []
 
     def validate_configuration(self):
         pass

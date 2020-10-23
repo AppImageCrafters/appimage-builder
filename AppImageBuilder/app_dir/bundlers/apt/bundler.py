@@ -32,9 +32,7 @@ class AptBundler(Bundler):
         self.graphics_stack_packages = apt_graphics_stack_packages
         self.glibc_packages = apt_glibc_packages
 
-        #   packages required by the runtime generators
-        self.proot_apprun_packages = apt_proot_apprun_packages
-        self.classic_apprun_packages = apt_classic_apprun_packages
+        #   packages required by the runtime generator
         self.wrapper_apprun_packages = apt_wrapper_apprun_packages
 
         self.config = None
@@ -73,36 +71,62 @@ class AptBundler(Bundler):
 
         self.apt_get.install(self.config.apt_include)
 
-        self._extract_packages_into_app_dir(self.app_dir, exclusion_list)
+        self._extract_packages_into_app_dir(self.app_dir)
 
-    def _extract_packages_into_app_dir(self, app_dir_path, exclusion_list):
+    def _extract_packages_into_app_dir(self, app_dir_path):
         archives_path = self.config.get_apt_archives_path()
 
-        for file_name in os.listdir(archives_path):
-            if is_deb_file(file_name):
+        for file_path in self.config.apt_include_files:
+            if is_deb_file(file_path):
+                file_name = os.path.basename(file_path)
                 (
-                    package_name,
-                    package_version,
-                    package_arch,
+                    pkg_name,
+                    pkg_version,
+                    pkg_arch,
+                ) = self._extract_package_info(file_name)
+                partition_path = self._resolve_partition_path(pkg_name, app_dir_path)
+                logging.info(
+                    "Deploying: %s %s %s => %s"
+                    % (
+                        pkg_name,
+                        pkg_version,
+                        pkg_arch,
+                        partition_path.replace(app_dir_path, "AppDir"),
+                    )
+                )
+
+                self.deployed_packages.append(
+                    "%s %s %s" % (pkg_name, pkg_version, pkg_arch)
+                )
+
+                package_files = self._extract_deb(file_path, partition_path)
+                self._make_symlinks_relative(package_files, partition_path)
+
+        for file_name in os.listdir(archives_path):
+            file_path = os.path.join(archives_path, file_name)
+            if is_deb_file(file_path):
+                (
+                    pkg_name,
+                    pkg_version,
+                    pkg_arch,
                 ) = self._extract_package_info(file_name)
 
-                if not self._is_excluded(package_name):
-                    file_path = os.path.join(archives_path, file_name)
+                if not self._is_excluded(pkg_name):
                     partition_path = self._resolve_partition_path(
-                        package_name, app_dir_path
+                        pkg_name, app_dir_path
                     )
                     logging.info(
                         "Deploying: %s %s %s => %s"
                         % (
-                            package_name,
-                            package_version,
-                            package_arch,
+                            pkg_name,
+                            pkg_version,
+                            pkg_arch,
                             partition_path.replace(app_dir_path, "AppDir"),
                         )
                     )
 
                     self.deployed_packages.append(
-                        "%s %s %s" % (package_name, package_version, package_arch)
+                        "%s %s %s" % (pkg_name, pkg_version, pkg_arch)
                     )
 
                     package_files = self._extract_deb(file_path, partition_path)
