@@ -129,7 +129,7 @@ class WrapperAppRun:
         for base_path, dirs, files in os.walk(self.app_dir):
             for file in files:
                 abs_path = os.path.join(base_path, file)
-                if fnmatch.fnmatch(abs_path, "*/libc-*.so"):
+                if fnmatch.fnmatch(abs_path, "*/libc.so*"):
                     paths.append(abs_path)
         return paths
 

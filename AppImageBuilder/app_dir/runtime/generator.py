@@ -14,7 +14,7 @@ import os
 
 from AppImageBuilder.app_dir.app_info.loader import AppInfoLoader
 from AppImageBuilder.recipe import Recipe
-from .file_info_cache import FileInfoCache
+from AppImageBuilder.app_dir.file_info_cache import FileInfoCache
 from .app_run import WrapperAppRun
 from .helpers.factory import HelperFactory
 

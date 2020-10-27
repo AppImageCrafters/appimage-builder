@@ -46,7 +46,7 @@ class FileInfoCache:
                         self.cache[abs_path] = self.inspect_file(abs_path)
                     else:
                         os.path.getmtime(abs_path)
-                        if os.path.getmtime(abs_path) != self.cache[abs_path]["mtme"]:
+                        if os.path.getmtime(abs_path) != self.cache[abs_path]["mtime"]:
                             self.cache[abs_path] = self.inspect_file(abs_path)
 
                     logging.debug(self.cache[abs_path])

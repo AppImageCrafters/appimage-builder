@@ -45,6 +45,13 @@ class RecipeGenerator:
         self.appimage_arch = None
 
         self.apt_arch = None
+        self.apt_includes = None
+        self.apt_excludes = None
+        self.apt_sources = None
+
+        self.files_include = None
+        self.files_exclude = None
+
         self._setup_app_info()
         self.setup_questions()
 
@@ -54,16 +61,20 @@ class RecipeGenerator:
         )
         runtime_analyser.run_app_analysis()
 
-        if shutil.which("apt-get"):
-            self.logger.info("Guessing APT configuration")
-            self.apt_arch = AptRecipeGenerator.get_arch()
-            self.apt_sources = AptRecipeGenerator.get_sources()
-            self.apt_includes = AptRecipeGenerator.resolve_includes(
-                runtime_analyser.runtime_libs
-            )
-            self.apt_excludes = AptRecipeGenerator.resolve_excludes()
+        # if shutil.which("apt-get"):
+        #     self.logger.info("Guessing APT configuration")
+        #     self.apt_arch = AptRecipeGenerator.get_arch()
+        #     self.apt_sources = AptRecipeGenerator.get_sources()
+        #     self.apt_includes = AptRecipeGenerator.resolve_includes(
+        #         runtime_analyser.runtime_libs
+        #     )
+        #     self.apt_excludes = AptRecipeGenerator.resolve_excludes()
 
-        self.files_excludes = [
+        self.files_include = []
+        self.files_include.extend(runtime_analyser.runtime_bins)
+        self.files_include.extend(runtime_analyser.runtime_libs)
+
+        self.files_exclude = [
             "usr/share/man",
             "usr/share/doc/*/README.*",
             "usr/share/doc/*/changelog.*",
@@ -106,11 +117,10 @@ class RecipeGenerator:
         ).ask()
 
     def generate(self):
-        appimage_builder_yml_template_path = os.path.realpath(
-            os.path.join(
-                os.path.dirname(__file__), "templates", "AppImageBuilder.yml.in"
-            )
+        appimage_builder_yml_template_path = os.path.join(
+            os.path.dirname(__file__), "templates", "appimage-builder.yml.in"
         )
+
         with open(appimage_builder_yml_template_path, "r") as filedata:
             appimage_builder_yml_template = Template.parse(filedata, "yaml")
 
@@ -128,7 +138,8 @@ class RecipeGenerator:
                 "apt_sources": self.apt_sources,
                 "apt_includes": self.apt_includes,
                 "apt_excludes": self.apt_excludes,
-                "files_excludes": self.files_excludes,
+                "files_includes": self.files_include,
+                "files_excludes": self.files_exclude,
                 "appimage_arch": self.appimage_arch,
             }
         )

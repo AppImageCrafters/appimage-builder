@@ -13,7 +13,6 @@ import os
 
 from .bundler import Bundler
 from .apt.bundler import AptBundler
-from .yum.bundler import YumBundler
 
 
 class BundlerFactoryError(RuntimeError):

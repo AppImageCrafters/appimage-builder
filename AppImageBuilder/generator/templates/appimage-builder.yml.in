@@ -1,3 +1,4 @@
+# appimage-builder recipe see https://appimage-builder.readthedocs.io for details
 version: 1
 
 AppDir:
@@ -15,16 +16,9 @@ AppDir:
     env:
       !Var runtime_env
 
-  apt:
-    arch: !Var apt_arch
-    sources:
-      !Var apt_sources
-    include:
-      !Var apt_includes
-    exclude:
-      !Var apt_excludes
-
   files:
+    include:
+      !Var files_includes
     exclude:
       !Var files_excludes
 
