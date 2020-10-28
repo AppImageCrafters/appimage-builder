@@ -19,7 +19,7 @@ from .app_info.desktop_entry_generator import DesktopEntryGenerator
 from .app_info.icon_bundler import IconBundler
 from .app_info.loader import AppInfoLoader
 from AppImageBuilder.app_dir.bundlers.factory import BundlerFactory
-from .bundlers.files.file_helper import FileDeployHelper
+from .bundlers.files.deploy_helper import FileDeployHelper
 from ..script import Script
 
 
@@ -87,12 +87,7 @@ class Builder:
             bundler.run()
 
         file_includes = self.recipe.get_item("AppDir/files/include", [])
-        include_graphics_libs = self.recipe.get_item(
-            "AppDir/include_graphics_libs", False
-        )
-        file_helper = FileDeployHelper(
-            self.app_dir_path, file_includes, include_graphics_libs
-        )
+        file_helper = FileDeployHelper(self.app_dir_path, file_includes)
         file_helper.deploy()
 
     def _generate_runtime(self):

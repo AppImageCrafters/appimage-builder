@@ -74,6 +74,10 @@ class RecipeGenerator:
         self.files_include.extend(runtime_analyser.runtime_bins)
         self.files_include.extend(runtime_analyser.runtime_libs)
 
+        self.files_include = [
+            file for file in self.files_include if not file.startswith(self.app_dir)
+        ]
+
         self.files_exclude = [
             "usr/share/man",
             "usr/share/doc/*/README.*",
@@ -159,7 +163,7 @@ class RecipeGenerator:
     def _locate_app_dir():
         for file_name in os.listdir(os.path.curdir):
             if os.path.isdir(file_name) and file_name.lower() == "appdir":
-                return file_name
+                return os.path.abspath(file_name)
 
         raise RecipeGeneratorError(
             "Unable to find an AppDir, this is required to create a recipe."

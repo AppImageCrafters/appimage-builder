@@ -10,8 +10,8 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-import logging
 import fnmatch
+import logging
 import os
 import shutil
 
@@ -38,10 +38,13 @@ class FileDeployHelper:
             "*/libX11-xcb.so*",
         ],
         "glibc": [
+            "*/libc-*.so",
+            "*/libc.so*",
+            "*/ld-*.so",
+            "*/ld-linux-x86-64.so*",
             "etc/ld.so.conf.d/*",
             "*/libcrypt.so*",
             "*/libnss_compat-*.so",
-            "*/ld-linux-x86-64.so*",
             "*/libnss_nis.so*",
             "*/libmemusage.so*",
             "*/libpthread.so*",
@@ -58,7 +61,6 @@ class FileDeployHelper:
             "*/libnss_nisplus.so*",
             "*/libgcc_s.so*",
             "*/libnss_compat.so*",
-            "*/ld-*.so",
             "*/libz.so*",
             "*/libthread_db-*.so",
             "*/libpcprofile.so",
@@ -67,11 +69,9 @@ class FileDeployHelper:
             "*/libnss_hesiod.so*",
             "*/libresolv.so*",
             "*/libBrokenLocale-*.so",
-            "*/libc-*.so",
             "*/libnss_hesiod-*.so",
             "*/libSegFault.so",
             "*/libnss_files.so*",
-            "*/libc.so*",
             "*/libanl.so*",
             "*/librt-*.so",
             "*/libanl-*.so",
@@ -99,10 +99,9 @@ class FileDeployHelper:
         ],
     }
 
-    def __init__(self, app_dir: str, includes: [str], include_graphic_libs=False):
-        self.app_dir = app_dir
+    def __init__(self, app_dir: str, includes: [str]):
+        self.app_dir = os.path.abspath(app_dir)
         self.includes = includes
-        self.include_graphic_libs = include_graphic_libs
         self.app_dir_cache = FileInfoCache(app_dir)
         self.logger = logging.getLogger("FileDeployHelper")
 
@@ -111,24 +110,13 @@ class FileDeployHelper:
         self.app_dir_cache.update()
 
         for path in self.includes:
-            if self.include_graphic_libs or not self._is_a_graphic_library(path):
-                self._deploy_file(path)
+            self._deploy_path(path)
 
-        self.app_dir_cache.update()
-        elf_files = self.app_dir_cache.find("*", attrs=["is_elf"])
-        for path in elf_files:
-            file_info = self.app_dir_cache.cache[path]
-            if "pt_needed" in file_info:
-                for lib in file_info["pt_needed"]:
-                    self._deploy_lib(lib)
+    def _deploy_path(self, path):
+        deploy_prefix = self._resolve_deploy_prefix(path)
+        deploy_path = deploy_prefix + path.lstrip("/")
 
-            if "pt_interp" in file_info:
-                if not file_info["pt_interp"].startswith("/tmp/appimage-"):
-                    self._deploy_file(file_info["pt_interp"])
-
-    def _deploy_file(self, path):
         self.logger.info("deploying %s" % path)
-        deploy_path = self._resolve_deploy_path(path)
         os.makedirs(os.path.dirname(deploy_path), exist_ok=True)
         shutil.copy2(path, deploy_path)
 
@@ -139,12 +127,9 @@ class FileDeployHelper:
 
         return False
 
-    def _resolve_deploy_path(self, path: str):
+    def _resolve_deploy_prefix(self, path: str):
         for pattern in self.listings["glibc"]:
             if fnmatch.fnmatch(path, pattern):
-                return self.app_dir.rstrip("/") + "/opt/libc/" + path.lstrip("/")
+                return self.app_dir.rstrip("/") + "/opt/libc/"
 
-        return self.app_dir.rstrip("/") + "/" + path.lstrip("/")
-
-    def _deploy_lib(self, lib):
-        pass
+        return self.app_dir.rstrip("/") + "/"

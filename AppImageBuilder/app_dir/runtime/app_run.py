@@ -68,10 +68,12 @@ class WrapperAppRun:
         if not libc_paths:
             raise AppRunSetupError("Unable to locate libc at: %s" % self.app_dir)
 
-        arch = set()
+        archs = set()
         for path in libc_paths:
-            arch.add(self._get_elf_arch(path))
-        return list(arch)
+            arch = self._get_elf_arch(path)
+            if arch:
+                archs.add(arch)
+        return list(archs)
 
     def _generate_env_file(self):
         with open(os.path.join(self.app_dir, ".env"), "w") as f:
@@ -85,11 +87,12 @@ class WrapperAppRun:
             ["file", "-b", file], stdout=subprocess.PIPE, env=proc_env
         )
         output = proc.stdout.decode("utf-8")
+
         parts = output.split(",")
         signature = ",".join(parts[1:2])
         signature = signature.replace("shared object", "")
         signature = signature.replace("executable", "")
-        return signature
+        return signature.strip(" ")
 
     def _download_apprun_binaries(self):
         self.apprun_binaries = []
@@ -130,6 +133,8 @@ class WrapperAppRun:
             for file in files:
                 abs_path = os.path.join(base_path, file)
                 if fnmatch.fnmatch(abs_path, "*/libc.so*"):
+                    paths.append(abs_path)
+                if fnmatch.fnmatch(abs_path, "*/libc-*.so*"):
                     paths.append(abs_path)
         return paths
 
