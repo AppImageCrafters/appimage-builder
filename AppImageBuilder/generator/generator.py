@@ -45,6 +45,13 @@ class RecipeGenerator:
         self.appimage_arch = None
 
         self.apt_arch = None
+        self.apt_includes = None
+        self.apt_excludes = None
+        self.apt_sources = None
+
+        self.files_include = None
+        self.files_exclude = None
+
         self._setup_app_info()
         self.setup_questions()
 
@@ -62,8 +69,12 @@ class RecipeGenerator:
                 runtime_analyser.runtime_libs
             )
             self.apt_excludes = AptRecipeGenerator.resolve_excludes()
+        else:
+            self.logger.warning("apt-get not found")
+            self.logger.info("Generating direct file include list")
+            self._generate_files_include_list(runtime_analyser)
 
-        self.files_excludes = [
+        self.files_exclude = [
             "usr/share/man",
             "usr/share/doc/*/README.*",
             "usr/share/doc/*/changelog.*",
@@ -78,6 +89,16 @@ class RecipeGenerator:
                 runtime_analyser.runtime_libs
             )
         }
+
+    def _generate_files_include_list(self, runtime_analyser):
+        self.files_include = set()
+        self.files_include = self.files_include.union(runtime_analyser.runtime_bins)
+        self.files_include = self.files_include.union(runtime_analyser.runtime_libs)
+        self.files_include = self.files_include.union(runtime_analyser.runtime_data)
+        self.files_include = sorted(self.files_include)
+        self.files_include = [
+            file for file in self.files_include if not file.startswith(self.app_dir)
+        ]
 
     def setup_questions(self):
         # AppDir -> app_info
@@ -106,11 +127,10 @@ class RecipeGenerator:
         ).ask()
 
     def generate(self):
-        appimage_builder_yml_template_path = os.path.realpath(
-            os.path.join(
-                os.path.dirname(__file__), "templates", "AppImageBuilder.yml.in"
-            )
+        appimage_builder_yml_template_path = os.path.join(
+            os.path.dirname(__file__), "templates", "appimage-builder.yml.in"
         )
+
         with open(appimage_builder_yml_template_path, "r") as filedata:
             appimage_builder_yml_template = Template.parse(filedata, "yaml")
 
@@ -128,7 +148,8 @@ class RecipeGenerator:
                 "apt_sources": self.apt_sources,
                 "apt_includes": self.apt_includes,
                 "apt_excludes": self.apt_excludes,
-                "files_excludes": self.files_excludes,
+                "files_includes": self.files_include,
+                "files_excludes": self.files_exclude,
                 "appimage_arch": self.appimage_arch,
             }
         )
@@ -148,7 +169,7 @@ class RecipeGenerator:
     def _locate_app_dir():
         for file_name in os.listdir(os.path.curdir):
             if os.path.isdir(file_name) and file_name.lower() == "appdir":
-                return file_name
+                return os.path.abspath(file_name)
 
         raise RecipeGeneratorError(
             "Unable to find an AppDir, this is required to create a recipe."
