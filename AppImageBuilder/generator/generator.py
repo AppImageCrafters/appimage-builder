@@ -61,22 +61,18 @@ class RecipeGenerator:
         )
         runtime_analyser.run_app_analysis()
 
-        # if shutil.which("apt-get"):
-        #     self.logger.info("Guessing APT configuration")
-        #     self.apt_arch = AptRecipeGenerator.get_arch()
-        #     self.apt_sources = AptRecipeGenerator.get_sources()
-        #     self.apt_includes = AptRecipeGenerator.resolve_includes(
-        #         runtime_analyser.runtime_libs
-        #     )
-        #     self.apt_excludes = AptRecipeGenerator.resolve_excludes()
-
-        self.files_include = []
-        self.files_include.extend(runtime_analyser.runtime_bins)
-        self.files_include.extend(runtime_analyser.runtime_libs)
-
-        self.files_include = [
-            file for file in self.files_include if not file.startswith(self.app_dir)
-        ]
+        if shutil.which("apt-get"):
+            self.logger.info("Guessing APT configuration")
+            self.apt_arch = AptRecipeGenerator.get_arch()
+            self.apt_sources = AptRecipeGenerator.get_sources()
+            self.apt_includes = AptRecipeGenerator.resolve_includes(
+                runtime_analyser.runtime_libs
+            )
+            self.apt_excludes = AptRecipeGenerator.resolve_excludes()
+        else:
+            self.logger.warning("apt-get not found")
+            self.logger.info("Generating direct file include list")
+            self._generate_files_include_list(runtime_analyser)
 
         self.files_exclude = [
             "usr/share/man",
@@ -93,6 +89,16 @@ class RecipeGenerator:
                 runtime_analyser.runtime_libs
             )
         }
+
+    def _generate_files_include_list(self, runtime_analyser):
+        self.files_include = set()
+        self.files_include = self.files_include.union(runtime_analyser.runtime_bins)
+        self.files_include = self.files_include.union(runtime_analyser.runtime_libs)
+        self.files_include = self.files_include.union(runtime_analyser.runtime_data)
+        self.files_include = sorted(self.files_include)
+        self.files_include = [
+            file for file in self.files_include if not file.startswith(self.app_dir)
+        ]
 
     def setup_questions(self):
         # AppDir -> app_info
