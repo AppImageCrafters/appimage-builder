@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 
 import fnmatch
+import glob
 import logging
 import os
 import shutil
@@ -109,7 +110,11 @@ class FileDeployHelper:
         self.logger.info("Inspecting AppDir")
         self.app_dir_cache.update()
 
+        expanded_list = set()
         for path in self.includes:
+            expanded_list = expanded_list.union(glob.glob(path, recursive=True))
+
+        for path in expanded_list:
             self._deploy_path(path)
 
     def _deploy_path(self, path):
