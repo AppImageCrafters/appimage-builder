@@ -85,7 +85,7 @@ class AptRecipeGenerator:
         with open(path, "r") as f:
             for line in f.readlines():
                 if line.startswith("deb "):
-                    sources.append({"sourceline": line.strip(), "key_url": ""})
+                    sources.append({"sourceline": line.strip()})
 
         return sources
 

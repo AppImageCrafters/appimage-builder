@@ -35,6 +35,7 @@ class Config:
         self.apt_include = []
         self.apt_include_files = []
         self.apt_exclude = []
+        self.allow_unauthenticated = False
 
     def load(self, settings):
         self.settings = settings
@@ -43,6 +44,7 @@ class Config:
         self._load_sources()
         self._load_apt_includes()
         self._load_apt_excludes()
+        self.allow_unauthenticated = 'allow_unauthenticated' in settings and settings['allow_unauthenticated']
 
     def generate(self):
         self._generate_apt_work_dirs()
@@ -228,14 +230,19 @@ class Config:
 
     def _generate_apt_conf_contents(self):
         arch = self.settings["arch"]
-        return (
-            'apt::Architecture "%s";\n'
-            'APT::Get::Host-Architecture "%s";\n'
-            'Dir "%s";\n'
-            'apt::Get::Download-Only "true";\n'
-            'apt::Install-Recommends "false";\n'
-            'APT::Default-Release "*";' % (arch, arch, self.apt_prefix)
-        )
+        lines = [
+            'Dir "%s";' % self.apt_prefix,
+            'APT::Architecture "%s";' % arch,
+            'APT::Default-Release "*";',
+            'APT::Get::Host-Architecture "%s";' % arch,
+            'APT::Get::Download-Only "True";',
+            'APT::Install-Recommends "False";',
+            'APT::Install-Suggests "False";',
+            'Dir::Etc::sourceparts "False";',
+            'APT::Get::AllowUnauthenticated "%s";' % self.allow_unauthenticated,
+            'Acquire::AllowInsecureRepositories "%s";' % self.allow_unauthenticated
+        ]
+        return "\n".join(lines)
 
     def _generate_apt_source_list(self):
         path = self._get_apt_sources_list_path()
@@ -284,7 +291,7 @@ class Config:
 
     @staticmethod
     def _generate_pkg_status_installed_ok_entry(
-        pkg_name, pkg_version="9%9z.9.9-1appimage-builder-9"
+            pkg_name, pkg_version="9%9z.9.9-1appimage-builder-9"
     ):
         return "\n".join(
             [

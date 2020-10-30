@@ -25,6 +25,7 @@ class AptSettingsValidator:
                 ],
                 "include": [And(str, len)],
                 Optional("exclude"): [And(str, len)],
+                Optional("allow_unauthenticated"): bool,
             }
         )
 

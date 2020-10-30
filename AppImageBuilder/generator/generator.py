@@ -127,8 +127,10 @@ class RecipeGenerator:
         ).ask()
 
     def generate(self):
+        template_file_name = "apt.yml.in" if self.apt_includes else "files.yml.in"
+
         appimage_builder_yml_template_path = os.path.join(
-            os.path.dirname(__file__), "templates", "appimage-builder.yml.in"
+            os.path.dirname(__file__), "templates", template_file_name
         )
 
         with open(appimage_builder_yml_template_path, "r") as filedata:
@@ -158,6 +160,7 @@ class RecipeGenerator:
         logging.info(rendered_yml)
 
         with open("AppImageBuilder.yml", "w") as f:
+            f.write("# appimage-builder recipe see https://appimage-builder.readthedocs.io for details\n")
             f.write(rendered_yml)
 
         self.logger.info("Recipe generation completed.")

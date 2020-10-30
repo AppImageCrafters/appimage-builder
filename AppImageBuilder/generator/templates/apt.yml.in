@@ -1,0 +1,59 @@
+# appimage-builder recipe see https://appimage-builder.readthedocs.io for details
+version: 1
+
+AppDir:
+  path: ./AppDir
+
+  app_info:
+    id: !Var app_info_id
+    name: !Var app_info_name
+    icon: !Var app_info_icon
+    version: !Var app_info_version
+    exec: !Var app_info_exec
+    exec_args: !Var app_info_exec_args
+
+  runtime:
+    env:
+      !Var runtime_env
+
+  apt:
+    arch: !Var apt_arch
+    # UNSAFE! Please set the sources list key_url property
+    allow_unauthenticated: true
+    sources:
+      !Var apt_sources
+    include:
+      !Var apt_includes
+    exclude:
+      !Var apt_excludes
+
+  files:
+    exclude:
+      !Var files_excludes
+
+  test:
+    fedora:
+      image: appimagecrafters/tests-env:fedora-30
+      command: ./AppRun
+      use_host_x: true
+    debian:
+      image: appimagecrafters/tests-env:debian-stable
+      command: ./AppRun
+      use_host_x: true
+    arch:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: ./AppRun
+      use_host_x: true
+    centos:
+      image: appimagecrafters/tests-env:centos-7
+      command: ./AppRun
+      use_host_x: true
+    ubuntu:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: ./AppRun
+      use_host_x: true
+
+AppImage:
+  arch: !Var appimage_arch
+  update-information: None
+  sign-key: None
