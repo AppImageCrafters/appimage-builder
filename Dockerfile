@@ -3,10 +3,7 @@ FROM ubuntu:bionic
 RUN apt-get update && apt-get -y install python3 python3-setuptools python3-pip wget fakeroot gnupg2 libglib2.0-bin file \
  desktop-file-utils libgdk-pixbuf2.0-dev librsvg2-dev zsync
 
-ADD AppImageBuilder /opt/appimage-builder/AppImageBuilder
-ADD appimage-builder /opt/appimage-builder
-ADD appimage-inspector /opt/appimage-builder
-ADD appimage-modules /opt/appimage-builder
+ADD appimagebuilder /opt/appimage-builder/AppImageBuilder
 ADD README.md /opt/appimage-builder
 ADD LICENSE /opt/appimage-builder
 ADD *.py /opt/appimage-builder
