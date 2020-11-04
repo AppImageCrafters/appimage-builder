@@ -13,8 +13,8 @@
 import argparse
 import logging
 
-from AppImageBuilder.inspector.inspector import Inspector
-from AppImageBuilder.tester.tester import Tester
+from appimagebuilder.inspector.inspector import Inspector
+from appimagebuilder.tester.tester import Tester
 
 
 def configure_logging(args):
