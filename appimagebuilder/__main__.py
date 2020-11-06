@@ -15,7 +15,7 @@ import argparse
 import logging
 import os
 
-from appimagebuilder.appimage_builder import AppImageBuilder
+from appimagebuilder.appimage import AppImageCreator
 from appimagebuilder.app_dir.builder import Builder
 from appimagebuilder.app_dir.tester import Tester
 from appimagebuilder.recipe import Recipe
@@ -85,8 +85,8 @@ def __main__():
         script_runner.execute(script_instructions)
 
     if not args.skip_build:
-        builder = Builder(recipe)
-        builder.build()
+        creator = Builder(recipe)
+        creator.build()
 
     if not args.skip_tests:
         try:
@@ -101,8 +101,8 @@ def __main__():
             exit(1)
 
     if not args.skip_appimage:
-        builder = AppImageBuilder(recipe)
-        builder.build()
+        creator = AppImageCreator(recipe)
+        creator.create()
 
 
 if __name__ == "__main__":

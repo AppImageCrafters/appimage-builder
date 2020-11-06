@@ -16,7 +16,7 @@ from urllib import request
 from appimagebuilder.commands.appimagetool import AppImageToolCommand
 
 
-class AppImageBuilder:
+class AppImageCreator:
     def __init__(self, recipe):
         self.app_dir = recipe.get_item("AppDir/path")
         self.target_arch = recipe.get_item("AppImage/arch")
@@ -36,7 +36,7 @@ class AppImageBuilder:
         )
         self.target_file = recipe.get_item("AppImage/file_name", fallback_file_name)
 
-    def build(self):
+    def create(self):
         self._assert_target_architecture()
 
         runtime_url = self._get_runtime_url()
