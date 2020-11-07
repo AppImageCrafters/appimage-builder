@@ -9,20 +9,21 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import fnmatch
 import glob
+import hashlib
 import logging
 import os
-import re
 import subprocess
+
 from pathlib import Path
+from urllib import request
+
+from .errors import PackageDeployError
+from .utils import filter_packages_cache, resolve_packages_from_simulated_install, \
+    package_tuples_to_file_names, run_apt_get_update, run_dpkg_deb_extract, run_apt_get_install_download_only
 
 
-class AptPackageDeployError(Exception):
-    pass
-
-
-class AptPackageDeploy:
+class PackageDeploy:
     """Deploy deb packages into an AppDir using apt-get to resolve the packages and their dependencies"""
 
     # manually crafted lists of packages used to determine what should be excluded by default or deployed in
@@ -95,6 +96,7 @@ class AptPackageDeploy:
     def __init__(self, cache_dir, sources: [str], keys: [str], options: {}):
         self.cache_dir = os.path.abspath(cache_dir)
         self.apt_conf_path = os.path.join(self.cache_dir, "apt.conf")
+        self.apt_keys_path = os.path.join(self.cache_dir, "keys")
 
         self.dpkg_dir_path = os.path.join(self.cache_dir, "dpkg")
         self.dpkg_status_path = os.path.join(self.dpkg_dir_path, "status")
@@ -111,6 +113,7 @@ class AptPackageDeploy:
             "Dir::Etc::Parts": self.cache_dir,
             "Dir::Etc::sourcelist": self.apt_sources_path,
             "Dir::Etc::PreferencesParts": self.cache_dir,
+            "Dir::Etc::TrustedParts": self.apt_keys_path,
             "Dir::State::status": self.dpkg_status_path,
             "Dir::Ignore-Files-Silently": False,
             "APT::Install-Recommends": False,
@@ -122,25 +125,21 @@ class AptPackageDeploy:
 
         self.logger = logging.getLogger("AptPackageDeploy")
 
-    def deploy(self, packages: [str], target: str, exclude: [str]):
-        """Deploy the packages and their dependencies to appdir. The packages listed in exclude will not be
-        deployed nor their dependencies.
+    def deploy(self, packages: [str], target: str, exclude: [str] = []):
+        """Deploy the packages and their dependencies to target.
 
+        Packages listed in exclude will not be deployed nor their dependencies.
         Packages from the system services and graphics listings will be added by default to the exclude list.
-
         Packages from the glibc listing will be deployed using <target>/opt/libc as prefix
         """
 
         self._configure()
 
-        # avoid packages from previous builds mix with the current build
-        self._clean()
-
         self._update()
 
         # resolve package names patterns
-        packages = self._extend_package_names_patterns(packages)
-        exclude = self._extend_package_names_patterns(exclude)
+        packages = filter_packages_cache(packages)
+        exclude = filter_packages_cache(exclude)
 
         # extend exclude list with default values keeping the packages that were required explicitly
         exclude = self._refine_exclude(exclude, packages)
@@ -149,25 +148,26 @@ class AptPackageDeploy:
         self._set_installed_packages(exclude)
 
         # use apt-get install --download-only to ensure that all the dependencies are resolved and downloaded
-        self._download(packages)
+        run_apt_get_install_download_only(packages)
 
         # manually extract downloaded packages to be able to create the opt/libc partition
         # where the glibc library and other related packages will be placed
-        self._extract(target)
+        self._extract(packages, target)
 
     def _refine_exclude(self, exclude, packages):
         # avoid duplicates
         exclude = set(exclude)
         # don't bundle graphic stack packages
-        exclude = exclude.union(self.listings['graphics'])
+        exclude = exclude.union(self.listings["graphics"])
         # don't bundle system services
-        exclude = exclude.union(self.listings['system_services'])
+        exclude = exclude.union(self.listings["system_services"])
         # don't exclude explicitly required packges
         exclude.difference_update(packages)
         return exclude
 
     def _configure(self):
         os.makedirs(self.cache_dir, exist_ok=True)
+        os.makedirs(self.apt_keys_path, exist_ok=True)
         os.makedirs(self.dpkg_dir_path, exist_ok=True)
         os.makedirs(os.path.join(self.dpkg_dir_path, "updates"), exist_ok=True)
         os.makedirs(os.path.join(self.dpkg_dir_path, "info"), exist_ok=True)
@@ -187,30 +187,53 @@ class AptPackageDeploy:
 
         Path(self.dpkg_status_path).touch(exist_ok=True)
 
+        self._retrieve_keys()
+
+    def _retrieve_keys(self):
+        for key_url in self.keys:
+            key_url_hash = hashlib.md5(key_url.encode()).hexdigest()
+            key_path = os.path.join(self.apt_keys_path, "%s.asc" % key_url_hash)
+            if not os.path.exists(key_path):
+                self.logger.info("Download key file: %s" % key_url)
+                request.urlretrieve(key_url, key_path)
+
     def _update(self):
         if os.getenv("ABUILDER_APT_SKIP_UPDATE", False):
-            self.logger.warning("`apt-get update` skip, newly added repositories will not be reachable!")
+            self.logger.warning(
+                "`apt-get update` skip, newly added repositories will not be reachable!"
+            )
             return
 
-        output = subprocess.run("apt-get update", shell=True)
-        if output.returncode:
-            raise AptPackageDeployError('"%s" execution failed with code %s' % (output.args, output.returncode))
+        run_apt_get_update()
 
-    @staticmethod
-    def _download(packages):
-        output = subprocess.run(
-            "apt-get install -y --download-only %s" % (" ".join(packages)),
-            shell=True,
+    def _extract(self, packages, target: str):
+        # ensure target directories exists
+        libc_target = os.path.join(target, "opt/libc")
+        os.makedirs(libc_target, exist_ok=True)
+        os.makedirs(target, exist_ok=True)
+
+        # make sure that all glibc related package will be properly identified
+        libc_packages = resolve_packages_from_simulated_install(
+            self.listings["glibc"]
         )
-        if output.returncode:
-            raise AptPackageDeployError(
-                '"%s" execution failed with code %s' % (output.args, output.returncode)
-            )
+        libc_package_files = package_tuples_to_file_names(libc_packages)
 
-    def _extract(self, target: str):
-        for package_path in glob.glob(self.cache_dir + "/archives/*.deb"):
-            self.logger.info("Deploying %s" % os.path.basename(package_path))
-            self._extract_deb(package_path, target)
+        # make sure that only the required packages and their dependencies are bundled (not the whole apt cache)
+        packages = resolve_packages_from_simulated_install(packages)
+        package_files = package_tuples_to_file_names(packages)
+
+        for file in package_files:
+            package_path = os.path.join(self.cache_dir, "archives", file)
+            if os.path.basename(package_path) in libc_package_files:
+                self.logger.info(
+                    "Deploying %s to %s" % (os.path.basename(package_path), libc_target)
+                )
+                run_dpkg_deb_extract(package_path, libc_target)
+            else:
+                self.logger.info(
+                    "Deploying %s to %s" % (os.path.basename(package_path), target)
+                )
+                run_dpkg_deb_extract(package_path, target)
 
     def _resolve_package_file_path(self, package):
         pattern = self.cache_dir + "/archives/%s_*_%s.deb"
@@ -218,65 +241,9 @@ class AptPackageDeploy:
         if paths:
             return paths[0]
 
-        raise AptPackageDeployError(
+        raise PackageDeployError(
             "Unable to determine file path for %s" % package["name"]
         )
-
-    @staticmethod
-    def _extract_deb(package_path, target):
-        output = subprocess.run(
-            "dpkg-deb -x %s %s" % (package_path, target), shell=True
-        )
-        if output.returncode:
-            raise AptPackageDeployError(
-                '"%s" execution failed with code %s' % (output.args, output.returncode)
-            )
-
-    @staticmethod
-    def _parse_deb_info(stdout):
-        """Read the first package information from the dpkg-deb --info output"""
-        package = {}
-
-        # read package name
-        search = re.match("Package: (.+)\n", stdout)
-        package["name"] = search.group(1)
-
-        search = re.search("Architecture: (.*)", stdout, flags=re.MULTILINE)
-        package["architecture"] = search.group(1)
-
-        search = re.search("Version: (.*)", stdout, flags=re.MULTILINE)
-        package["version"] = search.group(1)
-
-        search = re.search("Pre-Depends: (.*)", stdout, flags=re.MULTILINE)
-        if search:
-            pkg_list = search.group(1).split(",")
-            pkg_list = [pkg.strip() for pkg in pkg_list]
-            pkg_list = [pkg.split(" ")[0] for pkg in pkg_list]
-            package["pre-depends"] = pkg_list
-        else:
-            package["pre-depends"] = []
-
-        search = re.search("Depends: (.*)", stdout, flags=re.MULTILINE)
-        if search:
-            pkg_list = search.group(1).split(",")
-            pkg_list = [pkg.strip() for pkg in pkg_list]
-            pkg_list = [pkg.split(" ")[0] for pkg in pkg_list]
-            package["depends"] = pkg_list
-        else:
-            package["depends"] = []
-
-        return package
-
-    def _clean(self):
-        if os.getenv("ABUILDER_APT_SKIP_CLEAN", False):
-            self.logger.warning("`apt-get clean` skip, excluded package may still be deployed if they are in cache!")
-            return
-
-        output = subprocess.run("apt-get clean", shell=True)
-        if output.returncode:
-            raise AptPackageDeployError(
-                '"%s" execution failed with code %s' % (output.args, output.returncode)
-            )
 
     def _set_installed_packages(self, exclude):
         with open(self.dpkg_dir_path + "/status", "w") as f:
@@ -299,35 +266,3 @@ class AptPackageDeploy:
                     if not line:
                         f.write("%s\n" % line)
                         break
-
-    @staticmethod
-    def _extend_package_names_patterns(patterns):
-        output = subprocess.run(
-            "apt-cache pkgnames", stdout=subprocess.PIPE, shell=True
-        )
-        if output.returncode:
-            raise AptPackageDeployError(
-                '"%s" execution failed with code %s' % (output.args, output.returncode)
-            )
-        packages = output.stdout.decode("utf-8").splitlines()
-
-        filtered_packages = []
-        for pattern in patterns:
-            filtered_packages.extend(fnmatch.filter(packages, pattern))
-
-        return filtered_packages
-
-
-if __name__ == "__main__":
-    # execute only if run as the entry point into the program
-    pkgDeploy = AptPackageDeploy(
-        "/tmp/apt-deploy-cache",
-        ["deb [arch=amd64] http://deb.debian.org/debian/ bullseye main"],
-        keys=[],
-        options={
-            "APT::Get::AllowUnauthenticated": True,
-            "Acquire::AllowInsecureRepositories": True,
-        },
-    )
-
-    pkgDeploy.deploy(["perl"], "/tmp/AppDir", [])
