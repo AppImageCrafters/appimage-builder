@@ -15,6 +15,7 @@ packaging = "*"
 questionary = "*"
 emrichen = "*"
 PyGithub = "*"
+shutils = "*"
 
 [requires]
 python_version = "3.6"
