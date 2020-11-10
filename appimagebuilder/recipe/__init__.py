@@ -10,5 +10,8 @@
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
 
-from .reader import Recipe
+from .reader import read_recipe
+from .recipe import Recipe
+from .schema import RecipeSchema as Schema
 from .reader import RecipeError
+
