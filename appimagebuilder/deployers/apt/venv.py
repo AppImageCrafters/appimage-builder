@@ -24,21 +24,19 @@ from .errors import AptVenvError
 
 class Venv:
     def __init__(
-        self,
-        base_path: str,
-        sources: [str],
-        keys: [str],
-        architectures: [] = None,
-        user_options: {} = None,
+            self,
+            base_path: str,
+            sources: [str],
+            keys: [str],
+            architectures: [],
+            user_options: {} = None,
     ):
         self.logger = logging.getLogger("apt")
 
         self._generate_paths(base_path)
-        self._write_apt_conf(user_options)
+        self._write_apt_conf(user_options, architectures)
         self._write_sources_list(sources)
         self._write_keys(keys)
-
-        self._architectures = architectures
 
     def _generate_paths(self, base_path):
         self._base_path = Path(base_path).absolute()
@@ -54,7 +52,7 @@ class Venv:
         self._dpkg_path.mkdir(parents=True, exist_ok=True)
         self._dpkg_status_path.touch(exist_ok=True)
 
-    def _write_apt_conf(self, user_options):
+    def _write_apt_conf(self, user_options, architectures: [str]):
         options = {
             "Dir": self._base_path,
             "Dir::State": self._base_path,
@@ -69,6 +67,8 @@ class Venv:
             "APT::Install-Recommends": False,
             "APT::Install-Suggests": False,
             "APT::Immediate-Configure": False,
+            "APT::Architecture": architectures[0],
+            "APT::Architectures": architectures,
             "Acquire::Languages": "none",
         }
 
@@ -78,6 +78,17 @@ class Venv:
         # write apt.conf
         with open(self._apt_conf_path, "w") as f:
             for k, v in options.items():
+                if isinstance(v, str):
+                    f.write("%s \"%s\";\n" % (k, v))
+                    continue
+
+                if isinstance(v, list):
+                    f.write("%s {" % k)
+                    for sv in v:
+                        f.write("\"%s\"; " % sv)
+                    f.write("}\n")
+                    continue
+
                 f.write("%s %s;\n" % (k, v))
 
     def _write_sources_list(self, sources):
@@ -114,7 +125,7 @@ class Venv:
                             f.write("Status: install ok installed\n")
 
                         if line.startswith("Architecture:") or line.startswith(
-                            "Version"
+                                "Version"
                         ):
                             f.write("%s\n" % line)
                         if not line:
