@@ -31,7 +31,6 @@ class Builder:
     def __init__(self, recipe):
         self.recipe = recipe
         self.bundlers = []
-        self.generator = None
         self._load_config()
 
     def _load_config(self):
@@ -118,8 +117,3 @@ class Builder:
     def _generate_bundle_info(self):
         info = BundleInfo(self.app_dir_path, self.bundlers)
         info.generate()
-
-    def _run_script(self):
-        instructions = self.recipe.get_item("AppDir/shell", "")
-        script_runner = Script([instructions])
-        script_runner.execute(self.recipe.get_item("AppDir/before_bundle"))
