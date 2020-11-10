@@ -17,7 +17,7 @@ import yaml
 from appimagebuilder.recipe.errors import RecipeError
 
 
-def load_recipe(path=None, data=None, tag="!ENV"):
+def read_recipe(path=None, data=None, tag="!ENV"):
     """
     Load a yaml configuration file and resolve any environment variables
     The environment variables must have !ENV before them and be in this format

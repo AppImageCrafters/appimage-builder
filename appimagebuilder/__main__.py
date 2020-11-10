@@ -15,10 +15,11 @@ import argparse
 import logging
 import os
 
+from appimagebuilder import recipe
 from appimagebuilder.appimage import AppImageCreator
 from appimagebuilder.app_dir.builder import Builder
 from appimagebuilder.app_dir.tester import Tester
-from appimagebuilder.recipe import Recipe
+
 from appimagebuilder.script import Script
 from appimagebuilder.generator.generator import RecipeGenerator
 
@@ -77,32 +78,46 @@ def __main__():
         generator.generate()
         exit(0)
 
-    recipe = Recipe()
-    recipe.load_file(args.recipe)
-    if not args.skip_script:
-        script_instructions = recipe.get_item("script", [])
-        script_runner = Script()
-        script_runner.execute(script_instructions)
+    recipe_data = load_recipe(args.recipe)
+    recipe_version = recipe_data.get_item("version")
+    if recipe_version == 1:
+        if not args.skip_script:
+            script_instructions = recipe_data.get_item("script", [])
+            script_runner = Script()
+            script_runner.execute(script_instructions)
 
-    if not args.skip_build:
-        creator = Builder(recipe)
-        creator.build()
+        if not args.skip_build:
+            creator = Builder(recipe_data)
+            creator.build()
 
-    if not args.skip_tests:
-        try:
-            tester = Tester(recipe)
-            tester.run_tests()
-        except Tester.TestFailed as error:
+        if not args.skip_tests:
+            try:
+                tester = Tester(recipe_data)
+                tester.run_tests()
+            except Tester.TestFailed as error:
 
-            logger.error("Tests failed")
-            if error:
-                logger.error(error)
+                logger.error("Tests failed")
+                if error:
+                    logger.error(error)
 
-            exit(1)
+                exit(1)
 
-    if not args.skip_appimage:
-        creator = AppImageCreator(recipe)
-        creator.create()
+        if not args.skip_appimage:
+            creator = AppImageCreator(recipe_data)
+            creator.create()
+
+    logger.error("Unknown recipe version: %s" % recipe_version)
+    logger.info("Please make sure you're using the latest appimage-builder version")
+    exit(1)
+
+
+def load_recipe(path):
+    recipe_data = recipe.read_recipe(path=path)
+    recipe_validator = recipe.Schema()
+    recipe_validator.v1.validate(recipe_data)
+    recipe_access = recipe.Recipe(recipe_data)
+
+    return recipe_access
 
 
 if __name__ == "__main__":
