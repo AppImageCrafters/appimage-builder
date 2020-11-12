@@ -35,13 +35,14 @@ class TestDeploy(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.venv_path)
-        shutil.rmtree(cls.appdir_path)
+        pass
+        # shutil.rmtree(cls.venv_path)
+        # shutil.rmtree(cls.appdir_path)
 
     def test_deploy(self):
         logging.basicConfig(level=0)
 
         apt_deploy = Deploy(self.apt_venv)
-        apt_deploy.deploy(["perl"], self.appdir_path)
+        apt_deploy.deploy(["perl", "util-linux"], self.appdir_path)
         self.assertTrue(next(self.appdir_path.glob("usr")))
         self.assertTrue(next(self.appdir_path.glob("opt/libc/lib")))

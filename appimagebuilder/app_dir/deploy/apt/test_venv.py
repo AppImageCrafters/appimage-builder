@@ -32,21 +32,27 @@ class TestVenv(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree(cls.venv_path)
+        pass
+        # shutil.rmtree(cls.venv_path)
 
     def test_search_names(self):
         self.assertEqual(self.apt_venv.search_names(["perl"]), ["perl"])
         self.assertGreater(self.apt_venv.search_names(["perl*"]), ["perl"])
 
+    def test_search_packages(self):
+        self.assertTrue(self.apt_venv.search_packages(["dpkg", "debconf"]))
+
     def test_install_download_only(self):
-        self.apt_venv.install_download_only(["libc6"])
+        packages = self.apt_venv.search_packages(["libc6"])
+        self.apt_venv.install_download_only(packages)
 
         expected_path = "%s/libc6*.deb" % self.apt_venv._apt_archives_path
         self.assertTrue(glob.glob(expected_path))
 
     def test_set_installed_packages(self):
+        packages = self.apt_venv.search_packages(["dpkg", "debconf"])
         # dpkg and debconf need to be set as installed or the configuration step of apt-get install will fail
-        self.apt_venv.set_installed_packages(["dpkg", "debconf"])
+        self.apt_venv.set_installed_packages(packages)
         with open(self.apt_venv._dpkg_status_path, "r") as f:
             file_contents = f.read()
 
@@ -59,13 +65,14 @@ class TestVenv(TestCase):
             )
 
     def test_install_simulate(self):
+        packages = self.apt_venv.search_packages(["dpkg", "debconf"])
         # dpkg and debconf need to be set as installed or the configuration step of apt-get install will fail
-        self.apt_venv.set_installed_packages(["dpkg", "debconf"])
+        self.apt_venv.set_installed_packages(packages)
 
         packages = self.apt_venv.install_simulate(["libc6"])
         self.assertTrue(packages)
 
     def test_resolve_archive_paths(self):
-        self.apt_venv.install_download_only(["tar"])
-        paths = self.apt_venv.resolve_archive_paths([("tar", "*", "*")])
+        packages = self.apt_venv.search_packages(["tar"])
+        paths = self.apt_venv.resolve_archive_paths(packages)
         self.assertTrue(paths)

@@ -60,9 +60,7 @@ def read_recipe(path=None, data=None, tag="!ENV"):
             for g in match:
                 value = os.environ.get(g, g)
                 if value == g:
-                    raise RecipeError(
-                        "Unable to resolve environment variable: %s" % g
-                    )
+                    raise RecipeError("Unable to resolve environment variable: %s" % g)
 
                 full_value = full_value.replace(f"${{{g}}}", value)
             return full_value
