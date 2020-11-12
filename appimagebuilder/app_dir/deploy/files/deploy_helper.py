@@ -16,10 +16,8 @@ import logging
 import os
 import shutil
 
-from appimagebuilder.app_dir.file_info_cache import FileInfoCache
 
-
-class FileDeployHelper:
+class FileDeploy:
     """
     Deploy helper that uses the PT_NEEDED entries to resolve dependencies between binaries
     """
@@ -100,18 +98,13 @@ class FileDeployHelper:
         ],
     }
 
-    def __init__(self, app_dir: str, includes: [str]):
+    def __init__(self, app_dir: str):
         self.app_dir = os.path.abspath(app_dir)
-        self.includes = includes
-        self.app_dir_cache = FileInfoCache(app_dir)
         self.logger = logging.getLogger("FileDeployHelper")
 
-    def deploy(self):
-        self.logger.info("Inspecting AppDir")
-        self.app_dir_cache.update()
-
+    def deploy(self, paths: [str]):
         expanded_list = set()
-        for path in self.includes:
+        for path in paths:
             expanded_list = expanded_list.union(glob.glob(path, recursive=True))
 
         for path in expanded_list:

@@ -81,9 +81,11 @@ class RecipeSchema:
             }
         )
 
-        self.v1 = Schema({
-            "version": int,
-            Optional("script"): self.script,
-            "AppDir": self.v1_appdir,
-            "AppImage": self.v1_appimage,
-        })
+        self.v1 = Schema(
+            {
+                "version": int,
+                Optional("script"): self.script,
+                "AppDir": self.v1_appdir,
+                "AppImage": self.v1_appimage,
+            }
+        )

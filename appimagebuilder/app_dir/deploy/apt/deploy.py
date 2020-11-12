@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import fnmatch
 import logging
 import os
 from pathlib import Path
@@ -23,6 +24,8 @@ class Deploy:
     # a different partition
     listings = {
         "glibc": ["libc6", "zlib1g", "libstdc++6"],
+        # packages that apt and dpkg assume as installed
+        "apt_core": ["dpkg", "debconf", "dpkg", "apt"],
         # system service packages are usually safe to exclude
         "system_services": [
             "util-linux",
@@ -90,8 +93,10 @@ class Deploy:
         self.apt_venv = apt_venv
         self.logger = logging.getLogger("AptPackageDeploy")
 
-    def deploy(self, packages: [str], target: str, exclude: [str] = []):
-        """Deploy the packages and their dependencies to target.
+    def deploy(
+        self, package_names: [str], appdir_root: str, exclude_patterns: [str] = []
+    ):
+        """Deploy the packages and their dependencies to appdir_root.
 
         Packages listed in exclude will not be deployed nor their dependencies.
         Packages from the system services and graphics listings will be added by default to the exclude list.
@@ -104,55 +109,54 @@ class Deploy:
                 "Skipping`apt update` execution. Newly added sources will not be available!"
             )
 
-        # resolve package names patterns
-        packages = self.apt_venv.search_names(packages)
-        exclude = self.apt_venv.search_names(exclude)
+        # set apt core packages as installed, required for it to properly resolve dependencies
+        apt_core_packages = self.apt_venv.search_packages(self.listings["apt_core"])
+        self.apt_venv.set_installed_packages(apt_core_packages)
 
-        # extend exclude list with default values keeping the packages that were required explicitly
-        exclude = self._refine_exclude(exclude, packages)
+        # resolve patterns in package listings
+        packages = self.apt_venv.search_packages(package_names)
 
         # set the excluded packages as installed to avoid their retrieval
-        self.apt_venv.set_installed_packages(exclude)
+        excluded_packages = self._resolve_excluded_packages(exclude_patterns)
+        excluded_packages = [pkg for pkg in excluded_packages if pkg not in packages]
+
+        self.apt_venv.set_installed_packages(excluded_packages)
 
         # use apt-get install --download-only to ensure that all the dependencies are resolved and downloaded
         self.apt_venv.install_download_only(packages)
 
+        self._extract_packages(appdir_root, packages)
+
+    def _extract_packages(self, appdir_root, packages):
         # manually extract downloaded packages to be able to create the opt/libc partition
         # where the glibc library and other related packages will be placed
-        self._extract(packages, target)
-
-    def _refine_exclude(self, exclude, packages):
-        # avoid duplicates
-        exclude = set(exclude)
-        # don't bundle graphic stack packages
-        exclude = exclude.union(self.listings["graphics"])
-        # don't bundle system services
-        exclude = exclude.union(self.listings["system_services"])
-        # don't exclude explicitly required packges
-        exclude.difference_update(packages)
-        return exclude
-
-    def _extract(self, packages, target: str):
-        target = Path(target).absolute()
+        appdir_root = Path(appdir_root).absolute()
         # ensure target directories exists
-        libc_target = target / "opt" / "libc"
-        target.mkdir(exist_ok=True, parents=True)
-        libc_target.mkdir(exist_ok=True, parents=True)
-
-        # make sure that all glibc related package will be properly identified
+        libc_root = appdir_root / "opt" / "libc"
+        appdir_root.mkdir(exist_ok=True, parents=True)
+        libc_root.mkdir(exist_ok=True, parents=True)
+        # list libc related packages
         libc_packages = self.apt_venv.install_simulate(self.listings["glibc"])
-        libc_packages_paths = self.apt_venv.resolve_archive_paths(libc_packages)
-
-        # make sure that only the required packages and their dependencies are bundled (not the whole apt cache)
+        # make sure that only the required packages and their dependencies are bundled
         packages = self.apt_venv.install_simulate(packages)
-        packages_paths = self.apt_venv.resolve_archive_paths(packages)
-
-        for path in packages_paths:
-            final_target = target
-            if path in libc_packages_paths:
-                final_target = libc_target
+        for package in packages:
+            final_target = appdir_root
+            if package in libc_packages:
+                final_target = libc_root
 
             self.logger.info(
-                "Deploying %s to %s" % (os.path.basename(path), final_target)
+                "Deploying %s to %s" % (package.get_expected_file_name(), final_target)
             )
-            self.apt_venv.extract_archive(path, final_target)
+            self.apt_venv.extract_package(package, final_target)
+
+    def _resolve_excluded_packages(self, patterns):
+        # remove duplicated
+        patterns = set(patterns)
+        # don't bundle graphic stack packages
+        patterns = patterns.union(self.listings["graphics"])
+        # don't bundle system services
+        patterns = patterns.union(self.listings["system_services"])
+
+        # resolve packages
+        packages = self.apt_venv.search_packages(patterns)
+        return packages

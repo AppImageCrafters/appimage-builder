@@ -13,10 +13,10 @@ import logging
 import os
 
 from appimagebuilder.app_dir.app_info.loader import AppInfoLoader
-from appimagebuilder.recipe import Recipe
 from appimagebuilder.app_dir.file_info_cache import FileInfoCache
 from .app_run import WrapperAppRun
 from .helpers.factory import HelperFactory
+from ...recipe import Recipe
 
 
 class RuntimeGeneratorError(RuntimeError):
@@ -24,10 +24,11 @@ class RuntimeGeneratorError(RuntimeError):
 
 
 class RuntimeGenerator:
-    def __init__(self, recipe: Recipe):
+    def __init__(self, recipe: Recipe, file_info_cache: FileInfoCache):
         self._configure(recipe)
         self.app_run_constructor = WrapperAppRun
         self.helper_factory_constructor = HelperFactory
+        self.file_info_cache = file_info_cache
 
     def _configure(self, recipe):
         self.app_dir = recipe.get_item("AppDir/path")
@@ -56,10 +57,7 @@ class RuntimeGenerator:
         app_run.deploy()
 
     def _configure_runtime(self, app_run):
-        app_dir_cache = FileInfoCache(self.app_dir)
-        app_dir_cache.update()
-
-        factory = self.helper_factory_constructor(self.app_dir, app_dir_cache)
+        factory = self.helper_factory_constructor(self.app_dir, self.file_info_cache)
         for id in factory.list():
             h = factory.get(id)
             h.configure(app_run)

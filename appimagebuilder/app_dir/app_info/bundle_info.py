@@ -24,7 +24,7 @@ class BundleInfo:
         self.data = {}
 
     def generate(self):
-        self._fetch_bundlers_report()
+        # self._fetch_bundlers_report()
         self._fetch_dependencies()
 
         path = self.get_file_name()

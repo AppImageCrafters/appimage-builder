@@ -11,15 +11,15 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
+from pathlib import Path
 
 from appimagebuilder.app_dir.runtime.generator import RuntimeGenerator
-from appimagebuilder.app_dir.bundlers.file_bundler import FileBundler
+from . import deploy
 from .app_info.bundle_info import BundleInfo
 from .app_info.desktop_entry_generator import DesktopEntryGenerator
 from .app_info.icon_bundler import IconBundler
 from .app_info.loader import AppInfoLoader
-from appimagebuilder.app_dir.bundlers.factory import BundlerFactory
-from .bundlers.files.deploy_helper import FileDeployHelper
+from .file_info_cache import FileInfoCache
 from ..script import Script
 
 
@@ -31,6 +31,8 @@ class Builder:
     def __init__(self, recipe):
         self.recipe = recipe
         self.bundlers = []
+        self.generator = None
+        self.file_info_cache = None
         self._load_config()
 
     def _load_config(self):
@@ -39,21 +41,8 @@ class Builder:
         self._load_app_dir_path()
         self._load_app_info_config()
 
-        bundler_factory = BundlerFactory(self.app_dir_path, self.cache_dir)
-        bundler_factory.runtime = self.recipe.get_item(
-            "AppDir/runtime/generator", "wrapper"
-        )
-
-        for bundler_name in bundler_factory.list_bundlers():
-            if bundler_name in self.app_dir_conf:
-                bundler_settings = self.app_dir_conf[bundler_name]
-                bundler = bundler_factory.create(bundler_name, bundler_settings)
-                self.bundlers.append(bundler)
-
-        self.file_bundler = FileBundler(self.recipe)
-
     def _load_app_dir_path(self):
-        self.app_dir_path = os.path.abspath(self.recipe.get_item("AppDir/path"))
+        self.app_dir_path = Path(self.recipe.get_item("AppDir/path")).absolute()
         os.makedirs(self.app_dir_path, exist_ok=True)
 
     def _load_app_info_config(self):
@@ -65,10 +54,13 @@ class Builder:
         logging.info("Generating AppDir")
         logging.info("=================")
 
+        self.file_info_cache = FileInfoCache(self.recipe.get_item("AppDir/path"))
+
         scripts_runner = Script()
 
         scripts_runner.execute(self.recipe.get_item("AppDir/before_bundle", ""))
         self._bundle_dependencies()
+
         scripts_runner.execute(self.recipe.get_item("AppDir/after_bundle", ""))
 
         scripts_runner.execute(self.recipe.get_item("AppDir/before_runtime", ""))
@@ -82,19 +74,63 @@ class Builder:
         logging.info("Bundling dependencies")
         logging.info("---------------------")
 
-        for bundler in self.bundlers:
-            bundler.run()
+        if self.recipe.get_item("AppDir/apt", False):
+            apt_venv = self._setup_apt_venv()
 
-        file_includes = self.recipe.get_item("AppDir/files/include", [])
-        file_helper = FileDeployHelper(self.app_dir_path, file_includes)
-        file_helper.deploy()
+            apt_deploy = deploy.AptDeploy(apt_venv)
+            packages = self.recipe.get_item("AppDir/apt/include")
+            packages_excluded = self.recipe.get_item("AppDir/apt/exclude", [])
+            apt_deploy.deploy(packages, self.app_dir_path, packages_excluded)
+
+        files_include = self.recipe.get_item("AppDir/files/include", [])
+        if files_include:
+            file_helper = deploy.FileDeploy(self.app_dir_path)
+            file_helper.deploy(files_include)
+
+        self._make_symlinks_relative()
+        self.file_info_cache.update()
+
+    def _make_symlinks_relative(self):
+        self.file_info_cache.update()
+        for link in self.file_info_cache.find("*", attrs=["is_link"]):
+            relative_root = (
+                self.app_dir_path
+                if "opt/libc" not in link
+                else self.app_dir_path / "opt" / "libc"
+            )
+            deploy.make_symlink_relative(link, relative_root)
+
+    def _setup_apt_venv(self):
+        sources_list = []
+        keys_list = []
+        for item in self.recipe.get_item("AppDir/apt/sources"):
+            if "sourceline" in item:
+                sources_list.append(item["sourceline"])
+            if "key_url" in item:
+                keys_list.append(item["key_url"])
+        apt_arch = self.recipe.get_item("AppDir/apt/arch")
+        allow_unauthenticated = self.recipe.get_item(
+            "AppDir/apt/allow_unauthenticated", False
+        )
+        apt_options = {
+            "APT::Get::AllowUnauthenticated": allow_unauthenticated,
+            "Acquire::AllowInsecureRepositories": allow_unauthenticated,
+        }
+        apt_venv = deploy.AptVenv(
+            Path(self.cache_dir) / "apt",
+            sources_list,
+            keys_list,
+            [apt_arch],
+            apt_options,
+        )
+        return apt_venv
 
     def _generate_runtime(self):
         logging.info("")
         logging.info("Generating runtime")
         logging.info("__________________")
 
-        runtime = RuntimeGenerator(self.recipe)
+        runtime = RuntimeGenerator(self.recipe, self.file_info_cache)
         runtime.generate()
 
     def _write_bundle_information(self):

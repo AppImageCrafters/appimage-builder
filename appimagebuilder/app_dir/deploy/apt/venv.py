@@ -9,6 +9,8 @@
 #
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
+
+
 import fnmatch
 import hashlib
 import logging
@@ -20,16 +22,17 @@ from pathlib import Path
 from urllib import request
 
 from .errors import AptVenvError
+from .package import Package
 
 
 class Venv:
     def __init__(
-            self,
-            base_path: str,
-            sources: [str],
-            keys: [str],
-            architectures: [],
-            user_options: {} = None,
+        self,
+        base_path: str,
+        sources: [str],
+        keys: [str],
+        architectures: [],
+        user_options: {} = None,
     ):
         self.logger = logging.getLogger("apt")
 
@@ -37,6 +40,7 @@ class Venv:
         self._write_apt_conf(user_options, architectures)
         self._write_sources_list(sources)
         self._write_keys(keys)
+        self._write_dpkg_arch(architectures)
 
     def _generate_paths(self, base_path):
         self._base_path = Path(base_path).absolute()
@@ -79,13 +83,13 @@ class Venv:
         with open(self._apt_conf_path, "w") as f:
             for k, v in options.items():
                 if isinstance(v, str):
-                    f.write("%s \"%s\";\n" % (k, v))
+                    f.write('%s "%s";\n' % (k, v))
                     continue
 
                 if isinstance(v, list):
                     f.write("%s {" % k)
                     for sv in v:
-                        f.write("\"%s\"; " % sv)
+                        f.write('"%s"; ' % sv)
                     f.write("}\n")
                     continue
 
@@ -111,45 +115,35 @@ class Venv:
 
         return env
 
-    def set_installed_packages(self, packages: [str]):
+    def set_installed_packages(self, packages):
         with open(self._dpkg_status_path, "w") as f:
             for package in packages:
-                try:
-                    # read package info
-                    output = self._run_apt_cache_show(package)
+                f.write(
+                    "Package: %s\n"
+                    "Status: install ok installed\n"
+                    "Version: %s\n"
+                    "Architecture: %s\n"
+                    "\n" % (package.name, package.version, package.arch)
+                )
 
-                    # write package info setting the status to installed
-                    for line in output.stdout.decode("utf-8").splitlines():
-                        if line.startswith("Package:"):
-                            f.write("%s\n" % line)
-                            f.write("Status: install ok installed\n")
+    def _run_apt_cache_show(self, package_names: [str]):
+        if not package_names:
+            return []
 
-                        if line.startswith("Architecture:") or line.startswith(
-                                "Version"
-                        ):
-                            f.write("%s\n" % line)
-                        if not line:
-                            f.write("%s\n" % line)
-                            break
-                except AptVenvError:
-                    # errors here safe to be ignored as some packages from the exclusion list may not be present
-                    # in the sources listings
-                    pass
+        command = "apt-cache show %s" % " ".join(package_names)
+        self.logger.debug(command)
 
-    def _run_apt_cache_show(self, package):
         output = subprocess.run(
-            "apt-cache show %s" % package,
-            stdout=subprocess.PIPE,
-            shell=True,
-            env=self._get_environment(),
+            command, stdout=subprocess.PIPE, shell=True, env=self._get_environment()
         )
         self._assert_successful_output(output)
         return output
 
     def update(self) -> None:
-        output = subprocess.run(
-            "apt-get update", shell=True, env=self._get_environment()
-        )
+        command = "apt-get update"
+        self.logger.info(command)
+
+        output = subprocess.run(command, shell=True, env=self._get_environment())
         self._assert_successful_output(output)
 
     def search_names(self, patterns: [str]):
@@ -163,38 +157,45 @@ class Venv:
         return filtered_packages
 
     def _run_apt_cache_pkgnames(self):
+        command = "apt-cache pkgnames"
+        self.logger.debug(command)
+
         output = subprocess.run(
-            "apt-cache pkgnames",
-            stdout=subprocess.PIPE,
-            shell=True,
-            env=self._get_environment(),
+            command, stdout=subprocess.PIPE, shell=True, env=self._get_environment()
         )
         self._assert_successful_output(output)
         return output
 
-    def install_download_only(self, packages: [str]):
-        packages_str = " ".join(packages)
-        output = subprocess.run(
-            "apt-get install -y --download-only %s" % packages_str,
-            shell=True,
-            env=self._get_environment(),
-        )
+    def install_download_only(self, packages: [Package]):
+        packages_str = " ".join([str(pkg) for pkg in packages])
+
+        command = "apt-get install -y --download-only %s" % packages_str
+        self.logger.info(command)
+
+        output = subprocess.run(command, shell=True, env=self._get_environment())
         self._assert_successful_output(output)
 
-    def install_simulate(self, packages) -> (str, str, str):
-        output = self._run_apt_get_simulate_install(packages)
+    def install_simulate(self, packages: [Package]) -> [Package]:
+        packages_str = [str(package) for package in packages]
+        output = self._run_apt_get_simulate_install(packages_str)
 
+        stdout_str = output.stdout.decode("utf-8")
         # find installed packages name, version and arch
         results = re.findall(
-            "Inst\s+(?P<pkg_name>[\w|\d|\-|\.]+)\s+\((?P<pkg_version>\S+)\s.*\[(?P<pkg_arch>.*)\]\)",
-            output.stdout.decode("utf-8"),
+            "Inst\s+(?P<pkg_name>\S+)\s+\((?P<pkg_version>\S+)\s.*\[(?P<pkg_arch>.*)\]\)",
+            stdout_str,
         )
+        results = sorted(results)
+        installed_packages = [
+            Package(result[0], result[1], result[2]) for result in results
+        ]
+        return installed_packages
 
-        return results
-
-    def _run_apt_get_simulate_install(self, packages):
+    def _run_apt_get_simulate_install(self, packages: [str]):
+        command = "apt-get install -y --simulate %s" % (" ".join(packages))
+        self.logger.debug(command)
         output = subprocess.run(
-            "apt-get install -y --simulate %s" % (" ".join(packages)),
+            command,
             stdout=subprocess.PIPE,
             shell=True,
             env=self._get_environment(),
@@ -203,34 +204,23 @@ class Venv:
         self._assert_successful_output(output)
         return output
 
-    def resolve_archive_paths(self, packages: [(str, str, str)]):
-        paths = []
-        for pkg_tuple in packages:
-            file_name = "%s_%s_%s.deb" % pkg_tuple
-
-            # apt encodes invalid chars to comply the deb file naming convention
-            file_name = urllib.parse.quote(file_name, safe="+*").lower()
-
-            # allows using '*' in file name parts
-            path = next(self._apt_archives_path.glob(file_name))
-
-            if not path.exists():
-                raise AptVenvError(
-                    "Unable to find archive path for %s %s %s. "
-                    "This is provably an appimage-builder issue, please report it."
-                    % pkg_tuple
-                )
-
-            paths.append(path)
-
+    def resolve_archive_paths(self, packages: [Package]):
+        paths = [
+            self._apt_archives_path / pkg.get_expected_file_name() for pkg in packages
+        ]
         return paths
 
+    def extract_package(self, package, target):
+        path = self._apt_archives_path / package.get_expected_file_name()
+        command = "dpkg-deb -x %s %s" % (path, target)
+        self.logger.debug(command)
+        output = subprocess.run(command, shell=True, env=self._get_environment())
+        self._assert_successful_output(output)
+
     def extract_archive(self, path, target):
-        output = subprocess.run(
-            "dpkg-deb -x %s %s" % (path, target),
-            shell=True,
-            env=self._get_environment(),
-        )
+        command = "dpkg-deb -x %s %s" % (path, target)
+        self.logger.debug(command)
+        output = subprocess.run(command, shell=True, env=self._get_environment())
         self._assert_successful_output(output)
 
     @staticmethod
@@ -239,3 +229,32 @@ class Venv:
             raise AptVenvError(
                 '"%s" execution failed with code %s' % (output.args, output.returncode)
             )
+
+    def _write_dpkg_arch(self, architectures: [str]):
+        with open(self._dpkg_path / "arch", "w") as f:
+            for arch in architectures:
+                f.write("%s\n" % arch)
+
+    def search_packages(self, names):
+        packages = []
+
+        pkg_name = None
+        pkg_version = None
+        pkg_arch = None
+
+        output = self._run_apt_cache_show(names)
+        for line in output.stdout.decode("utf-8").splitlines():
+            if line.startswith("Package:"):
+                pkg_name = line.split(" ", maxsplit=2)[1]
+
+            if line.startswith("Architecture"):
+                pkg_arch = line.split(" ", maxsplit=2)[1]
+
+            if line.startswith("Version:"):
+                pkg_version = line.split(" ", maxsplit=2)[1]
+
+            # empty lines indicate the end of a package description block
+            if not line and pkg_name:
+                packages.append(Package(pkg_name, pkg_version, pkg_arch))
+
+        return packages
