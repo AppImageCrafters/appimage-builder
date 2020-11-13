@@ -13,6 +13,7 @@ import fnmatch
 import logging
 import os
 import re
+import shutil
 import subprocess
 
 from AppImageBuilder.commands.patchelf import PatchElf, PatchElfError
@@ -31,42 +32,38 @@ class AppRuntimeAnalyser:
     def run_app_analysis(self):
         self.runtime_libs.clear()
 
-        self.logger.debug("Running: %s %s" % (self.bin, self.args))
-        process = subprocess.Popen(
-            [
-                "strace",
-                "-f",
-                "-e",
-                "trace=openat",
-                "-E",
-                "LD_DEBUG=libs",
-                self.bin,
-                self.args,
-            ],
-            stderr=subprocess.PIPE,
+        command = "strace -f -e trace=openat -E LD_DEBUG=libs %s %s" % (
+            self.bin,
+            self.args,
+        )
+        self.logger.info(command)
+        output = subprocess.run(command, stderr=subprocess.PIPE, shell=True)
+
+        stderr_data = output.stderr.decode("utf-8")
+        self.runtime_libs = re.findall("init: (?P<lib>/.*)", stderr_data, re.IGNORECASE)
+        self.runtime_bins = re.findall(
+            "program: (?P<bin>.*)", stderr_data, re.IGNORECASE
+        )
+        self.runtime_bins = [shutil.which(path) for path in self.runtime_bins]
+        self.runtime_data = re.findall(
+            r'openat\(.*?"(?P<path>.*?)".*', stderr_data, re.IGNORECASE
         )
 
-        while process.poll() is None:
-            stderr_line = process.stderr.readline()
-            while stderr_line:
-                stderr_line = stderr_line.decode("utf-8").strip()
-                self.runtime_libs.add(self._read_lib_path(stderr_line))
-                self.runtime_bins.add(self._read_bin_path(stderr_line))
-                self.runtime_data.add(self._read_data_path(stderr_line))
-                stderr_line = process.stderr.readline()
-
-        self.runtime_libs.remove(None)
-        self.runtime_bins.remove(None)
-        self.runtime_data.remove(None)
+        # remove dirs, non existent files and excluded paths
+        self.runtime_data = [
+            path
+            for path in self.runtime_data
+            if os.path.exists(path)
+            and not os.path.isdir(path)
+            and not self._is_excluded_data_path(path)
+        ]
 
         interpreter_paths = self._resolve_bin_interpreters()
-        self.runtime_bins = self.runtime_bins.union(interpreter_paths)
+        self.runtime_bins.extend(interpreter_paths)
 
         self.runtime_bins = sorted(self.runtime_bins)
         self.runtime_libs = sorted(self.runtime_libs)
         self.runtime_data = sorted(self.runtime_data)
-
-        process.stderr.close()
 
     def _resolve_bin_interpreters(self):
         patch_elf = PatchElf()
@@ -80,47 +77,6 @@ class AppRuntimeAnalyser:
             except PatchElfError:
                 pass
         return interpreter_paths
-
-    @staticmethod
-    def _read_lib_path(stderr_line):
-        lib_path_search = re.search("init: (?P<lib>/.*)", stderr_line, re.IGNORECASE)
-        if lib_path_search:
-            return lib_path_search.group(1)
-        return None
-
-    @staticmethod
-    def _read_bin_path(stderr_line):
-        bin_path_search = re.search("program: (?P<bin>.*)", stderr_line, re.IGNORECASE)
-        if bin_path_search:
-            bin_name = bin_path_search.group(1)
-            if os.path.exists(bin_name):
-                return bin_name
-            else:
-                for path in os.getenv("PATH").split(":"):
-                    full_path = os.path.join(path, bin_name)
-                    if os.path.exists(full_path):
-                        return full_path
-
-        return None
-
-    @staticmethod
-    def _read_data_path(stderr_line):
-
-        data_path_search = re.search(
-            r'openat\(.*?"(?P<path>.*?)".*', stderr_line, re.IGNORECASE
-        )
-
-        if data_path_search:
-            path = data_path_search.group(1)
-
-            if (
-                os.path.exists(path)
-                and not os.path.isdir(path)
-                and not AppRuntimeAnalyser._is_excluded_data_path(path)
-            ):
-                return path
-
-        return None
 
     @staticmethod
     def _is_excluded_data_path(path):
