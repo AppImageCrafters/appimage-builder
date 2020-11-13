@@ -44,7 +44,9 @@ class Config:
         self._load_sources()
         self._load_apt_includes()
         self._load_apt_excludes()
-        self.allow_unauthenticated = 'allow_unauthenticated' in settings and settings['allow_unauthenticated']
+        self.allow_unauthenticated = (
+            "allow_unauthenticated" in settings and settings["allow_unauthenticated"]
+        )
 
     def generate(self):
         self._generate_apt_work_dirs()
@@ -240,7 +242,7 @@ class Config:
             'APT::Install-Suggests "False";',
             'Dir::Etc::sourceparts "False";',
             'APT::Get::AllowUnauthenticated "%s";' % self.allow_unauthenticated,
-            'Acquire::AllowInsecureRepositories "%s";' % self.allow_unauthenticated
+            'Acquire::AllowInsecureRepositories "%s";' % self.allow_unauthenticated,
         ]
         return "\n".join(lines)
 
@@ -291,7 +293,7 @@ class Config:
 
     @staticmethod
     def _generate_pkg_status_installed_ok_entry(
-            pkg_name, pkg_version="9%9z.9.9-1appimage-builder-9"
+        pkg_name, pkg_version="9%9z.9.9-1appimage-builder-9"
     ):
         return "\n".join(
             [
