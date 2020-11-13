@@ -17,7 +17,7 @@ import os
 class DesktopFileParser:
     def __init__(self, file_path):
         self.file_path = file_path
-        self.parser = configparser.ConfigParser()
+        self.parser = configparser.RawConfigParser()
         self.parser.read(file_path)
 
         exec = self.parser["Desktop Entry"]["Exec"].strip()
