@@ -160,7 +160,9 @@ class RecipeGenerator:
         logging.info(rendered_yml)
 
         with open("AppImageBuilder.yml", "w") as f:
-            f.write("# appimage-builder recipe see https://appimage-builder.readthedocs.io for details\n")
+            f.write(
+                "# appimage-builder recipe see https://appimage-builder.readthedocs.io for details\n"
+            )
             f.write(rendered_yml)
 
         self.logger.info("Recipe generation completed.")
@@ -225,10 +227,9 @@ class RecipeGenerator:
 
         absolute_app_dir = os.path.abspath(self.app_dir)
         for root, dir, files in os.walk(absolute_app_dir):
-            for file in files:
-                full_path = os.path.join(root, file)
-                if os.access(full_path, os.X_OK):
-                    return os.path.relpath(full_path, absolute_app_dir)
+            full_path = os.path.join(root, exec)
+            if os.access(full_path, os.X_OK):
+                return os.path.relpath(full_path, absolute_app_dir)
 
         raise RecipeGeneratorError("Unable to find executable: %s" % exec)
 
