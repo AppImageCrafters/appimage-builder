@@ -105,10 +105,10 @@ def __main__():
         if not args.skip_appimage:
             creator = AppImageCreator(recipe_data)
             creator.create()
-
-    logger.error("Unknown recipe version: %s" % recipe_version)
-    logger.info("Please make sure you're using the latest appimage-builder version")
-    exit(1)
+    else:
+        logger.error("Unknown recipe version: %s" % recipe_version)
+        logger.info("Please make sure you're using the latest appimage-builder version")
+        exit(1)
 
 
 def load_recipe(path):
