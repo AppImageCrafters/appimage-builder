@@ -36,6 +36,11 @@ class Venv:
     ):
         self.logger = logging.getLogger("apt")
 
+        self.sources = sources
+        self.keys = keys
+        self.architectures = architectures
+        self.user_options = user_options
+
         self._generate_paths(base_path)
         self._write_apt_conf(user_options, architectures)
         self._write_sources_list(sources)

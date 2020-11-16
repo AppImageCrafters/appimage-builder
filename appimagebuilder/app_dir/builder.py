@@ -30,8 +30,8 @@ class BuilderError(RuntimeError):
 class Builder:
     def __init__(self, recipe):
         self.recipe = recipe
-        self.bundlers = []
         self.generator = None
+        self.bundle_info = None
         self.file_info_cache = None
         self._load_config()
 
@@ -40,6 +40,7 @@ class Builder:
         self.cache_dir = os.path.join(os.path.curdir, "appimage-builder-cache")
         self._load_app_dir_path()
         self._load_app_info_config()
+        self.bundle_info = BundleInfo(self.app_dir_path)
 
     def _load_app_dir_path(self):
         self.app_dir_path = Path(self.recipe.get_item("AppDir/path")).absolute()
@@ -80,7 +81,13 @@ class Builder:
             apt_deploy = deploy.AptDeploy(apt_venv)
             packages = self.recipe.get_item("AppDir/apt/include")
             packages_excluded = self.recipe.get_item("AppDir/apt/exclude", [])
-            apt_deploy.deploy(packages, self.app_dir_path, packages_excluded)
+            deployed_packages = apt_deploy.deploy(
+                packages, self.app_dir_path, packages_excluded
+            )
+            self.bundle_info.data["apt"] = {
+                "sources": apt_venv.sources,
+                "packages": deployed_packages,
+            }
 
         files_include = self.recipe.get_item("AppDir/files/include", [])
         if files_include:
@@ -140,7 +147,7 @@ class Builder:
 
         self._bundle_app_dir_icon()
         self._generate_app_dir_desktop_entry()
-        self._generate_bundle_info()
+        self.bundle_info.generate()
 
     def _bundle_app_dir_icon(self):
         icon_bundler = IconBundler(self.app_dir_path, self.app_info.icon)
@@ -149,7 +156,3 @@ class Builder:
     def _generate_app_dir_desktop_entry(self):
         desktop_entry_editor = DesktopEntryGenerator(self.app_dir_path)
         desktop_entry_editor.generate(self.app_info)
-
-    def _generate_bundle_info(self):
-        info = BundleInfo(self.app_dir_path, self.bundlers)
-        info.generate()
