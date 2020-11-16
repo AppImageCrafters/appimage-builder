@@ -94,14 +94,17 @@ class Deploy:
         self.logger = logging.getLogger("AptPackageDeploy")
 
     def deploy(
-        self, package_names: [str], appdir_root: str, exclude_patterns: [str] = []
-    ):
+        self, package_names: [str], appdir_root: str, exclude_patterns=None
+    ) -> [str]:
         """Deploy the packages and their dependencies to appdir_root.
 
         Packages listed in exclude will not be deployed nor their dependencies.
         Packages from the system services and graphics listings will be added by default to the exclude list.
         Packages from the glibc listing will be deployed using <target>/opt/libc as prefix
         """
+        if exclude_patterns is None:
+            exclude_patterns = []
+
         if not os.getenv("ABUILDER_APT_SKIP_UPDATE", False):
             self.apt_venv.update()
         else:
@@ -125,7 +128,8 @@ class Deploy:
         # use apt-get install --download-only to ensure that all the dependencies are resolved and downloaded
         self.apt_venv.install_download_only(packages)
 
-        self._extract_packages(appdir_root, packages)
+        extracted_packages = self._extract_packages(appdir_root, packages)
+        return [str(package) for package in extracted_packages]
 
     def _extract_packages(self, appdir_root, packages):
         # manually extract downloaded packages to be able to create the opt/libc partition
@@ -148,6 +152,8 @@ class Deploy:
                 "Deploying %s to %s" % (package.get_expected_file_name(), final_target)
             )
             self.apt_venv.extract_package(package, final_target)
+
+        return packages
 
     def _resolve_excluded_packages(self, patterns):
         # remove duplicated
