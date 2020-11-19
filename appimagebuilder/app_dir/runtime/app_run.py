@@ -32,6 +32,14 @@ class WrapperAppRun:
         "XDG_CONFIG_DIRS": "$APPDIR/etc/xdg:$XDG_CONFIG_DIRS",
     }
 
+    # arch mappings from the file command output to the debian format
+    archs_mapping = {
+        'ARM aarch64': 'aarch64',
+        'ARM': 'gnueabihf',
+        'Intel 80386': 'i386',
+        'x86-64': 'x86_64'
+    }
+
     sections = {}
 
     def __init__(self, version, debug, app_dir, exec_path, exec_args="$@"):
