@@ -29,11 +29,11 @@ setuptools.setup(
     entry_points={
         "console_scripts": ["appimage-builer = appimagebuilder.__main__:__main__"]
     },
-    url="https://github.com/AppImageCrafters/AppImageBuilder",
+    url="https://github.com/AppImageCrafters/appimage-builder",
     project_urls={
-        "Bug Tracker": "https://github.com/AppImageCrafters/AppImageBuilder/issues",
+        "Bug Tracker": "https://github.com/AppImageCrafters/appimage-builder/issues",
         "Documentation": "https://appimage-builder.readthedocs.io",
-        "Source Code": "https://github.com/AppImageCrafters/AppImageBuilder",
+        "Source Code": "https://github.com/AppImageCrafters/appimage-builder",
     },
     packages=setuptools.find_packages(),
     classifiers=[
@@ -55,9 +55,10 @@ setuptools.setup(
     python_requires=">=3.6",
     package_data={
         "": [
-            "AppImageBuilder/generator/templates/AppImageBuilder.yml.in",
-            "AppImageBuilder/tester/utils/entry_point.sh",
-            "AppImageBuilder/tester/utils/static_test.sh",
+            "appimagebuilder/generator/templates/apt.yml.in",
+            "appimagebuilder/generator/templates/files.yml.in",
+            "appimagebuilder/tester/utils/entry_point.sh",
+            "appimagebuilder/tester/utils/static_test.sh",
         ]
     },
     include_package_data=True,
