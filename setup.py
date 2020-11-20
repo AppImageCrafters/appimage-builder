@@ -50,7 +50,6 @@ setuptools.setup(
         "packaging",
         "questionary",
         "emrichen",
-        "PyGithub",
     ],
     python_requires=">=3.6",
     package_data={

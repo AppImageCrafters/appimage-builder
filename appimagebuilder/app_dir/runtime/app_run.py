@@ -10,65 +10,73 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import fnmatch
+import logging
 import os
 import shutil
 import stat
 import subprocess
 import uuid
-import logging
+from pathlib import Path
 from urllib import request
-from github import Github
 
 
 class AppRunSetupError(RuntimeError):
     pass
 
 
-class WrapperAppRun:
+class AppRun:
     env = {
         "APPIMAGE_UUID": None,
         "SYSTEM_INTERP": None,
-        "XDG_DATA_DIRS": "$APPDIR/usr/local/share:$APPDIR/usr/share:${XDG_DATA_DIRS}",
+        "XDG_DATA_DIRS": "$APPDIR/usr/local/share:$APPDIR/usr/share:$XDG_CONFIG_DIRS",
         "XDG_CONFIG_DIRS": "$APPDIR/etc/xdg:$XDG_CONFIG_DIRS",
+        "LD_PRELOAD": "libapprun_hooks.so",
     }
 
     # arch mappings from the file command output to the debian format
     archs_mapping = {
-        'ARM aarch64': 'aarch64',
-        'ARM': 'gnueabihf',
-        'Intel 80386': 'i386',
-        'x86-64': 'x86_64'
+        "ARM aarch64": "aarch64",
+        "ARM": "gnueabihf",
+        "Intel 80386": "i386",
+        "x86-64": "x86_64",
     }
 
     sections = {}
 
-    def __init__(self, version, debug, app_dir, exec_path, exec_args="$@"):
-        self.app_dir = app_dir
+    def __init__(
+        self,
+        version,
+        debug,
+        app_dir,
+        exec_path,
+        exec_args="$@",
+        cache_dir="appimage-builder-cache/runtime",
+    ):
+        self.app_dir = Path(app_dir).absolute()
         self.apprun_version = version
-        self.apprun_debug = debug
+        self.apprun_build_type = "Debug" if debug else "Release"
         self.env["APPIMAGE_UUID"] = str(uuid.uuid4())
         self.env["EXEC_PATH"] = "$APPDIR/%s" % exec_path
         self.env["EXEC_ARGS"] = exec_args
+        self.cache_dir = Path(cache_dir).absolute()
 
     def deploy(self):
-        self._download_apprun_binaries()
-
         embed_archs = self._get_embed_libc_archs()
-        apprun_path = self._find_apprun(embed_archs[0])
-        shutil.copy(apprun_path, os.path.join(self.app_dir, "AppRun"))
-        self._set_execution_permissions(os.path.join(self.app_dir, "AppRun"))
+
+        # deploy AppRun
+        apprun_path = self._get_apprun_binary(embed_archs[0])
+        logging.info("Deploying: %s => %s" % (apprun_path, self.app_dir / "AppRun"))
+        shutil.copy(apprun_path, self.app_dir / "AppRun")
+        apprun_path.chmod(
+            stat.S_IRWXU | stat.S_IXGRP | stat.S_IRGRP | stat.S_IXOTH | stat.S_IROTH
+        )
 
         for arch in embed_archs:
-            hooks_lib = self._find_hooks_lib(arch)
+            hooks_lib = self._get_apprun_hooks_library(arch)
             target_lib_dir = self._find_hooks_lib_target_lib_dir(arch)
-            if not target_lib_dir:
-                raise AppRunSetupError(
-                    "Unable to find a lib dir for deploying: %s " % arch
-                )
             logging.info("Deploying: %s => %s" % (hooks_lib, target_lib_dir))
             shutil.copy(hooks_lib, os.path.join(target_lib_dir, "libapprun_hooks.so"))
 
-        self.env["LD_PRELOAD"] = "libapprun_hooks.so"
         self._generate_env_file()
 
     def _get_embed_libc_archs(self):
@@ -102,39 +110,6 @@ class WrapperAppRun:
         signature = signature.replace("executable", "")
         return signature.strip(" ")
 
-    def _download_apprun_binaries(self):
-        self.apprun_binaries = []
-        self.wrapper_binaries = []
-
-        gh = Github()
-        gh_repo = gh.get_repo("AppImageCrafters/AppRun")
-        gh_release = gh_repo.get_release(self.apprun_version)
-        for asset in gh_release.get_assets():
-            if not self.apprun_debug and "debug" in asset.name.lower():
-                continue
-
-            if self.apprun_debug and "debug" not in asset.name.lower():
-                continue
-
-            file_path = os.path.join(
-                os.curdir,
-                "appimage-builder-cache",
-                "%s-%s" % (self.apprun_version, asset.name),
-            )
-
-            if not os.path.exists(file_path):
-                logging.info(
-                    'Downloading "%s" from: %s'
-                    % (asset.name, asset.browser_download_url)
-                )
-                request.urlretrieve(asset.browser_download_url, file_path)
-
-            if "AppRun" in asset.name:
-                self.apprun_binaries.append(file_path)
-
-            if "libapprun_hooks" in asset.name:
-                self.wrapper_binaries.append(file_path)
-
     def _find_libc_paths(self):
         paths = []
         for base_path, dirs, files in os.walk(self.app_dir):
@@ -146,32 +121,10 @@ class WrapperAppRun:
                     paths.append(abs_path)
         return paths
 
-    def _find_hooks_lib(self, libc_arch):
-        for wrapper in self.wrapper_binaries:
-            signature = self._get_elf_arch(wrapper)
-            if libc_arch == signature:
-                return wrapper
-
-        raise AppRunSetupError("Unable to find a wrapper for: %s" % libc_arch)
-
-    def _find_apprun(self, libc_arch):
-        for apprun in self.apprun_binaries:
-            arch = self._get_elf_arch(apprun)
-            if libc_arch == arch:
-                return apprun
-
-        raise AppRunSetupError("Unable to find a AppRun for: %s" % libc_arch)
-
-    def _set_execution_permissions(self, path):
-        os.chmod(
-            path,
-            stat.S_IRWXU | stat.S_IXGRP | stat.S_IRGRP | stat.S_IXOTH | stat.S_IROTH,
-        )
-
     def _find_hooks_lib_target_lib_dir(self, arch):
         lib_dirs = self.env["APPDIR_LIBRARY_PATH"]
-        lib_dirs = lib_dirs.replace("$APPDIR", self.app_dir)
-        lib_dirs = lib_dirs.replace("$APPDIR", self.app_dir)
+        lib_dirs = lib_dirs.replace("$APPDIR", str(self.app_dir))
+        lib_dirs = lib_dirs.replace("$APPDIR", str(self.app_dir))
         lib_dirs = lib_dirs.split(":")
         for lib_dir in lib_dirs:
             for file in os.listdir(lib_dir):
@@ -180,3 +133,45 @@ class WrapperAppRun:
                     file_arch = self._get_elf_arch(file_path)
                     if file_arch == arch:
                         return lib_dir
+
+    def _get_apprun_binary(self, arch):
+        if arch not in self.archs_mapping:
+            raise AppRunSetupError("Non-supported architecture: '%s'" % arch)
+
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+
+        apprun_asset = "AppRun-%s-%s" % (
+            self.apprun_build_type,
+            self.archs_mapping[arch],
+        )
+        apprun_file = self.cache_dir / apprun_asset
+        if not apprun_file.exists():
+            url = (
+                "https://github.com/AppImageCrafters/AppRun/releases/download/%s/%s"
+                % (self.apprun_version, apprun_asset)
+            )
+            logging.info("Downloading: %s" % url)
+            request.urlretrieve(url, apprun_file)
+
+        return apprun_file
+
+    def _get_apprun_hooks_library(self, arch):
+        if arch not in self.archs_mapping:
+            raise AppRunSetupError("Non-supported architecture: '%s'" % arch)
+
+        self.cache_dir.mkdir(parents=True, exist_ok=True)
+
+        asset = "libapprun_hooks-%s-%s.so" % (
+            self.apprun_build_type,
+            self.archs_mapping[arch],
+        )
+        file = self.cache_dir / asset
+        if not file.exists():
+            url = (
+                "https://github.com/AppImageCrafters/AppRun/releases/download/%s/%s"
+                % (self.apprun_version, asset)
+            )
+            logging.info("Downloading: %s" % url)
+            request.urlretrieve(url, file)
+
+        return file

@@ -14,7 +14,6 @@ schema = "*"
 packaging = "*"
 questionary = "*"
 emrichen = "*"
-PyGithub = "*"
 shutils = "*"
 
 [requires]

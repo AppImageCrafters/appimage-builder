@@ -14,7 +14,7 @@ import os
 
 from appimagebuilder.app_dir.app_info.loader import AppInfoLoader
 from appimagebuilder.app_dir.file_info_cache import FileInfoCache
-from .app_run import WrapperAppRun
+from .app_run import AppRun
 from .helpers.factory import HelperFactory
 from ...recipe import Recipe
 
@@ -26,7 +26,7 @@ class RuntimeGeneratorError(RuntimeError):
 class RuntimeGenerator:
     def __init__(self, recipe: Recipe, file_info_cache: FileInfoCache):
         self._configure(recipe)
-        self.app_run_constructor = WrapperAppRun
+        self.app_run_constructor = AppRun
         self.helper_factory_constructor = HelperFactory
         self.file_info_cache = file_info_cache
 
@@ -62,14 +62,14 @@ class RuntimeGenerator:
             h = factory.get(id)
             h.configure(app_run)
 
-    def _add_user_defined_settings(self, app_run: WrapperAppRun) -> None:
+    def _add_user_defined_settings(self, app_run: AppRun) -> None:
         for k, v in self.env.items():
             if k in app_run.env:
                 logging.info("Overriding runtime env: %s" % k)
 
             app_run.env[k] = v
 
-    def _set_path_mappings(self, app_run: WrapperAppRun):
+    def _set_path_mappings(self, app_run: AppRun):
         if self.path_mappings:
             path_mappings_env = ""
             for path_mapping in self.path_mappings:
