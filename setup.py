@@ -19,7 +19,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="appimage_builder",
-    version="0.7.8",
+    version="0.7.9",
     author="Alexis Lopez Zubieta",
     author_email="contact@azubieta.net",
     description="Recipe based AppImage creation meta-tool",
@@ -27,7 +27,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     scripts=["appimage-modules", "appimage-inspector"],
     entry_points={
-        "console_scripts": ["appimage-builer = appimagebuilder.__main__:__main__"]
+        "console_scripts": ["appimage-builder = appimagebuilder.__main__:__main__"]
     },
     url="https://github.com/AppImageCrafters/appimage-builder",
     project_urls={
