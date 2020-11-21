@@ -65,9 +65,10 @@ class AppRun:
 
         # deploy AppRun
         apprun_path = self._get_apprun_binary(embed_archs[0])
+        apprun_deploy_path = self.app_dir / "AppRun"
         logging.info("Deploying: %s => %s" % (apprun_path, self.app_dir / "AppRun"))
-        shutil.copy(apprun_path, self.app_dir / "AppRun")
-        apprun_path.chmod(
+        shutil.copy(apprun_path, apprun_deploy_path)
+        apprun_deploy_path.chmod(
             stat.S_IRWXU | stat.S_IXGRP | stat.S_IRGRP | stat.S_IXOTH | stat.S_IROTH
         )
 
