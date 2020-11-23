@@ -16,12 +16,12 @@ import logging
 import os
 
 from appimagebuilder import recipe
-from appimagebuilder.appimage import AppImageCreator
 from appimagebuilder.app_dir.builder import Builder
-from appimagebuilder.tester.tester import Tester
-
-from appimagebuilder.script import Script
+from appimagebuilder.appimage import AppImageCreator
 from appimagebuilder.generator.generator import RecipeGenerator
+from appimagebuilder.script import Script
+from appimagebuilder.tester import TestCase
+from appimagebuilder.tester.errors import TestFailed
 
 
 def __main__():
@@ -91,16 +91,20 @@ def __main__():
             creator.build()
 
         if not args.skip_tests:
-            try:
-                tester = Tester(recipe_data)
-                tester.run_tests()
-            except Tester.TestFailed as error:
+            if recipe_data.get_item("AppDir/test", []):
+                logging.info("============")
+                logging.info("AppDir tests")
+                logging.info("============")
 
-                logger.error("Tests failed")
-                if error:
-                    logger.error(error)
+                test_cases = _load_tests(recipe_data)
+                try:
+                    for test in test_cases:
+                        test.run()
+                except TestFailed as err:
+                    logger.error("Tests failed")
+                    logger.error(err)
 
-                exit(1)
+                    exit(1)
 
         if not args.skip_appimage:
             creator = AppImageCreator(recipe_data)
@@ -109,6 +113,31 @@ def __main__():
         logger.error("Unknown recipe version: %s" % recipe_version)
         logger.info("Please make sure you're using the latest appimage-builder version")
         exit(1)
+
+
+def _load_tests(recipe_data):
+    test_cases = []
+
+    appdir = recipe_data.get_item("AppDir/path", "AppDir")
+    appdir = os.path.abspath(appdir)
+    test_case_configs = recipe_data.get_item("AppDir/test", [])
+
+    for name in test_case_configs:
+        env = recipe_data.get_item("AppDir/test/%s/env" % name, [])
+        if isinstance(env, dict):
+            env = ["%s=%s" % (k, v) for k, v in env.items()]
+
+        test = TestCase(
+            appdir=appdir,
+            name=name,
+            image=recipe_data.get_item("AppDir/test/%s/image" % name),
+            command=recipe_data.get_item("AppDir/test/%s/command" % name),
+            use_host_x=recipe_data.get_item("AppDir/test/%s/use_host_x" % name, False),
+            env=env,
+        )
+        test_cases.append(test)
+
+    return test_cases
 
 
 def load_recipe(path):

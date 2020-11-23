@@ -16,13 +16,13 @@ import re
 
 import docker
 
-
-class TestFailed(RuntimeError):
-    pass
+from appimagebuilder.tester.errors import TestFailed
 
 
 class TestCase:
-    def __init__(self, appdir, name, image, command, use_host_x=False, env: [str] = None):
+    def __init__(
+        self, appdir, name, image, command, use_host_x=False, env: [str] = None
+    ):
         if env is None:
             env = []
 
