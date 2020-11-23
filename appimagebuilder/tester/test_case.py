@@ -1,3 +1,15 @@
+#   Copyright  2020 Alexis Lopez Zubieta
+#
+#   Permission is hereby granted, free of charge, to any person obtaining a
+#   copy of this software and associated documentation files (the "Software"),
+#   to deal in the Software without restriction, including without limitation the
+#   rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#   sell copies of the Software, and to permit persons to whom the Software is
+#   furnished to do so, subject to the following conditions:
+#
+#   The above copyright notice and this permission notice shall be included in
+#   all copies or substantial portions of the Software.
+
 import logging
 import os
 import re
@@ -10,16 +22,18 @@ class TestFailed(RuntimeError):
 
 
 class TestCase:
-    def __init__(self, app_dir, name):
-        self.app_dir = app_dir
-        self.name = name
-        self.image = None
-        self.command = None
-        self.use_host_x = False
-        self.env = []
+    def __init__(self, appdir, name, image, command, use_host_x=False, env: [str] = None):
+        if env is None:
+            env = []
 
-        self.tests_utils_dir = None
-        self.client = None
+        self.appdir = appdir
+        self.name = name
+        self.image = image
+        self.command = command
+        self.use_host_x = use_host_x
+        self.env = env
+
+        self.client = docker.from_env()
         self.logger = logging.getLogger("TEST CASE '%s'" % self.name)
 
     def run(self):
@@ -27,33 +41,47 @@ class TestCase:
         logging.info("Running test: %s" % self.name)
         logging.info("-----------------------------")
 
-        self.logger.info("Executing: %s" % self.command)
-        ctr = self._run_container()
-        self._print_container_logs(ctr)
-        result = ctr.wait()
-
-        if result["StatusCode"] != 0:
-            raise TestFailed(result["Error"])
-
-    def _run_container(self):
         volumes = self._get_container_volumes()
-        command = self._get_container_command()
         environment = self.get_container_environment()
 
-        ctr = self.client.containers.run(
+        container = self.client.containers.run(
             self.image,
-            command,
-            auto_remove=True,
+            "/bin/sh",
             working_dir="/app",
             volumes=volumes,
-            stdout=True,
-            stderr=True,
-            cap_add=["SYS_PTRACE", "SYS_ADMIN"],
             environment=environment,
+            devices=["/dev/snd"],
+            cap_add=["SYS_PTRACE"],
+            tty=True,
             detach=True,
-            devices=["/dev/snd", "/dev/fuse"],
+            auto_remove=True,
         )
-        return ctr
+
+        try:
+            self.logger.info("before command")
+            self._run_command(
+                "useradd -mu %s %s" % (os.getuid(), os.getenv("USER")), container
+            )
+            self._run_command(
+                "mkdir -p /home/%s/.config" % os.getenv("USER"),
+                container,
+                user=os.getenv("USER"),
+            )
+
+            self.logger.info("command")
+            self._run_command(self.command, container, user=os.getenv("USER"))
+        finally:
+            container.kill()
+
+    def _run_command(self, command, container, user="root"):
+        print("$ %s" % command)
+        exit_code, output = container.exec_run(command, user=user, tty=True)
+        for line in output.decode("utf-8").splitlines():
+            print(line)
+
+        if exit_code != 0:
+            print("$ %s FAILED, exit code: %s" % (command, exit_code))
+            raise TestFailed()
 
     def _print_container_logs(self, ctr):
         logs = ctr.logs(stream=True)
@@ -61,11 +89,10 @@ class TestCase:
             self.logger.info(line.decode("utf-8").strip())
 
     def _get_container_volumes(self):
-        volumes = {self.app_dir: {"bind": "/app", "mode": "ro"}}
+        volumes = {self.appdir: {"bind": "/app", "mode": "ro"}}
 
         if self.use_host_x:
             volumes["/tmp/.X11-unix"] = {"bind": "/tmp/.X11-unix", "mode": "rw"}
-            volumes[self.tests_utils_dir] = {"bind": "/utils"}
 
         dbus_session_address = os.getenv("DBUS_SESSION_BUS_ADDRESS")
 
@@ -80,18 +107,6 @@ class TestCase:
 
         return volumes
 
-    def setup(self):
-        self.tests_utils_dir = os.path.realpath(
-            os.path.join(os.path.dirname(__file__), "utils")
-        )
-        self.client = docker.from_env()
-
-    def _get_container_command(self):
-        if self.use_host_x:
-            return ["/utils/entry_point.sh", self.command]
-        else:
-            return self.command
-
     def get_container_environment(self):
         if self.use_host_x:
             self.env.append("DISPLAY=%s" % os.getenv("DISPLAY"))
@@ -102,4 +117,5 @@ class TestCase:
 
         self.env.append("UID=%s" % os.getuid())
         self.env.append("UNAME=%s" % os.getenv("USER"))
+        self.env.append("XDG_DATA_DIRS=/usr/share:/usr/local/share")
         return self.env

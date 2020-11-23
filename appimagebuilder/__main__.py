@@ -18,7 +18,7 @@ import os
 from appimagebuilder import recipe
 from appimagebuilder.appimage import AppImageCreator
 from appimagebuilder.app_dir.builder import Builder
-from appimagebuilder.app_dir.tester import Tester
+from appimagebuilder.tester.tester import Tester
 
 from appimagebuilder.script import Script
 from appimagebuilder.generator.generator import RecipeGenerator

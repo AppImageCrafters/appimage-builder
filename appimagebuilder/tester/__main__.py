@@ -14,6 +14,7 @@
 import argparse
 import logging
 
+from appimagebuilder.tester import TestCase
 from appimagebuilder.tester.tester import Tester
 
 
