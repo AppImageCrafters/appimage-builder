@@ -29,7 +29,7 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "appimage-builder = appimagebuilder.__main__:__main__",
-            "appimage-tester = appimagebuilder.tester.__main__:__main__"
+            "appimage-tester = appimagebuilder.tester.__main__:__main__",
         ]
     },
     url="https://github.com/AppImageCrafters/appimage-builder",
