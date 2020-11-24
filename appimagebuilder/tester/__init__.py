@@ -10,4 +10,4 @@
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
 
-from .test_case import TestCase, TestFailed
+from .execution_test import ExecutionTest, TestFailed

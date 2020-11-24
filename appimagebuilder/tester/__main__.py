@@ -16,7 +16,7 @@ import logging
 from pathlib import Path
 
 from appimagebuilder.inspector.inspector import Inspector
-from appimagebuilder.tester import TestCase, TestFailed
+from appimagebuilder.tester import ExecutionTest, TestFailed
 from appimagebuilder.tester.static_test_case import StaticTestCase
 
 
@@ -64,7 +64,7 @@ def __main__():
     if args.do_test:
         try:
             for docker_image in args.docker_images:
-                test = TestCase(
+                test = ExecutionTest(
                     appdir=target,
                     name=docker_image,
                     image=docker_image,

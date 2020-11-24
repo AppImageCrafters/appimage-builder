@@ -20,7 +20,7 @@ from appimagebuilder.app_dir.builder import Builder
 from appimagebuilder.appimage import AppImageCreator
 from appimagebuilder.generator.generator import RecipeGenerator
 from appimagebuilder.script import Script
-from appimagebuilder.tester import TestCase
+from appimagebuilder.tester import ExecutionTest
 from appimagebuilder.tester.errors import TestFailed
 
 
@@ -127,7 +127,7 @@ def _load_tests(recipe_data):
         if isinstance(env, dict):
             env = ["%s=%s" % (k, v) for k, v in env.items()]
 
-        test = TestCase(
+        test = ExecutionTest(
             appdir=appdir,
             name=name,
             image=recipe_data.get_item("AppDir/test/%s/image" % name),

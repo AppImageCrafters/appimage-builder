@@ -20,7 +20,7 @@ import docker
 from appimagebuilder.tester.errors import TestFailed
 
 
-class TestCase:
+class ExecutionTest:
     def __init__(
         self, appdir: Path, name, image, command, use_host_x=False, env: [str] = None
     ):
