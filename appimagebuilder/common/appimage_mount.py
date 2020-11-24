@@ -14,23 +14,48 @@ import logging
 import subprocess
 
 
-def appimage_mount(target):
-    abs_target_path = os.path.abspath(target)
-    process = subprocess.Popen(
-        [abs_target_path, "--appimage-mount"], stdout=subprocess.PIPE
-    )
-    app_dir = process.stdout.readline().decode("utf-8").strip()
-    ret_code = process.poll()
+class AppImageMount:
+    def __init__(self, appimage_path):
+        self._appimage_path = appimage_path
+        self.path = None
+        self._process = None
 
-    if ret_code == None:
-        logging.info("AppImage mounted at: %s" % app_dir)
-        return app_dir, process
-    else:
-        raise RuntimeError("Unable to run: %s --appimage-mount" % target)
+    def __del__(self):
+        if self._process:
+            self.unmount()
 
+    def __enter__(self):
+        self.mount()
+        return self
 
-def appimage_umount(process):
-    process.kill()
-    process.wait()
+    def __exit__(self):
+        self.unmount()
+        return self
 
-    logging.info("AppImage unmounted")
+    def mount(self):
+        if self._process:
+            raise RuntimeError("The target is mounted already")
+
+        abs_target_path = os.path.abspath(self._appimage_path)
+        self._process = subprocess.Popen(
+            [abs_target_path, "--appimage-mount"], stdout=subprocess.PIPE
+        )
+        self.path = self._process.stdout.readline().decode("utf-8").strip()
+        ret_code = self._process.poll()
+
+        if not ret_code:
+            logging.info("AppImage mounted at: %s" % self.path)
+            return self.path
+        else:
+            raise RuntimeError(
+                "Unable to run: %s --appimage-mount" % self._appimage_path
+            )
+
+    def unmount(self):
+        self._process.kill()
+        self._process.wait()
+
+        self.path = None
+        self._process = None
+
+        logging.info("AppImage unmounted")

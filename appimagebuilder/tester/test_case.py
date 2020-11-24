@@ -13,6 +13,7 @@
 import logging
 import os
 import re
+from pathlib import Path
 
 import docker
 
@@ -21,7 +22,7 @@ from appimagebuilder.tester.errors import TestFailed
 
 class TestCase:
     def __init__(
-        self, appdir, name, image, command, use_host_x=False, env: [str] = None
+        self, appdir: Path, name, image, command, use_host_x=False, env: [str] = None
     ):
         if env is None:
             env = []

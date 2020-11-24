@@ -15,7 +15,7 @@ import os
 import subprocess
 
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
-from appimagebuilder.common.appimage_mount import appimage_mount, appimage_umount
+from appimagebuilder.common.appimage_mount import AppImageMount
 from appimagebuilder.common.file_test import is_elf
 from appimagebuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
 
@@ -24,14 +24,10 @@ class Inspector:
     def __init__(self, target):
         self.target = target
         if os.path.isfile(self.target):
-            self.app_dir, self.appimage_process = appimage_mount(target)
+            self.appimage_mount = AppImageMount(target)
+            self.app_dir = self.appimage_mount.mount()
         else:
             self.app_dir = target
-            self.appimage_process = None
-
-    def __del__(self):
-        if self.appimage_process:
-            appimage_umount(self.appimage_process)
 
     def get_app_dir(self):
         return self.app_dir
