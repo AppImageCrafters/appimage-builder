@@ -17,7 +17,7 @@ from pathlib import Path
 
 from appimagebuilder.inspector.inspector import Inspector
 from appimagebuilder.tester import ExecutionTest, TestFailed
-from appimagebuilder.tester.static_test_case import StaticTestCase
+from appimagebuilder.tester.dependencies_test import DependenciesTest
 
 
 def configure_logging(args):
@@ -88,7 +88,7 @@ def run_static_test(target, docker_image):
     inspector = Inspector(target)
     needed_libs = inspector.get_bundle_needed_libs()
 
-    test_case = StaticTestCase(docker_image, needed_libs)
+    test_case = DependenciesTest(docker_image, needed_libs)
     try:
         test_case.setup()
         test_case.run()

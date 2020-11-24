@@ -18,7 +18,7 @@ import docker
 from appimagebuilder.tester.errors import TestFailed
 
 
-class StaticTestCase:
+class DependenciesTest:
     def __init__(self, docker_image, needed_libs):
         self.docker_image = docker_image
         self.needed_libs = needed_libs
