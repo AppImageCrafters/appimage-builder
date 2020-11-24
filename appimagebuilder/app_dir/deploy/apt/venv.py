@@ -50,13 +50,18 @@ class Venv:
     def _generate_paths(self, base_path):
         self._base_path = Path(base_path).absolute()
         self._apt_conf_path = self._base_path / "apt.conf"
+        self._apt_conf_parts_path = self._base_path / "apt.conf.d"
         self._apt_sources_list_path = self._base_path / "sources.list"
+        self._apt_sources_list_parts_path = self._base_path / "sources.list.d"
+        self._apt_preferences_parts_path = self._base_path / "preferences.d"
         self._apt_key_parts_path = self._base_path / "keys"
         self._dpkg_path = self._base_path / "dpkg"
         self._dpkg_status_path = self._dpkg_path / "status"
         self._apt_archives_path = self._base_path / "archives"
 
         self._base_path.mkdir(parents=True, exist_ok=True)
+        self._apt_conf_parts_path.mkdir(parents=True, exist_ok=True)
+        self._apt_preferences_parts_path.mkdir(parents=True, exist_ok=True)
         self._apt_key_parts_path.mkdir(parents=True, exist_ok=True)
         self._dpkg_path.mkdir(parents=True, exist_ok=True)
         self._dpkg_status_path.touch(exist_ok=True)
@@ -67,9 +72,10 @@ class Venv:
             "Dir::State": self._base_path,
             "Dir::Cache": self._base_path,
             "Dir::Etc::Main": self._apt_conf_path,
-            "Dir::Etc::Parts": self._base_path,
-            "Dir::Etc::sourcelist": self._apt_sources_list_path,
-            "Dir::Etc::PreferencesParts": self._base_path,
+            "Dir::Etc::Parts": self._apt_conf_parts_path,
+            "Dir::Etc::SourceList": self._apt_sources_list_path,
+            "Dir::Etc::SourceListParts": self._apt_sources_list_parts_path,
+            "Dir::Etc::PreferencesParts": self._apt_preferences_parts_path,
             "Dir::Etc::TrustedParts": self._apt_key_parts_path,
             "Dir::State::status": self._dpkg_status_path,
             "Dir::Ignore-Files-Silently": False,
