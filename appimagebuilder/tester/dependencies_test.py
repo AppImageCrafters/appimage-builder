@@ -15,48 +15,48 @@ import re
 
 import docker
 
+from appimagebuilder.inspector.inspector import Inspector
 from appimagebuilder.tester.errors import TestFailed
 
 
 class DependenciesTest:
-    def __init__(self, docker_image, needed_libs):
+    def __init__(self, appdir, docker_image):
+        self.appdir = appdir
         self.docker_image = docker_image
-        self.needed_libs = needed_libs
+        self.logger = logging.getLogger("Dependencies test on '%s'" % self.docker_image)
 
-        self.tests_utils_dir = None
-        self.client = None
-        self.logger = logging.getLogger("TEST CASE '%s'" % self.docker_image)
-
-    def run(self):
-        ctr = self._run_container()
-        self._print_container_logs(ctr)
-        result = ctr.wait()
-
-        if result["StatusCode"] != 0:
-            raise TestFailed(result["Error"])
-
-    def _run_container(self):
-        command = ["/utils/static_test.sh"]
-        command.extend(self.needed_libs)
-
-        ctr = self.client.containers.run(
-            self.docker_image,
-            command,
-            auto_remove=True,
-            stdout=True,
-            stderr=True,
-            detach=True,
-            volumes={self.tests_utils_dir: {"bind": "/utils", "mode": "ro"}},
-        )
-        return ctr
-
-    def _print_container_logs(self, ctr):
-        logs = ctr.logs(stream=True)
-        for line in logs:
-            self.logger.info(line.decode("utf-8").strip())
-
-    def setup(self):
         self.tests_utils_dir = os.path.realpath(
             os.path.join(os.path.dirname(__file__), "utils")
         )
         self.client = docker.from_env()
+
+    def run(self):
+        self.logger.info("Looking for missing dependencies")
+        need_libs = self._list_needed_libs()
+        container_libs = self._list_container_libs()
+
+        missing_libs = [lib for lib in need_libs if lib not in container_libs]
+        for lib in missing_libs:
+            self.logger.error("Missing library '%s'" % lib)
+
+        if missing_libs:
+            raise TestFailed("Some libraries cannot be located in the docker image.")
+        else:
+            self.logger.info("Success, all dependencies were found!")
+
+    def _list_needed_libs(self):
+        inspector = Inspector(self.appdir)
+        return inspector.get_bundle_needed_libs()
+
+    def _list_container_libs(self):
+        output = self.client.containers.run(
+            self.docker_image,
+            "/sbin/ldconfig -p",
+            tty=True,
+            auto_remove=True,
+        )
+
+        results = re.findall(".*\s=>\s/.*/(.*)", output.decode("utf-8"))
+        container_libs = set([result.strip() for result in results])
+
+        return container_libs

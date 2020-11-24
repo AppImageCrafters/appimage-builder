@@ -15,8 +15,7 @@ import argparse
 import logging
 from pathlib import Path
 
-from appimagebuilder.inspector.inspector import Inspector
-from appimagebuilder.tester import ExecutionTest, TestFailed
+from appimagebuilder.tester import ExecutionTest
 from appimagebuilder.tester.dependencies_test import DependenciesTest
 
 
@@ -61,9 +60,9 @@ def __main__():
     configure_logging(args)
 
     target = Path(args.target).absolute()
-    if args.do_test:
+    for docker_image in args.docker_images:
         try:
-            for docker_image in args.docker_images:
+            if args.do_test:
                 test = ExecutionTest(
                     appdir=target,
                     name=docker_image,
@@ -72,30 +71,13 @@ def __main__():
                     use_host_x=True,
                 )
                 test.run()
+
+            if args.do_static_test:
+                test = DependenciesTest(target, docker_image)
+                test.run()
+
         except Exception as e:
             logging.error("Tests failed. %s" % e)
-
-    if args.do_static_test:
-        try:
-            for docker_image in args.docker_images:
-                run_static_test(target, docker_image)
-        except Exception as e:
-            logging.error("Tests failed. %s" % e)
-
-
-def run_static_test(target, docker_image):
-    logging.info("Building bundle dependencies list")
-    inspector = Inspector(target)
-    needed_libs = inspector.get_bundle_needed_libs()
-
-    test_case = DependenciesTest(docker_image, needed_libs)
-    try:
-        test_case.setup()
-        test_case.run()
-    except TestFailed:
-        raise
-    except Exception as e:
-        raise TestFailed("Execution failed. Error message: %s" % e)
 
 
 if __name__ == "__main__":
