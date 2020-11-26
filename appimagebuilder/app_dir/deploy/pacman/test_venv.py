@@ -9,7 +9,9 @@
 #
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
+
 import shutil
+from pathlib import Path
 from unittest import TestCase
 
 from .venv import Venv
@@ -20,10 +22,11 @@ class TestVenv(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.appdir_path = "/tmp/AppDir"
-        cls.venv_path = "/tmp/pacman-venv"
+        cls.appdir_path = Path("/tmp/AppDir")
+        cls.venv_path = Path("/tmp/pacman-venv")
         cls.pacman_venv = Venv(cls.venv_path, sources=[], keys=[], architectures=[])
         cls.pacman_venv.update()
+        cls.appdir_path.mkdir(parents=True, exist_ok=True)
 
     @classmethod
     def tearDownClass(cls):
@@ -33,3 +36,7 @@ class TestVenv(TestCase):
 
     def test_retrieve(self):
         self.pacman_venv.retrieve(["bash"], ["tzdata", "filesystem", "linux-api-headers"])
+
+    def test_extract(self):
+        files = self.pacman_venv.retrieve(["bash"], ["tzdata", "filesystem", "linux-api-headers"])
+        self.pacman_venv.extract(files[0], self.appdir_path)
