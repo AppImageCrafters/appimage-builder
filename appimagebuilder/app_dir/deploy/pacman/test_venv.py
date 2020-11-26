@@ -40,3 +40,7 @@ class TestVenv(TestCase):
     def test_extract(self):
         files = self.pacman_venv.retrieve(["bash"], ["tzdata", "filesystem", "linux-api-headers"])
         self.pacman_venv.extract(files[0], self.appdir_path)
+
+    def test_read_package_data(self):
+        files = self.pacman_venv.retrieve(["bash"], ["tzdata", "filesystem", "linux-api-headers"])
+        self.assertTrue(self.pacman_venv.read_package_data(files[0]))
