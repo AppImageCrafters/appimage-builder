@@ -66,9 +66,19 @@ class Venv:
 
         self._run_pacman_download_packages(packages_str, exclude_str)
         files = self._run_pacman_list_package_files(exclude_str, packages_str)
-        print(files)
 
         return files
+
+    def extract(self, file, target):
+        command = "pacman " \
+                  "--dbpath %s " \
+                  "--cachedir %s " \
+                  "--root %s " \
+                  "--upgrade --noconfirm --noscriptlet --nodeps %s" % (self._dbpath, self._cachedir, target, file)
+        self._logger.debug(command)
+        output = subprocess.run(command, shell=True)
+        self._assert_successful_output(output)
+        return output
 
     def _run_pacman_download_packages(self, packages_str, exclude_str):
         command = "pacman -Sy --downloadonly --noconfirm --dbpath %s --cachedir %s %s %s" % (
