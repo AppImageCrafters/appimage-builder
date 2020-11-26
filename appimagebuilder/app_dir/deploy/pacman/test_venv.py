@@ -1,0 +1,35 @@
+#   Copyright  2020 Alexis Lopez Zubieta
+#
+#   Permission is hereby granted, free of charge, to any person obtaining a
+#   copy of this software and associated documentation files (the "Software"),
+#   to deal in the Software without restriction, including without limitation the
+#   rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#   sell copies of the Software, and to permit persons to whom the Software is
+#   furnished to do so, subject to the following conditions:
+#
+#   The above copyright notice and this permission notice shall be included in
+#   all copies or substantial portions of the Software.
+import shutil
+from unittest import TestCase
+
+from .venv import Venv
+
+
+class TestVenv(TestCase):
+    venv_path = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.appdir_path = "/tmp/AppDir"
+        cls.venv_path = "/tmp/pacman-venv"
+        cls.pacman_venv = Venv(cls.venv_path, sources=[], keys=[], architectures=[])
+        cls.pacman_venv.update()
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+        # shutil.rmtree(cls.venv_path)
+        # shutil.rmtree(cls.appdir_path)
+
+    def test_retrieve(self):
+        self.pacman_venv.retrieve(["bash"], ["tzdata", "filesystem", "linux-api-headers"])
