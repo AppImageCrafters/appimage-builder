@@ -124,3 +124,19 @@ class Venv:
             raise PacmanVenvError(
                 '"%s" execution failed with code %s' % (output.args, output.returncode)
             )
+
+    def read_package_data(self, file):
+        command = "pacman -Qp %s" % file
+        self._logger.debug(command)
+        output = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
+        self._assert_successful_output(output)
+
+        lines = output.stdout.decode("utf-8").splitlines()
+        if lines:
+            first_line = lines[0]
+            line_parts = first_line.split(" ")
+
+            # name, version
+            return line_parts[0], line_parts[1]
+
+        raise PacmanVenvError("Unable to read package info from: '%s'" % file)
