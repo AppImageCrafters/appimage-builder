@@ -57,6 +57,12 @@ class RecipeSchema:
                 Optional("allow_unauthenticated"): bool,
             }
         )
+        self.v1_pacman = Schema(
+            {
+                "include": [str],
+                Optional("exclude"): [str],
+            }
+        )
 
         self.v1_appdir = Schema(
             {
@@ -64,6 +70,7 @@ class RecipeSchema:
                 "app_info": self.v1_app_info,
                 Optional("files"): self.v1_files,
                 Optional("apt"): self.v1_apt,
+                Optional("pacman"): self.v1_pacman,
                 Optional("runtime"): self.v1_runtime,
                 Optional("test"): self.v1_tests,
                 Optional("before_bundle"): self.script,
