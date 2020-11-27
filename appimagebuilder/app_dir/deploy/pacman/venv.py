@@ -10,6 +10,7 @@
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
 import logging
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -70,11 +71,13 @@ class Venv:
         return files
 
     def extract(self, file, target):
-        command = "pacman " \
-                  "--dbpath %s " \
-                  "--cachedir %s " \
-                  "--root %s " \
-                  "--upgrade --noconfirm --noscriptlet --nodeps %s" % (self._dbpath, self._cachedir, target, file)
+        os.makedirs(target, exist_ok=True)
+        command = "bsdtar " \
+                  "--exclude .BUILDINFO " \
+                  "--exclude .MTREE " \
+                  "--exclude .PKGINFO " \
+                  "--exclude .INSTALL " \
+                  "-xf %s -C %s " % (file, target)
         self._logger.debug(command)
         output = subprocess.run(command, shell=True)
         self._assert_successful_output(output)
