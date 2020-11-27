@@ -113,7 +113,7 @@ class FileInfoCache:
 
             if os.access(path, os.X_OK):
                 file_info["is_bin"] = True
-            else:
-                file_info["is_lib"] = True
+
+            file_info["is_lib"] = True
 
         return file_info
