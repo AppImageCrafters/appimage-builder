@@ -1,4 +1,6 @@
 version: 1
+script:
+  - rm -rf AppDir || true
 
 AppDir:
   path: ./AppDir
