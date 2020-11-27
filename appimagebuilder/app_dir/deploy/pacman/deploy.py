@@ -31,18 +31,22 @@ class Deploy:
         self.logger = logging.getLogger("PacmanPackageDeploy")
 
     def deploy(self, packages: [str], appdir_root: str, exclude: [str] = None):
-        appdir_root = Path(appdir_root)
+        self.pacman_venv.update()
 
+        appdir_root = Path(appdir_root)
         if not exclude:
             exclude = []
 
         exclude.extend(self.listings["pacman_core"])
         exclude.extend(self.listings["system"])
 
-        self.logger.debug("Excluded packages: ", exclude)
+        # don't exclude explicitly required packages
+        exclude = [pkg for pkg in exclude if pkg not in packages]
+
+        self.logger.debug("Excluded packages: %s" % " ".join(exclude))
 
         package_files = self.pacman_venv.retrieve(packages, exclude)
-        self.logger.debug("Candidate packages: ", package_files)
+        self.logger.debug("Candidate packages: %s" % " ".join(package_files))
 
         deployed_packages = []
         for file in package_files:

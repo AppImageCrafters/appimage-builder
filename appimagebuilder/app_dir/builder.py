@@ -89,6 +89,19 @@ class Builder:
                 "packages": deployed_packages,
             }
 
+        if self.recipe.get_item("AppDir/pacman", False):
+            pacman_venv = self._setup_pacman_venv()
+
+            pacman_deploy = deploy.PacmanDeploy(pacman_venv)
+            packages = self.recipe.get_item("AppDir/pacman/include")
+            packages_excluded = self.recipe.get_item("AppDir/pacman/exclude", [])
+            deployed_packages = pacman_deploy.deploy(
+                packages, self.app_dir_path, packages_excluded
+            )
+            self.bundle_info.data["pacman"] = {
+                "packages": deployed_packages,
+            }
+
         files_include = self.recipe.get_item("AppDir/files/include", [])
         if files_include:
             file_helper = deploy.FileDeploy(self.app_dir_path)
@@ -156,3 +169,15 @@ class Builder:
     def _generate_app_dir_desktop_entry(self):
         desktop_entry_editor = DesktopEntryGenerator(self.app_dir_path)
         desktop_entry_editor.generate(self.app_info)
+
+    def _setup_pacman_venv(self):
+        sources_list = []
+        keys_list = []
+        apt_venv = deploy.PacmanVenv(
+            Path(self.cache_dir) / "pacman",
+            sources_list,
+            keys_list,
+            [],
+            {},
+        )
+        return apt_venv

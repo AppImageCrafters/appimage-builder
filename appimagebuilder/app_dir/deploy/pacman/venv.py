@@ -118,7 +118,7 @@ class Venv:
         output = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
         self._assert_successful_output(output)
 
-        files = re.findall("file://(/.*)", output.stdout.decode("utf-8"))
+        files = re.findall("file://(.*)", output.stdout.decode("utf-8"))
         return files
 
     @staticmethod

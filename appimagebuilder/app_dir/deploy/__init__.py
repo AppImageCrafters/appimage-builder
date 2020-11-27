@@ -15,4 +15,7 @@ from .files.deploy_helper import FileDeploy
 from .apt.deploy import Deploy as AptDeploy
 from .apt.venv import Venv as AptVenv
 
+from .pacman.deploy import Deploy as PacmanDeploy
+from .pacman.venv import Venv as PacmanVenv
+
 from .util import make_symlink_relative
