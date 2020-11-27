@@ -10,6 +10,7 @@
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
 import logging
+import os
 from pathlib import Path
 
 from .venv import Venv
@@ -57,4 +58,18 @@ class Deploy:
             self.pacman_venv.extract(file, target)
             deployed_packages.append("%s=%s" % (name, version))
 
+        # create symlinks existent in a regular archlinux system
+        os.symlink("usr/bin", appdir_root / "bin")
+        os.symlink("usr/bin", appdir_root / "sbin")
+        os.symlink("usr/lib", appdir_root / "lib")
+        os.symlink("usr/lib", appdir_root / "lib64")
+        os.symlink("lib", appdir_root / "usr" / "lib64")
+        os.symlink("bin", appdir_root / "usr" / "sbin")
+
+        os.symlink("usr/bin", appdir_root / "opt" / "libc" / "bin")
+        os.symlink("usr/bin", appdir_root / "opt" / "libc" / "sbin")
+        os.symlink("usr/lib", appdir_root / "opt" / "libc" / "lib")
+        os.symlink("usr/lib", appdir_root / "opt" / "libc" / "lib64")
+        os.symlink("lib", appdir_root / "opt" / "libc" / "usr" / "lib64")
+        os.symlink("bin", appdir_root / "opt" / "libc" / "usr" / "sbin")
         return deployed_packages
