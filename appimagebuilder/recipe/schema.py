@@ -54,6 +54,7 @@ class RecipeSchema:
                 "sources": [{"sourceline": str, Optional("key_url"): str}],
                 "include": [str],
                 Optional("exclude"): [str],
+                Optional("allow_unauthenticated"): bool,
             }
         )
 
