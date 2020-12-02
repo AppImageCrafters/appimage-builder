@@ -58,15 +58,11 @@ class Interpreter(BaseHelper):
         )
 
         glibc_path = self.get_glibc_path()
-        glibc_version = self.gess_libc_version(glibc_path)
+        glibc_version = self.guess_libc_version(glibc_path)
         app_run.env["APPDIR_LIBC_VERSION"] = glibc_version
 
         self._patch_executables_interpreter(app_run.env["APPIMAGE_UUID"])
         app_run.env["SYSTEM_INTERP"] = ":".join(self.interpreters.keys())
-
-    @staticmethod
-    def _is_linker_file(file):
-        return fnmatch.fnmatch(file, "*/ld-*.so*")
 
     def _get_appdir_library_paths(self):
         paths = self.app_dir_cache.find("*", attrs=["is_lib"])
@@ -116,7 +112,8 @@ class Interpreter(BaseHelper):
             stat.S_IRWXU | stat.S_IXGRP | stat.S_IRGRP | stat.S_IXOTH | stat.S_IROTH,
         )
 
-    def gess_libc_version(self, loader_path):
+    @staticmethod
+    def guess_libc_version(loader_path):
         glib_version_re = re.compile(r"GLIBC_(?P<version>\d+\.\d+\.?\d*)")
         with open(loader_path, "rb") as f:
             content = str(f.read())
@@ -135,8 +132,8 @@ class Interpreter(BaseHelper):
             self._set_interpreter(bin, uuid)
 
     def _set_interpreter(self, file, uuid):
-        real_interpreter = self.app_dir_cache.cache[file]["pt_interp"]
-        if real_interpreter.startswith("/tmp/appimage-"):
+        original_interpreter = self.app_dir_cache.cache[file]["pt_interp"]
+        if original_interpreter.startswith("/tmp/appimage-"):
             # skip, the binary has been patched already
             return
         try:
@@ -144,13 +141,19 @@ class Interpreter(BaseHelper):
             patchelf_command.log_stderr = False
             patchelf_command.log_stdout = False
 
-            apprun_interpreter = self._gen_interpreter_link_path(real_interpreter, uuid)
-            if real_interpreter and real_interpreter != apprun_interpreter:
-                self.interpreters[real_interpreter] = apprun_interpreter
+            apprun_interpreter = self._gen_interpreter_link_path(
+                original_interpreter, uuid
+            )
+            if original_interpreter and original_interpreter != apprun_interpreter:
+                # only include interpreters from standard paths
+                if original_interpreter.startswith("/lib"):
+                    self.interpreters[original_interpreter] = apprun_interpreter
                 logging.info(
                     "Replacing PT_INTERP on: %s" % os.path.relpath(file, self.app_dir)
                 )
-                logging.info('\t"%s"  => "%s"' % (real_interpreter, apprun_interpreter))
+                logging.debug(
+                    '\t"%s"  => "%s"' % (original_interpreter, apprun_interpreter)
+                )
                 patchelf_command.set_interpreter(file, apprun_interpreter)
                 self.app_dir_cache.cache[file]["pt_interp"] = apprun_interpreter
         except PatchElfError:
