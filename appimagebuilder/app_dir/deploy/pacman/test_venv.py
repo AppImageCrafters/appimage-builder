@@ -19,20 +19,20 @@ from .venv import Venv
 
 class TestVenv(TestCase):
     venv_path = None
+    appdir_path = None
 
     @classmethod
     def setUpClass(cls):
         cls.appdir_path = Path("/tmp/AppDir")
         cls.venv_path = Path("/tmp/pacman-venv")
-        cls.pacman_venv = Venv(cls.venv_path, sources=[], keys=[], architectures=[])
+        cls.pacman_venv = Venv(cls.venv_path, repositories={}, keys=[], architectures=[])
         cls.pacman_venv.update()
         cls.appdir_path.mkdir(parents=True, exist_ok=True)
 
     @classmethod
     def tearDownClass(cls):
-        pass
-        # shutil.rmtree(cls.venv_path)
-        # shutil.rmtree(cls.appdir_path)
+        shutil.rmtree(cls.venv_path)
+        shutil.rmtree(cls.appdir_path)
 
     def test_retrieve(self):
         self.pacman_venv.retrieve(["bash"], ["tzdata", "filesystem", "linux-api-headers"])
