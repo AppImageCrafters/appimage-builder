@@ -116,20 +116,38 @@ class Deploy:
         apt_core_packages = self.apt_venv.search_packages(self.listings["apt_core"])
         self.apt_venv.set_installed_packages(apt_core_packages)
 
-        # resolve patterns in package listings
-        packages = self.apt_venv.search_packages(package_names)
-
-        # set the excluded packages as installed to avoid their retrieval
-        excluded_packages = self._resolve_excluded_packages(exclude_patterns)
-        excluded_packages = [pkg for pkg in excluded_packages if pkg not in packages]
-
-        self.apt_venv.set_installed_packages(excluded_packages)
+        # lists packages to be installed including dependencies
+        full_install_list = self.apt_venv.install_simulate(package_names)
+        refined_install_list = self._exclude_required_packages(
+            exclude_patterns, full_install_list
+        )
 
         # use apt-get install --download-only to ensure that all the dependencies are resolved and downloaded
-        self.apt_venv.install_download_only(packages)
+        self.apt_venv.install_download_only(refined_install_list)
 
-        extracted_packages = self._extract_packages(appdir_root, packages)
+        extracted_packages = self._extract_packages(appdir_root, refined_install_list)
         return [str(package) for package in extracted_packages]
+
+    def _exclude_required_packages(self, exclude_patterns, full_install_list):
+        default_exclusion_list = self._resolve_excluded_packages(exclude_patterns)
+        exclude_list = []
+        refined_install_list = []
+        for package in full_install_list:
+            if self._is_excluded(default_exclusion_list, package):
+                exclude_list.append(package)
+            else:
+                refined_install_list.append(package)
+        # set the excluded packages as installed to avoid their retrieval
+        self.apt_venv.set_installed_packages(exclude_list)
+        return refined_install_list
+
+    def _is_excluded(self, default_excluded_packages, package):
+        is_excluded = False
+        for excluded_package in default_excluded_packages:
+            if package.name == excluded_package.name:
+                is_excluded = True
+                break
+        return is_excluded
 
     def _extract_packages(self, appdir_root, packages):
         # manually extract downloaded packages to be able to create the opt/libc partition
@@ -141,8 +159,7 @@ class Deploy:
         libc_root.mkdir(exist_ok=True, parents=True)
         # list libc related packages
         libc_packages = self.apt_venv.install_simulate(self.listings["glibc"])
-        # make sure that only the required packages and their dependencies are bundled
-        packages = self.apt_venv.install_simulate(packages)
+
         for package in packages:
             final_target = appdir_root
             if package in libc_packages:
