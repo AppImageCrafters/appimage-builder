@@ -25,7 +25,7 @@ class TestDeploy(TestCase):
     def setUpClass(cls):
         cls.appdir_path = Path("/tmp/AppDir")
         cls.venv_path = Path("/tmp/pacman-venv")
-        cls.pacman_venv = Venv(cls.venv_path, sources=[], keys=[], architectures=[])
+        cls.pacman_venv = Venv(cls.venv_path, sources=[], keys=[], architecture=[])
         cls.pacman_venv.update()
         cls.appdir_path.mkdir(parents=True, exist_ok=True)
 

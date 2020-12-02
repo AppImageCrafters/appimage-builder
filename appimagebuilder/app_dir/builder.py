@@ -171,13 +171,5 @@ class Builder:
         desktop_entry_editor.generate(self.app_info)
 
     def _setup_pacman_venv(self):
-        sources_list = []
-        keys_list = []
-        apt_venv = deploy.PacmanVenv(
-            Path(self.cache_dir) / "pacman",
-            sources_list,
-            keys_list,
-            [],
-            {},
-        )
+        apt_venv = deploy.PacmanVenv(Path(self.cache_dir) / "pacman")
         return apt_venv

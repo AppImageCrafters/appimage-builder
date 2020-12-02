@@ -20,11 +20,7 @@ class Deploy:
     listings = {
         "glibc": ["glibc", "gcc-libs", "zstd"],
         "pacman_core": ["pacman"],
-        "system": [
-            "tzdata",
-            "filesystem",
-            "linux-api-headers"
-        ]
+        "system": ["tzdata", "filesystem", "linux-api-headers"],
     }
 
     def __init__(self, venv: Venv):
@@ -52,7 +48,11 @@ class Deploy:
         deployed_packages = []
         for file in package_files:
             name, version = self.pacman_venv.read_package_data(file)
-            target = appdir_root / "opt" / "libc" if name in self.listings["glibc"] else appdir_root
+            target = (
+                appdir_root / "opt" / "libc"
+                if name in self.listings["glibc"]
+                else appdir_root
+            )
 
             self.logger.info("Deploying %s=%s to %s" % (name, version, target))
             self.pacman_venv.extract(file, target)

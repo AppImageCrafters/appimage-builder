@@ -15,7 +15,6 @@ AppDir:
 
   pacman:
     Architecture: x86_64
-    SigLevel: Required
     repositories:
       core:
         - https://mirror.rackspace.com/archlinux/$repo/os/$arch
