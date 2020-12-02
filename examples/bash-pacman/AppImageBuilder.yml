@@ -14,6 +14,12 @@ AppDir:
     exec_args: $@
 
   pacman:
+    Architecture: x86_64
+    SigLevel: Required
+    repositories:
+      core:
+        - https://mirror.rackspace.com/archlinux/$repo/os/$arch
+        - https://mirror.leaseweb.net/archlinux/$repo/os/$arch
     include:
       - bash
     exclude:
