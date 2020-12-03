@@ -9,8 +9,10 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+
 import logging
 import os
+from pathlib import Path
 
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
 from appimagebuilder.common.file_test import is_elf
@@ -20,85 +22,60 @@ from .base_helper import BaseHelper
 class Qt(BaseHelper):
     def __init__(self, app_dir, app_dir_files):
         super().__init__(app_dir, app_dir_files)
+        self.app_dir = Path(app_dir)
+        self._qt_dirs = {}
 
     def configure(self, app_run):
-        qt_lib_path = self._get_qt_libs_path()
-        if qt_lib_path:
-            for path in self.app_dir_cache.find("*", attrs=["is_bin"]):
-                dir_name = os.path.dirname(path)
-                qt_conf_target_path = self._get_qt_conf_path(dir_name)
-                if not os.path.exists(qt_conf_target_path):
-                    qt_dirs = self._get_qt_dirs(dir_name)
+        self._locate_qt5_dirs()
+        if self._qt_dirs:
+            # deploy a qt.conf file next to executable files that may start a Qt application
+            exec_dirs = self._find_exec_dirs()
+            for path in exec_dirs:
+                qt_conf = self._generate_conf(path)
+                self._write_qt_conf(qt_conf, path)
 
-                    self._generate_qt_conf(qt_dirs, qt_conf_target_path)
+    def _find_exec_dirs(self):
+        exec_paths = self.app_dir_cache.find("*", attrs=["is_file", "is_bin"])
+        exec_dirs = set([os.path.dirname(path) for path in exec_paths])
+        exec_dirs = [Path(path) for path in exec_dirs]
+        return exec_dirs
 
-    def _generate_qt_conf(self, qt_dirs, qt_conf_target_path):
-        qt_conf = ["[Paths]\n"]
-        for k, v in qt_dirs.items():
-            if v:
-                qt_conf.append("%s=%s\n" % (k, v))
+    def _write_qt_conf(self, qt_conf: {str: str}, target_dir: Path):
+        path = target_dir / "qt.conf"
+        logging.info("Creating %s" % path.relative_to(self.app_dir))
+        with path.open("w") as f:
+            f.write("[Paths]\n")
+            for k, v in qt_conf.items():
+                f.write("%s = %s\n" % (k, v))
 
-        self._write_qt_conf(qt_conf, qt_conf_target_path)
+    def _generate_conf(self, base_path):
+        config = {"Prefix": os.path.relpath(self.app_dir, base_path)}
+        for k, v in self._qt_dirs.items():
+            config[k] = v.relative_to(self.app_dir)
 
-    def _write_qt_conf(self, qt_conf, qt_conf_target_path):
-        logging.info(
-            "Writing qt.conf to: %s"
-            % os.path.relpath(qt_conf_target_path, self.app_dir)
-        )
-        with open(qt_conf_target_path, "w") as f:
-            f.writelines(qt_conf)
+        return config
 
-    def _get_qt_dirs(self, exec_dir):
-        return {
-            "Prefix": self._get_qt_conf_prefix_path(exec_dir),
-            "Settings": self._get_qt_conf_etc_path(exec_dir),
-            "Libraries": self._get_qt_libs_path(),
-            "LibraryExecutables": self._get_qt_lib_exec_path(),
-            "Plugins": self._get_qt_plugins_path(),
-            "Qml2Imports": self._get_qt_qml_path(),
-            "Translations": self._get_qt_translations_path(),
-            "Data": self._get_qt_data_dir(),
-        }
+    def _locate_qt5_dirs(self):
+        libqt5core_paths = self.app_dir_cache.find("*/libQt5Core.so.*")
+        if libqt5core_paths:
+            self._qt_dirs["Libraries"] = Path(libqt5core_paths[0]).parent
 
-    def _get_qt_libs_path(self):
-        paths = self.app_dir_cache.find("*/libQt5Core.so.5")
-        if paths:
-            parent_dir = os.path.dirname(paths[0])
-            return os.path.relpath(parent_dir, self.app_dir)
+        qtwebengine_paths = self.app_dir_cache.find("*/QtWebEngineProcess")
+        if qtwebengine_paths:
+            self._qt_dirs["LibraryExecutables"] = Path(qtwebengine_paths[0]).parent
 
-    def _get_qt_lib_exec_path(self):
-        paths = self.app_dir_cache.find("*/qt5/libexec", attrs=["is_dir"])
-        if paths:
-            return os.path.relpath(paths[0], self.app_dir)
+        qmake_paths = self.app_dir_cache.find("*/qmake")
+        if qmake_paths:
+            self._qt_dirs["Binaries"] = Path(qmake_paths[0]).parent
 
-    def _get_qt_plugins_path(self):
-        paths = self.app_dir_cache.find("*/qt5/plugins", attrs=["is_dir"])
-        if paths:
-            return os.path.relpath(paths[0], self.app_dir)
+        libqminimal_paths = self.app_dir_cache.find("*/libqminimal.so")
+        if libqminimal_paths:
+            self._qt_dirs["Plugins"] = Path(libqminimal_paths[0]).parent.parent
 
-    def _get_qt_qml_path(self):
-        paths = self.app_dir_cache.find("*/qt5/qml", attrs=["is_dir"])
-        if paths:
-            return os.path.relpath(paths[0], self.app_dir)
+        builtins_qmltypes_paths = self.app_dir_cache.find("*/builtins.qmltypes")
+        if builtins_qmltypes_paths:
+            self._qt_dirs["Qml2Imports"] = Path(builtins_qmltypes_paths[0]).parent
 
-    def _get_qt_conf_etc_path(self, qt_conf_dir_path):
-        return os.path.relpath(os.path.join(self.app_dir, "etc"), qt_conf_dir_path)
-
-    def _get_qt_conf_prefix_path(self, qt_conf_dir_path):
-        qt_conf_dir_path = os.path.realpath(qt_conf_dir_path)
-        return os.path.relpath(self.app_dir, qt_conf_dir_path)
-
-    def _get_qt_conf_path(self, bin_dir):
-        full_path = os.path.join(bin_dir, "qt.conf")
-
-        return full_path
-
-    def _get_qt_translations_path(self):
-        paths = self.app_dir_cache.find("*/qt5/translations", attrs=["is_dir"])
-        if paths:
-            return os.path.relpath(paths[0], self.app_dir)
-
-    def _get_qt_data_dir(self):
-        paths = self.app_dir_cache.find("*/share/qt5", attrs=["is_dir"])
-        if paths:
-            return os.path.relpath(paths[0], self.app_dir)
+        qtbase_translations_paths = self.app_dir_cache.find("*/qtbase_en.qm")
+        if qtbase_translations_paths:
+            self._qt_dirs["Translations"] = Path(qtbase_translations_paths[0]).parent
