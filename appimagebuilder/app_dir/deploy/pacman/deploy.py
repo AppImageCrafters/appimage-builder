@@ -23,7 +23,7 @@ class Deploy:
         "system": [
             "tzdata",
             "filesystem",
-            "linux-api-headers"
+            "linux-api-headers",
             "systemd",
             "dbus",
             "util-linux",
@@ -34,7 +34,7 @@ class Deploy:
             "upower",
             "dmraid",
             "iso-codes",
-            ],
+        ],
         "graphics": [
             "libx11",
             "libxcb",
