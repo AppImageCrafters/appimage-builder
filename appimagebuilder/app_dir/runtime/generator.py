@@ -36,7 +36,7 @@ class RuntimeGenerator:
 
         app_info_loader = AppInfoLoader()
         self.app_info = app_info_loader.load(recipe)
-        self.apprun_version = recipe.get_item("AppDir/runtime/version", "v1.2.2")
+        self.apprun_version = recipe.get_item("AppDir/runtime/version", "v1.2.3")
         self.apprun_debug = recipe.get_item("AppDir/runtime/debug", False)
         self.env = recipe.get_item("AppDir/runtime/env", {})
         self.path_mappings = recipe.get_item("AppDir/runtime/path_mappings", [])
