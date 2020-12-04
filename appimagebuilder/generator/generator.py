@@ -222,7 +222,7 @@ class RecipeGenerator:
         return desktop_entries
 
     def _resolve_exec_path(self, exec):
-        if "/" in exec and os.path.exists(os.path.join(self.app_dir, exec)):
+        if "/" in exec and os.path.exists(self.app_dir + exec):
             return exec
 
         absolute_app_dir = os.path.abspath(self.app_dir)
