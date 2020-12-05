@@ -12,8 +12,12 @@
 import logging
 import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
+
+
+DEPENDS_ON = ["bsdtar", "pacman", "pacman-key"]
 
 
 class PacmanVenvError(RuntimeError):
@@ -44,6 +48,7 @@ class Venv:
         self._gpg_dir.mkdir(parents=True, exist_ok=True)
 
         self._logger = logging.getLogger("pacman")
+        self._check_deps()
         self._generate_config()
         self._configure_keyring()
 
@@ -89,6 +94,21 @@ class Venv:
         output = subprocess.run(command, shell=True)
         self._assert_successful_output(output)
         return output
+    def _check_deps(self):
+        """
+        Iterates through all items in the list of dependencies
+        defined in the global constant, DEPENDS_ON, and append
+        to the the variable, _deps[dep]
+        :return: None
+        """
+        # check if we have all the deps
+        for dep in DEPENDS_ON:
+            self._deps[dep] = shutil.which(dep)
+            if self._deps[dep] is None:
+                # shutil.which returns None if the executable
+                # was not found on PATH
+                raise FileNotFoundError(
+                    "Could not find '{exe}' on $PATH.")
 
     def _run_pacman_download_packages(self, packages_str, exclude_str):
         command = "pacman --config %s -Sy --downloadonly --noconfirm %s %s" % (
