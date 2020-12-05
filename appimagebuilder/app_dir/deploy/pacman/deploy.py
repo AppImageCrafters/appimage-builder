@@ -20,7 +20,31 @@ class Deploy:
     listings = {
         "glibc": ["glibc", "gcc-libs", "zstd"],
         "pacman_core": ["pacman"],
-        "system": ["tzdata", "filesystem", "linux-api-headers"],
+        "system": [
+            "tzdata",
+            "filesystem",
+            "linux-api-headers",
+            "systemd",
+            "dbus",
+            "util-linux",
+            "coreutils",
+            "avahi",
+            "polkit",
+            "thin-provisioning-tools",
+            "upower",
+            "dmraid",
+            "iso-codes",
+        ],
+        "graphics": [
+            "libx11",
+            "libxcb",
+            "libdrm",
+            "libxfixes",
+            "libxxf86vm",
+            "mesa",
+            "wayland",
+            "libglvnd",
+        ],
     }
 
     def __init__(self, venv: Venv):
@@ -36,6 +60,7 @@ class Deploy:
 
         exclude.extend(self.listings["pacman_core"])
         exclude.extend(self.listings["system"])
+        exclude.extend(self.listings["graphics"])
 
         # don't exclude explicitly required packages
         exclude = [pkg for pkg in exclude if pkg not in packages]

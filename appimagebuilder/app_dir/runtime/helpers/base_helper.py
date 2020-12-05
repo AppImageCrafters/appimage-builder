@@ -9,12 +9,12 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import fnmatch
-import os
+
+from appimagebuilder.app_dir.file_info_cache import FileInfoCache
 
 
 class BaseHelper:
-    def __init__(self, app_dir, app_dir_cache):
+    def __init__(self, app_dir, app_dir_cache: FileInfoCache):
         self.app_dir = app_dir
         self.app_dir_cache = app_dir_cache
 
