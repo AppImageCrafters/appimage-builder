@@ -12,8 +12,10 @@
 import logging
 import os
 import re
+import shlex
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -51,6 +53,7 @@ class Venv:
         self._architecture = architecture
         self._options = user_options
         self._needs_sudo = check_if_sudo_required()
+        self._deps = dict()
 
         self._db_path.mkdir(parents=True, exist_ok=True)
         self._cache_dir.mkdir(parents=True, exist_ok=True)
@@ -62,12 +65,7 @@ class Venv:
         self._configure_keyring()
 
     def update(self):
-        command = "pacman --config %s -Sy --quiet" % (self._config_path)
-        self._logger.debug(command)
-
-        output = subprocess.run(command, shell=True)
-        self._assert_successful_output(output)
-        return output
+        self._run_command("{sudo} {pacman} --config {config} -Sy --quiet")
 
     def retrieve(self, packages: [str], excluded_packages: [str] = None):
         initial_install_list = self._run_pacman_list_packages_and_versions(
@@ -92,17 +90,15 @@ class Venv:
     def extract(self, file, target):
         os.makedirs(target, exist_ok=True)
         command = (
-            "bsdtar "
+            "{bsdtar} "
             "--exclude .BUILDINFO "
             "--exclude .MTREE "
             "--exclude .PKGINFO "
             "--exclude .INSTALL "
-            "-xf %s -C %s " % (file, target)
+            "-xf {file} -C {target} "
         )
-        self._logger.debug(command)
-        output = subprocess.run(command, shell=True)
-        self._assert_successful_output(output)
-        return output
+        self._run_command(command, file=file, target=target)
+
     def _check_deps(self):
         """
         Iterates through all items in the list of dependencies
@@ -120,35 +116,35 @@ class Venv:
                     "Could not find '{exe}' on $PATH.")
 
     def _run_pacman_download_packages(self, packages_str, exclude_str):
-        command = "pacman --config %s -Sy --downloadonly --noconfirm %s %s" % (
-            self._config_path,
-            exclude_str,
-            packages_str,
+        self._run_command(
+            "{sudo} {pacman} --config {config} -Sy --downloadonly "
+            "--noconfirm {exclude} {packages}",
+            exclude=exclude_str,
+            packages=packages_str
         )
-        self._logger.debug(command)
-        output = subprocess.run(command, shell=True)
-        self._assert_successful_output(output)
-        return output
 
     def _run_pacman_list_packages_and_versions(self, packages_str):
-        command = "pacman --config %s -S --print-format '%%n=%%v' --noconfirm %s" % (
-            self._config_path,
-            packages_str,
-        )
-        self._logger.debug(command)
-        output = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
-        self._assert_successful_output(output)
+        command = \
+            "{pacman} --config {config} -S " \
+            "--print-format '%%n=%%v' " \
+            "--noconfirm {packages}"
+        output = self._run_command(command, packages=packages_str,
+                                   stdout=subprocess.PIPE)  # noqa:
 
-        return output.stdout.decode("utf-8").splitlines()
+        return output.stdout.decode("utf-8").splitlines()  # noqa:
 
     def _run_pacman_list_package_files(self, exclude_str, packages_str):
-        command = "pacman --config %s -S --print-format '%%l' --noconfirm %s %s" % (
-            self._config_path,
-            exclude_str,
-            packages_str,
-        )
+        command = \
+            "{pacman} --config {config} -S " \
+            "--print-format '%%l' " \
+            "--noconfirm {exclude} {packages}".format(
+                pacman=self._deps["pacman"],
+                config=self._config_path,
+                exclude=exclude_str,
+                packages=packages_str,
+            )
         self._logger.debug(command)
-        output = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
+        output = subprocess.run(command, stdout=subprocess.PIPE)
         self._assert_successful_output(output)
 
         files = re.findall("file://(.*)", output.stdout.decode("utf-8"))
@@ -162,12 +158,12 @@ class Venv:
             )
 
     def read_package_data(self, file):
-        command = "pacman -Qp %s" % file
-        self._logger.debug(command)
-        output = subprocess.run(command, stdout=subprocess.PIPE, shell=True)
-        self._assert_successful_output(output)
+        output = self._run_command(
+            "{pacman} -Qp {file}", file=file,
+            stdout=subprocess.PIPE  # noqa:
+        )
 
-        lines = output.stdout.decode("utf-8").splitlines()
+        lines = output.stdout.decode("utf-8").splitlines()  # noqa:
         if lines:
             first_line = lines[0]
             line_parts = first_line.split(" ")
@@ -199,10 +195,48 @@ class Venv:
                         f.write("Server = %s\n" % server)
 
     def _configure_keyring(self):
-        command = "pacman-key --config %s --init" % self._config_path
-        self._logger.debug(command)
-        self._assert_successful_output(subprocess.run(command, shell=True))
+        self._run_command("{sudo} {pacman_key} --config {config} --init")
+        self._run_command("{sudo} pacman-key --config {config} --populate archlinux")
 
-        command = "pacman-key --config %s --populate archlinux" % self._config_path
+    def _run_command(self, command,
+                     stdout=sys.stdout,
+                     assert_success=True,
+                     wait_for_completion=True,
+                     wait_for_completion_timeout=6000,
+                     **kwargs):
+        """
+        Runs a command as a subprocess
+        :param command: command to execute, does not need to be formatted
+        :param stdout: where to pipe the standard output
+        :param assert_success: should we check if the process succeeded?
+        :param wait_for_completion: should we wait for completion?
+        :param wait_for_completion_timeout: if yes, how much?
+        :param kwargs: additional params which should be passed to format
+        :return:
+        """
+        command = command.format(
+            config=self._config_path,
+            sudo=self._needs_sudo,
+            **self._deps,
+            **kwargs
+        )
+        # log it
         self._logger.debug(command)
-        self._assert_successful_output(subprocess.run(command, shell=True))
+
+        # need to split the command into args
+        _proc = subprocess.Popen(
+            shlex.split(command),
+            stdout=stdout,
+            stdin=sys.stdin,
+            stderr=sys.stderr
+        )
+
+        if wait_for_completion:
+            _proc.wait(wait_for_completion_timeout)
+
+        if assert_success:
+            self._assert_successful_output(_proc)
+
+        # return the process instance for future use
+        # if necessary
+        return _proc
