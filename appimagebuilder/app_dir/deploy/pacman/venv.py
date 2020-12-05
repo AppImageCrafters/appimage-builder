@@ -24,6 +24,14 @@ class PacmanVenvError(RuntimeError):
     pass
 
 
+def check_if_sudo_required():
+    if os.getuid() == 0:
+        # the user is root, we do not want to use sudo
+        return ''
+    # return the path to sudo, else return ''
+    return shutil.which("sudo") or ''
+
+
 class Venv:
     default_options = []
 
@@ -42,6 +50,7 @@ class Venv:
         self._repositories = repositories
         self._architecture = architecture
         self._options = user_options
+        self._needs_sudo = check_if_sudo_required()
 
         self._db_path.mkdir(parents=True, exist_ok=True)
         self._cache_dir.mkdir(parents=True, exist_ok=True)
