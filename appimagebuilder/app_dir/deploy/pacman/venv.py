@@ -130,7 +130,6 @@ class Venv:
             "--print-format '%%l' " \
             "--noconfirm {exclude} {packages}"
         self._logger.debug(command)
-        print(exclude_str, packages_str)
         output = self._run_command(command,
                                    packages=packages_str,
                                    exclude=exclude_str,
