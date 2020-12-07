@@ -186,8 +186,8 @@ class Venv:
                         f.write("Server = %s\n" % server)
 
     def _configure_keyring(self):
-        self._run_command("{fakeroot} {pacman_key} --config {config} --init")
-        self._run_command("{fakeroot} pacman-key --config {config} --populate archlinux")
+        self._run_command("{fakeroot} {pacman-key} --config {config} --init")
+        self._run_command("{fakeroot} {pacman-key} --config {config} --populate archlinux")
 
     def _run_command(self, command,
                      stdout=sys.stdout,
