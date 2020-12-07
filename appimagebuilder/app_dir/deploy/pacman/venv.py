@@ -117,7 +117,7 @@ class Venv:
     def _run_pacman_list_packages_and_versions(self, packages_str):
         command = \
             "{pacman} --config {config} -S " \
-            "--print-format '%%n=%%v' " \
+            "--print-format '%n=%v' " \
             "--noconfirm {packages}"
         output = self._run_command(command, packages=packages_str,
                                    stdout=subprocess.PIPE)  # noqa:
