@@ -122,7 +122,7 @@ class Venv:
         output = self._run_command(command, packages=packages_str,
                                    stdout=subprocess.PIPE)  # noqa:
 
-        return output.stdout.decode("utf-8").splitlines()  # noqa:
+        return output.stdout.read().decode("utf-8").splitlines()  # noqa:
 
     def _run_pacman_list_package_files(self, exclude_str, packages_str):
         command = \
@@ -151,7 +151,7 @@ class Venv:
             stdout=subprocess.PIPE  # noqa:
         )
 
-        lines = output.stdout.decode("utf-8").splitlines()  # noqa:
+        lines = output.stdout.read().decode("utf-8").splitlines()  # noqa:
         if lines:
             first_line = lines[0]
             line_parts = first_line.split(" ")
