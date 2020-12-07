@@ -128,17 +128,14 @@ class Venv:
         command = \
             "{pacman} --config {config} -S " \
             "--print-format '%%l' " \
-            "--noconfirm {exclude} {packages}".format(
-                pacman=self._deps["pacman"],
-                config=self._config_path,
-                exclude=exclude_str,
-                packages=packages_str,
-            )
+            "--noconfirm {exclude} {packages}"
         self._logger.debug(command)
-        output = subprocess.run(command, stdout=subprocess.PIPE)
-        self._assert_successful_output(output)
-
-        files = re.findall("file://(.*)", output.stdout.decode("utf-8"))
+        print(exclude_str, packages_str)
+        output = self._run_command(command,
+                                   packages=packages_str,
+                                   exclude=exclude_str,
+                                   stdout=subprocess.PIPE)  # noqa:
+        files = re.findall("file://(.*)", output.stdout.read().decode("utf-8"))
         return files
 
     @staticmethod
