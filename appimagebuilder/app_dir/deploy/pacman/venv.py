@@ -19,19 +19,11 @@ import sys
 from pathlib import Path
 
 
-DEPENDS_ON = ["bsdtar", "pacman", "pacman-key"]
+DEPENDS_ON = ["bsdtar", "pacman", "pacman-key", "fakeroot"]
 
 
 class PacmanVenvError(RuntimeError):
     pass
-
-
-def check_if_sudo_required():
-    if os.getuid() == 0:
-        # the user is root, we do not want to use sudo
-        return ''
-    # return the path to sudo, else return ''
-    return shutil.which("sudo") or ''
 
 
 class Venv:
@@ -52,7 +44,6 @@ class Venv:
         self._repositories = repositories
         self._architecture = architecture
         self._options = user_options
-        self._needs_sudo = check_if_sudo_required()
         self._deps = dict()
 
         self._db_path.mkdir(parents=True, exist_ok=True)
@@ -65,7 +56,7 @@ class Venv:
         self._configure_keyring()
 
     def update(self):
-        self._run_command("{sudo} {pacman} --config {config} -Sy --quiet")
+        self._run_command("{fakeroot} {pacman} --config {config} -Sy --quiet")
 
     def retrieve(self, packages: [str], excluded_packages: [str] = None):
         initial_install_list = self._run_pacman_list_packages_and_versions(
@@ -117,7 +108,7 @@ class Venv:
 
     def _run_pacman_download_packages(self, packages_str, exclude_str):
         self._run_command(
-            "{sudo} {pacman} --config {config} -Sy --downloadonly "
+            "{fakeroot} {pacman} --config {config} -Sy --downloadonly "
             "--noconfirm {exclude} {packages}",
             exclude=exclude_str,
             packages=packages_str
@@ -195,8 +186,8 @@ class Venv:
                         f.write("Server = %s\n" % server)
 
     def _configure_keyring(self):
-        self._run_command("{sudo} {pacman_key} --config {config} --init")
-        self._run_command("{sudo} pacman-key --config {config} --populate archlinux")
+        self._run_command("{fakeroot} {pacman_key} --config {config} --init")
+        self._run_command("{fakeroot} pacman-key --config {config} --populate archlinux")
 
     def _run_command(self, command,
                      stdout=sys.stdout,
@@ -216,7 +207,6 @@ class Venv:
         """
         command = command.format(
             config=self._config_path,
-            sudo=self._needs_sudo,
             **self._deps,
             **kwargs
         )
