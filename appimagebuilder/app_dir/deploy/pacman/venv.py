@@ -104,7 +104,8 @@ class Venv:
                 # shutil.which returns None if the executable
                 # was not found on PATH
                 raise FileNotFoundError(
-                    "Could not find '{exe}' on $PATH.")
+                    "Could not find '{exe}' on $PATH.".format(exe=dep)
+                )
 
     def _run_pacman_download_packages(self, packages_str, exclude_str):
         self._run_command(
