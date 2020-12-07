@@ -112,29 +112,31 @@ class Venv:
             "{fakeroot} {pacman} --config {config} -Sy --downloadonly "
             "--noconfirm {exclude} {packages}",
             exclude=exclude_str,
-            packages=packages_str
+            packages=packages_str,
         )
 
     def _run_pacman_list_packages_and_versions(self, packages_str):
-        command = \
-            "{pacman} --config {config} -S " \
-            "--print-format '%n=%v' " \
+        command = (
+            "{pacman} --config {config} -S "
+            "--print-format '%n=%v' "
             "--noconfirm {packages}"
-        output = self._run_command(command, packages=packages_str,
-                                   stdout=subprocess.PIPE)  # noqa:
+        )
+        output = self._run_command(
+            command, packages=packages_str, stdout=subprocess.PIPE
+        )  # noqa:
 
         return output.stdout.read().decode("utf-8").splitlines()  # noqa:
 
     def _run_pacman_list_package_files(self, exclude_str, packages_str):
-        command = \
-            "{pacman} --config {config} -S " \
-            "--print-format '%%l' " \
+        command = (
+            "{pacman} --config {config} -S "
+            "--print-format '%%l' "
             "--noconfirm {exclude} {packages}"
+        )
         self._logger.debug(command)
-        output = self._run_command(command,
-                                   packages=packages_str,
-                                   exclude=exclude_str,
-                                   stdout=subprocess.PIPE)  # noqa:
+        output = self._run_command(
+            command, packages=packages_str, exclude=exclude_str, stdout=subprocess.PIPE
+        )  # noqa:
         files = re.findall("file://(.*)", output.stdout.read().decode("utf-8"))
         return files
 
@@ -147,8 +149,7 @@ class Venv:
 
     def read_package_data(self, file):
         output = self._run_command(
-            "{pacman} -Qp {file}", file=file,
-            stdout=subprocess.PIPE  # noqa:
+            "{pacman} -Qp {file}", file=file, stdout=subprocess.PIPE  # noqa:
         )
 
         lines = output.stdout.read().decode("utf-8").splitlines()  # noqa:
@@ -184,14 +185,19 @@ class Venv:
 
     def _configure_keyring(self):
         self._run_command("{fakeroot} {pacman-key} --config {config} --init")
-        self._run_command("{fakeroot} {pacman-key} --config {config} --populate archlinux")
+        self._run_command(
+            "{fakeroot} {pacman-key} --config {config} --populate archlinux"
+        )
 
-    def _run_command(self, command,
-                     stdout=sys.stdout,
-                     assert_success=True,
-                     wait_for_completion=True,
-                     wait_for_completion_timeout=6000,
-                     **kwargs):
+    def _run_command(
+        self,
+        command,
+        stdout=sys.stdout,
+        assert_success=True,
+        wait_for_completion=True,
+        wait_for_completion_timeout=6000,
+        **kwargs
+    ):
         """
         Runs a command as a subprocess
         :param command: command to execute, does not need to be formatted
@@ -202,20 +208,13 @@ class Venv:
         :param kwargs: additional params which should be passed to format
         :return:
         """
-        command = command.format(
-            config=self._config_path,
-            **self._deps,
-            **kwargs
-        )
+        command = command.format(config=self._config_path, **self._deps, **kwargs)
         # log it
         self._logger.debug(command)
 
         # need to split the command into args
         _proc = subprocess.Popen(
-            shlex.split(command),
-            stdout=stdout,
-            stdin=sys.stdin,
-            stderr=sys.stderr
+            shlex.split(command), stdout=stdout, stdin=sys.stdin, stderr=sys.stderr
         )
 
         if wait_for_completion:

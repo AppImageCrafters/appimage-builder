@@ -58,8 +58,8 @@ class GdkPixbuf(BaseHelper):
                 return os.path.join(root, "gdk-pixbuf-query-loaders")
         # we did not find gdk-pixbuf-query-loaders in /usr/lib
         # perhaps we should search /usr/bin too
-        # Arch Linux has gdk-pixbuf-query-loaders in /usr/bin and 
-        # not in /usr/lib. This can be easily found out using 
+        # Arch Linux has gdk-pixbuf-query-loaders in /usr/bin and
+        # not in /usr/lib. This can be easily found out using
         # shutil.which API. => $PATH
         if shutil.which("gdk-pixbuf-query-loaders"):
             return shutil.which("gdk-pixbuf-query-loaders")
