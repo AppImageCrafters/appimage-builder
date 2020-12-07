@@ -12,6 +12,7 @@
 import logging
 import os
 import subprocess
+import shutil
 
 from .base_helper import BaseHelper
 
@@ -55,6 +56,13 @@ class GdkPixbuf(BaseHelper):
         for root, dirs, files in os.walk("/usr/lib"):
             if "gdk-pixbuf-query-loaders" in files:
                 return os.path.join(root, "gdk-pixbuf-query-loaders")
+        # we did not find gdk-pixbuf-query-loaders in /usr/lib
+        # perhaps we should search /usr/bin too
+        # Arch Linux has gdk-pixbuf-query-loaders in /usr/bin and 
+        # not in /usr/lib. This can be easily found out using 
+        # shutil.which API. => $PATH
+        if shutil.which("gdk-pixbuf-query-loaders"):
+            return shutil.which("gdk-pixbuf-query-loaders")
         raise RuntimeError("Missing 'gdk-pixbuf-query-loaders' executable")
 
     def _get_gdk_pixbuf_loaders_path(self):
