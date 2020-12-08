@@ -195,7 +195,7 @@ class Venv:
         stdout=sys.stdout,
         assert_success=True,
         wait_for_completion=True,
-        wait_for_completion_timeout=6000,
+        wait_for_completion_timeout=None,
         **kwargs
     ):
         """
