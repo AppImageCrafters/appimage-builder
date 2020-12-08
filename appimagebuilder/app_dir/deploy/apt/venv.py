@@ -17,12 +17,10 @@ import logging
 import os
 import re
 import subprocess
-import urllib
 from pathlib import Path
 from urllib import request
 
 from appimagebuilder.common import shell
-from .errors import AptVenvError
 from .package import Package
 
 DEPENDS_ON = ["dpkg-deb", "apt-get", "apt-key", "fakeroot", "apt-cache"]
