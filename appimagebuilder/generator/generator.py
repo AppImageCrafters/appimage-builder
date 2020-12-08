@@ -43,6 +43,7 @@ class RecipeGenerator:
         self.runtime_generator = None
         self.runtime_env = None
         self.appimage_arch = None
+        self.appimage_update_information = "guess"
 
         self.apt_arch = None
         self.apt_includes = None
@@ -122,6 +123,9 @@ class RecipeGenerator:
         self.app_info_exec_args = questionary.text(
             "Arguments [Default: $@] :", default=self.app_info_exec_args
         ).ask()
+        self.appimage_update_information = questionary.text(
+            "Update Information [Default: guess] :", default="guess"
+        ).ask()
         self.apt_arch = questionary.select(
             "Architecture :", ["amd64", "arm64", "i386", "armhf"], default=self.apt_arch
         ).ask()
@@ -153,6 +157,7 @@ class RecipeGenerator:
                 "files_includes": self.files_include,
                 "files_excludes": self.files_exclude,
                 "appimage_arch": self.appimage_arch,
+                "appimage_update_information": self.appimage_update_information,
             }
         )
 
