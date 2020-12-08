@@ -23,8 +23,16 @@ class AppImageCreator:
         self.app_name = recipe.get_item("AppDir/app_info/name")
         self.app_version = recipe.get_item("AppDir/app_info/version")
         self.update_information = recipe.get_item("AppImage/update-information", "None")
+        self.guess_update_information = False
+
         if self.update_information == "None":
             self.update_information = None
+        elif self.update_information == "guess":
+            # appimagetool supports a param --guess, -g
+            # this automatically generates the update_information based on CI
+            # variables, perhaps, we should use that
+            self.update_information = None
+            self.guess_update_information = True
 
         self.sing_key = recipe.get_item("AppImage/sign-key", "None")
         if self.sing_key == "None":
@@ -49,6 +57,7 @@ class AppImageCreator:
         appimage_tool = AppImageToolCommand(self.app_dir, self.target_file)
         appimage_tool.target_arch = self.target_arch
         appimage_tool.update_information = self.update_information
+        appimage_tool.guess_update_information = self.guess_update_information
         appimage_tool.sign_key = self.sing_key
         appimage_tool.runtime_file = runtime_path
         appimage_tool.run()
