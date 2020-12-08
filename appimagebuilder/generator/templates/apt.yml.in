@@ -55,5 +55,5 @@ AppDir:
 
 AppImage:
   arch: !Var appimage_arch
-  update-information: None
+  update-information: !Var appimage_update_information
   sign-key: None
