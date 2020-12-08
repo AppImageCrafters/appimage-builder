@@ -12,11 +12,10 @@
 import logging
 import os
 import re
-import shutil
 import subprocess
 from pathlib import Path
 
-from appimagebuilder.common.shell import run_command
+from appimagebuilder.common import shell
 
 DEPENDS_ON = ["bsdtar", "pacman", "pacman-key", "fakeroot"]
 
@@ -50,7 +49,7 @@ class Venv:
         self._gpg_dir.mkdir(parents=True, exist_ok=True)
 
         self._logger = logging.getLogger("pacman")
-        self._check_deps()
+        self._deps = shell.resolve_commands_paths(DEPENDS_ON)
         self._generate_config()
         self._configure_keyring()
 
@@ -88,23 +87,6 @@ class Venv:
             "-xf {file} -C {target} "
         )
         self._run_command(command, file=file, target=target)
-
-    def _check_deps(self):
-        """
-        Iterates through all items in the list of dependencies
-        defined in the global constant, DEPENDS_ON, and append
-        to the the variable, _deps[dep]
-        :return: None
-        """
-        # check if we have all the deps
-        for dep in DEPENDS_ON:
-            self._deps[dep] = shutil.which(dep)
-            if self._deps[dep] is None:
-                # shutil.which returns None if the executable
-                # was not found on PATH
-                raise FileNotFoundError(
-                    "Could not find '{exe}' on $PATH.".format(exe=dep)
-                )
 
     def _run_pacman_download_packages(self, packages_str, exclude_str):
         self._run_command(
@@ -188,4 +170,6 @@ class Venv:
         :param kwargs: additional params which should be passed to format
         :return:
         """
-        return run_command(command, config=self._config_path, **self._deps, **kwargs)
+        return shell.run_command(
+            command, config=self._config_path, **self._deps, **kwargs
+        )
