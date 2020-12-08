@@ -12,7 +12,9 @@
 import logging
 import os
 import re
+import shlex
 import subprocess
+import sys
 from pathlib import Path
 
 from appimagebuilder.common import shell
@@ -163,13 +165,41 @@ class Venv:
             "{fakeroot} {pacman-key} --config {config} --populate archlinux"
         )
 
-    def _run_command(self, command, **kwargs):
+    def _run_command(
+        self,
+        command,
+        stdout=sys.stdout,
+        assert_success=True,
+        wait_for_completion=True,
+        wait_for_completion_timeout=None,
+        **kwargs
+    ):
         """
-        Add common arguments to all commands that will be executed as part of the pacman virtual environment
+        Runs a command as a subprocess
         :param command: command to execute, does not need to be formatted
+        :param stdout: where to pipe the standard output
+        :param assert_success: should we check if the process succeeded?
+        :param wait_for_completion: should we wait for completion?
+        :param wait_for_completion_timeout: if yes, how much?
         :param kwargs: additional params which should be passed to format
         :return:
         """
-        return shell.run_command(
-            command, config=self._config_path, **self._deps, **kwargs
+        command = command.format(config=self._config_path, **self._deps, **kwargs)
+        # log it
+        self._logger.debug(command)
+
+        # need to split the command into args
+        _proc = subprocess.Popen(
+            shlex.split(command), stdout=stdout, stdin=sys.stdin, stderr=sys.stderr
         )
+
+        if wait_for_completion:
+            _proc.wait(wait_for_completion_timeout)
+
+        if assert_success:
+            shell.assert_command_successful_output(_proc)
+
+        # return the process instance for future use
+        # if necessary
+        return _proc
+
