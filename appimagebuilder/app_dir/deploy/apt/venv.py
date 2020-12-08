@@ -235,13 +235,6 @@ class Venv:
         output = subprocess.run(command, shell=True, env=self._get_environment())
         shell.assert_command_successful_output(output)
 
-    @staticmethod
-    def _assert_successful_output(output):
-        if output.returncode:
-            raise AptVenvError(
-                '"%s" execution failed with code %s' % (output.args, output.returncode)
-            )
-
     def _write_dpkg_arch(self, architectures: [str]):
         with open(self._dpkg_path / "arch", "w") as f:
             for arch in architectures:
