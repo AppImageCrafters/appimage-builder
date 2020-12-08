@@ -25,7 +25,7 @@ def resolve_commands_paths(commands: [str]):
     return paths
 
 
-def assert_command_successful_output(proc):
+def assert_successful_result(proc):
     if proc.returncode:
         raise ShellCommandError(
             '"%s" execution failed with code %s' % (proc.args, proc.returncode)

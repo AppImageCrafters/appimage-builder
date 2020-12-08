@@ -150,7 +150,7 @@ class Venv:
         _proc = subprocess.run(
             command, stdout=subprocess.PIPE, shell=True, env=self._get_environment()
         )
-        shell.assert_command_successful_output(_proc)
+        shell.assert_successful_result(_proc)
         return _proc
 
     def update(self) -> None:
@@ -158,7 +158,7 @@ class Venv:
         self.logger.info(command)
 
         _proc = subprocess.run(command, shell=True, env=self._get_environment())
-        shell.assert_command_successful_output(_proc)
+        shell.assert_successful_result(_proc)
 
     def search_names(self, patterns: [str]):
         output = self._run_apt_cache_pkgnames()
@@ -176,7 +176,7 @@ class Venv:
         proc = subprocess.run(
             command, stdout=subprocess.PIPE, shell=True, env=self._get_environment()
         )
-        shell.assert_command_successful_output(proc)
+        shell.assert_successful_result(proc)
         return proc
 
     def install_download_only(self, packages: [Package]):
@@ -188,7 +188,7 @@ class Venv:
         self.logger.info(command)
 
         output = subprocess.run(command, shell=True, env=self._get_environment())
-        shell.assert_command_successful_output(output)
+        shell.assert_successful_result(output)
 
     def install_simulate(self, packages: [Package]) -> [Package]:
         packages_str = [str(package) for package in packages]
@@ -218,7 +218,7 @@ class Venv:
             env=self._get_environment(),
         )
 
-        shell.assert_command_successful_output(command)
+        shell.assert_successful_result(command)
         return command
 
     def resolve_archive_paths(self, packages: [Package]):
@@ -234,7 +234,7 @@ class Venv:
         )
         self.logger.debug(command)
         output = subprocess.run(command, shell=True, env=self._get_environment())
-        shell.assert_command_successful_output(output)
+        shell.assert_successful_result(output)
 
     def _write_dpkg_arch(self, architectures: [str]):
         with open(self._dpkg_path / "arch", "w") as f:

@@ -197,7 +197,7 @@ class Venv:
             _proc.wait(wait_for_completion_timeout)
 
         if assert_success:
-            shell.assert_command_successful_output(_proc)
+            shell.assert_successful_result(_proc)
 
         # return the process instance for future use
         # if necessary
