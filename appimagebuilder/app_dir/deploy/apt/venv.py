@@ -21,20 +21,24 @@ import urllib
 from pathlib import Path
 from urllib import request
 
+from appimagebuilder.common import shell
 from .errors import AptVenvError
 from .package import Package
+
+DEPENDS_ON = ["dpkg-deb", "apt-get", "apt-key", "fakeroot", "apt-cache"]
 
 
 class Venv:
     def __init__(
-        self,
-        base_path: str,
-        sources: [str],
-        keys: [str],
-        architectures: [],
-        user_options: {} = None,
+            self,
+            base_path: str,
+            sources: [str],
+            keys: [str],
+            architectures: [],
+            user_options: {} = None,
     ):
         self.logger = logging.getLogger("apt")
+        self._deps = shell.resolve_commands_paths(DEPENDS_ON)
 
         self.sources = sources
         self.keys = keys
@@ -139,23 +143,24 @@ class Venv:
 
     def _run_apt_cache_show(self, package_names: [str]):
         if not package_names:
-            return []
+            return None
 
-        command = "apt-cache show %s" % " ".join(package_names)
+        command = "{apt-cache} show %s" % " ".join(package_names)
+        command = command.format(**self._deps)
         self.logger.debug(command)
 
-        output = subprocess.run(
+        _proc = subprocess.run(
             command, stdout=subprocess.PIPE, shell=True, env=self._get_environment()
         )
-        self._assert_successful_output(output)
-        return output
+        shell.assert_command_successful_output(_proc)
+        return _proc
 
     def update(self) -> None:
         command = "apt-get update"
         self.logger.info(command)
 
-        output = subprocess.run(command, shell=True, env=self._get_environment())
-        self._assert_successful_output(output)
+        _proc = subprocess.run(command, shell=True, env=self._get_environment())
+        shell.assert_command_successful_output(_proc)
 
     def search_names(self, patterns: [str]):
         output = self._run_apt_cache_pkgnames()
@@ -168,23 +173,25 @@ class Venv:
         return filtered_packages
 
     def _run_apt_cache_pkgnames(self):
-        command = "apt-cache pkgnames"
+        command = "{apt-cache} pkgnames".format(**self._deps)
         self.logger.debug(command)
-
-        output = subprocess.run(
-            command, stdout=subprocess.PIPE, shell=True, env=self._get_environment()
+        proc = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            shell=True,
+            env=self._get_environment()
         )
-        self._assert_successful_output(output)
-        return output
+        shell.assert_command_successful_output(proc)
+        return proc
 
     def install_download_only(self, packages: [Package]):
         packages_str = " ".join([str(pkg) for pkg in packages])
 
-        command = "apt-get install -y --download-only %s" % packages_str
+        command = "{apt-get} install -y --download-only {packages}".format(**self._deps, packages=packages_str)
         self.logger.info(command)
 
         output = subprocess.run(command, shell=True, env=self._get_environment())
-        self._assert_successful_output(output)
+        shell.assert_command_successful_output(output)
 
     def install_simulate(self, packages: [Package]) -> [Package]:
         packages_str = [str(package) for package in packages]
@@ -203,17 +210,17 @@ class Venv:
         return installed_packages
 
     def _run_apt_get_simulate_install(self, packages: [str]):
-        command = "apt-get install -y --simulate %s" % (" ".join(packages))
+        command = "{apt-get} install -y --simulate {packages}".format(**self._deps, packages=" ".join(packages))
         self.logger.debug(command)
-        output = subprocess.run(
+        command = subprocess.run(
             command,
             stdout=subprocess.PIPE,
             shell=True,
             env=self._get_environment(),
         )
 
-        self._assert_successful_output(output)
-        return output
+        shell.assert_command_successful_output(command)
+        return command
 
     def resolve_archive_paths(self, packages: [Package]):
         paths = [
@@ -223,16 +230,10 @@ class Venv:
 
     def extract_package(self, package, target):
         path = self._apt_archives_path / package.get_expected_file_name()
-        command = "dpkg-deb -x %s %s" % (path, target)
+        command = "{dpkg-deb} -x {archive} {directory}".format(**self._deps, archive=path, directory=target)
         self.logger.debug(command)
         output = subprocess.run(command, shell=True, env=self._get_environment())
-        self._assert_successful_output(output)
-
-    def extract_archive(self, path, target):
-        command = "dpkg-deb -x %s %s" % (path, target)
-        self.logger.debug(command)
-        output = subprocess.run(command, shell=True, env=self._get_environment())
-        self._assert_successful_output(output)
+        shell.assert_command_successful_output(output)
 
     @staticmethod
     def _assert_successful_output(output):

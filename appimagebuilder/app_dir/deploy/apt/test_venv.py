@@ -32,8 +32,7 @@ class TestVenv(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        pass
-        # shutil.rmtree(cls.venv_path)
+        shutil.rmtree(cls.venv_path)
 
     def test_search_names(self):
         self.assertEqual(self.apt_venv.search_names(["perl"]), ["perl"])
