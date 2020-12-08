@@ -30,12 +30,12 @@ DEPENDS_ON = ["dpkg-deb", "apt-get", "apt-key", "fakeroot", "apt-cache"]
 
 class Venv:
     def __init__(
-            self,
-            base_path: str,
-            sources: [str],
-            keys: [str],
-            architectures: [],
-            user_options: {} = None,
+        self,
+        base_path: str,
+        sources: [str],
+        keys: [str],
+        architectures: [],
+        user_options: {} = None,
     ):
         self.logger = logging.getLogger("apt")
         self._deps = shell.resolve_commands_paths(DEPENDS_ON)
@@ -176,10 +176,7 @@ class Venv:
         command = "{apt-cache} pkgnames".format(**self._deps)
         self.logger.debug(command)
         proc = subprocess.run(
-            command,
-            stdout=subprocess.PIPE,
-            shell=True,
-            env=self._get_environment()
+            command, stdout=subprocess.PIPE, shell=True, env=self._get_environment()
         )
         shell.assert_command_successful_output(proc)
         return proc
@@ -187,7 +184,9 @@ class Venv:
     def install_download_only(self, packages: [Package]):
         packages_str = " ".join([str(pkg) for pkg in packages])
 
-        command = "{apt-get} install -y --download-only {packages}".format(**self._deps, packages=packages_str)
+        command = "{apt-get} install -y --download-only {packages}".format(
+            **self._deps, packages=packages_str
+        )
         self.logger.info(command)
 
         output = subprocess.run(command, shell=True, env=self._get_environment())
@@ -210,7 +209,9 @@ class Venv:
         return installed_packages
 
     def _run_apt_get_simulate_install(self, packages: [str]):
-        command = "{apt-get} install -y --simulate {packages}".format(**self._deps, packages=" ".join(packages))
+        command = "{apt-get} install -y --simulate {packages}".format(
+            **self._deps, packages=" ".join(packages)
+        )
         self.logger.debug(command)
         command = subprocess.run(
             command,
@@ -230,7 +231,9 @@ class Venv:
 
     def extract_package(self, package, target):
         path = self._apt_archives_path / package.get_expected_file_name()
-        command = "{dpkg-deb} -x {archive} {directory}".format(**self._deps, archive=path, directory=target)
+        command = "{dpkg-deb} -x {archive} {directory}".format(
+            **self._deps, archive=path, directory=target
+        )
         self.logger.debug(command)
         output = subprocess.run(command, shell=True, env=self._get_environment())
         shell.assert_command_successful_output(output)
