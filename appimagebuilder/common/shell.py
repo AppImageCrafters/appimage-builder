@@ -1,3 +1,4 @@
+import os
 import shlex
 import shutil
 import subprocess
@@ -30,6 +31,7 @@ def run_command(
     assert_success=True,
     wait_for_completion=True,
     wait_for_completion_timeout=6000,
+    env=None,
     **kwargs
 ):
     """
@@ -40,15 +42,19 @@ def run_command(
     :param wait_for_completion: should we wait for completion?
     :param wait_for_completion_timeout: if yes, how much?
     :param kwargs: additional params which should be passed to format
+    :param env: environment to be used while running the command
     :return:
     """
     command = command.format(**kwargs)
     # log it
     logging.debug(command)
 
+    if not env:
+        env = os.environ
+
     # need to split the command into args
     proc = subprocess.Popen(
-        shlex.split(command), stdout=stdout, stdin=sys.stdin, stderr=sys.stderr
+        shlex.split(command), stdout=stdout, stdin=sys.stdin, stderr=sys.stderr, env=env
     )
 
     if wait_for_completion:
