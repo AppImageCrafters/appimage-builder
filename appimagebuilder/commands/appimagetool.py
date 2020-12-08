@@ -24,6 +24,7 @@ class AppImageToolCommand(Command):
         self.app_dir = app_dir
         self.runtime_file = None
         self.update_information = None
+        self.guess_update_information = False
         self.sign_key = None
         self.target_file = target_file
         self.target_arch = None
@@ -51,6 +52,9 @@ class AppImageToolCommand(Command):
 
         if self.update_information:
             command.extend(["--updateinformation", self.update_information])
+
+        if self.guess_update_information:
+            command.extend(["--guess"])
 
         command.extend([self.app_dir, self.target_file])
         return command
