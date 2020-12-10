@@ -12,9 +12,9 @@ AppDir:
     exec_args: $@
 
   apt:
-    arch: arm64
+    arch: i386
     sources:
-      - sourceline: 'deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports bionic main'
+      - sourceline: 'deb [arch=i386] http://archive.ubuntu.com/ubuntu bionic main'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
 
     include:
@@ -26,27 +26,25 @@ AppDir:
   test:
     debian:
       image: appimagecrafters/tests-env:debian-stable
-      command: "./AppRun -c 'hello world'"
+      command: "./AppRun -c 'echo hello world'"
       use_host_x: True
     centos:
       image: appimagecrafters/tests-env:centos-7
-      command: "./AppRun"
+      command: "./AppRun -c 'echo hello world'"
       use_host_x: True
     arch:
       image: appimagecrafters/tests-env:archlinux-latest
-      command: "./AppRun -c 'hello world'"
+      command: "./AppRun -c 'echo hello world'"
       use_host_x: True
     fedora:
       image: appimagecrafters/tests-env:fedora-30
-      command: "./AppRun -c 'hello world'"
+      command: "./AppRun -c 'echo hello world'"
       use_host_x: True
     ubuntu:
       image: appimagecrafters/tests-env:ubuntu-xenial
-      command: "./AppRun -c 'hello world'"
+      command: "./AppRun -c 'echo hello world'"
       use_host_x: True
 
 
 AppImage:
-  update-information: None
-  sign-key: None
-  arch: aarch64
+  arch: i686
