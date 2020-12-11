@@ -164,7 +164,7 @@ class Interpreter(BaseHelper):
         return "/tmp/appimage-%s-%s" % (uuid, os.path.basename(real_interpreter))
 
     def _get_bin_paths(self):
-        paths = self.app_dir_cache.find("*", attrs=["is_bin"])
+        paths = self.app_dir_cache.find("*", attrs=["is_file", "is_exec"])
         # only dir names are relevant
         paths = set(os.path.dirname(path) for path in paths)
 

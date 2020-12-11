@@ -14,7 +14,7 @@ import logging
 import os
 
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
-from appimagebuilder.common.file_test import is_elf
+from appimagebuilder.common.file_test import is_elf, is_elf_executable
 
 
 class FileInfoCache:
@@ -100,6 +100,10 @@ class FileInfoCache:
 
         if is_elf(path):
             file_info["is_elf"] = True
+            if is_elf_executable(path):
+                file_info["is_bin"] = True
+            else:
+                file_info["is_lib"] = True
             try:
                 patchelf = PatchElf()
                 patchelf.logger.level = logging.WARNING
@@ -111,9 +115,7 @@ class FileInfoCache:
             except PatchElfError:
                 pass
 
-            if os.access(path, os.X_OK):
-                file_info["is_bin"] = True
-
-            file_info["is_lib"] = True
+        if os.access(path, os.X_OK):
+            file_info["is_exec"] = True
 
         return file_info

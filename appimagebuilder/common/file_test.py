@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import subprocess
 
 
 def is_elf(path):
@@ -18,3 +19,18 @@ def is_elf(path):
             return True
 
     return False
+
+
+def is_elf_executable(path):
+    """
+    Determine if an elf is executable
+
+    The `__libc_start_main` symbol should be present in every runnable elf file.
+    https://refspecs.linuxbase.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/baselib---libc-start-main-.html
+     """
+    has_main_method = False
+    _proc = subprocess.run("readelf -s %s" % path, stdout=subprocess.PIPE, shell=True)
+    if _proc.returncode == 0:
+        output = _proc.stdout.decode("utf-8")
+        has_main_method = '__libc_start_main' in output
+    return has_main_method

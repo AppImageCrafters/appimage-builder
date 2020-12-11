@@ -35,7 +35,7 @@ class Qt(BaseHelper):
                 self._write_qt_conf(qt_conf, path)
 
     def _find_exec_dirs(self):
-        exec_paths = self.app_dir_cache.find("*", attrs=["is_file", "is_bin"])
+        exec_paths = self.app_dir_cache.find("*", attrs=["is_file", "is_exec"])
         exec_dirs = set([os.path.dirname(path) for path in exec_paths])
         exec_dirs = [Path(path) for path in exec_dirs]
         return exec_dirs
