@@ -1,21 +1,23 @@
-  on:
-    push
-  jobs:
-    bash-app:
-      runs-on: ubuntu-20.04
-      steps:
-        - uses: actions/checkout@v2
-        - name: Set up Python
-          uses: actions/setup-python@v1
-          with:
-            python-version: '3.x'
-        - name: Install appimage-builder
-          run: |
-            python -m pip install --upgrade .
-            sudo apt-get install -y patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot
-        - name: Builde AppImage
-          run: |
-            cd examples/bash
-            appimage-builder --skip-test --skip-appimage
+name: Test
+
+on:
+  push
+jobs:
+  bash-app:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+      - name: Install appimage-builder
+        run: |
+          python -m pip install --upgrade .
+          sudo apt-get install -y patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot
+      - name: Builde AppImage
+        run: |
+          cd examples/bash
+          appimage-builder --skip-test --skip-appimage
 
 
