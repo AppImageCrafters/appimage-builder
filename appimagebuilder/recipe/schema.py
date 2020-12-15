@@ -36,7 +36,7 @@ class RecipeSchema:
         self.v1_runtime = {
             Optional("debug"): bool,
             Optional("path_mappings"): [str],
-            Optional("env"): {str: str},
+            Optional("env"): {str: Or(str, int, bool)},
         }
 
         self.v1_tests = {
@@ -44,7 +44,7 @@ class RecipeSchema:
                 "image": str,
                 "command": str,
                 Optional("use_host_x"): bool,
-                Optional("env"): {str: str},
+                Optional("env"): {str: Or(str, int, bool)},
             }
         }
 
