@@ -182,7 +182,7 @@ class Venv:
     def install_download_only(self, packages: [Package]):
         packages_str = " ".join([str(pkg) for pkg in packages])
 
-        command = "{apt-get} install -y --download-only {packages}".format(
+        command = "{apt-get} install -y --download-only --no-install-recommends {packages}".format(
             **self._deps, packages=packages_str
         )
         self.logger.info(command)
@@ -207,7 +207,7 @@ class Venv:
         return installed_packages
 
     def _run_apt_get_simulate_install(self, packages: [str]):
-        command = "{apt-get} install -y --simulate {packages}".format(
+        command = "{apt-get} install -y --no-install-recommends --simulate {packages}".format(
             **self._deps, packages=" ".join(packages)
         )
         self.logger.debug(command)
