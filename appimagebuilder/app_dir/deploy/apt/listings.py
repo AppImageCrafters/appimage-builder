@@ -34,6 +34,7 @@ system_services = [
     "debconf",
     "debianutils",
     "dpkg",
+    "fdisk",
     "init-system-helpers",
     "iso-codes",
     "libcap2-bin",
@@ -62,6 +63,7 @@ system_services = [
 # stack packages are also excluded by default
 graphics = [
     "libdrm*",
+    "libegl-*",
     "libegl1*",
     "libegl1-*",
     "libgbm*",
@@ -84,3 +86,8 @@ graphics = [
     "libxcb1",
     "x11-common",
 ]
+
+default_exclude_list = []
+default_exclude_list.extend(apt_core)
+default_exclude_list.extend(system_services)
+default_exclude_list.extend(graphics)
