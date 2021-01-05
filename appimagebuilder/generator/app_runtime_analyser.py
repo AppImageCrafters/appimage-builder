@@ -67,6 +67,12 @@ class AppRuntimeAnalyser:
         self.runtime_libs = sorted(self.runtime_libs)
         self.runtime_data = sorted(self.runtime_data)
 
+        if not self.runtime_libs:
+            logging.warning(
+                "No dependencies were found, "
+                "please make sure that all the required libraries are reachable."
+            )
+
     def _resolve_bin_interpreters(self):
         patch_elf = PatchElf()
         patch_elf.log_stderr = False
