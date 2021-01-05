@@ -27,10 +27,10 @@ def is_elf_executable(path):
 
     The `__libc_start_main` symbol should be present in every runnable elf file.
     https://refspecs.linuxbase.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/baselib---libc-start-main-.html
-     """
+    """
     has_main_method = False
     _proc = subprocess.run("readelf -s %s" % path, stdout=subprocess.PIPE, shell=True)
     if _proc.returncode == 0:
         output = _proc.stdout.decode("utf-8")
-        has_main_method = '__libc_start_main' in output
+        has_main_method = "__libc_start_main" in output
     return has_main_method
