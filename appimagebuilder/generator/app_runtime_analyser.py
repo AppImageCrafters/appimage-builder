@@ -17,6 +17,9 @@ import shutil
 import subprocess
 
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
+from appimagebuilder.common import shell
+
+DEPENDS_ON = ["strace", "patchelf"]
 
 
 class AppRuntimeAnalyser:
@@ -28,14 +31,13 @@ class AppRuntimeAnalyser:
         self.runtime_bins = set()
         self.runtime_data = set()
         self.logger = logging.getLogger("AppRuntimeAnalyser")
+        self._deps = shell.resolve_commands_paths(DEPENDS_ON)
 
     def run_app_analysis(self):
         self.runtime_libs.clear()
+        command = "{strace} -f -e trace=openat -E LD_DEBUG=libs {bin} {args}"
+        command = command.format(bin=self.bin, args=self.args, **self._deps)
 
-        command = "strace -f -e trace=openat -E LD_DEBUG=libs %s %s" % (
-            self.bin,
-            self.args,
-        )
         self.logger.info(command)
         output = subprocess.run(command, stderr=subprocess.PIPE, shell=True)
 
