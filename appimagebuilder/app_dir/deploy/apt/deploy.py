@@ -9,7 +9,6 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import fnmatch
 import logging
 import os
 from pathlib import Path
@@ -26,7 +25,7 @@ class Deploy:
         self.logger = logging.getLogger("AptPackageDeploy")
 
     def deploy(
-            self, package_names: [str], appdir_root: str, exclude_patterns=None
+        self, package_names: [str], appdir_root: str, exclude_patterns=None
     ) -> [str]:
         """Deploy the packages and their dependencies to appdir_root.
 
@@ -37,49 +36,41 @@ class Deploy:
         if exclude_patterns is None:
             exclude_patterns = []
 
+        self._prepare_apt_venv()
+
+        deploy_list = self._resolve_packages_to_deploy(exclude_patterns, package_names)
+
+        # use apt-get install --download-only to avoid packages being configured by apt-get
+        self.apt_venv.install_download_only(deploy_list)
+
+        extracted_packages = self._extract_packages(appdir_root, deploy_list)
+        return [str(package) for package in extracted_packages]
+
+    def _prepare_apt_venv(self):
         if not os.getenv("ABUILDER_APT_SKIP_UPDATE", False):
             self.apt_venv.update()
         else:
             self.logger.warning(
                 "Skipping`apt update` execution. Newly added sources will not be available!"
             )
-
         # set apt core packages as installed, required for it to properly resolve dependencies
         apt_core_packages = self.apt_venv.search_packages(listings.apt_core)
         self.apt_venv.set_installed_packages(apt_core_packages)
 
+    def _resolve_packages_to_deploy(self, exclude_patterns, package_names):
+        # extend user defined exclude listing with the default exclude listing
+        exclude_patterns.extend(listings.default_exclude_list)
+        excluded_packages = set(self.apt_venv.search_packages(exclude_patterns))
+        # don't exclude explicitly required packages
+        required_packages = set(self.apt_venv.search_packages(package_names))
+        excluded_packages = excluded_packages.difference(required_packages)
         # lists packages to be installed including dependencies
-        full_install_list = self.apt_venv.install_simulate(package_names)
-        refined_install_list = self._exclude_required_packages(
-            exclude_patterns, full_install_list
-        )
-
-        # use apt-get install --download-only to ensure that all the dependencies are resolved and downloaded
-        self.apt_venv.install_download_only(refined_install_list)
-
-        extracted_packages = self._extract_packages(appdir_root, refined_install_list)
-        return [str(package) for package in extracted_packages]
-
-    def _exclude_required_packages(self, exclude_patterns, full_install_list):
-        default_exclusion_list = self._resolve_excluded_packages(exclude_patterns)
-        exclude_list = []
-        refined_install_list = []
-        for package in full_install_list:
-            if self._is_excluded(default_exclusion_list, package):
-                exclude_list.append(package)
-            else:
-                refined_install_list.append(package)
-        # set the excluded packages as installed to avoid their retrieval
-        self.apt_venv.set_installed_packages(exclude_list)
+        full_install_list = set(self.apt_venv.install_simulate(package_names))
+        refined_exclude_list = excluded_packages.intersection(full_install_list)
+        refined_install_list = full_install_list.difference(refined_exclude_list)
+        # set the exclude packages as installed to avoid their retrieval by the "apt-get install" method
+        self.apt_venv.set_installed_packages(refined_exclude_list)
         return refined_install_list
-
-    def _is_excluded(self, default_excluded_packages, package):
-        is_excluded = False
-        for excluded_package in default_excluded_packages:
-            if package.name == excluded_package.name:
-                is_excluded = True
-                break
-        return is_excluded
 
     def _extract_packages(self, appdir_root, packages):
         # manually extract downloaded packages to be able to create the opt/libc partition
@@ -102,16 +93,4 @@ class Deploy:
             )
             self.apt_venv.extract_package(package, final_target)
 
-        return packages
-
-    def _resolve_excluded_packages(self, patterns):
-        # remove duplicated
-        patterns = set(patterns)
-        # don't bundle graphic stack packages
-        patterns = patterns.union(listings.graphics)
-        # don't bundle system services
-        patterns = patterns.union(listings.system_services)
-
-        # resolve packages
-        packages = self.apt_venv.search_packages(patterns)
         return packages

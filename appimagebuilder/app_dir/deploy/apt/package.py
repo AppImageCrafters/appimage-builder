@@ -46,3 +46,6 @@ class Package:
         if self.version:
             output = "%s=%s" % (output, self.version)
         return output
+
+    def __hash__(self):
+        return self.__str__().__hash__()
