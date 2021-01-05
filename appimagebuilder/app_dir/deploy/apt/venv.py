@@ -207,8 +207,10 @@ class Venv:
         return installed_packages
 
     def _run_apt_get_simulate_install(self, packages: [str]):
-        command = "{apt-get} install -y --no-install-recommends --simulate {packages}".format(
-            **self._deps, packages=" ".join(packages)
+        command = (
+            "{apt-get} install -y --no-install-recommends --simulate {packages}".format(
+                **self._deps, packages=" ".join(packages)
+            )
         )
         self.logger.debug(command)
         command = subprocess.run(
