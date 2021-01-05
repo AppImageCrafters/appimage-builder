@@ -12,7 +12,7 @@
 import fnmatch
 import os
 
-from appimagebuilder.app_dir import deploy
+from appimagebuilder.app_dir.deploy.apt import listings
 from appimagebuilder.commands.dpkg_architecture import DpkgArchitecture
 from appimagebuilder.commands.dpkg_query import DpkgQuery
 
@@ -64,8 +64,8 @@ class AptRecipeGenerator:
     @staticmethod
     def _remove_excluded_packages(packages):
         exclusion_list = []
-        exclusion_list.extend(deploy.AptDeploy.listings["system_services"])
-        exclusion_list.extend(deploy.AptDeploy.listings["graphics"])
+        exclusion_list.extend(listings.system_services)
+        exclusion_list.extend(listings.graphics)
         filtered_packages = set()
         for package in packages:
             excluded = False
