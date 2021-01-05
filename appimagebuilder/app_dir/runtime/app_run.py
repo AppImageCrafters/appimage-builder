@@ -28,7 +28,7 @@ class AppRun:
     env = {
         "APPIMAGE_UUID": None,
         "SYSTEM_INTERP": None,
-        "XDG_DATA_DIRS": "$APPDIR/usr/local/share:$APPDIR/usr/share:$XDG_CONFIG_DIRS",
+        "XDG_DATA_DIRS": "$APPDIR/usr/local/share:$APPDIR/usr/share:$XDG_DATA_DIRS",
         "XDG_CONFIG_DIRS": "$APPDIR/etc/xdg:$XDG_CONFIG_DIRS",
         "LD_PRELOAD": "libapprun_hooks.so",
     }
