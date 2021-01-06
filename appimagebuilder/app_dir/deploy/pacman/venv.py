@@ -9,6 +9,7 @@
 #
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
+import glob
 import logging
 import os
 import re
@@ -160,9 +161,17 @@ class Venv:
                         f.write("Server = %s\n" % server)
 
     def _configure_keyring(self):
+        keyrings = list(
+            map(
+                lambda x: x.split('.gpg')[0],
+                [os.path.basename(x) for x in glob.glob('/usr/share/pacman/keyrings/*.gpg')]
+            )
+        )
+
         self._run_command("{fakeroot} {pacman-key} --config {config} --init")
         self._run_command(
-            "{fakeroot} {pacman-key} --config {config} --populate archlinux"
+            "{fakeroot} {pacman-key} --config {config} --populate "
+            f"{' '.join(keyrings)}"
         )
 
     def _run_command(
