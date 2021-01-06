@@ -20,7 +20,7 @@ from pathlib import Path
 
 from appimagebuilder.common import shell
 
-DEPENDS_ON = ["bsdtar", "pacman", "pacman-key", "fakeroot"]
+DEPENDS_ON = ["bsdtar", "pacman", "pacman-key", "fakeroot", "gpg-agent"]
 
 
 class PacmanVenvError(RuntimeError):
@@ -168,6 +168,11 @@ class Venv:
             )
         )
 
+        self._run_command(
+            "{fakeroot} {gpg-agent} --homedir {gpgdir} --daemon",
+            assert_success=False,
+            wait_for_completion=False
+        )
         self._run_command("{fakeroot} {pacman-key} --config {config} --init")
         self._run_command(
             "{fakeroot} {pacman-key} --config {config} --populate "
@@ -193,7 +198,7 @@ class Venv:
         :param kwargs: additional params which should be passed to format
         :return:
         """
-        command = command.format(config=self._config_path, **self._deps, **kwargs)
+        command = command.format(config=self._config_path, gpgdir=self._gpg_dir, **self._deps, **kwargs)
         # log it
         self._logger.debug(command)
 
