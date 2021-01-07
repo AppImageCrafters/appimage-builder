@@ -17,6 +17,7 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from appimagebuilder.common import shell
 
@@ -168,18 +169,25 @@ class Venv:
             )
         )
 
-        proc_gpgagent = self._run_command(
-            "{fakeroot} {gpg-agent} --homedir {gpgdir} --daemon",
-            assert_success=False,
-            wait_for_completion=False
-        )
-        self._run_command("{fakeroot} {pacman-key} --config {config} --init")
-        self._run_command(
-            "{fakeroot} {pacman-key} --config {config} --populate "
-            f"{' '.join(keyrings)}"
-        )
+        with TemporaryDirectory(prefix="appimage-builder.") as temp_dir:
+            temp_gnupg_dir = str(Path(temp_dir) / 'gnupg')
+            
+            os.symlink(self._gpg_dir.absolute(), temp_gnupg_dir, target_is_directory=True)
 
-        proc_gpgagent.terminate()
+            proc_gpgagent = self._run_command(
+                "{fakeroot} {gpg-agent} --homedir"
+                f" {temp_gnupg_dir}"
+                " --daemon",
+                assert_success=False,
+                wait_for_completion=False
+            )
+            self._run_command("{fakeroot} {pacman-key} --config {config} --init")
+            self._run_command(
+                "{fakeroot} {pacman-key} --config {config} --populate "
+                f"{' '.join(keyrings)}"
+            )
+
+            proc_gpgagent.terminate()
 
     def _run_command(
         self,
