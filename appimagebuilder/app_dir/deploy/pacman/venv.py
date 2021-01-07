@@ -208,7 +208,7 @@ class Venv:
         :param kwargs: additional params which should be passed to format
         :return:
         """
-        command = command.format(config=self._config_path, gpgdir=self._gpg_dir, **self._deps, **kwargs)
+        command = command.format(config=self._config_path, **self._deps, **kwargs)
         # log it
         self._logger.debug(command)
 
