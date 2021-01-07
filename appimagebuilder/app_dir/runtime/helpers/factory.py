@@ -20,6 +20,7 @@ from .qt import Qt
 from .gdk_pixbuf import GdkPixbuf
 from .gtk import Gtk
 from .glib_schemas import GLibSchemas
+from .linux_abi import LinuxABIReader
 
 
 class HelperFactoryError(RuntimeError):
@@ -42,6 +43,7 @@ class HelperFactory:
             "gtk": Gtk,
             "glib_schemas": GLibSchemas,
             "java": Java,
+            "linux-abi": LinuxABIReader,
         }
 
     def get(self, id) -> BaseHelper:
