@@ -168,7 +168,7 @@ class Venv:
             )
         )
 
-        self._run_command(
+        proc_gpgagent = self._run_command(
             "{fakeroot} {gpg-agent} --homedir {gpgdir} --daemon",
             assert_success=False,
             wait_for_completion=False
@@ -178,6 +178,8 @@ class Venv:
             "{fakeroot} {pacman-key} --config {config} --populate "
             f"{' '.join(keyrings)}"
         )
+
+        proc_gpgagent.terminate()
 
     def _run_command(
         self,
