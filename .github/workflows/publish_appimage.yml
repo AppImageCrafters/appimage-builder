@@ -1,0 +1,31 @@
+# This workflows will upload a Python Package using Twine when a release is created
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+
+name: Upload AppImage Package
+
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+    branches:
+      - feature/appimage-package/84
+
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get Version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+      - name: Build AppImage
+        uses: AppImageCrafters/build-appimage-action@master
+        env:
+          APPIMAGE_BUILDER_VERSION: ${{ steps.get_version.outputs.VERSION }}
+
+        with:
+          recipe: AppImageBuilder.yml
+
