@@ -5,8 +5,6 @@ name: Upload AppImage Package
 
 on:
   push:
-    tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
     branches:
       - master
 
@@ -28,4 +26,9 @@ jobs:
 
         with:
           recipe: AppImageBuilder.yml
-
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          automatic_release_tag: ${{ steps.get_version.outputs.VERSION }}
+          files: './*.AppImage*'
