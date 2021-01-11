@@ -1,7 +1,7 @@
 # This workflows will upload a Python Package using Twine when a release is created
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
-name: Upload AppImage Package
+name: Create a "continuous" release for every commit on master
 
 on:
   push:
@@ -31,4 +31,4 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: true
           automatic_release_tag: Continuous
-          files: './*.AppImage*'
+          files: './appimage-builder*.AppImage*'

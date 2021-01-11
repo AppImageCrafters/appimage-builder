@@ -8,12 +8,9 @@ on:
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
-
 jobs:
-  deploy:
-
+  release-python-wheel:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -24,16 +21,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install setuptools wheel twine
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
       - name: Build and publish
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
@@ -41,3 +28,20 @@ jobs:
         run: |
           python setup.py sdist bdist_wheel
           twine upload dist/*
+
+  release-appimage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build AppImage
+        uses: AppImageCrafters/build-appimage-action@master
+        env:
+          APPIMAGE_BUILDER_VERSION: ${{ github.ref }}
+        with:
+          recipe: AppImageBuilder.yml
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          automatic_release_tag: ${{ github.ref }}
+          files: './appimage-builder*.AppImage*'
