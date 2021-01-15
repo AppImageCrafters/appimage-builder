@@ -26,4 +26,17 @@ class ExecutablesWrapper:
 
     def write_env(self, env_path, env):
         with open(env_path, "w") as f:
-            f.write(str(env))
+            f.write(self._serialize_dict_to_env(env))
+
+    def _serialize_dict_to_env(self, input: dict):
+        lines = []
+        for k, v in input.items():
+            if isinstance(v, str):
+                lines.append("%s=%s\n" % (k, v))
+            if isinstance(v, list):
+                lines.append("%s=%s\n" % (k, ":".join(v)))
+            if isinstance(v, dict):
+                entries = ["%s:%s;" % (k, v) for (k, v) in v.items()]
+                lines.append("%s=%s\n" % (k, "".join(entries)))
+
+        return "".join(lines)
