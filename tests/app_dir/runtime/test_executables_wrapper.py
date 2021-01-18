@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from unittest import TestCase
 
+from appimagebuilder.app_dir.runtime.executables import Executable
 from appimagebuilder.app_dir.runtime.executables_wrapper import ExecutablesWrapper
 
 
@@ -25,8 +26,8 @@ class TestExecutablesWrapper(TestCase):
             os.remove(self.env_path)
 
     def test_wrap(self):
-        wrapper = ExecutablesWrapper(self.apprun_path)
-        wrapper.wrap(self.bin_path, [], {})
+        wrapper = ExecutablesWrapper(self.apprun_path, self.data_dir, {})
+        wrapper.wrap(Executable(self.bin_path, []), {})
 
         self.assertTrue(self.wrapped_path.exists())
 
@@ -34,14 +35,27 @@ class TestExecutablesWrapper(TestCase):
 
         self.assertTrue(filecmp.cmp(self.bin_path, self.apprun_path))
 
+    def test_generate_executable_env(self):
+        executable = Executable(self.bin_path, ["$@"])
+        wrapper = ExecutablesWrapper(self.apprun_path, self.data_dir, {"APPDIR_LIBRARY_PATH": "$APPDIR/usr/lib"})
+        result = wrapper._generate_executable_env(executable, self.wrapped_path, {"PYTHONHOME": "$APPDIR/usr"})
+        expected = {
+            "APPDIR": "$ORIGIN/.",
+            "EXEC": "$APPDIR/bash.orig",
+            "EXEC_ARGS": ["$@"],
+            "APPDIR_LIBRARY_PATH": "$APPDIR/usr/lib",
+            "PYTHONHOME": "$APPDIR/usr"
+        }
+
+        self.assertEqual(result, expected)
+
 
 class TestExecutablesWrapperEnvSerializer(TestCase):
-    def test_serialize_dict_to_env(self):
-        wrapper = ExecutablesWrapper("/AppDir/bin/main")
-
-        serialized_env = wrapper._serialize_dict_to_env({
+    def test_serialize_dict_to_dot_env(self):
+        serialized_env = ExecutablesWrapper._serialize_dict_to_dot_env({
             "APPDIR": "/AppDir",
             "APPIMAGE_UUID": "123",
+            "EXEC_ARGS": ["-f", "$@"],
             "LIST": ["1", "2"],
             "DICT": {
                 "a": "b",
@@ -52,6 +66,7 @@ class TestExecutablesWrapperEnvSerializer(TestCase):
         self.assertEqual(serialized_env,
                          "APPDIR=/AppDir\n"
                          "APPIMAGE_UUID=123\n"
-                         "DICT=a:b;c:d;\n"
+                         "EXEC_ARGS=-f $@\n"
                          "LIST=1:2\n"
+                         "DICT=a:b;c:d;\n"
                          )

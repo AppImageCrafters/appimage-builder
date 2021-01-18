@@ -5,21 +5,22 @@ class ExecutableProcessingError(RuntimeError):
 class Executable:
     """Executable unit with its environment"""
 
-    def __init__(self, path):
+    def __init__(self, path, args: [str]):
         self.path = path
+        self.args = args
 
     def __str__(self) -> str:
         return self.path
 
     def __eq__(self, o: object) -> bool:
-        return self.__class__ == o.__class__ and self.path == o.path
+        return self.__class__ == o.__class__ and self.path == o.path and self.args == o.args
 
 
 class InterpretedExecutable(Executable):
     """Interpreted executable of any kind"""
 
-    def __init__(self, path):
-        super().__init__(path)
+    def __init__(self, path, args: [str]):
+        super().__init__(path, args)
         self.shebang = self.read_shebang(path)
 
     def __eq__(self, o: object) -> bool:
@@ -52,7 +53,7 @@ def search_interpreted_executables(file_cache) -> [InterpretedExecutable]:
     paths = file_cache.find("*", ["is_exec"])
     for path in paths:
         try:
-            executables.append(InterpretedExecutable(path))
+            executables.append(InterpretedExecutable(path, []))
         except ExecutableProcessingError:
             pass
     return executables
