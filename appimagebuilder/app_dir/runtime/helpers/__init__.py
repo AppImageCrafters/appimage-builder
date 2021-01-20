@@ -9,3 +9,15 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+
+from .fontconfig import FontConfig
+from .gdk_pixbuf import GdkPixbuf
+from .glib_schemas import GLibSchemas
+from .gstreamer import GStreamer
+from .gtk import Gtk
+from .interpreter import Interpreter
+from .java import Java
+from .libgl import LibGL
+from .openssl import OpenSSL
+from .python import Python
+from .qt import Qt

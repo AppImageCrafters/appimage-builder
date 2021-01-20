@@ -13,19 +13,11 @@ import logging
 import os
 
 from .base_helper import BaseHelper
+from ..environment import GlobalEnvironment
 
 
 class OpenSSL(BaseHelper):
-    def __init__(self, app_dir, app_dir_files):
-        super().__init__(app_dir, app_dir_files)
-
-    def configure(self, app_run):
-        engines_dir = self._get_engines_dir()
-
+    def configure(self, env: GlobalEnvironment):
+        engines_dir = self.app_dir_cache.find_one("*/openssl-*/engines", attrs=["is_dir"])
         if engines_dir:
-            app_run.env["OPENSSL_ENGINES"] = engines_dir
-
-    def _get_engines_dir(self):
-        paths = self.app_dir_cache.find("*/openssl-1.0.0/engines", attrs=["is_dir"])
-        if paths:
-            return os.path.relpath(paths[0], self.app_dir)
+            env.set("OPENSSL_ENGINES", engines_dir)

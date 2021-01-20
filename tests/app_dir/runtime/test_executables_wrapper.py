@@ -37,14 +37,18 @@ class TestExecutablesWrapper(TestCase):
 
     def test_generate_executable_env(self):
         executable = Executable(self.bin_path, ["$@"])
-        wrapper = ExecutablesWrapper(self.apprun_path, self.data_dir, {"APPDIR_LIBRARY_PATH": "$APPDIR/usr/lib"})
-        result = wrapper._generate_executable_env(executable, self.wrapped_path, {"PYTHONHOME": "$APPDIR/usr"})
+        wrapper = ExecutablesWrapper(
+            self.apprun_path, self.data_dir, {"APPDIR_LIBRARY_PATH": "$APPDIR/usr/lib"}
+        )
+        result = wrapper._generate_executable_env(
+            executable, self.wrapped_path, {"PYTHONHOME": "$APPDIR/usr"}
+        )
         expected = {
             "APPDIR": "$ORIGIN/.",
             "EXEC": "$APPDIR/bash.orig",
             "EXEC_ARGS": ["$@"],
             "APPDIR_LIBRARY_PATH": "$APPDIR/usr/lib",
-            "PYTHONHOME": "$APPDIR/usr"
+            "PYTHONHOME": "$APPDIR/usr",
         }
 
         self.assertEqual(result, expected)
@@ -52,21 +56,24 @@ class TestExecutablesWrapper(TestCase):
 
 class TestExecutablesWrapperEnvSerializer(TestCase):
     def test_serialize_dict_to_dot_env(self):
-        serialized_env = ExecutablesWrapper._serialize_dict_to_dot_env({
-            "APPDIR": "/AppDir",
-            "APPIMAGE_UUID": "123",
-            "EXEC_ARGS": ["-f", "$@"],
-            "LIST": ["1", "2"],
-            "DICT": {
-                "a": "b",
-                "c": "d",
-            },
-        })
+        serialized_env = ExecutablesWrapper._serialize_dict_to_dot_env(
+            {
+                "APPDIR": "/AppDir",
+                "APPIMAGE_UUID": "123",
+                "EXEC_ARGS": ["-f", "$@"],
+                "LIST": ["1", "2"],
+                "DICT": {
+                    "a": "b",
+                    "c": "d",
+                },
+            }
+        )
 
-        self.assertEqual(serialized_env,
-                         "APPDIR=/AppDir\n"
-                         "APPIMAGE_UUID=123\n"
-                         "EXEC_ARGS=-f $@\n"
-                         "LIST=1:2\n"
-                         "DICT=a:b;c:d;\n"
-                         )
+        self.assertEqual(
+            serialized_env,
+            "APPDIR=/AppDir\n"
+            "APPIMAGE_UUID=123\n"
+            "EXEC_ARGS=-f $@\n"
+            "LIST=1:2\n"
+            "DICT=a:b;c:d;\n",
+        )

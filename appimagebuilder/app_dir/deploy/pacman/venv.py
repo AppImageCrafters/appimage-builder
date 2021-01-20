@@ -164,22 +164,25 @@ class Venv:
     def _configure_keyring(self):
         keyrings = list(
             map(
-                lambda x: x.split('.gpg')[0],
-                [os.path.basename(x) for x in glob.glob('/usr/share/pacman/keyrings/*.gpg')]
+                lambda x: x.split(".gpg")[0],
+                [
+                    os.path.basename(x)
+                    for x in glob.glob("/usr/share/pacman/keyrings/*.gpg")
+                ],
             )
         )
 
         with TemporaryDirectory(prefix="appimage-builder.") as temp_dir:
-            temp_gnupg_dir = str(Path(temp_dir) / 'gnupg')
-            
-            os.symlink(self._gpg_dir.absolute(), temp_gnupg_dir, target_is_directory=True)
+            temp_gnupg_dir = str(Path(temp_dir) / "gnupg")
+
+            os.symlink(
+                self._gpg_dir.absolute(), temp_gnupg_dir, target_is_directory=True
+            )
 
             proc_gpgagent = self._run_command(
-                "{fakeroot} {gpg-agent} --homedir"
-                f" {temp_gnupg_dir}"
-                " --daemon",
+                "{fakeroot} {gpg-agent} --homedir" f" {temp_gnupg_dir}" " --daemon",
                 assert_success=False,
-                wait_for_completion=False
+                wait_for_completion=False,
             )
             self._run_command("{fakeroot} {pacman-key} --config {config} --init")
             self._run_command(
@@ -196,7 +199,7 @@ class Venv:
         assert_success=True,
         wait_for_completion=True,
         wait_for_completion_timeout=None,
-        **kwargs
+        **kwargs,
     ):
         """
         Runs a command as a subprocess

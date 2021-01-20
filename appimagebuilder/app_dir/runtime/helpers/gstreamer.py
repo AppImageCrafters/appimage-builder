@@ -9,57 +9,32 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import logging
 import os
 
 from .base_helper import BaseHelper
+from ..environment import GlobalEnvironment
 
 
 class GStreamer(BaseHelper):
-    def configure(self, app_run):
-        self._set_gst_plugins_path(app_run)
-        self._set_gst_plugins_scanner_path(app_run)
-        self._set_ptp_helper_path(app_run)
+    def configure(self, env: GlobalEnvironment):
+        self._set_gst_plugins_path(env)
+        self._set_gst_plugins_scanner_path(env)
+        self._set_ptp_helper_path(env)
 
-    def _set_gst_plugins_path(self, app_run):
-        gst_1_lib_path = self._get_gst_1_lib_path()
-        gst_plugins_path = self._get_gst_plugins_path(gst_1_lib_path)
+    def _set_gst_plugins_path(self, env):
+        gst_1_lib_path = self.app_dir_cache.find_one("*/libgstreamer-1.0.so.0", attrs=["is_file"])
         if gst_1_lib_path:
-            app_run.env["GST_PLUGIN_PATH"] = "$APPDIR/%s" % gst_plugins_path
-            # app_run.env['GST_PLUGIN_PATH_1_0'] = '$APPDIR/%s' % gst_plugins_path
-            app_run.env["GST_PLUGIN_SYSTEM_PATH"] = "$APPDIR/%s" % gst_plugins_path
-            # app_run.env['GST_PLUGIN_SYSTEM_PATH_1_0'] = '$APPDIR/%s' % gst_plugins_path
+            gst_plugins_path = os.path.join(os.path.dirname(gst_1_lib_path), "gstreamer-1.0")
+            env.set("GST_PLUGIN_PATH", gst_plugins_path)
+            env.set("GST_PLUGIN_SYSTEM_PATH", gst_plugins_path)
 
     def _set_gst_plugins_scanner_path(self, app_run):
-        gst_plugins_scanner_path = self._get_gst_plugins_scanner_path()
+        gst_plugins_scanner_path = self.app_dir_cache.find_one("*/gst-plugin-scanner", attrs=["is_bin"])
         if gst_plugins_scanner_path:
-            app_run.env["GST_REGISTRY_REUSE_PLUGIN_SCANNER"] = "no"
-            app_run.env["GST_PLUGIN_SCANNER"] = "$APPDIR/%s" % gst_plugins_scanner_path
-            # app_run.env['GST_PLUGIN_SCANNER_1_0'] = '$APPDIR/%s' % gst_plugins_scanner_path
+            app_run.set("GST_REGISTRY_REUSE_PLUGIN_SCANNER", "no")
+            app_run.set("GST_PLUGIN_SCANNER", gst_plugins_scanner_path)
 
     def _set_ptp_helper_path(self, app_run):
-        gst_ptp_helper_path = self._get_gst_ptp_helper_path()
+        gst_ptp_helper_path = self.app_dir_cache.find_one("*/gst-ptp-helper", attrs=["is_bin"])
         if gst_ptp_helper_path:
-            app_run.env["GST_PTP_HELPER"] = "$APPDIR/%s" % gst_ptp_helper_path
-            # app_run.env['GST_PTP_HELPER_1_0'] = '$APPDIR/%s' % gst_ptp_helper_path
-
-    def _get_gst_1_lib_path(self):
-        path = self.app_dir_cache.find("*/libgstreamer-1.0.so.0", attrs=["is_file"])
-        if path:
-            return os.path.relpath(path[0], self.app_dir)
-
-    def _get_gst_plugins_path(self, gst_1_lib_path):
-        if gst_1_lib_path:
-            return os.path.join(os.path.dirname(gst_1_lib_path), "gstreamer-1.0")
-
-        return None
-
-    def _get_gst_plugins_scanner_path(self):
-        path = self.app_dir_cache.find("*/gst-plugin-scanner", attrs=["is_bin"])
-        if path:
-            return os.path.relpath(path[0], self.app_dir)
-
-    def _get_gst_ptp_helper_path(self):
-        path = self.app_dir_cache.find("*/gst-ptp-helper", attrs=["is_bin"])
-        if path:
-            return os.path.relpath(path[0], self.app_dir)
+            app_run.set("GST_PTP_HELPER", gst_ptp_helper_path)

@@ -9,18 +9,17 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import fnmatch
 import logging
 import os
 import re
 import stat
-
-from packaging import version
 from functools import reduce
 
-from appimagebuilder.common.file_test import is_elf
-from .base_helper import BaseHelper
+from packaging import version
+
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
+from .base_helper import BaseHelper
+from ..environment import GlobalEnvironment
 
 
 class InterpreterHandlerError(RuntimeError):
@@ -37,47 +36,41 @@ class Interpreter(BaseHelper):
         self.interpreters = {}
 
     def get_glibc_path(self) -> str:
-        paths = self.app_dir_cache.find("*/libc.so.*")
-        if not paths:
+        path = self.app_dir_cache.find_one("*/libc.so.*")
+        if not path:
             raise InterpreterHandlerError("Unable to find libc.so")
-        path = paths[0]
 
         logging.info("Libc found at: %s" % os.path.relpath(path, self.app_dir))
         return path
 
-    def configure(self, app_run):
-        self.set_path_env(app_run)
 
-        app_run.env["APPDIR_LIBRARY_PATH"] = ":".join(
-            ["$APPDIR/%s" % path for path in self._get_appdir_library_paths()]
-        )
-        app_run.env["LIBC_LIBRARY_PATH"] = ":".join(
-            ["$APPDIR/%s" % path for path in self._get_libc_library_paths()]
-        )
+    def configure(self, env: GlobalEnvironment):
+        self.set_path_env(env)
+
+        env.set("APPDIR_LIBRARY_PATH", self._get_appdir_library_paths())
+
+        env.set("LIBC_LIBRARY_PATH", self._get_libc_library_paths())
 
         glibc_path = self.get_glibc_path()
         glibc_version = self.guess_libc_version(glibc_path)
-        app_run.env["APPDIR_LIBC_VERSION"] = glibc_version
+        env.set("APPDIR_LIBC_VERSION", glibc_version)
 
-        self._patch_executables_interpreter(app_run.env["APPIMAGE_UUID"])
-        app_run.env["SYSTEM_INTERP"] = ":".join(self.interpreters.keys())
+        self._patch_executables_interpreter(env.get("APPIMAGE_UUID"))
+        env.set("SYSTEM_INTERP", self.interpreters.keys())
 
     def set_path_env(self, app_run):
         bin_paths = self._get_bin_paths()
-        path_env = ["$APPDIR/%s" % path for path in bin_paths]
-        path_env.append("$PATH")
-        app_run.env["PATH"] = ":".join(path_env)
+        bin_paths.append("$PATH")
+        app_run.set("PATH", bin_paths)
 
     def _get_appdir_library_paths(self):
         paths = self.app_dir_cache.find("*", attrs=["is_lib"])
         # only dir names are relevant
         paths = set(os.path.dirname(path) for path in paths)
 
-        # make all paths relative to app_dir
-        paths = [os.path.relpath(path, self.app_dir) for path in paths]
-
         # exclude libc partition paths
-        paths = [path for path in paths if not path.startswith("opt/libc")]
+        libc_prefix = os.path.join(self.app_dir, "opt/libc")
+        paths = [path for path in paths if not path.startswith(libc_prefix)]
 
         # exclude qt5 plugins paths
         paths = [path for path in paths if "qt5/plugins" not in path]
@@ -94,11 +87,9 @@ class Interpreter(BaseHelper):
         # only dir names are relevant
         paths = set(os.path.dirname(path) for path in paths)
 
-        # make all paths relative to app_dir
-        paths = [os.path.relpath(path, self.app_dir) for path in paths]
-
-        # exclude libc partition paths
-        paths = [path for path in paths if path.startswith("opt/libc")]
+        # exclude non-libc partition paths
+        libc_prefix = os.path.join(self.app_dir, "opt/libc")
+        paths = [path for path in paths if path.startswith(libc_prefix)]
 
         return paths
 
@@ -171,9 +162,6 @@ class Interpreter(BaseHelper):
         paths = self.app_dir_cache.find("*", attrs=["is_file", "is_exec"])
         # only dir names are relevant
         paths = set(os.path.dirname(path) for path in paths)
-
-        # make all paths relative to app_dir
-        paths = [os.path.relpath(path, self.app_dir) for path in paths]
 
         # exclude libc partition paths
         paths = [path for path in paths if not path.startswith("opt/libc")]

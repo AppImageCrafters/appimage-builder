@@ -13,40 +13,42 @@ import logging
 import os
 
 from .base_helper import BaseHelper
+from ..environment import GlobalEnvironment
 
 
 class FontConfig(BaseHelper):
+    fonts_conf_template = """<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<!-- $XDG_CONFIG_HOME/fontconfig/fonts.conf for per-user font configuration -->
+<fontconfig>
+<dir prefix="relative">{appdir_fonts_dir}</dir>
+<dir prefix="xdg">fonts</dir>
+</fontconfig>
+"""
+
     def __init__(self, app_dir, app_dir_cache):
         super().__init__(app_dir, app_dir_cache)
         self.priority = 0
 
-    def configure(self, app_run):
-        font_conf_files = self.app_dir_cache.find("*/etc/fonts/font.conf")
-        for file in font_conf_files:
-            rel_path = os.path.relpath(file, self.app_dir)
-            app_run.env["FONTCONFIG_FILE"] = "$APPDIR/%s" % rel_path
-            app_run.env["FONTCONFIG_PATH"] = "$APPDIR/usr/share/fontconfig"
-            app_run.env["FONTCONFIG_SYSROOT"] = "$APPDIR"
+    def configure(self, global_env: GlobalEnvironment):
 
-            self._include_app_dir_fonts_dir_in_font_conf()
+        fonts_dir = self.app_dir_cache.find_one("*/share/fonts", ["is_dir"])
+        if fonts_dir:
+            font_conf_path = os.path.join(self.app_dir, "etc/fonts/fonts.conf")
 
-    def _include_app_dir_fonts_dir_in_font_conf(self):
-        data = self._read_font_conf()
-        self._add_app_dir_relative_fonts_dir_line(data)
-        self._write_font_conf(data)
+            global_env.set("FONTCONFIG_FILE", font_conf_path)
+            # global_env.set("FONTCONFIG_PATH", fontconfig_path)
+            # global_env.set("FONTCONFIG_SYSROOT", self.app_dir)
 
-    def _write_font_conf(self, new_lines):
-        with open(self._get_font_conf_path(), "w") as f:
-            f.writelines(new_lines)
+            self._generate_fonts_conf(fonts_dir, font_conf_path)
 
-    def _add_app_dir_relative_fonts_dir_line(self, lines):
-        entry_index = lines.index("<!-- Font directory list -->\n")
-        lines.insert(entry_index + 1, '<dir prefix="relative">usr/share/fonts</dir>\n')
+    def _generate_fonts_conf(self, fonts_dir, font_conf_path):
+        font_conf_dir = os.path.dirname(font_conf_path)
+        rel_fonts_dir = os.path.relpath(fonts_dir, font_conf_dir)
+        fonts_conf_data = self.fonts_conf_template.format(
+            appdir_fonts_dir=rel_fonts_dir
+        )
 
-    def _read_font_conf(self):
-        with open(self._get_font_conf_path(), "r") as f:
-            return f.readlines()
-
-    def _get_font_conf_path(self):
-        fonts_conf_path = os.path.join(self.app_dir, "etc", "fonts", "fonts.conf")
-        return fonts_conf_path
+        os.makedirs(os.path.dirname(font_conf_path), exist_ok=True)
+        with open(font_conf_path, "w") as file:
+            file.write(fonts_conf_data)

@@ -75,6 +75,18 @@ class FileInfoCache:
 
         return results
 
+    def find_one(self, pattern, attrs=None):
+        if attrs is None:
+            attrs = []
+
+        for file in self.cache.keys():
+            if fnmatch.fnmatch(file, pattern):
+                file_info = self.cache[file]
+                if self.match_file_info_attrs(file_info, attrs):
+                    return file
+
+        return None
+
     @staticmethod
     def match_file_info_attrs(file_info, attrs):
         for attr in attrs:

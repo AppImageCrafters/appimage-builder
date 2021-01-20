@@ -13,7 +13,11 @@ class Executable:
         return self.path
 
     def __eq__(self, o: object) -> bool:
-        return self.__class__ == o.__class__ and self.path == o.path and self.args == o.args
+        return (
+            self.__class__ == o.__class__
+            and self.path == o.path
+            and self.args == o.args
+        )
 
 
 class InterpretedExecutable(Executable):
@@ -25,9 +29,9 @@ class InterpretedExecutable(Executable):
 
     def __eq__(self, o: object) -> bool:
         return (
-                self.__class__ == o.__class__
-                and self.path == o.path
-                and self.shebang == o.shebang
+            self.__class__ == o.__class__
+            and self.path == o.path
+            and self.shebang == o.shebang
         )
 
     @staticmethod
@@ -36,7 +40,9 @@ class InterpretedExecutable(Executable):
             buf = f.read(128)
 
             if buf[0] != ord("#") or buf[1] != ord("!"):
-                raise ExecutableProcessingError("No shebang found, this file is not an script!")
+                raise ExecutableProcessingError(
+                    "No shebang found, this file is not an script!"
+                )
 
             end_idx = buf.find(b"\n")
             if end_idx == -1:

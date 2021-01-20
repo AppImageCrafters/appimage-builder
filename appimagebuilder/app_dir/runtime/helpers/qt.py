@@ -17,6 +17,7 @@ from pathlib import Path
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
 from appimagebuilder.common.file_test import is_elf
 from .base_helper import BaseHelper
+from ..environment import GlobalEnvironment
 
 
 class Qt(BaseHelper):
@@ -25,7 +26,7 @@ class Qt(BaseHelper):
         self.app_dir = Path(app_dir)
         self._qt_dirs = {}
 
-    def configure(self, app_run):
+    def configure(self, env: GlobalEnvironment):
         self._locate_qt5_dirs()
         if self._qt_dirs:
             # deploy a qt.conf file next to executable files that may start a Qt application
