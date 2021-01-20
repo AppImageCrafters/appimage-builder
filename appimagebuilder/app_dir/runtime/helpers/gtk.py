@@ -12,8 +12,10 @@
 import logging
 import os
 import subprocess
+from pathlib import Path
 
 from .base_helper import BaseHelper
+from ..environment import GlobalEnvironment
 
 
 class Gtk(BaseHelper):
@@ -22,8 +24,9 @@ class Gtk(BaseHelper):
     Reference: https://developer.gnome.org/gtk3/stable/gtk-running.html
     """
 
-    def configure(self, app_run):
-        libgtk_path = self.app_dir_cache.find("*/libgtk-*")
+    def configure(self, env: GlobalEnvironment):
+        libgtk_path = self.app_dir_cache.find_one("*/libgtk-*")
         if libgtk_path:
-            app_run.env["GTK_EXE_PREFIX"] = "$APPDIR"
-            app_run.env["GTK_DATA_PREFIX"] = "$APPDIR"
+            prefix = Path(libgtk_path).parent.parent
+            env.set("GTK_EXE_PREFIX", str(prefix))
+            env.set("GTK_DATA_PREFIX", str(prefix))

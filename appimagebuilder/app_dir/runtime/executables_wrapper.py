@@ -24,7 +24,15 @@ class ExecutablesWrapper:
 
     def _deploy_apprun(self, target_path):
         shutil.copyfile(self.apprun_path, target_path, follow_symlinks=True)
-        os.chmod(target_path, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        os.chmod(
+            target_path,
+            stat.S_IRUSR
+            | stat.S_IRGRP
+            | stat.S_IROTH
+            | stat.S_IXUSR
+            | stat.S_IXGRP
+            | stat.S_IXOTH,
+        )
 
     def is_wrapped(self, path):
         return path.name.endswith(".orig")
@@ -59,7 +67,7 @@ class ExecutablesWrapper:
         apprun_env = {
             "APPDIR": "$ORIGIN/" + os.path.relpath(self.appdir_path, executable_dir),
             "EXEC": "$APPDIR/" + os.path.relpath(wrapped_path, self.appdir_path),
-            "EXEC_ARGS": executable.args
+            "EXEC_ARGS": executable.args,
         }
 
         # set defaults

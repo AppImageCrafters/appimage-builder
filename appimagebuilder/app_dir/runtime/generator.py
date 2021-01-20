@@ -9,13 +9,12 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import logging
-import os
+import uuid
+from pathlib import Path
 
-from appimagebuilder.app_dir.app_info.loader import AppInfoLoader
 from appimagebuilder.app_dir.file_info_cache import FileInfoCache
-from .app_run import AppRun
-from .helpers.factory import HelperFactory
+from . import helpers
+from .environment import GlobalEnvironment
 from ...recipe import Recipe
 
 
@@ -25,54 +24,42 @@ class RuntimeGeneratorError(RuntimeError):
 
 class RuntimeGenerator:
     def __init__(self, recipe: Recipe, file_info_cache: FileInfoCache):
-        self._configure(recipe)
-        self.app_run_constructor = AppRun
-        self.helper_factory_constructor = HelperFactory
-        self.file_info_cache = file_info_cache
-
-    def _configure(self, recipe):
-        self.app_dir = recipe.get_item("AppDir/path")
-        self.app_dir = os.path.abspath(self.app_dir)
-
-        app_info_loader = AppInfoLoader()
-        self.app_info = app_info_loader.load(recipe)
+        self.app_dir = Path(recipe.get_item("AppDir/path")).absolute()
+        self.main_exec = recipe.get_item("AppDir/app_info/exec")
+        self.main_exec_args = recipe.get_item("AppDir/app_info/exec_args", "$@")
         self.apprun_version = recipe.get_item("AppDir/runtime/version", "v1.2.3")
         self.apprun_debug = recipe.get_item("AppDir/runtime/debug", False)
-        self.env = recipe.get_item("AppDir/runtime/env", {})
+        self.user_env = recipe.get_item("AppDir/runtime/env", {})
         self.path_mappings = recipe.get_item("AppDir/runtime/path_mappings", [])
 
+        self.file_info_cache = file_info_cache
+
     def generate(self):
-        app_run = self.app_run_constructor(
-            self.apprun_version,
-            self.apprun_debug,
-            self.app_dir,
-            self.app_info.exec,
-            self.app_info.exec_args,
-        )
-        self._configure_runtime(app_run)
-        self._add_user_defined_settings(app_run)
+        global_env = GlobalEnvironment()
+        global_env.set("APPIMAGE_UUID", str(uuid.uuid4()))
 
-        self._set_path_mappings(app_run)
+        self._run_configuration_helpers(global_env)
+        self._get_apprun_binary()
+        # entry_points = [Executable(self.main_exec, self.main_exec_args)]
 
-        app_run.deploy()
+    def _run_configuration_helpers(self, global_env):
+        execution_list = [
+            helpers.FontConfig,
+            helpers.GdkPixbuf,
+            helpers.GLibSchemas,
+            helpers.GStreamer,
+            helpers.Gtk,
+            helpers.Interpreter,
+            helpers.Java,
+            helpers.LibGL,
+            helpers.OpenSSL,
+            helpers.Python,
+            helpers.Qt,
+        ]
 
-    def _configure_runtime(self, app_run):
-        factory = self.helper_factory_constructor(self.app_dir, self.file_info_cache)
-        for id in factory.list():
-            h = factory.get(id)
-            h.configure(app_run)
+        for helper in execution_list:
+            inst = helper(self.app_dir, self.file_info_cache)
+            inst.configure(global_env)
 
-    def _add_user_defined_settings(self, app_run: AppRun) -> None:
-        for k, v in self.env.items():
-            if k in app_run.env:
-                logging.info("Overriding runtime env: %s" % k)
-
-            app_run.env[k] = v
-
-    def _set_path_mappings(self, app_run: AppRun):
-        if self.path_mappings:
-            path_mappings_env = ""
-            for path_mapping in self.path_mappings:
-                path_mappings_env += path_mapping + ";"
-
-            app_run.env["APPRUN_PATH_MAPPINGS"] = path_mappings_env
+    def _get_apprun_binary(self):
+        pass

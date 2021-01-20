@@ -9,22 +9,16 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import shutil
-import subprocess
+import os
+from pathlib import Path
 
 from .base_helper import BaseHelper
 from ..environment import GlobalEnvironment
 
 
-class GLibSchemas(BaseHelper):
+class Python(BaseHelper):
     def configure(self, env: GlobalEnvironment):
-        path = self.app_dir_cache.find_one(
-            "*/usr/share/glib-2.0/schemas", attrs=["is_dir"]
-        )
-        if path:
-            bin_path = shutil.which("glib-compile-schemas")
-            if not bin_path:
-                raise RuntimeError("Missing 'glib-compile-schemas' executable")
-
-            subprocess.run([bin_path, path])
-            env.set("GSETTINGS_SCHEMA_DIR", path)
+        python_path = self.app_dir_cache.find_one("*/bin/python?", attrs=["is_bin"])
+        if python_path:
+            python_home = Path(python_path).parent.parent
+            env.set("PYTHONHOME", str(python_home))

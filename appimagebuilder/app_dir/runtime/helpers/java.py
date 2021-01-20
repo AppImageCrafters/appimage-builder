@@ -10,28 +10,15 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import os
+from pathlib import Path
 
 from .base_helper import BaseHelper
+from ..environment import GlobalEnvironment
 
 
 class Java(BaseHelper):
-    class Error(RuntimeError):
-        pass
-
-    def configure(self, app_run):
-        try:
-            java_home = self._get_java_home_dir()
-            app_run.env["JAVA_HOME"] = "$APPDIR/%s" % java_home
-        except Java.Error:
-            pass
-
-    def _get_java_home_dir(self):
-        java_bin = self.app_dir_cache.find("*/bin/java", attrs=["is_bin"])
-        if not java_bin:
-            raise Java.Error("Missing java binary")
-
-        bin_dir = os.path.dirname(java_bin)
-        java_home = os.path.dirname(bin_dir)
-        rel_java_home = os.path.relpath(java_home, self.app_dir)
-
-        return rel_java_home
+    def configure(self, env: GlobalEnvironment):
+        java_path = self.app_dir_cache.find_one("*/bin/java", attrs=["is_bin"])
+        if java_path:
+            java_home = Path(java_path).parent.parent
+            env.set("JAVA_HOME", str(java_home))

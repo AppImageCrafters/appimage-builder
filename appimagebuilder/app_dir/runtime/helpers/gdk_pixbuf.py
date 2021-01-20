@@ -11,48 +11,52 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
+import re
 import subprocess
 import shutil
 
 from .base_helper import BaseHelper
+from ..environment import GlobalEnvironment
 
 
 class GdkPixbuf(BaseHelper):
-    def configure(self, app_run):
-        path = self._get_gdk_pixbuf_loaders_path()
-        if path:
-            loaders_cache_path = os.path.join(
-                self.app_dir, os.path.dirname(path), "loaders.cache"
-            )
-
-            self._generate_loaders_cache(path, loaders_cache_path)
-
-            app_run.env["GDK_PIXBUF_MODULEDIR"] = "$APPDIR/%s" % path
-            app_run.env["GDK_PIXBUF_MODULE_FILE"] = loaders_cache_path.replace(
-                self.app_dir, "$APPDIR"
-            )
-            app_run.env["APPDIR_LIBRARY_PATH"] = "$APPDIR/%s:%s" % (
-                path,
-                app_run.env["APPDIR_LIBRARY_PATH"],
-            )
-
-    def _generate_loaders_cache(self, loaders_path, loaders_cache_path):
-        proc = subprocess.run(
-            self._get_gdk_pixbuf_query_loaders_bin(),
-            cwd=self.app_dir,
-            stdout=subprocess.PIPE,
+    def configure(self, global_env: GlobalEnvironment):
+        loaders_dir_path = self.app_dir_cache.find_one(
+            "*/gdk-pixbuf-2.0/*/loaders", attrs=["is_dir"]
         )
-        query_output = proc.stdout.decode("utf-8")
+        if loaders_dir_path:
+            base_dir = os.path.dirname(loaders_dir_path)
+            loaders_cache_path = os.path.join(base_dir, "loaders.cache")
 
-        logging.info("GDK loaders cache modules dir: %s" % loaders_path)
-        modified_output = self._remove_loaders_path_prefixes(query_output.splitlines())
+            logging.info("GDK loaders cache modules dir: %s" % loaders_cache_path)
+            self._generate_loaders_cache(loaders_cache_path)
+
+            global_env.set("GDK_PIXBUF_MODULEDIR", loaders_dir_path)
+            global_env.set("GDK_PIXBUF_MODULE_FILE", loaders_cache_path)
+            global_env.append("APPDIR_LIBRARY_PATH", loaders_dir_path)
+
+    def _generate_loaders_cache(self, loaders_cache_path):
+        bin_path = self._find_gdk_pixbuf_query_loaders_bin()
+
+        logging.warning(
+            "gdk-pixbuf-query-loaders cannot generate cache from modules of a "
+            "different version or architecture. Therefore it will be ran using the"
+            "system modules and the output will be *adapted* to the AppDir."
+        )
+
+        proc = subprocess.run(bin_path, stdout=subprocess.PIPE)
+
+        query_output = proc.stdout.decode("utf-8")
+        # remove absolute paths from module names
+        query_output = re.sub("(/.*/)", "", query_output)
 
         with open(loaders_cache_path, "w") as f:
-            f.write("\n".join(modified_output))
+            f.write(query_output)
 
         logging.info("GDK loaders cache wrote to: %s" % loaders_cache_path)
 
-    def _get_gdk_pixbuf_query_loaders_bin(self):
+    @staticmethod
+    def _find_gdk_pixbuf_query_loaders_bin():
         for root, dirs, files in os.walk("/usr/lib"):
             if "gdk-pixbuf-query-loaders" in files:
                 return os.path.join(root, "gdk-pixbuf-query-loaders")
@@ -64,16 +68,6 @@ class GdkPixbuf(BaseHelper):
         if shutil.which("gdk-pixbuf-query-loaders"):
             return shutil.which("gdk-pixbuf-query-loaders")
         raise RuntimeError("Missing 'gdk-pixbuf-query-loaders' executable")
-
-    def _get_gdk_pixbuf_loaders_path(self):
-        paths = self.app_dir_cache.find(
-            "*/usr/*/gdk-pixbuf-2.0/*/loaders", attrs=["is_dir"]
-        )
-        if paths:
-            rel_path = os.path.relpath(paths[0], self.app_dir)
-            return rel_path
-
-        return None
 
     def _remove_loaders_path_prefixes(self, loaders_cache):
         output = []

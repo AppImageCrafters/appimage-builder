@@ -2,8 +2,11 @@ from pathlib import Path
 from unittest import TestCase
 
 from appimagebuilder.app_dir.file_info_cache import FileInfoCache
-from appimagebuilder.app_dir.runtime.executables import InterpretedExecutable, ExecutableProcessingError, \
-    search_interpreted_executables
+from appimagebuilder.app_dir.runtime.executables import (
+    InterpretedExecutable,
+    ExecutableProcessingError,
+    search_interpreted_executables,
+)
 
 
 class TestInterpretedExecutable(TestCase):
