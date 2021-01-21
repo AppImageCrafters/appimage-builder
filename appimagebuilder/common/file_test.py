@@ -43,10 +43,10 @@ def read_elf_arch(path):
     https://en.wikipedia.org/wiki/Executable_and_Linkable_Format#File_header
     """
     known_architectures = {
-        b'\xB7': "aarch64",
-        b'\x28': "gnueabihf",
-        b'\x03': "i386",
-        b'\x3E': "x86_64",
+        b"\xB7": "aarch64",
+        b"\x28": "gnueabihf",
+        b"\x03": "i386",
+        b"\x3E": "x86_64",
     }
 
     with open(path, "rb") as f:
@@ -55,4 +55,6 @@ def read_elf_arch(path):
         if e_machine in known_architectures:
             return known_architectures[e_machine]
         else:
-            raise RuntimeError('Unknown instructions set architecture: `%s`' % e_machine.hex())
+            raise RuntimeError(
+                "Unknown instructions set architecture: `%s`" % e_machine.hex()
+            )

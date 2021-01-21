@@ -13,7 +13,11 @@ import os
 import subprocess
 
 from appimagebuilder.app_dir.file_info_cache import FileInfoCache
-from appimagebuilder.app_dir.runtime.executables import Executable, BinaryExecutable, InterpretedExecutable
+from appimagebuilder.app_dir.runtime.executables import (
+    Executable,
+    BinaryExecutable,
+    InterpretedExecutable,
+)
 from appimagebuilder.common.file_test import read_elf_arch
 
 
@@ -36,7 +40,9 @@ class ExecutablesScanner:
                 break
 
         if iterations >= 5:
-            raise RuntimeError("Loop found while resolving the interpreter of '%s'" % path)
+            raise RuntimeError(
+                "Loop found while resolving the interpreter of '%s'" % path
+            )
 
         return results
 
@@ -45,7 +51,9 @@ class ExecutablesScanner:
             bin_name = shebang[1]
             path = self.files_cache.find_one("*/%s" % bin_name, [])
             if not path:
-                raise RuntimeError("Required binary '%s' could not be found in the AppDir")
+                raise RuntimeError(
+                    "Required binary '%s' could not be found in the AppDir"
+                )
             return path
         else:
             path = shebang[0]
