@@ -77,8 +77,7 @@ class ExecutionTest:
     def _run_command(self, command, container, user="root"):
         print("$ %s" % command)
         exit_code, output = container.exec_run(command, user=user, tty=True)
-        for line in output.decode("utf-8").splitlines():
-            print(line)
+        print(output.decode())
 
         if exit_code != 0:
             print("$ %s FAILED, exit code: %s" % (command, exit_code))

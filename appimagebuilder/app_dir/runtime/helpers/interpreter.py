@@ -56,7 +56,7 @@ class Interpreter(BaseHelper):
         env.set("APPDIR_LIBC_VERSION", glibc_version)
 
         self._patch_executables_interpreter(env.get("APPIMAGE_UUID"))
-        env.set("SYSTEM_INTERP", self.interpreters.keys())
+        env.set("SYSTEM_INTERP", list(self.interpreters.keys()))
 
     def set_path_env(self, app_run):
         bin_paths = self._get_bin_paths()

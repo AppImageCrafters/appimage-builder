@@ -19,10 +19,11 @@ from ..environment import GlobalEnvironment
 class FontConfig(BaseHelper):
     fonts_conf_template = """<?xml version="1.0"?>
 <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
-<!-- $XDG_CONFIG_HOME/fontconfig/fonts.conf for per-user font configuration -->
 <fontconfig>
-<dir prefix="relative">{appdir_fonts_dir}</dir>
-<dir prefix="xdg">fonts</dir>
+    <dir prefix="relative">{appdir_fonts_dir}</dir>
+    <include ignore_missing="yes" prefix="xdg">fontconfig/fonts.conf</include>
+    <include ignore_missing="yes">conf.d</include>
+    <include ignore_missing="yes">local.conf</include>
 </fontconfig>
 """
 

@@ -18,6 +18,8 @@ from ..environment import GlobalEnvironment
 
 class OpenSSL(BaseHelper):
     def configure(self, env: GlobalEnvironment):
-        engines_dir = self.app_dir_cache.find_one("*/openssl-*/engines", attrs=["is_dir"])
+        engines_dir = self.app_dir_cache.find_one(
+            "*/openssl-*/engines", attrs=["is_dir"]
+        )
         if engines_dir:
             env.set("OPENSSL_ENGINES", engines_dir)

@@ -9,22 +9,25 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+from pathlib import Path
+
 
 class Executable:
     """Executable unit with its environment"""
 
     def __init__(self, path):
-        self.path = path
+        self.path = Path(path)
         self.args = ["$@"]
+        self.env = {}
 
     def __str__(self) -> str:
         return self.path
 
     def __eq__(self, o: object) -> bool:
         return (
-                self.__class__ == o.__class__
-                and self.path == o.path
-                and self.args == o.args
+            self.__class__ == o.__class__
+            and self.path == o.path
+            and self.args == o.args
         )
 
 
@@ -37,9 +40,9 @@ class BinaryExecutable(Executable):
 
     def __eq__(self, o: object) -> bool:
         return (
-                self.__class__ == o.__class__
-                and self.path == o.path
-                and self.arch == o.arch
+            self.__class__ == o.__class__
+            and self.path == o.path
+            and self.arch == o.arch
         )
 
     def __str__(self) -> str:
@@ -55,9 +58,9 @@ class InterpretedExecutable(Executable):
 
     def __eq__(self, o: object) -> bool:
         return (
-                self.__class__ == o.__class__
-                and self.path == o.path
-                and self.shebang == o.shebang
+            self.__class__ == o.__class__
+            and self.path == o.path
+            and self.shebang == o.shebang
         )
 
     def __str__(self) -> str:
