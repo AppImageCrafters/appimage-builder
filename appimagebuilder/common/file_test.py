@@ -34,3 +34,25 @@ def is_elf_executable(path):
         output = _proc.stdout.decode("utf-8")
         has_main_method = "__libc_start_main" in output
     return has_main_method
+
+
+def read_elf_arch(path):
+    """
+    Read the target instructions set architecture and maps it to a name known by appimage-builder
+
+    https://en.wikipedia.org/wiki/Executable_and_Linkable_Format#File_header
+    """
+    known_architectures = {
+        b'\xB7': "aarch64",
+        b'\x28': "gnueabihf",
+        b'\x03': "i386",
+        b'\x3E': "x86_64",
+    }
+
+    with open(path, "rb") as f:
+        f.seek(18)
+        e_machine = f.read(1)
+        if e_machine in known_architectures:
+            return known_architectures[e_machine]
+        else:
+            raise RuntimeError('Unknown instructions set architecture: `%s`' % e_machine.hex())

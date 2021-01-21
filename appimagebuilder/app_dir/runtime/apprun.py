@@ -25,14 +25,6 @@ class AppRunSetupError(RuntimeError):
 
 
 class AppRun:
-    env = {
-        "APPIMAGE_UUID": None,
-        "SYSTEM_INTERP": None,
-        "XDG_DATA_DIRS": "$APPDIR/usr/local/share:$APPDIR/usr/share:$XDG_DATA_DIRS",
-        "XDG_CONFIG_DIRS": "$APPDIR/etc/xdg:$XDG_CONFIG_DIRS",
-        "LD_PRELOAD": "libapprun_hooks.so",
-    }
-
     # arch mappings from the file command output to the debian format
     archs_mapping = {
         "ARM aarch64": "aarch64",
@@ -44,41 +36,23 @@ class AppRun:
     sections = {}
 
     def __init__(
-        self,
-        version,
-        debug,
-        app_dir,
-        exec_path,
-        exec_args="$@",
-        cache_dir="appimage-builder-cache/runtime",
+            self,
+            version,
+            debug,
+            app_dir,
+            cache_dir="appimage-builder-cache/runtime",
     ):
         self.app_dir = Path(app_dir).absolute()
         self.apprun_version = version
         self.apprun_build_type = "Debug" if debug else "Release"
-        self.env["APPIMAGE_UUID"] = str(uuid.uuid4())
-        self.env["EXEC_PATH"] = "$APPDIR/%s" % exec_path
-        self.env["EXEC_ARGS"] = exec_args
         self.cache_dir = Path(cache_dir).absolute()
 
     def deploy(self):
         embed_archs = self._get_embed_libc_archs()
 
-        # deploy AppRun
         apprun_path = self._get_apprun_binary(embed_archs[0])
-        apprun_deploy_path = self.app_dir / "AppRun"
-        logging.info("Deploying: %s => %s" % (apprun_path, self.app_dir / "AppRun"))
-        shutil.copy(apprun_path, apprun_deploy_path)
-        apprun_deploy_path.chmod(
-            stat.S_IRWXU | stat.S_IXGRP | stat.S_IRGRP | stat.S_IXOTH | stat.S_IROTH
-        )
-
         for arch in embed_archs:
             hooks_lib = self._get_apprun_hooks_library(arch)
-            target_lib_dir = self._find_hooks_lib_target_lib_dir(arch)
-            logging.info("Deploying: %s => %s" % (hooks_lib, target_lib_dir))
-            shutil.copy(hooks_lib, os.path.join(target_lib_dir, "libapprun_hooks.so"))
-
-        self._generate_env_file()
 
     def _get_embed_libc_archs(self):
         libc_paths = self._find_libc_paths()
@@ -148,8 +122,8 @@ class AppRun:
         apprun_file = self.cache_dir / apprun_asset
         if not apprun_file.exists():
             url = (
-                "https://github.com/AppImageCrafters/AppRun/releases/download/%s/%s"
-                % (self.apprun_version, apprun_asset)
+                    "https://github.com/AppImageCrafters/AppRun/releases/download/%s/%s"
+                    % (self.apprun_version, apprun_asset)
             )
             logging.info("Downloading: %s" % url)
             request.urlretrieve(url, apprun_file)
@@ -169,8 +143,8 @@ class AppRun:
         file = self.cache_dir / asset
         if not file.exists():
             url = (
-                "https://github.com/AppImageCrafters/AppRun/releases/download/%s/%s"
-                % (self.apprun_version, asset)
+                    "https://github.com/AppImageCrafters/AppRun/releases/download/%s/%s"
+                    % (self.apprun_version, asset)
             )
             logging.info("Downloading: %s" % url)
             request.urlretrieve(url, file)
