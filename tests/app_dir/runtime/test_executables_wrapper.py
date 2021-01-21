@@ -10,7 +10,7 @@ from appimagebuilder.app_dir.runtime.executables_wrapper import ExecutablesWrapp
 class TestExecutablesWrapper(TestCase):
     def setUp(self) -> None:
         self.data_dir = Path(__file__).parent / "data"
-        self.apprun_path = self.data_dir / "ls"
+        self.apprun_path = self.data_dir / "python3"
         self.bin_path = self.data_dir / "bash"
         self.env_path = self.data_dir / "bash.env"
         self.wrapped_path = self.data_dir / "bash.orig"
@@ -27,7 +27,7 @@ class TestExecutablesWrapper(TestCase):
 
     def test_wrap(self):
         wrapper = ExecutablesWrapper(self.apprun_path, self.data_dir, {})
-        wrapper.wrap(Executable(self.bin_path, []), {})
+        wrapper.wrap(Executable(self.bin_path), {})
 
         self.assertTrue(self.wrapped_path.exists())
 
@@ -36,7 +36,7 @@ class TestExecutablesWrapper(TestCase):
         self.assertTrue(filecmp.cmp(self.bin_path, self.apprun_path))
 
     def test_generate_executable_env(self):
-        executable = Executable(self.bin_path, ["$@"])
+        executable = Executable(self.bin_path)
         wrapper = ExecutablesWrapper(
             self.apprun_path, self.data_dir, {"APPDIR_LIBRARY_PATH": "$APPDIR/usr/lib"}
         )
