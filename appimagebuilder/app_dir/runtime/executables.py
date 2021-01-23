@@ -21,7 +21,7 @@ class Executable:
         self.env = {}
 
     def __str__(self) -> str:
-        return self.path
+        return self.path.__str__()
 
     def __eq__(self, o: object) -> bool:
         return (
@@ -55,13 +55,15 @@ class InterpretedExecutable(Executable):
     def __init__(self, path, shebang: [str]):
         super().__init__(path)
         self.shebang = shebang
+        self.interpreter = None
 
     def __eq__(self, o: object) -> bool:
         return (
             self.__class__ == o.__class__
             and self.path == o.path
             and self.shebang == o.shebang
+            and self.interpreter == o.interpreter
         )
 
     def __str__(self) -> str:
-        return super().__str__() + self.shebang
+        return super().__str__() + ", shebang: " + " ".join(self.shebang)

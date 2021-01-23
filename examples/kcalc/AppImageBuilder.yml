@@ -29,6 +29,7 @@ AppDir:
       - perl
       - perl-base
       - libpam-runtime
+      - procps
 
   files:
     exclude:
@@ -39,6 +40,7 @@ AppDir:
       - usr/share/doc/*/NEWS.*
       - usr/share/doc/*/TODO.*
   runtime:
+    version: "continuous"
     debug: Yes
 
   test:

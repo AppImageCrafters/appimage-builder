@@ -10,6 +10,7 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
+
 class Environment:
     def __init__(self):
         self._env = dict()
@@ -34,6 +35,26 @@ class Environment:
 
     def items(self):
         return self._env.items()
+
+    @staticmethod
+    def serialize(env: dict):
+        lines = []
+        for k, v in env.items():
+            if isinstance(v, str):
+                lines.append("%s=%s\n" % (k, v))
+
+            if isinstance(v, list):
+                if k == "EXEC_ARGS":
+                    lines.append("%s=%s\n" % (k, " ".join(v)))
+                else:
+                    lines.append("%s=%s\n" % (k, ":".join(v)))
+
+            if isinstance(v, dict):
+                entries = ["%s:%s;" % (k, v) for (k, v) in v.items()]
+                lines.append("%s=%s\n" % (k, "".join(entries)))
+
+        result = "".join(lines)
+        return result
 
 
 class GlobalEnvironment(Environment):

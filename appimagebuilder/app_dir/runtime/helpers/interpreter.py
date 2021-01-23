@@ -59,7 +59,7 @@ class Interpreter(BaseHelper):
         env.set("SYSTEM_INTERP", list(self.interpreters.keys()))
 
     def set_path_env(self, app_run):
-        bin_paths = self._get_bin_paths()
+        bin_paths = sorted(self._get_bin_paths())
         bin_paths.append("$PATH")
         app_run.set("PATH", bin_paths)
 

@@ -23,6 +23,9 @@ AppDir:
       - adwaita-icon-theme
       - humanity-icon-theme
 
+  runtime:
+    version: "continuous"
+
   files:
     exclude:
       - usr/lib/x86_64-linux-gnu/gconv
