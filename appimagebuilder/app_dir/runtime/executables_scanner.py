@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import logging
 import os
 import subprocess
 
@@ -21,6 +22,10 @@ from appimagebuilder.app_dir.runtime.executables import (
 from appimagebuilder.common.file_test import read_elf_arch
 
 
+class MissingInterpreterError(RuntimeError):
+    pass
+
+
 class ExecutablesScanner:
     def __init__(self, appdir, files_cache: FileInfoCache):
         self.appdir = appdir
@@ -29,15 +34,26 @@ class ExecutablesScanner:
     def scan_file(self, path) -> [Executable]:
         results = []
         iterations = 0
-        for iterations in range(1, 5):
+        binary_found = False
+        while iterations < 5 and not binary_found:
             shebang = ExecutablesScanner.read_shebang(path)
             if shebang:
-                results.append(InterpretedExecutable(path, shebang))
-                path = self._resolve_interpreter_path(shebang)
+                try:
+                    executable = InterpretedExecutable(path, shebang)
+                    path = self._resolve_interpreter_path(shebang)
+                except MissingInterpreterError as err:
+                    logging.warning(err.__str__() + " while processing " + path)
+                    break
             else:
                 arch = read_elf_arch(path)
-                results.append(BinaryExecutable(path, arch))
-                break
+                executable = BinaryExecutable(path, arch)
+                binary_found = True
+
+            if len(results) > 0:
+                results[-1].interpreter = executable
+
+            results.append(executable)
+            iterations = iterations + 1
 
         if iterations >= 5:
             raise RuntimeError(
@@ -48,15 +64,21 @@ class ExecutablesScanner:
 
     def _resolve_interpreter_path(self, shebang):
         if shebang[0] == "/usr/bin/env":
-            bin_name = shebang[1]
+            bin_name = shebang[1].strip(" ")
             path = self.files_cache.find_one("*/%s" % bin_name, [])
+            path = os.path.relpath(path)
             if not path:
                 raise RuntimeError(
-                    "Required binary '%s' could not be found in the AppDir"
+                    "Required binary '%s' could not be found in the AppDir" % path
                 )
             return path
         else:
-            path = shebang[0]
+            path = self.appdir / shebang[0].strip("/")
+            path = os.path.realpath(path)
+            if not os.path.exists(path):
+                raise MissingInterpreterError(
+                    "Required binary '%s' could not be found in the AppDir" % path
+                )
         return path
 
     @staticmethod
@@ -74,4 +96,5 @@ class ExecutablesScanner:
             buf = buf[2:end_idx].decode()
 
             parts = buf.split(" ")
+            parts = [part.strip() for part in parts if part]
             return parts
