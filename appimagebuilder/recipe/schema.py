@@ -35,6 +35,7 @@ class RecipeSchema:
 
         self.v1_runtime = {
             Optional("debug"): bool,
+            Optional("version"): str,
             Optional("path_mappings"): [str],
             Optional("env"): {str: Or(str, int, bool)},
         }
