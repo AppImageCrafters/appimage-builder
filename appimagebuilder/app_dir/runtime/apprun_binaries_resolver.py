@@ -25,7 +25,7 @@ class AppRunBinariesResolver:
     ):
         self.apprun_version = version
         self.apprun_build_type = "Debug" if debug else "Release"
-        self.cache_dir = Path(cache_dir).absolute()
+        self.cache_dir = Path(cache_dir).absolute() / version
 
     def resolve_executable(self, arch):
         self.cache_dir.mkdir(parents=True, exist_ok=True)
