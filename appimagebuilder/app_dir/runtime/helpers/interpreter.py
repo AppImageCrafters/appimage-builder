@@ -46,9 +46,7 @@ class Interpreter(BaseHelper):
         return path
 
     def configure(self, app_run):
-        app_run.env["PATH"] = ":".join(
-            ["$APPDIR/%s:$PATH" % path for path in self._get_bin_paths()]
-        )
+        self.set_path_env(app_run)
 
         app_run.env["APPDIR_LIBRARY_PATH"] = ":".join(
             ["$APPDIR/%s" % path for path in self._get_appdir_library_paths()]
@@ -63,6 +61,12 @@ class Interpreter(BaseHelper):
 
         self._patch_executables_interpreter(app_run.env["APPIMAGE_UUID"])
         app_run.env["SYSTEM_INTERP"] = ":".join(self.interpreters.keys())
+
+    def set_path_env(self, app_run):
+        bin_paths = self._get_bin_paths()
+        path_env = ["$APPDIR/%s" % path for path in bin_paths]
+        path_env.append("$PATH")
+        app_run.env["PATH"] = ":".join(path_env)
 
     def _get_appdir_library_paths(self):
         paths = self.app_dir_cache.find("*", attrs=["is_lib"])
