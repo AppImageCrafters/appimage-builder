@@ -43,7 +43,6 @@ class Interpreter(BaseHelper):
         logging.info("Libc found at: %s" % os.path.relpath(path, self.app_dir))
         return path
 
-
     def configure(self, env: GlobalEnvironment):
         self.set_path_env(env)
 
