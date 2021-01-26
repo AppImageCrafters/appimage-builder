@@ -95,7 +95,9 @@ class TestExecutablesWrapper(TestCase):
         executable = Executable(self.bin_path)
         executable.env = {"PYTHONHOME": "$APPDIR/usr"}
         wrapper = ExecutablesWrapper(self.data_dir, resolver, environment)
-        result = wrapper._generate_executable_env(executable, self.bin_path.with_name("bin.orig"))
+        result = wrapper._generate_executable_env(
+            executable, self.bin_path.with_name("bin.orig")
+        )
         expected = {
             "APPDIR": "$ORIGIN/.",
             "APPIMAGE_UUID": "1234",
@@ -110,7 +112,9 @@ class TestExecutablesWrapper(TestCase):
 
 class TestExecutablesWrapperEnvSerializer(TestCase):
     def test_serialize_dict_to_dot_env(self):
-        wrapper = ExecutablesWrapper("/AppDir/", FakeAppRunBinariesResolver(), GlobalEnvironment())
+        wrapper = ExecutablesWrapper(
+            "/AppDir/", FakeAppRunBinariesResolver(), GlobalEnvironment()
+        )
         result = wrapper._serialize_dict_to_dot_env(
             {
                 "APPDIR": "$ORIGIN/..",
