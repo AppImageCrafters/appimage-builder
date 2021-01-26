@@ -37,7 +37,8 @@ class RuntimeGenerator:
         self.main_exec_args = recipe.get_item("AppDir/app_info/exec_args", "$@")
         self.apprun_version = recipe.get_item("AppDir/runtime/version", "v1.2.3")
         self.apprun_debug = recipe.get_item("AppDir/runtime/debug", False)
-        self.user_env = recipe.get_item("AppDir/runtime/env", {})
+        user_env_input = recipe.get_item("AppDir/runtime/env", {})
+        self.user_env = self.parse_env_input(user_env_input)
         self.path_mappings = recipe.get_item("AppDir/runtime/path_mappings", [])
 
         self.file_info_cache = file_info_cache
@@ -149,3 +150,18 @@ class RuntimeGenerator:
             result = Environment.serialize(apprun_env)
             result = result.replace(str(self.appdir_path), "$APPDIR")
             f.write(result)
+
+    def parse_env_input(self, user_env_input):
+        env = dict()
+        for k, v in user_env_input.items():
+            v = v.replace("$APPDIR", self.appdir_path.__str__())
+            v = v.replace("${APPDIR}", self.appdir_path.__str__())
+
+            if isinstance(v, str) and (
+                k == "PATH" or k == "APPDIR_LIBRARY_PATH" or k == "LIBC_LIBRARY_PATH"
+            ):
+                v = v.split(":")
+
+            env[k] = v
+
+        return env

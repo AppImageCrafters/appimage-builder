@@ -51,7 +51,7 @@ class ExecutablesWrapper:
         wrapped_path = str(executable.path) + ".orig"
         os.rename(executable.path, wrapped_path)
         apprun_env = self._generate_executable_env(executable, wrapped_path)
-        self._deploy_env(executable, wrapped_path, apprun_env)
+        self._deploy_env(executable, apprun_env)
         self.deploy_apprun(executable.arch, executable.path)
         self.deploy_hooks_lib(executable.arch)
 
@@ -64,9 +64,17 @@ class ExecutablesWrapper:
         if not "APPDIR_LIBRARY_PATH" in self.env:
             raise RuntimeError("Missing APPDIR_LIBRARY_PATH")
 
-        paths = self.env.get("APPDIR_LIBRARY_PATH")
         source_path = self.binaries_resolver.resolve_hooks_library(arch)
-        target_path = Path(paths[0]) / "libapprun_hooks.so"
+
+        paths = self.env.get("APPDIR_LIBRARY_PATH")
+        if len(paths) <= 0:
+            raise RuntimeError(
+                "Please make sure APPDIR_LIBRARY_PATH is properly defined"
+            )
+
+        target_path = paths[0]
+        target_path = Path(target_path) / "libapprun_hooks.so"
+
         shutil.copy2(source_path, target_path, follow_symlinks=True)
 
     def _remove_binary_only_variables(self, apprun_env):
@@ -138,7 +146,7 @@ class ExecutablesWrapper:
     def is_wrapped(self, path):
         return path.name.endswith(".orig")
 
-    def _deploy_env(self, executable, wrapped_path, env):
+    def _deploy_env(self, executable, env):
         env_path = str(executable.path) + ".env"
         with open(env_path, "w") as f:
             result = Environment.serialize(env)
