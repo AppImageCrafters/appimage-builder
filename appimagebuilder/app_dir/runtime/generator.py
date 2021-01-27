@@ -154,13 +154,16 @@ class RuntimeGenerator:
     def parse_env_input(self, user_env_input):
         env = dict()
         for k, v in user_env_input.items():
-            v = v.replace("$APPDIR", self.appdir_path.__str__())
-            v = v.replace("${APPDIR}", self.appdir_path.__str__())
+            if isinstance(v, str):
+                v = v.replace("$APPDIR", self.appdir_path.__str__())
+                v = v.replace("${APPDIR}", self.appdir_path.__str__())
 
-            if isinstance(v, str) and (
-                k == "PATH" or k == "APPDIR_LIBRARY_PATH" or k == "LIBC_LIBRARY_PATH"
-            ):
-                v = v.split(":")
+                if (
+                    k == "PATH"
+                    or k == "APPDIR_LIBRARY_PATH"
+                    or k == "LIBC_LIBRARY_PATH"
+                ):
+                    v = v.split(":")
 
             env[k] = v
 
