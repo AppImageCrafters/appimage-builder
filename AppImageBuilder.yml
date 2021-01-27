@@ -30,7 +30,7 @@ AppDir:
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
 
     include:
-      - python3
+      - python3-minimal
       - python3-pip
       - python3-pkg-resources
       - python3-setuptools
