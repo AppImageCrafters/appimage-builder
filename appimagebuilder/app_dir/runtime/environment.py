@@ -40,18 +40,20 @@ class Environment:
     def serialize(env: dict):
         lines = []
         for k, v in env.items():
-            if isinstance(v, str):
-                lines.append("%s=%s\n" % (k, v))
-
             if isinstance(v, list):
                 if k == "EXEC_ARGS":
                     lines.append("%s=%s\n" % (k, " ".join(v)))
+                    continue
                 else:
                     lines.append("%s=%s\n" % (k, ":".join(v)))
+                    continue
 
             if isinstance(v, dict):
                 entries = ["%s:%s;" % (k, v) for (k, v) in v.items()]
                 lines.append("%s=%s\n" % (k, "".join(entries)))
+                continue
+
+            lines.append("%s=%s\n" % (k, v))
 
         result = "".join(lines)
         return result
