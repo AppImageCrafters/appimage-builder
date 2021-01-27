@@ -34,7 +34,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build AppImage
-        uses: AppImageCrafters/build-appimage-action@master
+        uses: AppImageCrafters/build-appimage@v1
         env:
           APPIMAGE_BUILDER_VERSION: ${{ github.ref }}
         with:
