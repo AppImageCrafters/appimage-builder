@@ -76,7 +76,7 @@ class Qt(BaseHelper):
         if builtins_qmltypes_paths:
             self._qt_dirs["Qml2Imports"] = Path(builtins_qmltypes_paths[0]).parent
 
-        qtbase_translations_paths = self.app_dir_cache.find("*/qtbase_en.qm")
+        qtbase_translations_paths = self.app_dir_cache.find("*/qt5/translations", ["is_dir"])
         if qtbase_translations_paths:
             self._qt_dirs["Translations"] = Path(qtbase_translations_paths[0]).parent
 
