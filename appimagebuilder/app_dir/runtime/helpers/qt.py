@@ -79,7 +79,7 @@ class Qt(BaseHelper):
 
         qtbase_translations_paths = self.app_dir_cache.find("*/qt5/translations", ["is_dir"])
         if qtbase_translations_paths:
-            self._qt_dirs["Translations"] = Path(qtbase_translations_paths[0]).parent
+            self._qt_dirs["Translations"] = Path(qtbase_translations_paths[0])
 
         data_paths = self.app_dir_cache.find("*/qt5/resources", ["is_dir"])
         if data_paths:
