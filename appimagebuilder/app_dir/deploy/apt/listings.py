@@ -55,8 +55,6 @@ system_services = [
     # fontconfig can be excluded most of the time
     "fontconfig",
     "fontconfig-config",
-    "libfontconfig*",
-    "libfreetype*",
 ]
 
 # because of issues with the nvidia driver and to achieve better performance the graphics
