@@ -12,11 +12,11 @@
 import os
 
 from .base_helper import BaseHelper
-from ..environment import GlobalEnvironment
+from ..environment import Environment
 
 
 class LibGL(BaseHelper):
-    def configure(self, env: GlobalEnvironment):
+    def configure(self, env: Environment):
         dri_path = self.app_dir_cache.find_one("*/dri", attrs=["is_dir"])
         if dri_path:
             env.set("LIBGL_DRIVERS_PATH", dri_path)

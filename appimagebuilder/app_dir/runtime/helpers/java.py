@@ -13,11 +13,11 @@ import os
 from pathlib import Path
 
 from .base_helper import BaseHelper
-from ..environment import GlobalEnvironment
+from ..environment import Environment
 
 
 class Java(BaseHelper):
-    def configure(self, env: GlobalEnvironment):
+    def configure(self, env: Environment):
         java_path = self.app_dir_cache.find_one("*/bin/java", attrs=["is_bin"])
         if java_path:
             java_home = Path(java_path).parent.parent

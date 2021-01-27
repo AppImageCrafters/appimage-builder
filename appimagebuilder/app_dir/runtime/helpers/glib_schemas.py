@@ -13,11 +13,11 @@ import shutil
 import subprocess
 
 from .base_helper import BaseHelper
-from ..environment import GlobalEnvironment
+from ..environment import Environment
 
 
 class GLibSchemas(BaseHelper):
-    def configure(self, env: GlobalEnvironment):
+    def configure(self, env: Environment):
         path = self.app_dir_cache.find_one(
             "*/usr/share/glib-2.0/schemas", attrs=["is_dir"]
         )

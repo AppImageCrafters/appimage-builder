@@ -19,7 +19,7 @@ from packaging import version
 
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
 from .base_helper import BaseHelper
-from ..environment import GlobalEnvironment
+from ..environment import Environment
 
 
 class InterpreterHandlerError(RuntimeError):
@@ -43,7 +43,7 @@ class Interpreter(BaseHelper):
         logging.info("Libc found at: %s" % os.path.relpath(path, self.app_dir))
         return path
 
-    def configure(self, env: GlobalEnvironment):
+    def configure(self, env: Environment):
         self.set_path_env(env)
 
         env.set("APPDIR_LIBRARY_PATH", self._get_appdir_library_paths())
