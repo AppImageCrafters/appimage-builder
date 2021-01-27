@@ -14,8 +14,6 @@ import logging
 import os
 from pathlib import Path
 
-from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
-from appimagebuilder.common.file_test import is_elf
 from .base_helper import BaseHelper
 from ..environment import GlobalEnvironment
 
