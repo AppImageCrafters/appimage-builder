@@ -15,7 +15,7 @@ import subprocess
 from pathlib import Path
 
 from .base_helper import BaseHelper
-from ..environment import GlobalEnvironment
+from ..environment import Environment
 
 
 class Gtk(BaseHelper):
@@ -24,7 +24,7 @@ class Gtk(BaseHelper):
     Reference: https://developer.gnome.org/gtk3/stable/gtk-running.html
     """
 
-    def configure(self, env: GlobalEnvironment):
+    def configure(self, env: Environment):
         libgtk_path = self.app_dir_cache.find_one("*/libgtk-*")
         if libgtk_path:
             prefix = Path(libgtk_path).parent.parent

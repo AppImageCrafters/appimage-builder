@@ -16,11 +16,11 @@ import subprocess
 import shutil
 
 from .base_helper import BaseHelper
-from ..environment import GlobalEnvironment
+from ..environment import Environment
 
 
 class GdkPixbuf(BaseHelper):
-    def configure(self, global_env: GlobalEnvironment):
+    def configure(self, global_env: Environment):
         loaders_dir_path = self.app_dir_cache.find_one(
             "*/gdk-pixbuf-2.0/*/loaders", attrs=["is_dir"]
         )

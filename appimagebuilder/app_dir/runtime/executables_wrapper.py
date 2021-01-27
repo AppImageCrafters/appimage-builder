@@ -18,7 +18,7 @@ from pathlib import Path
 from appimagebuilder.app_dir.runtime.apprun_binaries_resolver import (
     AppRunBinariesResolver,
 )
-from appimagebuilder.app_dir.runtime.environment import GlobalEnvironment, Environment
+from appimagebuilder.app_dir.runtime.environment import Environment
 from appimagebuilder.app_dir.runtime.executables import (
     Executable,
     BinaryExecutable,
@@ -31,7 +31,7 @@ class ExecutablesWrapper:
         self,
         appdir_path: str,
         binaries_resolver: AppRunBinariesResolver,
-        env: GlobalEnvironment,
+        env: Environment,
     ):
         self.appdir_path = Path(appdir_path)
         self.binaries_resolver = binaries_resolver

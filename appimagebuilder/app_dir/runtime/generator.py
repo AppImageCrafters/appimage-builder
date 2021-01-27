@@ -18,7 +18,7 @@ from pathlib import Path
 from appimagebuilder.app_dir.file_info_cache import FileInfoCache
 from . import helpers
 from .apprun_binaries_resolver import AppRunBinariesResolver
-from .environment import GlobalEnvironment, Environment
+from .environment import Environment
 from .executables import BinaryExecutable, InterpretedExecutable
 from .executables_scanner import ExecutablesScanner
 from .executables_wrapper import ExecutablesWrapper
@@ -79,18 +79,18 @@ class RuntimeGenerator:
         return executables
 
     def _configure_runtime_environment(self):
-        global_env = GlobalEnvironment()
-        global_env.set("APPIMAGE_UUID", str(uuid.uuid4()))
-        global_env.set(
-            "XDG_DATA_DIRS",
-            [
-                "$APPDIR/usr/local/share",
-                "$APPDIR/usr/share",
-                "$XDG_DATA_DIRS",
-            ],
+        global_env = Environment(
+            {
+                "APPIMAGE_UUID": str(uuid.uuid4()),
+                "XDG_DATA_DIRS": [
+                    "$APPDIR/usr/local/share",
+                    "$APPDIR/usr/share",
+                    "$XDG_DATA_DIRS",
+                ],
+                "XDG_CONFIG_DIRS": ["$APPDIR/etc/xdg", "$XDG_CONFIG_DIRS"],
+                "LD_PRELOAD": "libapprun_hooks.so",
+            }
         )
-        global_env.set("XDG_CONFIG_DIRS", ["$APPDIR/etc/xdg", "$XDG_CONFIG_DIRS"])
-        global_env.set("LD_PRELOAD", "libapprun_hooks.so")
 
         self._run_configuration_helpers(global_env)
         for k, v in self.user_env.items():
@@ -123,31 +123,27 @@ class RuntimeGenerator:
             inst.configure(global_env)
 
     def _deploy_appdir_apprun(self, wrapper, global_environment):
-        self._write_appdir_env(global_environment, wrapper)
+        self._write_appdir_env(global_environment)
         arch = read_elf_arch(self.appdir_path / self.main_exec)
         wrapper.deploy_apprun(arch, self.appdir_path / "AppRun")
         wrapper.deploy_hooks_lib(arch)
 
-    def _write_appdir_env(self, global_environment, wrapper):
-        apprun_env = {
-            "APPDIR": "$ORIGIN/",
-            "APPIMAGE_UUID": None,
-            "EXEC_PATH": "$APPDIR/" + self.main_exec,
-            "EXEC_ARGS": self.main_exec_args,
-        }
-        # set defaults
-        for k, v in global_environment.items():
-            apprun_env[k] = v
-        # override defaults with the user_env
-        for k, v in self.user_env.items():
-            apprun_env[k] = v
-        # drop empty keys
-        for k in list(apprun_env.keys()):
-            if not apprun_env[k]:
-                del apprun_env[k]
+    def _write_appdir_env(self, global_environment):
+        apprun_env = Environment(
+            {
+                "APPDIR": "$ORIGIN/",
+                "APPIMAGE_UUID": None,
+                "EXEC_PATH": "$APPDIR/" + self.main_exec,
+                "EXEC_ARGS": self.main_exec_args,
+            }
+        )
+
+        apprun_env.merge(global_environment)
+        apprun_env.merge(self.user_env)
+        apprun_env.drop_empty_keys()
 
         with open(self.appdir_path / ".env", "w") as f:
-            result = Environment.serialize(apprun_env)
+            result = apprun_env.serialize()
             result = result.replace(str(self.appdir_path), "$APPDIR")
             f.write(result)
 

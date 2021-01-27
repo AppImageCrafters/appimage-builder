@@ -12,8 +12,11 @@
 
 
 class Environment:
-    def __init__(self):
-        self._env = dict()
+    def __init__(self, values=None):
+        if values:
+            self._env = values
+        else:
+            self._env = dict()
 
     def __contains__(self, item):
         return item in self._env
@@ -33,13 +36,21 @@ class Environment:
         else:
             self._env[key] = [value]
 
+    def merge(self, other):
+        for k, v in other.items():
+            self._env[k] = v
+
+    def drop_empty_keys(self):
+        for k in list(self._env.keys()):
+            if not self._env[k]:
+                del self._env[k]
+
     def items(self):
         return self._env.items()
 
-    @staticmethod
-    def serialize(env: dict):
+    def serialize(self):
         lines = []
-        for k, v in env.items():
+        for k, v in self._env.items():
             if isinstance(v, list):
                 if k == "EXEC_ARGS":
                     lines.append("%s=%s\n" % (k, " ".join(v)))
@@ -57,17 +68,3 @@ class Environment:
 
         result = "".join(lines)
         return result
-
-
-class GlobalEnvironment(Environment):
-    """
-    Represents the global execution environment of the bundle
-    """
-
-
-class ExecutableEnvironment(Environment):
-    """
-    Holds the execution environment of a given executable
-    """
-
-    pass

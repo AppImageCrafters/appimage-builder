@@ -12,11 +12,11 @@
 import os
 
 from .base_helper import BaseHelper
-from ..environment import GlobalEnvironment
+from ..environment import Environment
 
 
 class GStreamer(BaseHelper):
-    def configure(self, env: GlobalEnvironment):
+    def configure(self, env: Environment):
         self._set_gst_plugins_path(env)
         self._set_gst_plugins_scanner_path(env)
         self._set_ptp_helper_path(env)
