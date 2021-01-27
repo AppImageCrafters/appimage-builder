@@ -105,7 +105,6 @@ class RuntimeGenerator:
 
     def _run_configuration_helpers(self, global_env):
         execution_list = [
-            helpers.FontConfig,
             helpers.GdkPixbuf,
             helpers.GLibSchemas,
             helpers.GStreamer,
