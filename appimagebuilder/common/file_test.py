@@ -56,5 +56,5 @@ def read_elf_arch(path):
             return known_architectures[e_machine]
         else:
             raise RuntimeError(
-                "Unknown instructions set architecture: `%s`" % e_machine.hex()
+                "Unknown instructions set architecture `%s` on: %s" % (e_machine.hex(), path)
             )
