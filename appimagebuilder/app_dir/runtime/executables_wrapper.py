@@ -114,7 +114,7 @@ class ExecutablesWrapper:
         self._rewrite_shebang_using_env(executable)
 
     def _rewrite_shebang_using_env(self, executable):
-        logging.info("Patching shebang on script: %s" % executable.path)
+        logging.info("Replacing SHEBANG on: %s" % executable.path)
         local_env_path = "/tmp/appimage-" + self.env.get("APPIMAGE_UUID") + "-env"
         tmp_path = executable.path.__str__() + ".tmp"
         output = open(tmp_path, "wb")
