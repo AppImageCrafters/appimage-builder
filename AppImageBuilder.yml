@@ -9,6 +9,8 @@ script:
   - chmod +x appimagetool.AppImage; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool.AppImage; ./appimagetool.AppImage --appimage-extract
   - mv ./squashfs-root AppDir/opt/appimagetool
   - ln -s ../../opt/appimagetool/AppRun AppDir/usr/bin/appimagetool
+  # download pip
+  - wget -c https://bootstrap.pypa.io/get-pip.py -O get-pip.py
 
 AppDir:
   path: ./AppDir
@@ -41,6 +43,7 @@ AppDir:
     exclude: []
 
   after_bundle: |
+    PYTHONHOME=$PWD/AppDir/usr python3 get-pip.py
     PYTHONHOME=$PWD/AppDir/usr python3 -m pip install .
 
   runtime:
