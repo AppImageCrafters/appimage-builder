@@ -54,18 +54,31 @@ class RuntimeGenerator:
         executables = self._find_executables(scanner)
         self._find_embed_archs(executables)
 
+        self._wrap_interpreted_executables(executables, runtime_env, wrapper)
+
+        self._deploy_appdir_apprun(wrapper, runtime_env)
+
+    def _wrap_interpreted_executables(self, executables, runtime_env, wrapper):
         interpreted_executables = [
             executable
             for executable in executables
             if isinstance(executable, InterpretedExecutable)
         ]
-        for executable in interpreted_executables:
-            wrapper.wrap(executable)
 
         if interpreted_executables:
-            runtime_env.set("EXPORTED_BINARIES", str(self.appdir_path / "usr/bin/env"))
-
-        self._deploy_appdir_apprun(wrapper, runtime_env)
+            env_path = self.file_info_cache.find_one("*/env", ["is_bin"])
+            if env_path:
+                runtime_env.set("EXPORTED_BINARIES", env_path)
+                for executable in interpreted_executables:
+                    wrapper.wrap(executable)
+            else:
+                logging.warning(
+                    "Missing 'env' binary. Embed interpreted executables will not work"
+                )
+                logging.warning(
+                    "To ensure a proper behaviour of interpreted executables it's recommended "
+                    "to bundle the 'env' along with the required interpreters."
+                )
 
     def _find_embed_archs(self, executables):
         embed_archs = []
