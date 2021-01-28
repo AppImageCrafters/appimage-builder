@@ -11,7 +11,6 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
-import subprocess
 
 from appimagebuilder.app_dir.file_info_cache import FileInfoCache
 from appimagebuilder.app_dir.runtime.executables import (
@@ -19,7 +18,7 @@ from appimagebuilder.app_dir.runtime.executables import (
     BinaryExecutable,
     InterpretedExecutable,
 )
-from appimagebuilder.common.file_test import read_elf_arch
+from appimagebuilder.common import file_utils
 
 
 class MissingInterpreterError(RuntimeError):
@@ -45,9 +44,13 @@ class ExecutablesScanner:
                     logging.warning(err.__str__() + " while processing " + path)
                     break
             else:
-                arch = read_elf_arch(path)
-                executable = BinaryExecutable(path, arch)
-                binary_found = True
+                if file_utils.is_elf_executable(path):
+                    arch = file_utils.read_elf_arch(path)
+                    executable = BinaryExecutable(path, arch)
+                    binary_found = True
+                else:
+                    logging.warning("Unknown executable format " + path)
+                    break
 
             if len(results) > 0:
                 results[-1].interpreter = executable

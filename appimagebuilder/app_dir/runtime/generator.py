@@ -22,7 +22,7 @@ from .environment import Environment
 from .executables import BinaryExecutable, InterpretedExecutable
 from .executables_scanner import ExecutablesScanner
 from .executables_wrapper import ExecutablesWrapper
-from ...common.file_test import read_elf_arch
+from ...common.file_utils import read_elf_arch
 from ...recipe import Recipe
 
 
@@ -54,10 +54,16 @@ class RuntimeGenerator:
         executables = self._find_executables(scanner)
         self._find_embed_archs(executables)
 
-        # Wrap interpreted executables
-        for executable in executables:
-            if isinstance(executable, InterpretedExecutable):
-                wrapper.wrap(executable)
+        interpreted_executables = [
+            executable
+            for executable in executables
+            if isinstance(executable, InterpretedExecutable)
+        ]
+        for executable in interpreted_executables:
+            wrapper.wrap(executable)
+
+        if interpreted_executables:
+            runtime_env.set("EXPORTED_BINARIES", str(self.appdir_path / "usr/bin/env"))
 
         self._deploy_appdir_apprun(wrapper, runtime_env)
 

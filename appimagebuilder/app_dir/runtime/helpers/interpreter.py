@@ -100,12 +100,6 @@ class Interpreter(BaseHelper):
                     paths.add(line.strip())
         return paths
 
-    def _set_execution_permissions(self, path):
-        os.chmod(
-            path,
-            stat.S_IRWXU | stat.S_IXGRP | stat.S_IRGRP | stat.S_IXOTH | stat.S_IROTH,
-        )
-
     @staticmethod
     def guess_libc_version(loader_path):
         glib_version_re = re.compile(r"GLIBC_(?P<version>\d+\.\d+\.?\d*)")
