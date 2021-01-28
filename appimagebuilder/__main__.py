@@ -15,11 +15,11 @@ import argparse
 import logging
 import os
 
+from appimagebuilder.common import shell
 from appimagebuilder import recipe
 from appimagebuilder.app_dir.builder import Builder
 from appimagebuilder.appimage import AppImageCreator
 from appimagebuilder.generator.generator import RecipeGenerator
-from appimagebuilder.script import Script
 from appimagebuilder.tester import ExecutionTest
 from appimagebuilder.tester.errors import TestFailed
 
@@ -83,8 +83,10 @@ def __main__():
     if recipe_version == 1:
         if not args.skip_script:
             script_instructions = recipe_data.get_item("script", [])
-            script_runner = Script()
-            script_runner.execute(script_instructions)
+            logging.info("======")
+            logging.info("Script")
+            logging.info("======")
+            shell.execute(script_instructions)
 
         if not args.skip_build:
             creator = Builder(recipe_data)

@@ -13,6 +13,7 @@ import logging
 import os
 from pathlib import Path
 
+from appimagebuilder.common import shell
 from appimagebuilder.app_dir.runtime.generator import RuntimeGenerator
 from . import deploy
 from .app_info.bundle_info import BundleInfo
@@ -20,7 +21,6 @@ from .app_info.desktop_entry_generator import DesktopEntryGenerator
 from .app_info.icon_bundler import IconBundler
 from .app_info.loader import AppInfoLoader
 from .file_info_cache import FileInfoCache
-from ..script import Script
 
 
 class BuilderError(RuntimeError):
@@ -57,16 +57,14 @@ class Builder:
 
         self.file_info_cache = FileInfoCache(self.recipe.get_item("AppDir/path"))
 
-        scripts_runner = Script()
-
-        scripts_runner.execute(self.recipe.get_item("AppDir/before_bundle", ""))
+        shell.execute(self.recipe.get_item("AppDir/before_bundle", ""))
         self._bundle_dependencies()
 
-        scripts_runner.execute(self.recipe.get_item("AppDir/after_bundle", ""))
+        shell.execute(self.recipe.get_item("AppDir/after_bundle", ""))
 
-        scripts_runner.execute(self.recipe.get_item("AppDir/before_runtime", ""))
+        shell.execute(self.recipe.get_item("AppDir/before_runtime", ""))
         self._generate_runtime()
-        scripts_runner.execute(self.recipe.get_item("AppDir/after_runtime", ""))
+        shell.execute(self.recipe.get_item("AppDir/after_runtime", ""))
 
         self._write_bundle_information()
 

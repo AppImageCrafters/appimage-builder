@@ -1,13 +1,6 @@
 import os
-import shlex
+import pty
 import shutil
-import subprocess
-import sys
-import logging
-
-
-class ShellCommandError(RuntimeError):
-    pass
 
 
 def resolve_commands_paths(commands: [str]):
@@ -21,12 +14,32 @@ def resolve_commands_paths(commands: [str]):
         if paths[dep] is None:
             # shutil.which returns None if the executable
             # was not found on PATH
-            raise ShellCommandError("Could not find '{exe}' on $PATH.".format(exe=dep))
+            raise RuntimeError("Could not find '{exe}' on $PATH.".format(exe=dep))
     return paths
 
 
 def assert_successful_result(proc):
     if proc.returncode:
-        raise ShellCommandError(
+        raise RuntimeError(
             '"%s" execution failed with code %s' % (proc.args, proc.returncode)
         )
+
+
+def execute(script):
+    if not script:
+        return
+
+    if isinstance(script, str):
+        script = script.splitlines()
+
+    # log each command before running it
+    script = [
+        "echo %s$ %s && %s" % (os.path.abspath(os.curdir), item, item)
+        for item in script
+    ]
+    script = " && ".join(script)
+
+    shell = os.environ.get("SHELL", "sh")
+    ret = pty.spawn([shell, "-c", script])
+    if ret != 0:
+        raise RuntimeError("Script exited with code %s", ret)
