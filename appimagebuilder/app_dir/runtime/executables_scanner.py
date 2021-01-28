@@ -49,7 +49,6 @@ class ExecutablesScanner:
                     executable = BinaryExecutable(path, arch)
                     binary_found = True
                 else:
-                    logging.warning("Unknown executable format " + path)
                     break
 
             if len(results) > 0:

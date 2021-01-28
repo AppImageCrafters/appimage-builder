@@ -47,7 +47,6 @@ setuptools.setup(
     install_requires=[
         "pyyaml>=5",
         "docker",
-        "bash.py",
         "requests",
         "schema",
         "packaging",
