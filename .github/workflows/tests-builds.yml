@@ -15,9 +15,8 @@ jobs:
       - name: Get Version
         id: get_version
         run: echo ::set-output name=VERSION::$(grep -Po 'version="\K((\d|\.)+)' setup.py)
-
       - name: Build AppImage
-        uses: AppImageCrafters/build-appimage-action@master
+        uses: AppImageCrafters/build-appimage@v1
         env:
           APPIMAGE_BUILDER_VERSION: ${{ steps.get_version.outputs.VERSION }}
         with:
