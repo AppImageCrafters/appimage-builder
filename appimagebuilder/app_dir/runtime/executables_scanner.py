@@ -64,8 +64,14 @@ class ExecutablesScanner:
 
     def _resolve_interpreter_path(self, shebang):
         if shebang[0] == "/usr/bin/env":
-            bin_name = shebang[1].strip(" ")
-            path = self.files_cache.find_one("*/%s" % bin_name, [])
+            interpreter_path = shebang[1].strip(" ")
+            interpreter_name = os.path.basename(interpreter_path)
+            path = self.files_cache.find_one("*/%s" % interpreter_name)
+            if not path:
+                raise RuntimeError(
+                    "Required binary '%s' could not be found in the AppDir" % path
+                )
+
             path = os.path.relpath(path)
             if not path:
                 raise RuntimeError(
