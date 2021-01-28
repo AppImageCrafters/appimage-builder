@@ -9,6 +9,8 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import os
+import stat
 import subprocess
 
 
@@ -56,5 +58,19 @@ def read_elf_arch(path):
             return known_architectures[e_machine]
         else:
             raise RuntimeError(
-                "Unknown instructions set architecture `%s` on: %s" % (e_machine.hex(), path)
+                "Unknown instructions set architecture `%s` on: %s"
+                % (e_machine.hex(), path)
             )
+
+
+def set_permissions_rx_all(path):
+    os.chmod(
+        path,
+        stat.S_IRUSR
+        | stat.S_IRGRP
+        | stat.S_IROTH
+        | stat.S_IXUSR
+        | stat.S_IXGRP
+        | stat.S_IXOTH
+        | stat.S_IWUSR,
+    )

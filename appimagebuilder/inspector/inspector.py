@@ -16,7 +16,7 @@ import subprocess
 
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
 from appimagebuilder.common.appimage_mount import AppImageMount
-from appimagebuilder.common.file_test import is_elf
+from appimagebuilder.common.file_utils import is_elf
 from appimagebuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
 
 

@@ -14,7 +14,7 @@ import logging
 import os
 
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
-from appimagebuilder.common.file_test import is_elf, is_elf_executable
+from appimagebuilder.common.file_utils import is_elf, is_elf_executable
 
 
 class FileInfoCache:
