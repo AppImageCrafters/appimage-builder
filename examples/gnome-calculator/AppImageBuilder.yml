@@ -1,4 +1,6 @@
 version: 1
+script:
+  - rm -rf AppDir || true
 
 AppDir:
   path: ./AppDir
@@ -22,6 +24,10 @@ AppDir:
     exclude:
       - adwaita-icon-theme
       - humanity-icon-theme
+      - sensible-utils
+      - dconf-service
+      - ubuntu-mono
+      - fonts-*-core
 
   runtime:
     version: "continuous"
