@@ -11,12 +11,13 @@
 #  all copies or substantial portions of the Software.
 import os
 
+from appimagebuilder.common.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 
 
 class LibGL(BaseHelper):
     def configure(self, env: Environment):
-        dri_path = self.app_dir_cache.find_one("*/dri", attrs=["is_dir"])
+        dri_path = self.finder.find_one("*/dri", [Finder.is_dir])
         if dri_path:
             env.set("LIBGL_DRIVERS_PATH", dri_path)

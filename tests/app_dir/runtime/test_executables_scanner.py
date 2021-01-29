@@ -14,7 +14,7 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from appimagebuilder.app_dir.file_info_cache import FileInfoCache
+from appimagebuilder.common.finder import Finder
 from appimagebuilder.app_dir.runtime.executables import (
     BinaryExecutable,
     InterpretedExecutable,
@@ -41,8 +41,7 @@ class TestExecutablesScanner(TestCase):
         with self.script_rel_shebang_path.open("w") as f:
             f.write("#!/usr/bin/env python3\n" "print 'hello world'\n")
 
-        self.file_cache = FileInfoCache(self.data_dir)
-        self.file_cache.update()
+        self.file_cache = Finder(self.data_dir)
 
         self.scanner = ExecutablesScanner(self.data_dir, self.file_cache)
 

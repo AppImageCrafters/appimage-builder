@@ -10,13 +10,13 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-from appimagebuilder.app_dir.file_info_cache import FileInfoCache
+from appimagebuilder.common.finder import Finder
 
 
 class BaseHelper:
-    def __init__(self, app_dir, app_dir_cache: FileInfoCache):
+    def __init__(self, app_dir, finder: Finder):
         self.app_dir = app_dir
-        self.app_dir_cache = app_dir_cache
+        self.finder = finder
 
         self.priority = 0
         self.env = {}

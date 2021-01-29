@@ -11,18 +11,17 @@
 #  all copies or substantial portions of the Software.
 
 import logging
-import os
 import uuid
 from pathlib import Path
 
-from appimagebuilder.app_dir.file_info_cache import FileInfoCache
+from appimagebuilder.common.finder import Finder
 from . import helpers
 from .apprun_binaries_resolver import AppRunBinariesResolver
 from .environment import Environment
 from .executables import BinaryExecutable, InterpretedExecutable
 from .executables_scanner import ExecutablesScanner
 from .executables_wrapper import ExecutablesWrapper
-from ...common.file_utils import read_elf_arch
+from ...common.elf import get_arch
 from ...recipe import Recipe
 
 
@@ -31,7 +30,7 @@ class RuntimeGeneratorError(RuntimeError):
 
 
 class RuntimeGenerator:
-    def __init__(self, recipe: Recipe, file_info_cache: FileInfoCache):
+    def __init__(self, recipe: Recipe, finder: Finder):
         self.appdir_path = Path(recipe.get_item("AppDir/path")).absolute()
         self.main_exec = recipe.get_item("AppDir/app_info/exec")
         self.main_exec_args = recipe.get_item("AppDir/app_info/exec_args", "$@")
@@ -41,13 +40,12 @@ class RuntimeGenerator:
         self.user_env = self.parse_env_input(user_env_input)
         self.path_mappings = recipe.get_item("AppDir/runtime/path_mappings", [])
 
-        self.file_info_cache = file_info_cache
+        self.finder = finder
 
     def generate(self):
-        self.file_info_cache.update()
         runtime_env = self._configure_runtime_environment()
 
-        scanner = ExecutablesScanner(self.appdir_path, self.file_info_cache)
+        scanner = ExecutablesScanner(self.appdir_path, self.finder)
         resolver = AppRunBinariesResolver(self.apprun_version, self.apprun_debug)
         wrapper = ExecutablesWrapper(self.appdir_path, resolver, runtime_env)
 
@@ -66,7 +64,9 @@ class RuntimeGenerator:
         ]
 
         if interpreted_executables:
-            env_path = self.file_info_cache.find_one("*/env", ["is_bin"])
+            env_path = self.finder.find_one(
+                "env", [Finder.is_file, Finder.is_executable]
+            )
             if env_path:
                 runtime_env.set("EXPORTED_BINARIES", env_path)
                 for executable in interpreted_executables:
@@ -90,7 +90,7 @@ class RuntimeGenerator:
 
     def _find_executables(self, scanner):
         executables = []
-        files = self.file_info_cache.find("*", ["is_exec", "is_file"])
+        files = self.finder.find("*", [Finder.is_file, Finder.is_executable])
         for file in files:
             new_executables = scanner.scan_file(file)
             executables.extend(new_executables)
@@ -137,12 +137,13 @@ class RuntimeGenerator:
         ]
 
         for helper in execution_list:
-            inst = helper(self.appdir_path, self.file_info_cache)
+            logging.info("Running configuration helper: %s" % helper.__name__)
+            inst = helper(self.appdir_path, self.finder)
             inst.configure(global_env)
 
     def _deploy_appdir_apprun(self, wrapper, global_environment):
         self._write_appdir_env(global_environment)
-        arch = read_elf_arch(self.appdir_path / self.main_exec)
+        arch = get_arch(self.appdir_path / self.main_exec)
         wrapper.deploy_apprun(arch, self.appdir_path / "AppRun")
         wrapper.deploy_hooks_lib(arch)
 

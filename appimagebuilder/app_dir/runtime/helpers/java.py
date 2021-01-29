@@ -12,13 +12,14 @@
 import os
 from pathlib import Path
 
+from appimagebuilder.common.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 
 
 class Java(BaseHelper):
     def configure(self, env: Environment):
-        java_path = self.app_dir_cache.find_one("*/bin/java", attrs=["is_bin"])
+        java_path = self.finder.find_one("java", [Finder.is_file, Finder.is_executable])
         if java_path:
             java_home = Path(java_path).parent.parent
             env.set("JAVA_HOME", str(java_home))

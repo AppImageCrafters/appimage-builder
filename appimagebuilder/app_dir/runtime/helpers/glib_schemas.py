@@ -12,15 +12,14 @@
 import shutil
 import subprocess
 
+from appimagebuilder.common.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 
 
 class GLibSchemas(BaseHelper):
     def configure(self, env: Environment):
-        path = self.app_dir_cache.find_one(
-            "*/usr/share/glib-2.0/schemas", attrs=["is_dir"]
-        )
+        path = self.finder.find_one("*/glib-2.0/schemas", [Finder.is_dir])
         if path:
             bin_path = shutil.which("glib-compile-schemas")
             if not bin_path:

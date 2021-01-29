@@ -12,13 +12,16 @@
 import os
 from pathlib import Path
 
+from appimagebuilder.common.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 
 
 class Python(BaseHelper):
     def configure(self, env: Environment):
-        python_path = self.app_dir_cache.find_one("*/bin/python?", attrs=["is_bin"])
+        python_path = self.finder.find_one(
+            "*/bin/python?", [Finder.is_file, Finder.is_executable]
+        )
         if python_path:
             python_home = Path(python_path).parent.parent
             env.set("PYTHONHOME", str(python_home))

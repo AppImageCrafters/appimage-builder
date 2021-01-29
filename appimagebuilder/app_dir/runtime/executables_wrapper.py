@@ -48,11 +48,11 @@ class ExecutablesWrapper:
             self._wrap_interpreted_executable(executable)
 
     def _wrap_binary_executable(self, executable):
-        wrapped_path = str(executable.path) + ".orig"
-        os.rename(executable.path, wrapped_path)
+        wrapped_path = str(executable.base_path) + ".orig"
+        os.rename(executable.base_path, wrapped_path)
         apprun_env = self._generate_executable_env(executable, wrapped_path)
         self._deploy_env(executable, apprun_env)
-        self.deploy_apprun(executable.arch, executable.path)
+        self.deploy_apprun(executable.arch, executable.base_path)
         self.deploy_hooks_lib(executable.arch)
 
     def deploy_apprun(self, arch, target_path):
@@ -81,14 +81,14 @@ class ExecutablesWrapper:
         return path.name.endswith(".orig")
 
     def _deploy_env(self, executable, env):
-        env_path = str(executable.path) + ".env"
+        env_path = str(executable.base_path) + ".env"
         with open(env_path, "w") as f:
             result = Environment.serialize(env)
             result = result.replace(str(self.appdir_path), "$APPDIR")
             f.write(result)
 
     def _generate_executable_env(self, executable, wrapped_path):
-        executable_dir = os.path.dirname(executable.path)
+        executable_dir = os.path.dirname(executable.base_path)
         apprun_env = {
             "APPDIR": "$ORIGIN/" + os.path.relpath(self.appdir_path, executable_dir),
             "APPIMAGE_UUID": None,

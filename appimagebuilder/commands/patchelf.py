@@ -23,6 +23,7 @@ class PatchElf(Command):
         super().__init__("patchelf")
 
     def get_interpreter(self, file):
+        file = file.__str__()
         self._run(["patchelf", "--print-interpreter", file])
         if self.return_code != 0:
             raise PatchElfError("\n".join(self.stderr))
@@ -30,12 +31,14 @@ class PatchElf(Command):
         return "\n".join(self.stdout).strip()
 
     def set_interpreter(self, file, interpreter):
+        file = file.__str__()
         self._run(["patchelf", "--set-interpreter", interpreter, file])
 
         if self.return_code != 0:
             raise PatchElfError("\n".join(self.stderr))
 
     def get_needed(self, file):
+        file = file.__str__()
         self._run(["patchelf", "--print-needed", file])
 
         if self.return_code != 0:
@@ -44,12 +47,14 @@ class PatchElf(Command):
         return self.stdout
 
     def set_run_path(self, file, run_paths):
+        file = file.__str__()
         self._run(["patchelf", "--set-rpath", ":".join(run_paths), file])
 
         if self.return_code != 0:
             raise PatchElfError("\n".join(self.stderr))
 
     def set(self, file, run_path=None, interpreter=None):
+        file = file.__str__()
         command = ["patchelf"]
         if run_path:
             command.append("--set-rpath")

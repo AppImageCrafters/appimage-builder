@@ -15,14 +15,15 @@ import re
 import subprocess
 import shutil
 
+from appimagebuilder.common.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 
 
 class GdkPixbuf(BaseHelper):
     def configure(self, global_env: Environment):
-        loaders_dir_path = self.app_dir_cache.find_one(
-            "*/gdk-pixbuf-2.0/*/loaders", attrs=["is_dir"]
+        loaders_dir_path = self.finder.find_one(
+            "*/gdk-pixbuf-2.0/*/loaders", [Finder.is_dir]
         )
         if loaders_dir_path:
             base_dir = os.path.dirname(loaders_dir_path)

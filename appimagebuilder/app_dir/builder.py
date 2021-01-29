@@ -20,7 +20,7 @@ from .app_info.bundle_info import BundleInfo
 from .app_info.desktop_entry_generator import DesktopEntryGenerator
 from .app_info.icon_bundler import IconBundler
 from .app_info.loader import AppInfoLoader
-from .file_info_cache import FileInfoCache
+from appimagebuilder.common.finder import Finder
 
 
 class BuilderError(RuntimeError):
@@ -32,7 +32,7 @@ class Builder:
         self.recipe = recipe
         self.generator = None
         self.bundle_info = None
-        self.file_info_cache = None
+        self.finder = None
         self._load_config()
 
     def _load_config(self):
@@ -55,7 +55,7 @@ class Builder:
         logging.info("Generating AppDir")
         logging.info("=================")
 
-        self.file_info_cache = FileInfoCache(self.recipe.get_item("AppDir/path"))
+        self.finder = Finder(self.recipe.get_item("AppDir/path"))
 
         shell.execute(self.recipe.get_item("AppDir/before_bundle", ""))
         self._bundle_dependencies()
@@ -106,14 +106,12 @@ class Builder:
             file_helper.deploy(files_include)
 
         self._make_symlinks_relative()
-        self.file_info_cache.update()
 
     def _make_symlinks_relative(self):
-        self.file_info_cache.update()
-        for link in self.file_info_cache.find("*", attrs=["is_link"]):
+        for link in self.finder.find("*", [Finder.is_symlink]):
             relative_root = (
                 self.app_dir_path
-                if "opt/libc" not in link
+                if "opt/libc" not in str(link)
                 else self.app_dir_path / "opt" / "libc"
             )
             deploy.make_symlink_relative(link, relative_root)
@@ -148,7 +146,7 @@ class Builder:
         logging.info("Generating runtime")
         logging.info("__________________")
 
-        runtime = RuntimeGenerator(self.recipe, self.file_info_cache)
+        runtime = RuntimeGenerator(self.recipe, self.finder)
         runtime.generate()
 
     def _write_bundle_information(self):
