@@ -11,56 +11,6 @@
 #  all copies or substantial portions of the Software.
 import os
 import stat
-import subprocess
-
-
-def is_elf(path):
-    with open(path, "rb") as f:
-        bits = f.read(4)
-        if bits == b"\x7fELF":
-            return True
-
-    return False
-
-
-def is_elf_executable(path):
-    """
-    Determine if an elf is executable
-
-    The `__libc_start_main` symbol should be present in every runnable elf file.
-    https://refspecs.linuxbase.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/baselib---libc-start-main-.html
-    """
-    has_main_method = False
-    _proc = subprocess.run("readelf -s %s" % path, stdout=subprocess.PIPE, shell=True)
-    if _proc.returncode == 0:
-        output = _proc.stdout.decode("utf-8")
-        has_main_method = "__libc_start_main" in output
-    return has_main_method
-
-
-def read_elf_arch(path):
-    """
-    Read the target instructions set architecture and maps it to a name known by appimage-builder
-
-    https://en.wikipedia.org/wiki/Executable_and_Linkable_Format#File_header
-    """
-    known_architectures = {
-        b"\xB7": "aarch64",
-        b"\x28": "gnueabihf",
-        b"\x03": "i386",
-        b"\x3E": "x86_64",
-    }
-
-    with open(path, "rb") as f:
-        f.seek(18)
-        e_machine = f.read(1)
-        if e_machine in known_architectures:
-            return known_architectures[e_machine]
-        else:
-            raise RuntimeError(
-                "Unknown instructions set architecture `%s` on: %s"
-                % (e_machine.hex(), path)
-            )
 
 
 def set_permissions_rx_all(path):

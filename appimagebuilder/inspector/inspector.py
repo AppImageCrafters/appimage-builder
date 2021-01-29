@@ -16,7 +16,7 @@ import subprocess
 
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
 from appimagebuilder.common.appimage_mount import AppImageMount
-from appimagebuilder.common.file_utils import is_elf
+from appimagebuilder.common.elf import has_magic_bytes
 from appimagebuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
 
 
@@ -43,7 +43,7 @@ class Inspector:
                 bundle_libs.add(file)
                 abs_path = os.path.join(root, file)
                 try:
-                    if is_elf(abs_path):
+                    if has_magic_bytes(abs_path):
                         patch_elf = PatchElf()
                         patch_elf.log_stdout = False
                         patch_elf.log_stderr = False
@@ -72,7 +72,7 @@ class Inspector:
             for file in files:
                 abs_path = os.path.join(root, file)
                 try:
-                    if is_elf(abs_path):
+                    if has_magic_bytes(abs_path):
                         patch_elf = PatchElf()
                         patch_elf.log_stdout = False
                         patch_elf.log_stderr = False

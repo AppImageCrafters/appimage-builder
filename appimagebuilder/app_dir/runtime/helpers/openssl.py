@@ -12,14 +12,13 @@
 import logging
 import os
 
+from appimagebuilder.common.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 
 
 class OpenSSL(BaseHelper):
     def configure(self, env: Environment):
-        engines_dir = self.app_dir_cache.find_one(
-            "*/openssl-*/engines", attrs=["is_dir"]
-        )
+        engines_dir = self.finder.find_one("*/openssl-*/engines", [Finder.is_dir])
         if engines_dir:
             env.set("OPENSSL_ENGINES", engines_dir)

@@ -11,13 +11,16 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
+import pathlib
 import re
 import stat
+from distutils.command.check import check
 from functools import reduce
 
 from packaging import version
 
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
+from appimagebuilder.common.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 
@@ -27,8 +30,8 @@ class InterpreterHandlerError(RuntimeError):
 
 
 class Interpreter(BaseHelper):
-    def __init__(self, app_dir, app_dir_cache):
-        super().__init__(app_dir, app_dir_cache)
+    def __init__(self, app_dir, finder):
+        super().__init__(app_dir, finder)
 
         self.priority = 100
         self.patch_elf = PatchElf()
@@ -36,7 +39,7 @@ class Interpreter(BaseHelper):
         self.interpreters = {}
 
     def get_glibc_path(self) -> str:
-        path = self.app_dir_cache.find_one("*/libc.so.*")
+        path = self.finder.find_one("*/libc.so.*", [Finder.is_elf_shared_lib])
         if not path:
             raise InterpreterHandlerError("Unable to find libc.so")
 
@@ -63,34 +66,25 @@ class Interpreter(BaseHelper):
         app_run.set("PATH", bin_paths)
 
     def _get_appdir_library_paths(self):
-        paths = self.app_dir_cache.find("*", attrs=["is_lib"])
-        # only dir names are relevant
-        paths = set(os.path.dirname(path) for path in paths)
+        paths = self.finder.find_dirs_containing(
+            pattern="*.so*",
+            file_checks=[Finder.is_file, Finder.is_elf_shared_lib],
+            excluded_patterns=[
+                "*/opt/libc*",
+                "*/qt5/plugins*",
+                "*/perl*",
+                "*/perl-base*",
+            ],
+        )
 
-        # exclude libc partition paths
-        libc_prefix = os.path.join(self.app_dir, "opt/libc")
-        paths = [path for path in paths if not path.startswith(libc_prefix)]
-
-        # exclude qt5 plugins paths
-        paths = [path for path in paths if "qt5/plugins" not in path]
-
-        # exclude perl paths
-        paths = [path for path in paths if "/perl/" not in path]
-        paths = [path for path in paths if "/perl-base/" not in path]
-
-        return paths
+        return [path.__str__() for path in paths]
 
     def _get_libc_library_paths(self):
-        paths = self.app_dir_cache.find("*", attrs=["is_lib"])
-
-        # only dir names are relevant
-        paths = set(os.path.dirname(path) for path in paths)
-
-        # exclude non-libc partition paths
-        libc_prefix = os.path.join(self.app_dir, "opt/libc")
-        paths = [path for path in paths if path.startswith(libc_prefix)]
-
-        return paths
+        paths = self.finder.find_dirs_containing(
+            pattern="*/opt/libc/*.so*",
+            file_checks=[Finder.is_file, Finder.is_elf_shared_lib],
+        )
+        return [path.__str__() for path in paths]
 
     def _load_ld_conf_file(self, file):
         paths = set()
@@ -116,18 +110,28 @@ class Interpreter(BaseHelper):
                 raise InterpreterHandlerError("Unable to determine glibc version")
 
     def _patch_executables_interpreter(self, uuid):
-        for bin in self.app_dir_cache.find("*", attrs=["pt_interp"]):
+        binaries = self.finder.find(
+            pattern="*",
+            check_true=[
+                Finder.is_file,
+                Finder.is_executable,
+                Finder.is_elf,
+                Finder.is_dynamically_linked_executable,
+            ]
+        )
+        for bin in binaries:
             self._set_interpreter(bin, uuid)
 
     def _set_interpreter(self, file, uuid):
-        original_interpreter = self.app_dir_cache.cache[file]["pt_interp"]
-        if original_interpreter.startswith("/tmp/appimage-"):
-            # skip, the binary has been patched already
-            return
         try:
             patchelf_command = PatchElf()
             patchelf_command.log_stderr = False
             patchelf_command.log_stdout = False
+
+            original_interpreter = patchelf_command.get_interpreter(file)
+            if original_interpreter.startswith("/tmp/appimage-"):
+                # skip, the binary has been patched already
+                return
 
             apprun_interpreter = self._gen_interpreter_link_path(
                 original_interpreter, uuid
@@ -143,7 +147,6 @@ class Interpreter(BaseHelper):
                     '\t"%s"  => "%s"' % (original_interpreter, apprun_interpreter)
                 )
                 patchelf_command.set_interpreter(file, apprun_interpreter)
-                self.app_dir_cache.cache[file]["pt_interp"] = apprun_interpreter
         except PatchElfError:
             pass
 
@@ -152,11 +155,9 @@ class Interpreter(BaseHelper):
         return "/tmp/appimage-%s-%s" % (uuid, os.path.basename(real_interpreter))
 
     def _get_bin_paths(self):
-        paths = self.app_dir_cache.find("*", attrs=["is_file", "is_exec"])
-        # only dir names are relevant
-        paths = set(os.path.dirname(path) for path in paths)
-
-        # exclude libc partition paths
-        paths = [path for path in paths if not path.startswith("opt/libc")]
-
-        return paths
+        paths = self.finder.find_dirs_containing(
+            pattern="*",
+            file_checks=[Finder.is_file, Finder.is_executable],
+            excluded_patterns=["*/opt/libc*"],
+        )
+        return [path.__str__() for path in paths]

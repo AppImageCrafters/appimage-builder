@@ -12,7 +12,8 @@
 import logging
 import os
 
-from appimagebuilder.app_dir.file_info_cache import FileInfoCache
+import appimagebuilder.common.elf
+from appimagebuilder.common.finder import Finder
 from appimagebuilder.app_dir.runtime.executables import (
     Executable,
     BinaryExecutable,
@@ -26,7 +27,7 @@ class MissingInterpreterError(RuntimeError):
 
 
 class ExecutablesScanner:
-    def __init__(self, appdir, files_cache: FileInfoCache):
+    def __init__(self, appdir, files_cache: Finder):
         self.appdir = appdir
         self.files_cache = files_cache
 
@@ -41,11 +42,13 @@ class ExecutablesScanner:
                     executable = InterpretedExecutable(path, shebang)
                     path = self._resolve_interpreter_path(shebang)
                 except MissingInterpreterError as err:
-                    logging.warning(err.__str__() + " while processing " + path)
+                    logging.warning(
+                        err.__str__() + " while processing " + path.__str__()
+                    )
                     break
             else:
-                if file_utils.is_elf_executable(path):
-                    arch = file_utils.read_elf_arch(path)
+                if appimagebuilder.common.elf.has_main_symbol(path):
+                    arch = appimagebuilder.common.elf.get_arch(path)
                     executable = BinaryExecutable(path, arch)
                     binary_found = True
                 else:
@@ -66,27 +69,26 @@ class ExecutablesScanner:
 
     def _resolve_interpreter_path(self, shebang):
         if shebang[0] == "/usr/bin/env":
-            interpreter_path = shebang[1].strip(" ")
-            interpreter_name = os.path.basename(interpreter_path)
-            path = self.files_cache.find_one("*/%s" % interpreter_name)
-            if not path:
-                raise RuntimeError(
-                    "Required binary '%s' could not be found in the AppDir" % path
-                )
-
-            path = os.path.relpath(path)
-            if not path:
-                raise RuntimeError(
-                    "Required binary '%s' could not be found in the AppDir" % path
-                )
-            return path
+            interpreter = shebang[1].strip(" ")
         else:
-            path = self.appdir / shebang[0].strip("/")
-            path = os.path.realpath(path)
-            if not os.path.exists(path):
-                raise MissingInterpreterError(
-                    "Required binary '%s' could not be found in the AppDir" % path
-                )
+            interpreter = shebang[0].strip(" ")
+
+        interpreter_name = os.path.basename(interpreter)
+        path = self.files_cache.find_one(
+            interpreter_name, [self.files_cache.is_file, self.files_cache.is_executable]
+        )
+        if not path:
+            raise MissingInterpreterError(
+                "Required interpreter '%s' could not be found in the AppDir"
+                % interpreter_name
+            )
+
+        path = os.path.relpath(path)
+        if not path:
+            raise MissingInterpreterError(
+                "Required interpreter '%s' could not be found in the AppDir"
+                % interpreter_name
+            )
         return path
 
     @staticmethod

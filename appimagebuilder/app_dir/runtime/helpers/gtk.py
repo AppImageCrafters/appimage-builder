@@ -14,6 +14,7 @@ import os
 import subprocess
 from pathlib import Path
 
+from appimagebuilder.common.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 
@@ -25,7 +26,9 @@ class Gtk(BaseHelper):
     """
 
     def configure(self, env: Environment):
-        libgtk_path = self.app_dir_cache.find_one("*/libgtk-*")
+        libgtk_path = self.finder.find_one(
+            "*/libgtk-*", [Finder.is_file, Finder.is_elf_shared_lib]
+        )
         if libgtk_path:
             prefix = Path(libgtk_path).parent.parent
             env.set("GTK_EXE_PREFIX", str(prefix))

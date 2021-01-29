@@ -14,6 +14,7 @@ import logging
 import os
 from pathlib import Path
 
+from appimagebuilder.common.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 
@@ -34,9 +35,9 @@ class Qt(BaseHelper):
                 self._write_qt_conf(qt_conf, path)
 
     def _find_exec_dirs(self):
-        exec_paths = self.app_dir_cache.find("*", attrs=["is_file", "is_exec"])
-        exec_dirs = set([os.path.dirname(path) for path in exec_paths])
-        exec_dirs = [Path(path) for path in exec_dirs]
+        exec_dirs = self.finder.find_dirs_containing(
+            file_checks=[Finder.is_file, Finder.is_executable]
+        )
         return exec_dirs
 
     def _write_qt_conf(self, qt_conf: {str: str}, target_dir: Path):
@@ -55,32 +56,42 @@ class Qt(BaseHelper):
         return config
 
     def _locate_qt5_dirs(self):
-        libqt5core_paths = self.app_dir_cache.find("*/libQt5Core.so.*")
-        if libqt5core_paths:
-            self._qt_dirs["Libraries"] = Path(libqt5core_paths[0]).parent
-
-        qtwebengine_paths = self.app_dir_cache.find("*/QtWebEngineProcess")
-        if qtwebengine_paths:
-            self._qt_dirs["LibraryExecutables"] = Path(qtwebengine_paths[0]).parent
-
-        qmake_paths = self.app_dir_cache.find("*/qmake")
-        if qmake_paths:
-            self._qt_dirs["Binaries"] = Path(qmake_paths[0]).parent
-
-        libqminimal_paths = self.app_dir_cache.find("*/libqminimal.so")
-        if libqminimal_paths:
-            self._qt_dirs["Plugins"] = Path(libqminimal_paths[0]).parent.parent
-
-        builtins_qmltypes_paths = self.app_dir_cache.find("*/builtins.qmltypes")
-        if builtins_qmltypes_paths:
-            self._qt_dirs["Qml2Imports"] = Path(builtins_qmltypes_paths[0]).parent
-
-        qtbase_translations_paths = self.app_dir_cache.find(
-            "*/qt5/translations", ["is_dir"]
+        libqt5core_path = self.finder.find_one(
+            "*/libQt5Core.so.*", [Finder.is_file, Finder.is_elf_shared_lib]
         )
-        if qtbase_translations_paths:
-            self._qt_dirs["Translations"] = Path(qtbase_translations_paths[0])
+        if libqt5core_path:
+            self._qt_dirs["Libraries"] = libqt5core_path.parent
 
-        data_paths = self.app_dir_cache.find("*/qt5/resources", ["is_dir"])
-        if data_paths:
-            self._qt_dirs["Data"] = Path(data_paths[0]).parent
+        qtwebengine_path = self.finder.find_one(
+            "*/QtWebEngineProcess", [Finder.is_file, Finder.is_executable]
+        )
+        if qtwebengine_path:
+            self._qt_dirs["LibraryExecutables"] = qtwebengine_path.parent
+
+        qmake_path = self.finder.find_one(
+            "*/qmake", [Finder.is_file, Finder.is_executable]
+        )
+        if qmake_path:
+            self._qt_dirs["Binaries"] = qmake_path.parent
+
+        libqminimal_path = self.finder.find_one(
+            "*/libqminimal.so", [Finder.is_file, Finder.is_elf]
+        )
+        if libqminimal_path:
+            self._qt_dirs["Plugins"] = libqminimal_path.parent.parent
+
+        builtins_qmltypes_path = self.finder.find_one(
+            "*/builtins.qmltypes", [Finder.is_file]
+        )
+        if builtins_qmltypes_path:
+            self._qt_dirs["Qml2Imports"] = builtins_qmltypes_path.parent
+
+        qtbase_translations_path = self.finder.find_one(
+            "*/qt5/translations", [Finder.is_dir]
+        )
+        if qtbase_translations_path:
+            self._qt_dirs["Translations"] = qtbase_translations_path
+
+        data_path = self.finder.find_one("*/qt5/resources", [Finder.is_dir])
+        if data_path:
+            self._qt_dirs["Data"] = data_path.parent
