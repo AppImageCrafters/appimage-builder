@@ -1,3 +1,4 @@
+import os
 import shutil
 import subprocess
 
@@ -24,14 +25,21 @@ def assert_successful_result(proc):
         )
 
 
-def execute(script):
+def execute(script, env=None):
+    if env is None:
+        env = {}
+
     if not script:
         return
 
     if isinstance(script, list):
         script = "\n".join(script)
 
-    _proc = subprocess.Popen(["bash", "-ve"], stdin=subprocess.PIPE)
+    run_env = os.environ.copy()
+    for k, v in env.items():
+        run_env[k] = v
+
+    _proc = subprocess.Popen(["bash", "-ve"], stdin=subprocess.PIPE, env=run_env)
     _proc.communicate(script.encode())
 
     if _proc.returncode != 0:

@@ -46,3 +46,12 @@ class TestShell(TestCase):
                 "exit 1",
             ],
         )
+
+    def test_use_pass_env(self):
+        shell.execute(
+            [
+                "if [ -z ${var+x} ]; then",
+                "   exit 1; ",
+                "fi",
+            ], env={"var": "value"}
+        )
