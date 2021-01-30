@@ -57,14 +57,15 @@ class Builder:
 
         self.finder = Finder(self.recipe.get_item("AppDir/path"))
 
-        shell.execute(self.recipe.get_item("AppDir/before_bundle", ""))
+        script_env = {"APPDIR": os.path.abspath(self.app_dir_path)}
+        shell.execute(self.recipe.get_item("AppDir/before_bundle", ""), env=script_env)
         self._bundle_dependencies()
 
-        shell.execute(self.recipe.get_item("AppDir/after_bundle", ""))
+        shell.execute(self.recipe.get_item("AppDir/after_bundle", ""), env=script_env)
 
-        shell.execute(self.recipe.get_item("AppDir/before_runtime", ""))
+        shell.execute(self.recipe.get_item("AppDir/before_runtime", ""), env=script_env)
         self._generate_runtime()
-        shell.execute(self.recipe.get_item("AppDir/after_runtime", ""))
+        shell.execute(self.recipe.get_item("AppDir/after_runtime", ""), env=script_env)
 
         self._write_bundle_information()
 

@@ -86,7 +86,8 @@ def __main__():
             logging.info("======")
             logging.info("Script")
             logging.info("======")
-            shell.execute(script_instructions)
+            appdir = recipe_data.get_item("AppDir/path")
+            shell.execute(script_instructions, env={"APPDIR": os.path.abspath(appdir)})
 
         if not args.skip_build:
             creator = Builder(recipe_data)
