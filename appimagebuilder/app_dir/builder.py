@@ -55,7 +55,7 @@ class Builder:
         logging.info("Generating AppDir")
         logging.info("=================")
 
-        self.finder = Finder(self.recipe.get_item("AppDir/path"))
+        self.finder = Finder(self.app_dir_path)
 
         script_env = {"APPDIR": os.path.abspath(self.app_dir_path)}
         shell.execute(self.recipe.get_item("AppDir/before_bundle", ""), env=script_env)
