@@ -1,14 +1,14 @@
 version: 1
 script:
   # Remove any previous build
-  - rm -rf AppDir  || true
-  - mkdir -p AppDir/usr/share/icons/hicolor/scalable/apps AppDir/usr/bin AppDir/opt
-  - cp resources/appimage-builder.svg AppDir/usr/share/icons/hicolor/scalable/apps
+  - rm -rf $APPDIR  || true
+  - mkdir -p $APPDIR/usr/share/icons/hicolor/scalable/apps $APPDIR/usr/bin $APPDIR/opt
+  - cp resources/appimage-builder.svg $APPDIR/usr/share/icons/hicolor/scalable/apps
   # deploy appimagetool
   - wget -c https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool.AppImage
   - chmod +x appimagetool.AppImage; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool.AppImage; ./appimagetool.AppImage --appimage-extract
-  - mv ./squashfs-root AppDir/opt/appimagetool
-  - ln -s ../../opt/appimagetool/AppRun AppDir/usr/bin/appimagetool
+  - mv ./squashfs-root $APPDIR/opt/appimagetool
+  - ln -s ../../opt/appimagetool/AppRun $APPDIR/usr/bin/appimagetool
   # download pip
   - wget -c https://bootstrap.pypa.io/get-pip.py -O get-pip.py
 
@@ -23,7 +23,7 @@ AppDir:
     # Set the python executable as entry point
     exec: usr/bin/python3
     # Set the application main script path as argument. Use '$@' to forward CLI parameters
-    exec_args: "$APPDIR/usr/local/bin/appimage-builder $@"
+    exec_args: "$APPDIR/usr/bin/appimage-builder $@"
 
   apt:
     arch: amd64
@@ -43,8 +43,9 @@ AppDir:
     exclude: []
 
   after_bundle: |
-    PYTHONHOME=$PWD/AppDir/usr python3 get-pip.py
-    PYTHONHOME=$PWD/AppDir/usr python3 -m pip install .
+    export PYTHONHOME=$APPDIR/usr
+    python3 get-pip.py
+    python3 -m pip install --ignore-installed --prefix=/usr --root=$APPDIR  install .
 
   runtime:
     version: "continuous"
