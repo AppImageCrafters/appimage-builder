@@ -1,6 +1,5 @@
-import os
-import pty
 import shutil
+import subprocess
 
 
 def resolve_commands_paths(commands: [str]):
@@ -29,17 +28,11 @@ def execute(script):
     if not script:
         return
 
-    if isinstance(script, str):
-        script = script.splitlines()
+    if isinstance(script, list):
+        script = "\n".join(script)
 
-    # log each command before running it
-    script = [
-        "echo %s$ %s && %s" % (os.path.abspath(os.curdir), item, item)
-        for item in script
-    ]
-    script = " && ".join(script)
+    _proc = subprocess.Popen(["bash", "-ve"], stdin=subprocess.PIPE)
+    _proc.communicate(script.encode())
 
-    shell = os.environ.get("SHELL", "sh")
-    ret = pty.spawn([shell, "-c", script])
-    if ret != 0:
-        raise RuntimeError("Script exited with code %s", ret)
+    if _proc.returncode != 0:
+        raise RuntimeError("Script exited with code: %s" % _proc.returncode)

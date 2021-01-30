@@ -117,7 +117,7 @@ class Interpreter(BaseHelper):
                 Finder.is_executable,
                 Finder.is_elf,
                 Finder.is_dynamically_linked_executable,
-            ]
+            ],
         )
         for bin in binaries:
             self._set_interpreter(bin, uuid)
