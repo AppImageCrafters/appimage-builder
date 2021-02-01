@@ -1,26 +1,32 @@
 # This workflows will upload a Python Package using Twine when a release is created
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
 
-name: Create an AppImage release for every commit
+name: Buid AppImage
 
 on:
   push
 
 jobs:
   pack:
-    runs-on: ubuntu-latest
+    runs-on: Ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v2
       - name: Get Version
         id: get_version
         run: echo ::set-output name=VERSION::$(grep -Po 'version="\K((\d|\.)+)' setup.py)
+      - name: Install dependencies
+        run: |
+          sudo apt install -y python3.8-minimal python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace
+          sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+          sudo chmod +x /usr/local/bin/appimagetool
+      - name: Install appimage-builder
+        run: |
+          sudo python3.8 -m pip install .
       - name: Build AppImage
-        uses: AppImageCrafters/build-appimage@v1
-        env:
-          APPIMAGE_BUILDER_VERSION: ${{ steps.get_version.outputs.VERSION }}
-        with:
-          recipe: AppImageBuilder.yml
+        run: |
+          export APPIMAGE_BUILDER_VERSION=${{ steps.get_version.outputs.VERSION }}
+          appimage-builder --skip-test
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2.1.4
         with:
