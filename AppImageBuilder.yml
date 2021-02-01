@@ -6,11 +6,11 @@ script:
   - cp resources/appimage-builder.svg $APPDIR/usr/share/icons/hicolor/scalable/apps
   # deploy appimagetool
   - wget -c https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool.AppImage
-  - chmod +x appimagetool.AppImage; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool.AppImage; ./appimagetool.AppImage --appimage-extract
-  - mv ./squashfs-root $APPDIR/opt/appimagetool
-  - ln -s ../../opt/appimagetool/AppRun $APPDIR/usr/bin/appimagetool
-  # download pip
-  - wget -c https://bootstrap.pypa.io/get-pip.py -O get-pip.py
+  - chmod +x appimagetool.AppImage
+  - ./appimagetool.AppImage --appimage-extract
+  - cp squashfs-root/usr/bin/appimagetool $APPDIR/usr/bin/appimagetool
+  - mkdir -p $APPDIR/usr/lib/appimagekit/
+  - cp squashfs-root/usr/lib/appimagekit/mksquashfs $APPDIR/usr/lib/appimagekit/
 
 AppDir:
   path: ./AppDir
@@ -32,20 +32,21 @@ AppDir:
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
 
     include:
-      - dash
       - coreutils
-      - python3-minimal
-      - patchelf
+      - dash
       - desktop-file-utils
-      - libgdk-pixbuf2.0-dev
       - fakeroot
+      - libgdk-pixbuf2.0-dev
+      - patchelf
+      - python3-minimal
+      - squashfs-tools
       - strace
+      - zsync
     exclude: []
 
   after_bundle: |
-    export PYTHONHOME=$APPDIR/usr
-    python3 get-pip.py
-    python3 -m pip install --ignore-installed --prefix=/usr --root=$APPDIR  install .
+    export PYTHONPATH=${APPDIR}/usr/lib/python3.8/site-packages
+    python3.8 -m pip install --ignore-installed --prefix=/usr --root=$APPDIR  install .
 
   runtime:
     version: "continuous"
@@ -56,7 +57,7 @@ AppDir:
       PYTHONHOME: '${APPDIR}/usr'
       # Path to the site-packages dir or other modules dirs
       # See https://docs.python.org/3/using/cmdline.html#envvar-PYTHONPATH
-      PYTHONPATH: '${APPDIR}/usr/lib/python3.6/site-packages'
+      PYTHONPATH: '${APPDIR}/usr/lib/python3.8/site-packages'
 
   test:
     fedora:
