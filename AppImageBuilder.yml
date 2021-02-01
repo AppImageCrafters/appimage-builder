@@ -38,7 +38,7 @@ AppDir:
       - fakeroot
       - libgdk-pixbuf2.0-dev
       - patchelf
-      - python3-minimal
+      - python3.8
       - squashfs-tools
       - strace
       - zsync

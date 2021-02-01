@@ -13,6 +13,7 @@ AppDir:
 
   apt:
     arch: i386
+    allow_unauthenticated: true
     sources:
       - sourceline: 'deb [arch=i386] http://archive.ubuntu.com/ubuntu bionic main'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
