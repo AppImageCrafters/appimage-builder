@@ -52,3 +52,19 @@ jobs:
         with:
           name: bash
           path: './bash*.AppImage*'
+  upload-continuous-releases:
+    runs-on: ubuntu-20.04
+    needs: test
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v2
+      - name: Download AppImage from build job
+        uses: actions/download-artifact@v2
+        with:
+          name: appimage-builder
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: true
+          automatic_release_tag: Continuous
+          files: './appimage-builder*.AppImage*'
