@@ -30,15 +30,24 @@ jobs:
           twine upload dist/*
 
   release-appimage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
+      - name: Get Version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(grep -Po 'version="\K((\d|\.)+)' setup.py)
+      - name: Install dependencies
+        run: |
+          sudo apt install -y python3.8-minimal python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace
+          sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+          sudo chmod +x /usr/local/bin/appimagetool
+      - name: Install appimage-builder
+        run: |
+          sudo python3.8 -m pip install .
       - name: Build AppImage
-        uses: AppImageCrafters/build-appimage@v1
-        env:
-          APPIMAGE_BUILDER_VERSION: ${{ github.ref }}
-        with:
-          recipe: AppImageBuilder.yml
+        run: |
+          export APPIMAGE_BUILDER_VERSION=${{ steps.get_version.outputs.VERSION }}
+          appimage-builder --skip-test
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
