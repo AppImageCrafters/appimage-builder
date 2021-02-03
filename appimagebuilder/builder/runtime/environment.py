@@ -65,7 +65,7 @@ class Environment:
                 continue
 
             if v is None:
-                lines.append("%s=\"\"\n" % (k))
+                lines.append('%s=""\n' % (k))
                 continue
 
             lines.append("%s=%s\n" % (k, v))

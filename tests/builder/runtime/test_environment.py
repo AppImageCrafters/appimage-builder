@@ -17,18 +17,20 @@ from appimagebuilder.builder.runtime.environment import Environment
 
 class TestEnvironment(TestCase):
     def test_serialize(self):
-        env = Environment({
-            "APPDIR": "$ORIGIN/..",
-            "APPIMAGE_UUID": "123",
-            "EXEC_ARGS": ["-f", "$@"],
-            "LIST": ["1", "2"],
-            "DICT": {
-                "a": "b",
-                "c": "d",
-            },
-            "APPDIR_LIBRARY_PATH": ["/AppDir/usr/lib"],
-            "NONE": None,
-        })
+        env = Environment(
+            {
+                "APPDIR": "$ORIGIN/..",
+                "APPIMAGE_UUID": "123",
+                "EXEC_ARGS": ["-f", "$@"],
+                "LIST": ["1", "2"],
+                "DICT": {
+                    "a": "b",
+                    "c": "d",
+                },
+                "APPDIR_LIBRARY_PATH": ["/AppDir/usr/lib"],
+                "NONE": None,
+            }
+        )
         result = env.serialize()
 
         expected = (
@@ -38,7 +40,7 @@ class TestEnvironment(TestCase):
             "LIST=1:2\n"
             "DICT=a:b;c:d;\n"
             "APPDIR_LIBRARY_PATH=/AppDir/usr/lib\n"
-            "NONE=\"\"\n"
+            'NONE=""\n'
         )
 
         self.assertEqual(expected, result)
