@@ -53,5 +53,6 @@ class TestShell(TestCase):
                 "if [ -z ${var+x} ]; then",
                 "   exit 1; ",
                 "fi",
-            ], env={"var": "value"}
+            ],
+            env={"var": "value"},
         )
