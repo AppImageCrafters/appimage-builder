@@ -4,6 +4,8 @@
 # Example builds
 /examples/*/AppDir
 /examples/*/appimage-builder-cache
+/AppDir
+/appimage-builder-cache
 
 # Build results
 *.AppImage
