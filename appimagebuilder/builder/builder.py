@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 
 from appimagebuilder.common import shell
-from appimagebuilder.app_dir.runtime.generator import RuntimeGenerator
+from appimagebuilder.builder.runtime.generator import RuntimeGenerator
 from . import deploy
 from .app_info.bundle_info import BundleInfo
 from .app_info.desktop_entry_generator import DesktopEntryGenerator

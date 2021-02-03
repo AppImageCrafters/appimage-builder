@@ -12,7 +12,7 @@
 import fnmatch
 import os
 
-from appimagebuilder.app_dir.deploy.apt import listings
+from appimagebuilder.builder.deploy.apt import listings
 from appimagebuilder.commands.dpkg_architecture import DpkgArchitecture
 from appimagebuilder.commands.dpkg_query import DpkgQuery
 

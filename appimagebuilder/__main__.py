@@ -17,7 +17,7 @@ import os
 
 from appimagebuilder.common import shell
 from appimagebuilder import recipe
-from appimagebuilder.app_dir.builder import Builder
+from appimagebuilder.builder.builder import Builder
 from appimagebuilder.appimage import AppImageCreator
 from appimagebuilder.generator.generator import RecipeGenerator
 from appimagebuilder.tester import ExecutionTest

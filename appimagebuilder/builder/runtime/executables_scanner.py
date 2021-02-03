@@ -14,7 +14,7 @@ import os
 
 import appimagebuilder.common.elf
 from appimagebuilder.common.finder import Finder
-from appimagebuilder.app_dir.runtime.executables import (
+from appimagebuilder.builder.runtime.executables import (
     Executable,
     BinaryExecutable,
     InterpretedExecutable,

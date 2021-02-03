@@ -13,7 +13,7 @@
 from pathlib import Path
 from unittest import TestCase
 
-from appimagebuilder.app_dir.runtime.executables import (
+from appimagebuilder.builder.runtime.executables import (
     InterpretedExecutable,
 )
 

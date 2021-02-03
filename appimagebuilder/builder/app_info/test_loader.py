@@ -12,7 +12,7 @@
 
 import unittest
 
-from appimagebuilder.app_dir.app_info.loader import AppInfoLoader
+from appimagebuilder.builder.app_info.loader import AppInfoLoader
 from appimagebuilder.recipe import Recipe, RecipeError
 
 

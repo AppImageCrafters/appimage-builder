@@ -15,16 +15,16 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from appimagebuilder.app_dir.runtime.apprun_binaries_resolver import (
+from appimagebuilder.builder.runtime.apprun_binaries_resolver import (
     AppRunBinariesResolver,
 )
-from appimagebuilder.app_dir.runtime.environment import GlobalEnvironment
-from appimagebuilder.app_dir.runtime.executables import (
+from appimagebuilder.builder.runtime.environment import GlobalEnvironment
+from appimagebuilder.builder.runtime.executables import (
     Executable,
     BinaryExecutable,
     InterpretedExecutable,
 )
-from appimagebuilder.app_dir.runtime.executables_wrapper import ExecutablesWrapper
+from appimagebuilder.builder.runtime.executables_wrapper import ExecutablesWrapper
 
 
 class FakeAppRunBinariesResolver(AppRunBinariesResolver):
