@@ -64,6 +64,10 @@ class Environment:
                 lines.append("%s=%s\n" % (k, "".join(entries)))
                 continue
 
+            if v is None:
+                lines.append("%s=\"\"\n" % (k))
+                continue
+
             lines.append("%s=%s\n" % (k, v))
 
         result = "".join(lines)
