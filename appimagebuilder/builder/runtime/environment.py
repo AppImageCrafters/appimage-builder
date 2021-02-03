@@ -50,7 +50,7 @@ class Environment:
 
     def serialize(self):
         lines = []
-        for k, v in self._env.items():
+        for k, v in self.items():
             if isinstance(v, list):
                 if k == "EXEC_ARGS":
                     lines.append("%s=%s\n" % (k, " ".join(v)))
