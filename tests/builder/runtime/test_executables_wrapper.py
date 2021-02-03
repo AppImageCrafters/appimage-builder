@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 
 import os
+import shutil
 import tempfile
 from pathlib import Path
 from unittest import TestCase
@@ -46,7 +47,7 @@ class TestExecutablesWrapper(TestCase):
         self.data_dir = Path(self.temp_dir.name)
 
         self.bin_path = self.data_dir / "bin"
-        self.bin_path.symlink_to("/bin/bash")
+        shutil.copy("/bin/bash", self.bin_path)
 
         self.script_path = self.data_dir / "script"
         with self.script_path.open("w") as f:
