@@ -88,7 +88,7 @@ class ExecutablesWrapper:
             f.write(result)
 
     def _generate_executable_env(self, executable, wrapped_path):
-        executable_dir = os.path.dirname(executable.base_path)
+        executable_dir = os.path.dirname(executable.path)
         apprun_env = {
             "APPDIR": "$ORIGIN/" + os.path.relpath(self.appdir_path, executable_dir),
             "APPIMAGE_UUID": None,

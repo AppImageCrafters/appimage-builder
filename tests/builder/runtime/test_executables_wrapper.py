@@ -18,7 +18,7 @@ from unittest import TestCase
 from appimagebuilder.builder.runtime.apprun_binaries_resolver import (
     AppRunBinariesResolver,
 )
-from appimagebuilder.builder.runtime.environment import GlobalEnvironment
+from appimagebuilder.builder.runtime.environment import Environment
 from appimagebuilder.builder.runtime.executables import (
     Executable,
     BinaryExecutable,
@@ -57,7 +57,7 @@ class TestExecutablesWrapper(TestCase):
 
     def test_wrap_binary_executable(self):
         resolver = FakeAppRunBinariesResolver()
-        environment = GlobalEnvironment()
+        environment = Environment()
         environment.set("APPDIR_LIBRARY_PATH", [str(self.data_dir)])
         wrapper = ExecutablesWrapper(self.data_dir, resolver, environment)
         executable = BinaryExecutable(self.bin_path, "x86_64")
@@ -76,7 +76,7 @@ class TestExecutablesWrapper(TestCase):
 
     def test_wrap_interpreted_executable(self):
         resolver = FakeAppRunBinariesResolver()
-        environment = GlobalEnvironment()
+        environment = Environment()
         wrapper = ExecutablesWrapper(self.data_dir, resolver, environment)
         executable = InterpretedExecutable(self.script_path, ["/usr/bin/python3"])
         wrapper.wrap(executable)
@@ -89,7 +89,7 @@ class TestExecutablesWrapper(TestCase):
 
     def test_generate_executable_env(self):
         resolver = FakeAppRunBinariesResolver()
-        environment = GlobalEnvironment()
+        environment = Environment()
         environment.set("APPDIR_LIBRARY_PATH", [self.data_dir / "usr/lib"])
         environment.set("APPIMAGE_UUID", "1234")
         executable = Executable(self.bin_path)
@@ -113,7 +113,7 @@ class TestExecutablesWrapper(TestCase):
 class TestExecutablesWrapperEnvSerializer(TestCase):
     def test_serialize_dict_to_dot_env(self):
         wrapper = ExecutablesWrapper(
-            "/AppDir/", FakeAppRunBinariesResolver(), GlobalEnvironment()
+            "/AppDir/", FakeAppRunBinariesResolver(), Environment()
         )
         result = wrapper._serialize_dict_to_dot_env(
             {
