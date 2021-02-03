@@ -78,12 +78,13 @@ class TestExecutablesWrapper(TestCase):
     def test_wrap_interpreted_executable(self):
         resolver = FakeAppRunBinariesResolver()
         environment = Environment()
+        environment.set("APPIMAGE_UUID", "UUID")
         wrapper = ExecutablesWrapper(self.data_dir, resolver, environment)
         executable = InterpretedExecutable(self.script_path, ["/usr/bin/python3"])
         wrapper.wrap(executable)
 
         result = self.script_path.read_text()
-        expected = "#!/usr/bin/env python3\n" "1234567890\n"
+        expected = "#!/tmp/appimage-UUID-env python3\n" "1234567890\n"
         self.assertTrue(os.access(self.bin_path, os.X_OK | os.R_OK))
 
         self.assertEqual(expected, result)
