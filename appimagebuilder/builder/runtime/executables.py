@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import os
 from pathlib import Path
 
 
@@ -35,6 +36,7 @@ class BinaryExecutable(Executable):
     """Binary executable (an elf file)"""
 
     def __init__(self, path, arch):
+        path = os.path.realpath(path)
         super().__init__(path)
         self.arch = arch
 
@@ -46,7 +48,7 @@ class BinaryExecutable(Executable):
         )
 
     def __str__(self) -> str:
-        return super().__str__() + self.arch
+        return "BinaryExecutable(%s)" % self.path.__str__()
 
 
 class InterpretedExecutable(Executable):
@@ -66,4 +68,4 @@ class InterpretedExecutable(Executable):
         )
 
     def __str__(self) -> str:
-        return super().__str__() + ", shebang: " + " ".join(self.shebang)
+        return "InterpretedExecutable(%s)" % self.path
