@@ -77,11 +77,10 @@ class TestExecutablesScanner(TestCase):
 
     def test_scan_file_interpreted_executable_rel_path(self):
         results = self.scanner.scan_file(self.script_rel_shebang_path)
-        expected = [
-            InterpretedExecutable(
-                self.script_rel_shebang_path, ["/usr/bin/env", "python3"]
-            ),
-            BinaryExecutable(str(self.data_dir / "python3"), "x86_64"),
-        ]
+        python_binary = BinaryExecutable("/usr/bin/python3.6", "x86_64")
+        script = InterpretedExecutable(
+            self.script_rel_shebang_path, ["/usr/bin/env", "python3"]
+        )
+        script.interpreter = python_binary
 
-        self.assertEqual(expected, results)
+        self.assertEqual([script, python_binary], results)
