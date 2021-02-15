@@ -9,8 +9,10 @@
 #
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
+import os
+import re
+
 from appimagebuilder.recipe.errors import RecipeError
-from appimagebuilder.recipe.schema import RecipeSchema
 
 
 class Recipe:
@@ -56,4 +58,37 @@ class Recipe:
 
     def get_item(self, path, fallback=None):
         resolver = Recipe.ItemResolver(self._data, path, fallback)
-        return resolver.resolve()
+        result = resolver.resolve()
+        result = self._resolve_variables(result)
+        return result
+
+    def _resolve_variables(self, variable):
+        if isinstance(variable, str):
+            return self._replace_env_variables_in_str(variable)
+
+        if isinstance(variable, list):
+            new_list = []
+            for v in variable:
+                new_list.append(self._resolve_variables(v))
+            return new_list
+
+        if isinstance(variable, dict):
+            new_dict = {}
+            for k, v in variable.items():
+                new_dict[k] = self._resolve_variables(v)
+
+            return new_dict
+
+        return variable
+
+    def _replace_env_variables_in_str(self, variable):
+        new_val = variable
+        for item in re.findall(r"{{\s?\w+\s?}}", variable):
+            var_name = item[2:-2]
+            var_name = var_name.strip()
+            if var_name not in os.environ:
+                raise RuntimeError("Missing environment variable: \'%s\'" % var_name)
+            value = os.environ[var_name]
+            new_val = new_val.replace(item, value, 1)
+
+        return new_val

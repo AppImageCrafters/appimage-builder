@@ -42,7 +42,7 @@ def execute(script, env=None):
         run_env[k] = v
 
     with tempfile.NamedTemporaryFile() as exported_env:
-        run_env['BUILDER_ENV'] = exported_env.name
+        run_env["BUILDER_ENV"] = exported_env.name
 
         _proc = subprocess.Popen(["bash", "-ve"], stdin=subprocess.PIPE, env=run_env)
         _proc.communicate(script.encode())
@@ -52,6 +52,7 @@ def execute(script, env=None):
 
         exported_env.seek(0, 0)
         for line in exported_env.readlines():
+            line = line.decode().strip()
             logging.info("Exporting env: %s" % line)
-            key, val = line.decode().split("=", 1)
+            key, val = line.split("=", 1)
             os.environ[key] = val
