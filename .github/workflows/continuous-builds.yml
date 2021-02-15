@@ -46,8 +46,9 @@ jobs:
           name: appimage-builder
       - name: Pack bash
         run: |
-          chmod +x appimage-builder-0.8.3-x86_64.AppImage
-          ./appimage-builder-0.8.3-x86_64.AppImage --recipe ./examples/bash/AppImageBuilder.yml --skip-test
+          BUILDER_PATH=$(find $PWD -name appimage-builder-*.AppImage)
+          chmod +x $BUILDER_PATH
+          $BUILDER_PATH --recipe ./examples/bash/AppImageBuilder.yml --skip-test
       - name: Test bash
         run: |
           ./bash*.AppImage --appimage-extract-and-run -c "echo Hello World"
