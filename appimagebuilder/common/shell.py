@@ -1,6 +1,8 @@
+import logging
 import os
 import shutil
 import subprocess
+import tempfile
 
 
 def resolve_commands_paths(commands: [str]):
@@ -39,8 +41,17 @@ def execute(script, env=None):
     for k, v in env.items():
         run_env[k] = v
 
-    _proc = subprocess.Popen(["bash", "-ve"], stdin=subprocess.PIPE, env=run_env)
-    _proc.communicate(script.encode())
+    with tempfile.NamedTemporaryFile() as exported_env:
+        run_env['BUILDER_ENV'] = exported_env.name
 
-    if _proc.returncode != 0:
-        raise RuntimeError("Script exited with code: %s" % _proc.returncode)
+        _proc = subprocess.Popen(["bash", "-ve"], stdin=subprocess.PIPE, env=run_env)
+        _proc.communicate(script.encode())
+
+        if _proc.returncode != 0:
+            raise RuntimeError("Script exited with code: %s" % _proc.returncode)
+
+        exported_env.seek(0, 0)
+        for line in exported_env.readlines():
+            logging.info("Exporting env: %s" % line)
+            key, val = line.decode().split("=", 1)
+            os.environ[key] = val

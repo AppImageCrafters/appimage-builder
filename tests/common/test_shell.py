@@ -56,3 +56,23 @@ class TestShell(TestCase):
             ],
             env={"var": "value"},
         )
+
+    def test_builder_env_set(self):
+        shell.execute(
+            [
+                "echo $BUILDER_ENV",
+                "if [ -z ${BUILDER_ENV+x} ]; then",
+                "   exit 1; ",
+                "fi",
+            ]
+        )
+
+    def test_builder_export_variable(self):
+        shell.execute("echo TEST_VAR=1 >> $BUILDER_ENV")
+        shell.execute(
+            [
+                "if [ -z ${TEST_VAR+x} ]; then",
+                "   exit 1; ",
+                "fi",
+            ]
+        )
