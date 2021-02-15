@@ -12,6 +12,10 @@ script:
   - mkdir -p $APPDIR/usr/lib/appimagekit/
   - cp squashfs-root/usr/lib/appimagekit/mksquashfs $APPDIR/usr/lib/appimagekit/
 
+  # find bundle version
+  - PACKAGE_VERSION=$(grep -Po 'version="\K((\d|\.)+)' setup.py)
+  - echo APPIMAGE_BUILDER_VERSION="$PACKAGE_VERSION-$(git rev-parse --short HEAD)" >> $BUILDER_ENV
+
 AppDir:
   path: ./AppDir
 
@@ -19,7 +23,7 @@ AppDir:
     id: org.appimage-crafters.appimage-builder
     name: appimage-builder
     icon: appimage-builder
-    version: !ENV ${APPIMAGE_BUILDER_VERSION}
+    version: '{{APPIMAGE_BUILDER_VERSION}}'
     # Set the python executable as entry point
     exec: usr/bin/python3
     # Set the application main script path as argument. Use '$@' to forward CLI parameters
