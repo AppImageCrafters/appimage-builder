@@ -24,6 +24,17 @@ AppDir:
     exclude:
       - libpcre3
 
+  files:
+    exclude:
+      - usr/share/doc/**/examples/**
+      - usr/include/**
+      - usr/lib/*/gconv/**
+      - usr/share/man/**
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
+
   test:
     debian:
       image: appimagecrafters/tests-env:debian-stable

@@ -101,12 +101,16 @@ class Builder:
                 "packages": deployed_packages,
             }
 
+        file_helper = deploy.FileDeploy(self.app_dir_path)
         files_include = self.recipe.get_item("AppDir/files/include", [])
         if files_include:
-            file_helper = deploy.FileDeploy(self.app_dir_path)
             file_helper.deploy(files_include)
 
         self._make_symlinks_relative()
+
+        files_exclude = self.recipe.get_item("AppDir/files/exclude", [])
+        if files_exclude:
+            file_helper.clean(files_exclude)
 
     def _make_symlinks_relative(self):
         for link in self.finder.find("*", [Finder.is_symlink]):
