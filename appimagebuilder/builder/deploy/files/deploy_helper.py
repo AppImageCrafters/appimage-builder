@@ -131,3 +131,22 @@ class FileDeploy:
                 return self.app_dir.rstrip("/") + "/opt/libc/"
 
         return self.app_dir.rstrip("/") + "/"
+
+    def clean(self, paths: [str]):
+        self.logger.info("Removing excluded files:")
+        expanded_list = set()
+        for path in paths:
+            root_abs_path = os.path.join(self.app_dir, path)
+            expanded_list = expanded_list.union(glob.glob(root_abs_path, recursive=True))
+
+            libc_abs_path = os.path.join(self.app_dir, 'opt/libc', path)
+            expanded_list = expanded_list.union(glob.glob(libc_abs_path, recursive=True))
+
+        for path in expanded_list:
+            if os.path.isfile(path):
+                self.logger.info(path)
+                os.unlink(path)
+
+        for dirName, subdirList, fileList in os.walk(self.app_dir):
+            if not subdirList and not fileList:
+                os.rmdir(dirName)
