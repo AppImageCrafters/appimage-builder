@@ -137,16 +137,18 @@ class FileDeploy:
         expanded_list = set()
         for path in paths:
             root_abs_path = os.path.join(self.app_dir, path)
-            expanded_list = expanded_list.union(glob.glob(root_abs_path, recursive=True))
+            self.unlink_files(root_abs_path)
 
-            libc_abs_path = os.path.join(self.app_dir, 'opt/libc', path)
-            expanded_list = expanded_list.union(glob.glob(libc_abs_path, recursive=True))
-
-        for path in expanded_list:
-            if os.path.isfile(path):
-                self.logger.info(path)
-                os.unlink(path)
+            libc_abs_path = os.path.join(self.app_dir, "opt/libc", path)
+            self.unlink_files(libc_abs_path)
 
         for dirName, subdirList, fileList in os.walk(self.app_dir):
             if not subdirList and not fileList:
                 os.rmdir(dirName)
+
+    def unlink_files(self, glob_expr):
+        self.logger.info(glob_expr)
+        for match in glob.glob(glob_expr, recursive=True):
+            self.logger.debug(match)
+            if os.path.isfile(match):
+                os.unlink(match)
