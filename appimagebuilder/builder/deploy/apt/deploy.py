@@ -80,8 +80,7 @@ class Deploy:
         libc_root = appdir_root / "opt" / "libc"
         appdir_root.mkdir(exist_ok=True, parents=True)
         libc_root.mkdir(exist_ok=True, parents=True)
-        # list libc related packages
-        libc_packages = self.apt_venv.install_simulate(listings.glibc)
+        libc_packages = self.list_lib_related_packages()
 
         for package in packages:
             final_target = appdir_root
@@ -94,3 +93,11 @@ class Deploy:
             self.apt_venv.extract_package(package, final_target)
 
         return packages
+
+    def list_lib_related_packages(self):
+        initial_libc_packages = []
+        for pkg_name in listings.glibc:
+            for arch in self.apt_venv.architectures:
+                initial_libc_packages.append("%s:%s" % (pkg_name, arch))
+        libc_packages = self.apt_venv.install_simulate(initial_libc_packages)
+        return libc_packages

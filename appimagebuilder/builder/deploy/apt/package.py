@@ -14,7 +14,14 @@ import urllib
 
 class Package:
     def __init__(self, name, version, arch):
-        self.name = name
+        # remove arch from the name
+        colon_idx = name.find(":")
+        if colon_idx != -1:
+            self.name = name[:colon_idx]
+            self.arch = name[colon_idx + 1 :]
+        else:
+            self.name = name
+
         self.version = version
         self.arch = arch
 
