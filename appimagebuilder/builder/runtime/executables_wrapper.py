@@ -27,6 +27,8 @@ from appimagebuilder.common import file_utils
 
 
 class ExecutablesWrapper:
+    EXPORTED_FILES_PREFIX = "/tmp/appimage-"
+
     def __init__(
         self,
         appdir_path: str,
@@ -115,7 +117,10 @@ class ExecutablesWrapper:
 
     def _rewrite_shebang_using_env(self, executable):
         logging.info("Replacing SHEBANG on: %s" % executable.path)
-        local_env_path = "/tmp/appimage-" + self.env.get("APPIMAGE_UUID") + "-env"
+        local_env_path = "%s%s-env" % (
+            self.EXPORTED_FILES_PREFIX,
+            self.env.get("APPIMAGE_UUID"),
+        )
         tmp_path = executable.path.__str__() + ".tmp"
         output = open(tmp_path, "wb")
         try:
@@ -136,7 +141,13 @@ class ExecutablesWrapper:
 
     def _write_rel_shebang(self, executable, local_env_path, output):
         output.write(b"#!%s" % local_env_path.encode())
-        args_start = 2 if executable.shebang[0] == "/usr/bin/env" else 1
+        shebang_main = executable.shebang[0]
+        if shebang_main.startswith("/usr/bin/env") or shebang_main.startswith(
+            self.EXPORTED_FILES_PREFIX
+        ):
+            args_start = 2
+        else:
+            args_start = 1
         bin_name = os.path.basename(executable.shebang[args_start - 1])
         output.write(b" ")
         output.write(bin_name.encode())
