@@ -87,7 +87,7 @@ class Recipe:
             var_name = item[2:-2]
             var_name = var_name.strip()
             if var_name not in os.environ:
-                raise RuntimeError("Missing environment variable: \'%s\'" % var_name)
+                raise RuntimeError("Missing environment variable: '%s'" % var_name)
             value = os.environ[var_name]
             new_val = new_val.replace(item, value, 1)
 

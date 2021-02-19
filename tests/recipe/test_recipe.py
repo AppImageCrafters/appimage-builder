@@ -20,10 +20,12 @@ class TestRecipe(TestCase):
     def test_get_dict_item_with_var(self):
         os.environ["TEST_VAR_1"] = "VALUE1"
         os.environ["TEST_VAR_2"] = "VALUE2"
-        recipe = Recipe({
-            "K1": {"K2": "{{TEST_VAR_1}} {{TEST_VAR_2}}"},
-            "K3": ["{{TEST_VAR_1}}", "{{TEST_VAR_2}}"]
-        })
+        recipe = Recipe(
+            {
+                "K1": {"K2": "{{TEST_VAR_1}} {{TEST_VAR_2}}"},
+                "K3": ["{{TEST_VAR_1}}", "{{TEST_VAR_2}}"],
+            }
+        )
         result = recipe.get_item("K1")
         self.assertEqual({"K2": "VALUE1 VALUE2"}, result)
 
@@ -33,9 +35,7 @@ class TestRecipe(TestCase):
     def test_get_list_item_with_var(self):
         os.environ["TEST_VAR_1"] = "VALUE1"
         os.environ["TEST_VAR_2"] = "VALUE2"
-        recipe = Recipe({
-            "K3": ["{{TEST_VAR_1}}", "{{TEST_VAR_2}}"]
-        })
+        recipe = Recipe({"K3": ["{{TEST_VAR_1}}", "{{TEST_VAR_2}}"]})
 
         result = recipe.get_item("K3")
         self.assertEqual(["VALUE1", "VALUE2"], result)
@@ -43,9 +43,7 @@ class TestRecipe(TestCase):
     def test_get_string_item_with_var(self):
         os.environ["TEST_VAR_1"] = "VALUE1"
         os.environ["TEST_VAR_2"] = "VALUE2"
-        recipe = Recipe({
-            "K": "{{TEST_VAR_1}} {{TEST_VAR_2}}"
-        })
+        recipe = Recipe({"K": "{{TEST_VAR_1}} {{TEST_VAR_2}}"})
 
         result = recipe.get_item("K")
         self.assertEqual("VALUE1 VALUE2", result)
@@ -53,16 +51,12 @@ class TestRecipe(TestCase):
     def test_get_string_item_with_var_and_spaces(self):
         os.environ["TEST_VAR_1"] = "VALUE1"
         os.environ["TEST_VAR_2"] = "VALUE2"
-        recipe = Recipe({
-            "K": "{{ TEST_VAR_1}} {{TEST_VAR_2 }}"
-        })
+        recipe = Recipe({"K": "{{ TEST_VAR_1}} {{TEST_VAR_2 }}"})
 
         result = recipe.get_item("K")
         self.assertEqual("VALUE1 VALUE2", result)
 
     def test_get_string_item_with_missing_var(self):
-        recipe = Recipe({
-            "K": "{{TEST_VAR_MISSING_VAR}}"
-        })
+        recipe = Recipe({"K": "{{TEST_VAR_MISSING_VAR}}"})
 
         self.assertRaises(RuntimeError, recipe.get_item, "K")

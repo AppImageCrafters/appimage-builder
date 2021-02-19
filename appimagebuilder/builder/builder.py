@@ -129,7 +129,10 @@ class Builder:
                 sources_list.append(item["sourceline"])
             if "key_url" in item:
                 keys_list.append(item["key_url"])
-        apt_arch = self.recipe.get_item("AppDir/apt/arch")
+        apt_archs = self.recipe.get_item("AppDir/apt/arch")
+        if isinstance(apt_archs, str):
+            apt_archs = [apt_archs]
+
         allow_unauthenticated = self.recipe.get_item(
             "AppDir/apt/allow_unauthenticated", False
         )
@@ -141,7 +144,7 @@ class Builder:
             Path(self.cache_dir) / "apt",
             sources_list,
             keys_list,
-            [apt_arch],
+            apt_archs,
             apt_options,
         )
         return apt_venv
