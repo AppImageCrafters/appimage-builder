@@ -1,4 +1,6 @@
 version: 1
+script:
+  - rm -rf AppDir | true
 
 AppDir:
   path: ./AppDir
@@ -12,20 +14,22 @@ AppDir:
     exec_args: $@
 
   apt:
-    arch: i386
+    arch: [amd64, i386]
     allow_unauthenticated: true
     sources:
-      - sourceline: 'deb [arch=i386] http://archive.ubuntu.com/ubuntu bionic main'
+      - sourceline: 'deb http://archive.ubuntu.com/ubuntu bionic main'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
 
     include:
       - bash
       - coreutils
+      - libc6:i386
     exclude:
       - libpcre3
 
   files:
     exclude:
+      - etc/**
       - usr/share/doc/**/examples/**
       - usr/include/**
       - usr/lib/*/gconv/**
@@ -59,4 +63,4 @@ AppDir:
 
 
 AppImage:
-  arch: i686
+  arch: x86_64
