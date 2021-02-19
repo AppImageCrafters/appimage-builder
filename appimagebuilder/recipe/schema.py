@@ -51,7 +51,7 @@ class RecipeSchema:
 
         self.v1_apt = Schema(
             {
-                "arch": str,
+                "arch": Or(str, [str]),
                 "sources": [{"sourceline": str, Optional("key_url"): str}],
                 "include": [str],
                 Optional("exclude"): [str],
