@@ -84,7 +84,6 @@ class Venv:
             "APT::Install-Recommends": False,
             "APT::Install-Suggests": False,
             "APT::Immediate-Configure": False,
-            "APT::Architecture": architectures[0],
             "APT::Architectures": architectures,
             "Acquire::Languages": "none",
         }
