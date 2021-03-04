@@ -20,7 +20,7 @@
 glibc = ["libc6", "zlib1g", "libstdc++6"]
 
 # packages that apt and dpkg assume as installed
-apt_core = ["dpkg", "debconf", "dpkg", "apt"]
+apt_core = ["dpkg", "debconf", "apt"]
 
 # system service packages are usually safe to exclude
 system_services = [
