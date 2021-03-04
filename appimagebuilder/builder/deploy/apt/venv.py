@@ -270,6 +270,6 @@ class Venv:
 
         # empty lines indicate the end of a package description block
         if pkg_name:
-                packages.append(Package(pkg_name, pkg_version, pkg_arch))
+            packages.append(Package(pkg_name, pkg_version, pkg_arch))
 
         return packages

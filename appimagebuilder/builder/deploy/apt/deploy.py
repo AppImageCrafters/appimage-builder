@@ -55,6 +55,7 @@ class Deploy:
             )
         # set apt core packages as installed, required for it to properly resolve dependencies
         apt_core_packages = self.apt_venv.search_packages(listings.apt_core)
+        apt_core_packages = self._remove_old_packages(apt_core_packages)
         self.apt_venv.set_installed_packages(apt_core_packages)
 
     def _resolve_packages_to_deploy(self, exclude_patterns, package_names):
@@ -80,7 +81,7 @@ class Deploy:
         libc_root = appdir_root / "opt" / "libc"
         appdir_root.mkdir(exist_ok=True, parents=True)
         libc_root.mkdir(exist_ok=True, parents=True)
-        libc_packages = self.list_lib_related_packages()
+        libc_packages = self.list_glibc_related_packages()
 
         for package in packages:
             final_target = appdir_root
@@ -94,10 +95,22 @@ class Deploy:
 
         return packages
 
-    def list_lib_related_packages(self):
+    def list_glibc_related_packages(self):
         initial_libc_packages = []
         for pkg_name in listings.glibc:
             for arch in self.apt_venv.architectures:
                 initial_libc_packages.append("%s:%s" % (pkg_name, arch))
         libc_packages = self.apt_venv.install_simulate(initial_libc_packages)
         return libc_packages
+
+    def _remove_old_packages(self, apt_core_packages):
+        latest_packages = {}
+        for package in apt_core_packages:
+            pkg_tuple = (package.name, package.arch)
+            if pkg_tuple not in latest_packages:
+                latest_packages[pkg_tuple] = package
+            else:
+                if package > latest_packages[pkg_tuple]:
+                    latest_packages[pkg_tuple] = package
+
+        return latest_packages.values()

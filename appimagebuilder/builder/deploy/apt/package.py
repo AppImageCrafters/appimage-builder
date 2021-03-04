@@ -11,6 +11,8 @@
 #   all copies or substantial portions of the Software.
 import urllib
 
+from packaging import version
+
 
 class Package:
     def __init__(self, name, version, arch):
@@ -53,6 +55,10 @@ class Package:
         if self.version:
             output = "%s=%s" % (output, self.version)
         return output
+
+    def __gt__(self, other):
+        if isinstance(other, Package):
+            return version.parse(self.version) > version.parse(other.version)
 
     def __hash__(self):
         return self.__str__().__hash__()
