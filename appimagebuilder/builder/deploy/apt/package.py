@@ -10,6 +10,7 @@
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
 import urllib
+from pathlib import Path
 
 from packaging import version
 
@@ -36,6 +37,17 @@ class Package:
 
     def get_apt_install_string(self):
         return "%s:%s=%s" % (self.name, self.arch, self.version)
+
+    @staticmethod
+    def from_file_path(path):
+        path = Path(path)
+        name_parts = path.stem.split("_")
+
+        return Package(
+            urllib.parse.unquote(name_parts[0]),
+            urllib.parse.unquote(name_parts[1]),
+            urllib.parse.unquote(name_parts[2]),
+        )
 
     def __eq__(self, other: object) -> bool:
         """Overrides the default implementation"""

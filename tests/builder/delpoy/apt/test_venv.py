@@ -42,13 +42,6 @@ class TestVenv(TestCase):
     def test_search_packages(self):
         self.assertTrue(self.apt_venv.search_packages(["dpkg", "debconf"]))
 
-    def test_install_download_only(self):
-        packages = self.apt_venv.search_packages(["libc6"])
-        self.apt_venv.install_download_only(packages)
-
-        expected_path = "%s/libc6*.deb" % self.apt_venv._apt_archives_path
-        self.assertTrue(glob.glob(expected_path))
-
     def test_set_installed_packages(self):
         packages = self.apt_venv.search_packages(["dpkg", "debconf"])
         # dpkg and debconf need to be set as installed or the configuration step of apt-get install will fail
@@ -64,12 +57,12 @@ class TestVenv(TestCase):
                 "Package: debconf\n" "Status: install ok installed\n", file_contents
             )
 
-    def test_install_simulate(self):
+    def test_resolve_packages(self):
         packages = self.apt_venv.search_packages(["dpkg", "debconf"])
         # dpkg and debconf need to be set as installed or the configuration step of apt-get install will fail
         self.apt_venv.set_installed_packages(packages)
 
-        packages = self.apt_venv.install_simulate(["libc6"])
+        packages = self.apt_venv.resolve_packages(["libc6"])
         self.assertTrue(packages)
 
     def test_resolve_archive_paths(self):

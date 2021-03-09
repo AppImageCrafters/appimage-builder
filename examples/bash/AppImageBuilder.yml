@@ -22,7 +22,7 @@ AppDir:
 
     include:
       - bash
-      - coreutils
+      - libc6
       - libc6:i386
     exclude:
       - libpcre3
