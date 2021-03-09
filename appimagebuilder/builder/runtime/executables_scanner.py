@@ -47,7 +47,7 @@ class ExecutablesScanner:
                     )
                     break
             else:
-                if appimagebuilder.common.elf.has_main_symbol(path):
+                if appimagebuilder.common.elf.has_start_symbol(path):
                     arch = appimagebuilder.common.elf.get_arch(path)
                     executable = BinaryExecutable(path, arch)
                     binary_found = True

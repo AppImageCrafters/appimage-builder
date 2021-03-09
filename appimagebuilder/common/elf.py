@@ -40,12 +40,12 @@ def has_soname(path):
     return has_soname_tag
 
 
-def has_main_symbol(path):
+def has_start_symbol(path):
     """
     Determine if an elf is executable
 
-    The `__libc_start_main` symbol should be present in every runnable elf file.
-    https://refspecs.linuxbase.org/LSB_3.1.1/LSB-Core-generic/LSB-Core-generic/baselib---libc-start-main-.html
+    The `_start` symbol must be present in every runnable elf file.
+    http://www.dbp-consulting.com/tutorials/debugging/linuxProgramStartup.html
     """
     has_main_method = False
     _proc = subprocess.run(
@@ -56,7 +56,7 @@ def has_main_symbol(path):
     )
     if _proc.returncode == 0:
         output = _proc.stdout.decode("utf-8")
-        has_main_method = "__libc_start_main" in output
+        has_main_method = "_start" in output
     return has_main_method
 
 

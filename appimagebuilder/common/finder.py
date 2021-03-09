@@ -63,7 +63,7 @@ class Finder:
     @staticmethod
     def is_dynamically_linked_executable(path: pathlib.Path):
         try:
-            return appimagebuilder.common.elf.has_main_symbol(path)
+            return appimagebuilder.common.elf.has_start_symbol(path)
         except:
             return False
 
