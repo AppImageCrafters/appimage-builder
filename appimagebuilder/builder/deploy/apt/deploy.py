@@ -25,7 +25,7 @@ class Deploy:
         self.logger = logging.getLogger("AptPackageDeploy")
 
     def deploy(
-        self, package_names: [str], appdir_root: str, exclude_patterns=None
+            self, include_patterns: [str], appdir_root: str, exclude_patterns=None
     ) -> [str]:
         """Deploy the packages and their dependencies to appdir_root.
 
@@ -33,16 +33,8 @@ class Deploy:
         Packages from the system services and graphics listings will be added by default to the exclude list.
         Packages from the glibc listing will be deployed using <target>/opt/libc as prefix
         """
-        if exclude_patterns is None:
-            exclude_patterns = []
-
         self._prepare_apt_venv()
-
-        deploy_list = self._resolve_packages_to_deploy(exclude_patterns, package_names)
-
-        # use apt-get install --download-only to avoid packages being configured by apt-get
-        self.apt_venv.install_download_only(deploy_list)
-
+        deploy_list = self._resolve_packages_to_deploy(include_patterns, exclude_patterns)
         extracted_packages = self._extract_packages(appdir_root, deploy_list)
         return [str(package) for package in extracted_packages]
 
@@ -58,20 +50,21 @@ class Deploy:
         apt_core_packages = self._remove_old_packages(apt_core_packages)
         self.apt_venv.set_installed_packages(apt_core_packages)
 
-    def _resolve_packages_to_deploy(self, exclude_patterns, package_names):
+    def _resolve_packages_to_deploy(self, include_patterns, exclude_patterns):
+        if exclude_patterns is None:
+            exclude_patterns = []
+
         # extend user defined exclude listing with the default exclude listing
         exclude_patterns.extend(listings.default_exclude_list)
         excluded_packages = set(self.apt_venv.search_packages(exclude_patterns))
         # don't exclude explicitly required packages
-        required_packages = set(self.apt_venv.search_packages(package_names))
+        required_packages = set(self.apt_venv.search_packages(include_patterns))
         excluded_packages = excluded_packages.difference(required_packages)
+        self.apt_venv.set_installed_packages(excluded_packages)
         # lists packages to be installed including dependencies
-        full_install_list = set(self.apt_venv.install_simulate(package_names))
-        refined_exclude_list = excluded_packages.intersection(full_install_list)
-        refined_install_list = full_install_list.difference(refined_exclude_list)
-        # set the exclude packages as installed to avoid their retrieval by the "apt-get install" method
-        self.apt_venv.set_installed_packages(refined_exclude_list)
-        return refined_install_list
+        deploy_list = set(self.apt_venv.resolve_packages(include_patterns))
+
+        return deploy_list
 
     def _extract_packages(self, appdir_root, packages):
         # manually extract downloaded packages to be able to create the opt/libc partition
@@ -100,7 +93,7 @@ class Deploy:
         for pkg_name in listings.glibc:
             for arch in self.apt_venv.architectures:
                 initial_libc_packages.append("%s:%s" % (pkg_name, arch))
-        libc_packages = self.apt_venv.install_simulate(initial_libc_packages)
+        libc_packages = self.apt_venv.resolve_packages(initial_libc_packages)
         return libc_packages
 
     def _remove_old_packages(self, apt_core_packages):

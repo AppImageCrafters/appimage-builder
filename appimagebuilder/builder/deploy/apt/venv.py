@@ -15,7 +15,6 @@ import fnmatch
 import hashlib
 import logging
 import os
-import re
 import subprocess
 from pathlib import Path
 from urllib import request
@@ -179,43 +178,28 @@ class Venv:
         shell.assert_successful_result(proc)
         return proc
 
-    def install_download_only(self, packages: [Package]):
-        packages_str = " ".join([str(pkg) for pkg in packages])
-
-        command = "{apt-get} install -y --download-only --no-install-recommends {packages}".format(
-            **self._deps, packages=packages_str
-        )
-        self.logger.info(command)
-
-        output = subprocess.run(command, shell=True, env=self._get_environment())
-        shell.assert_successful_result(output)
-
-    def install_simulate(self, packages: [Package]) -> [Package]:
+    def resolve_packages(self, packages: [Package]) -> [Package]:
         packages_str = [str(package) for package in packages]
-        output = self._run_apt_get_simulate_install(packages_str)
+        output = self._run_apt_get_install_download_only(packages_str)
 
-        stdout_str = output.stdout.decode("utf-8")
-        # find installed packages name, version and arch
-        results = re.findall(
-            "Inst\s+(?P<pkg_name>\S+)\s+\((?P<pkg_version>\S+)\s.*\[(?P<pkg_arch>.*)\]\)",
-            stdout_str,
-        )
-        results = sorted(results)
-        installed_packages = [
-            Package(result[0], result[1], result[2]) for result in results
-        ]
+        stdout_str = output.stderr.decode("utf-8")
+        installed_packages = []
+        for line in stdout_str.splitlines():
+            if line.startswith("Dequeuing") and line.endswith(".deb"):
+                file_path = Path(line.split(" ")[1])
+                installed_packages.append(Package.from_file_path(file_path))
+
         return installed_packages
 
-    def _run_apt_get_simulate_install(self, packages: [str]):
+    def _run_apt_get_install_download_only(self, packages: [str]):
         command = (
-            "{apt-get} install -y --no-install-recommends --simulate {packages}".format(
-                **self._deps, packages=" ".join(packages)
-            )
+            "{apt-get} install -y --no-install-recommends --download-only -o Debug::pkgAcquire=1 "
+            "{packages}".format(**self._deps, packages=" ".join(packages))
         )
         self.logger.debug(command)
         command = subprocess.run(
             command,
-            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             shell=True,
             env=self._get_environment(),
         )
@@ -231,6 +215,7 @@ class Venv:
 
     def extract_package(self, package, target):
         path = self._apt_archives_path / package.get_expected_file_name()
+
         command = "{dpkg-deb} -x {archive} {directory}".format(
             **self._deps, archive=path, directory=target
         )
