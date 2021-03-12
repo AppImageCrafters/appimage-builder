@@ -38,6 +38,9 @@ class AptRecipeGenerator:
 
     @staticmethod
     def resolve_includes(runtime_libs):
+        if not runtime_libs:
+            return []
+
         packages = AptRecipeGenerator._map_files_to_packages(runtime_libs)
         packages = AptRecipeGenerator._remove_excluded_packages(packages)
         packages = AptRecipeGenerator._remove_nested_dependencies(packages)
