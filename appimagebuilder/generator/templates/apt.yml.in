@@ -24,6 +24,8 @@ AppDir:
       !Var apt_excludes
 
   files:
+    include:
+      !Var files_includes
     exclude:
       !Var files_excludes
 

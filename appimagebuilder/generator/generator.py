@@ -61,19 +61,30 @@ class RecipeGenerator:
             self.app_dir, self.app_info_exec, self.app_info_exec_args
         )
         runtime_analyser.run_app_analysis()
+        # group binaries and libraries together to resolve which packages provide then
+        required_files = runtime_analyser.runtime_bins
+        required_files.extend(runtime_analyser.runtime_libs)
 
         if shutil.which("apt-get"):
             self.logger.info("Guessing APT configuration")
             self.apt_arch = AptRecipeGenerator.get_arch()
             self.apt_sources = AptRecipeGenerator.get_sources()
-            self.apt_includes = AptRecipeGenerator.resolve_includes(
-                runtime_analyser.runtime_libs
-            )
-            self.apt_excludes = AptRecipeGenerator.resolve_excludes()
-        else:
-            self.logger.warning("apt-get not found")
-            self.logger.info("Generating direct file include list")
-            self._generate_files_include_list(runtime_analyser)
+
+            self.logger.info("Resolving dependencies packages")
+            required_packages, missing_required_files = AptRecipeGenerator.map_files_to_packages(required_files)
+
+            required_packages = AptRecipeGenerator.remove_excluded_packages(required_packages)
+            required_packages = AptRecipeGenerator.remove_nested_dependencies(required_packages)
+
+            self.apt_includes = required_packages
+            self.apt_excludes = []
+
+            # remove files included in packages from the require list
+            required_files = missing_required_files
+
+        # data files are better included granularly
+        required_files.extend(runtime_analyser.runtime_data)
+        self.files_include = required_files
 
         self.files_exclude = [
             "usr/share/man",
@@ -90,16 +101,6 @@ class RecipeGenerator:
                 runtime_analyser.runtime_libs
             )
         }
-
-    def _generate_files_include_list(self, runtime_analyser):
-        self.files_include = set()
-        self.files_include = self.files_include.union(runtime_analyser.runtime_bins)
-        self.files_include = self.files_include.union(runtime_analyser.runtime_libs)
-        self.files_include = self.files_include.union(runtime_analyser.runtime_data)
-        self.files_include = sorted(self.files_include)
-        self.files_include = [
-            file for file in self.files_include if not file.startswith(self.app_dir)
-        ]
 
     def setup_questions(self):
         # AppDir -> app_info
@@ -218,7 +219,7 @@ class RecipeGenerator:
                 desktop_entries.append(file_name)
 
         for root, dir, files in os.walk(
-            os.path.join(self.app_dir, "usr", "share", "applications")
+                os.path.join(self.app_dir, "usr", "share", "applications")
         ):
             for file_name in files:
                 if file_name.lower().endswith("desktop"):
@@ -261,9 +262,9 @@ class RecipeGenerator:
         for lib in runtime_libs:
             dirname = os.path.dirname(lib)
             if (
-                not dirname.endswith("/dri")
-                and "qt5/qml" not in dirname
-                and "qt5/plugins" not in lib
+                    not dirname.endswith("/dri")
+                    and "qt5/qml" not in dirname
+                    and "qt5/plugins" not in lib
             ):
                 lib_dirs.add(dirname)
 

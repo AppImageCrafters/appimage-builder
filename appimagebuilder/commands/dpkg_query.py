@@ -27,15 +27,18 @@ class DpkgQuery(Command):
         command.extend(files)
         self._run(command)
 
-        if not self.stdout and self.return_code != 0:
-            raise DpkgQueryError("Package lockup failed")
-
         packages = set()
         for line in self.stdout:
             split = line.find(":")
             packages.add(line[:split])
 
-        return packages
+        missing = []
+        for line in self.stderr:
+            if "no path found" in line:
+                parts = line.split(" ")
+                missing.append(parts[-1])
+
+        return packages, missing
 
     def depends(self, packages):
         command = [self.runnable, "-W", "-f=${binary:Package}: ${Depends}\\n"]

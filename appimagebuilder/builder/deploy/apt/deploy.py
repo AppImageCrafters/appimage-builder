@@ -25,7 +25,7 @@ class Deploy:
         self.logger = logging.getLogger("AptPackageDeploy")
 
     def deploy(
-            self, include_patterns: [str], appdir_root: str, exclude_patterns=None
+        self, include_patterns: [str], appdir_root: str, exclude_patterns=None
     ) -> [str]:
         """Deploy the packages and their dependencies to appdir_root.
 
@@ -34,7 +34,9 @@ class Deploy:
         Packages from the glibc listing will be deployed using <target>/opt/libc as prefix
         """
         self._prepare_apt_venv()
-        deploy_list = self._resolve_packages_to_deploy(include_patterns, exclude_patterns)
+        deploy_list = self._resolve_packages_to_deploy(
+            include_patterns, exclude_patterns
+        )
         extracted_packages = self._extract_packages(appdir_root, deploy_list)
         return [str(package) for package in extracted_packages]
 

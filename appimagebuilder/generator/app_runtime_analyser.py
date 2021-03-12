@@ -26,8 +26,8 @@ DEPENDS_ON = ["strace", "patchelf"]
 
 class AppRuntimeAnalyser:
     def __init__(self, app_dir, bin, args):
-        self.abs_app_dir = os.path.abspath(app_dir)
-        self.bin = os.path.join(self.abs_app_dir, bin)
+        self.appdir = os.path.abspath(app_dir)
+        self.bin = os.path.join(self.appdir, bin)
         self.args = args
         self.runtime_libs = set()
         self.runtime_bins = set()
@@ -63,16 +63,18 @@ class AppRuntimeAnalyser:
             path
             for path in self.runtime_data
             if os.path.exists(path)
-               and not os.path.isdir(path)
-               and not self._is_excluded_data_path(path)
+            and not os.path.isdir(path)
+            and not self._is_excluded_data_path(path)
+            and path not in self.runtime_bins
+            and path not in self.runtime_libs
         ]
 
         interpreter_paths = self._resolve_bin_interpreters()
         self.runtime_bins.extend(interpreter_paths)
 
-        self.runtime_bins = sorted(self.runtime_bins)
-        self.runtime_libs = sorted(self.runtime_libs)
-        self.runtime_data = sorted(self.runtime_data)
+        self.runtime_bins = sorted(path for path in self.runtime_bins if not path.startswith(self.appdir))
+        self.runtime_libs = sorted(path for path in self.runtime_libs if not path.startswith(self.appdir))
+        self.runtime_data = sorted(path for path in self.runtime_data if not path.startswith(self.appdir))
 
         if not self.runtime_libs:
             logging.warning(
@@ -81,7 +83,7 @@ class AppRuntimeAnalyser:
             )
 
     def _resolve_appdir_library_paths(self):
-        finder = Finder(self.abs_app_dir)
+        finder = Finder(self.appdir)
         lib_paths = finder.find("*", [Finder.is_elf_shared_lib])
         library_paths = set([os.path.dirname(path) for path in lib_paths])
         return library_paths
