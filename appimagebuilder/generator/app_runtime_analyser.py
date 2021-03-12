@@ -28,7 +28,7 @@ class AppRuntimeAnalyser:
         self.bin = os.path.join(self.appdir, bin)
         self.args = args
         self.runtime_libs = set()
-        self.runtime_bins = set()
+        self.runtime_execs = set()
         self.runtime_data = set()
         self.logger = logging.getLogger("AppRuntimeAnalyser")
         self._deps = shell.resolve_commands_paths(DEPENDS_ON)
@@ -38,7 +38,7 @@ class AppRuntimeAnalyser:
         library_paths = self._resolve_appdir_library_paths()
         library_paths = ":".join(library_paths)
 
-        command = "{strace} -f -e trace=openat -E LD_LIBRARY_PATH={library_paths} {bin} {args}"
+        command = "{strace} -ff -e trace=openat -E LD_LIBRARY_PATH={library_paths} {bin} {args}"
         command = command.format(
             bin=self.bin, args=self.args, **self._deps, library_paths=library_paths
         )
@@ -61,22 +61,26 @@ class AppRuntimeAnalyser:
             and not self._is_excluded_data_path(path)
         ]
 
-        self.runtime_bins = [path for path in runtime_files if os.access(path, os.X_OK)]
+        self.runtime_execs = [
+            path for path in runtime_files if os.access(path, os.X_OK)
+        ]
         self.runtime_libs = [path for path in runtime_files if elf.has_soname(path)]
         self.runtime_data = [
             path
             for path in runtime_files
-            if path not in self.runtime_bins and path not in self.runtime_libs
+            if path not in self.runtime_execs and path not in self.runtime_libs
         ]
 
         interpreter_paths = self._resolve_bin_interpreters()
-        self.runtime_bins.extend(interpreter_paths)
+        self.runtime_execs.extend(interpreter_paths)
 
         if not self.runtime_libs:
             logging.warning(
                 "No dependencies were found, "
                 "please make sure that all the required libraries are reachable."
             )
+
+        return runtime_files
 
     def _resolve_appdir_library_paths(self):
         finder = Finder(self.appdir)
@@ -88,7 +92,7 @@ class AppRuntimeAnalyser:
         patch_elf = PatchElf()
         patch_elf.log_stderr = False
         interpreter_paths = set()
-        for bin in self.runtime_bins:
+        for bin in self.runtime_execs:
             try:
                 interpreter = patch_elf.get_interpreter(bin)
                 if not interpreter.startswith("/tmp"):

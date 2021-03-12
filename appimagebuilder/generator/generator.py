@@ -60,37 +60,26 @@ class RecipeGenerator:
         runtime_analyser = AppRuntimeAnalyser(
             self.app_dir, self.app_info_exec, self.app_info_exec_args
         )
-        runtime_analyser.run_app_analysis()
-        # group binaries and libraries together to resolve which packages provide then
-        required_files = runtime_analyser.runtime_bins
-        required_files.extend(runtime_analyser.runtime_libs)
+        required_files = runtime_analyser.run_app_analysis()
 
+        # try use apt-get to resolve the dependencies
         if shutil.which("apt-get"):
             self.logger.info("Guessing APT configuration")
             self.apt_arch = AptRecipeGenerator.get_arch()
             self.apt_sources = AptRecipeGenerator.get_sources()
 
             self.logger.info("Resolving dependencies packages")
-            (
-                required_packages,
-                missing_required_files,
-            ) = AptRecipeGenerator.map_files_to_packages(required_files)
+            (packages, missing_files) = AptRecipeGenerator.search_packages(required_files)
 
-            required_packages = AptRecipeGenerator.remove_excluded_packages(
-                required_packages
-            )
-            required_packages = AptRecipeGenerator.remove_nested_dependencies(
-                required_packages
-            )
+            packages = AptRecipeGenerator.filter_children_packages(packages)
+            packages = AptRecipeGenerator.filter_excluded_packages(packages)
 
-            self.apt_includes = required_packages
+            self.apt_includes = packages
             self.apt_excludes = []
 
             # remove files included in packages from the require list
-            required_files = missing_required_files
+            required_files = missing_files
 
-        # data files are better included granularly
-        required_files.extend(runtime_analyser.runtime_data)
         self.files_include = required_files
 
         self.files_exclude = [
