@@ -16,6 +16,8 @@ import re
 import shutil
 import subprocess
 
+from appimagebuilder.common.finder import Finder
+
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
 from appimagebuilder.common import shell
 
@@ -35,8 +37,13 @@ class AppRuntimeAnalyser:
 
     def run_app_analysis(self):
         self.runtime_libs.clear()
-        command = "{strace} -f -e trace=openat -E LD_DEBUG=libs {bin} {args}"
-        command = command.format(bin=self.bin, args=self.args, **self._deps)
+        library_paths = self._resolve_appdir_library_paths()
+        library_paths = ":".join(library_paths)
+
+        command = "{strace} -f -e trace=openat -E LD_DEBUG=libs -E LD_LIBRARY_PATH={library_paths} {bin} {args}"
+        command = command.format(
+            bin=self.bin, args=self.args, **self._deps, library_paths=library_paths
+        )
 
         self.logger.info(command)
         output = subprocess.run(command, stderr=subprocess.PIPE, shell=True)
@@ -56,8 +63,8 @@ class AppRuntimeAnalyser:
             path
             for path in self.runtime_data
             if os.path.exists(path)
-            and not os.path.isdir(path)
-            and not self._is_excluded_data_path(path)
+               and not os.path.isdir(path)
+               and not self._is_excluded_data_path(path)
         ]
 
         interpreter_paths = self._resolve_bin_interpreters()
@@ -72,6 +79,12 @@ class AppRuntimeAnalyser:
                 "No dependencies were found, "
                 "please make sure that all the required libraries are reachable."
             )
+
+    def _resolve_appdir_library_paths(self):
+        finder = Finder(self.abs_app_dir)
+        lib_paths = finder.find("*", [Finder.is_elf_shared_lib])
+        library_paths = set([os.path.dirname(path) for path in lib_paths])
+        return library_paths
 
     def _resolve_bin_interpreters(self):
         patch_elf = PatchElf()
