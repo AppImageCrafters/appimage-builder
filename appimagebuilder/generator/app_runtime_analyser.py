@@ -13,13 +13,11 @@ import fnmatch
 import logging
 import os
 import re
-import shutil
 import subprocess
 
-from appimagebuilder.common.finder import Finder
-
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
-from appimagebuilder.common import shell
+from appimagebuilder.common import shell, elf
+from appimagebuilder.common.finder import Finder
 
 DEPENDS_ON = ["strace", "patchelf"]
 
@@ -40,7 +38,7 @@ class AppRuntimeAnalyser:
         library_paths = self._resolve_appdir_library_paths()
         library_paths = ":".join(library_paths)
 
-        command = "{strace} -f -e trace=openat -E LD_DEBUG=libs -E LD_LIBRARY_PATH={library_paths} {bin} {args}"
+        command = "{strace} -f -e trace=openat -E LD_LIBRARY_PATH={library_paths} {bin} {args}"
         command = command.format(
             bin=self.bin, args=self.args, **self._deps, library_paths=library_paths
         )
@@ -49,32 +47,30 @@ class AppRuntimeAnalyser:
         output = subprocess.run(command, stderr=subprocess.PIPE, shell=True)
 
         stderr_data = output.stderr.decode("utf-8")
-        self.runtime_libs = re.findall("init: (?P<lib>/.*)", stderr_data, re.IGNORECASE)
-        self.runtime_bins = re.findall(
-            "program: (?P<bin>.*)", stderr_data, re.IGNORECASE
-        )
-        self.runtime_bins = [shutil.which(path) for path in self.runtime_bins]
-        self.runtime_data = re.findall(
+        runtime_files = re.findall(
             r'openat\(.*?"(?P<path>.*?)".*', stderr_data, re.IGNORECASE
         )
 
         # remove dirs, non existent files and excluded paths
-        self.runtime_data = [
+        runtime_files = [
             path
-            for path in self.runtime_data
+            for path in runtime_files
             if os.path.exists(path)
             and not os.path.isdir(path)
+            and not path.startswith(self.appdir)
             and not self._is_excluded_data_path(path)
-            and path not in self.runtime_bins
-            and path not in self.runtime_libs
+        ]
+
+        self.runtime_bins = [path for path in runtime_files if os.access(path, os.X_OK)]
+        self.runtime_libs = [path for path in runtime_files if elf.has_soname(path)]
+        self.runtime_data = [
+            path
+            for path in runtime_files
+            if path not in self.runtime_bins and path not in self.runtime_libs
         ]
 
         interpreter_paths = self._resolve_bin_interpreters()
         self.runtime_bins.extend(interpreter_paths)
-
-        self.runtime_bins = sorted(path for path in self.runtime_bins if not path.startswith(self.appdir))
-        self.runtime_libs = sorted(path for path in self.runtime_libs if not path.startswith(self.appdir))
-        self.runtime_data = sorted(path for path in self.runtime_data if not path.startswith(self.appdir))
 
         if not self.runtime_libs:
             logging.warning(
@@ -111,6 +107,7 @@ class AppRuntimeAnalyser:
             "/etc/ld.so.cache",
             "/etc/nsswitch.conf",
             "/etc/passwd",
+            "/usr/lib/locale/*",
             "*/.local/*",
             "*/.fonts/*",
             "*/.cache/*",

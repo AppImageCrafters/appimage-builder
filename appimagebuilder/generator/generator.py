@@ -71,10 +71,17 @@ class RecipeGenerator:
             self.apt_sources = AptRecipeGenerator.get_sources()
 
             self.logger.info("Resolving dependencies packages")
-            required_packages, missing_required_files = AptRecipeGenerator.map_files_to_packages(required_files)
+            (
+                required_packages,
+                missing_required_files,
+            ) = AptRecipeGenerator.map_files_to_packages(required_files)
 
-            required_packages = AptRecipeGenerator.remove_excluded_packages(required_packages)
-            required_packages = AptRecipeGenerator.remove_nested_dependencies(required_packages)
+            required_packages = AptRecipeGenerator.remove_excluded_packages(
+                required_packages
+            )
+            required_packages = AptRecipeGenerator.remove_nested_dependencies(
+                required_packages
+            )
 
             self.apt_includes = required_packages
             self.apt_excludes = []
@@ -219,7 +226,7 @@ class RecipeGenerator:
                 desktop_entries.append(file_name)
 
         for root, dir, files in os.walk(
-                os.path.join(self.app_dir, "usr", "share", "applications")
+            os.path.join(self.app_dir, "usr", "share", "applications")
         ):
             for file_name in files:
                 if file_name.lower().endswith("desktop"):
@@ -262,9 +269,9 @@ class RecipeGenerator:
         for lib in runtime_libs:
             dirname = os.path.dirname(lib)
             if (
-                    not dirname.endswith("/dri")
-                    and "qt5/qml" not in dirname
-                    and "qt5/plugins" not in lib
+                not dirname.endswith("/dri")
+                and "qt5/qml" not in dirname
+                and "qt5/plugins" not in lib
             ):
                 lib_dirs.add(dirname)
 
