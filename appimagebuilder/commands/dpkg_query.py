@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import os
 
 from .command import Command
 
@@ -39,6 +40,18 @@ class DpkgQuery(Command):
                 missing.append(parts[-1])
 
         return packages, missing
+
+    def list_files(self, packages):
+        command = [self.runnable, "-L"]
+        command.extend(packages)
+        self._run(command)
+
+        files = set()
+        for line in self.stdout:
+            if os.path.isabs(line) and os.path.isfile(line):
+                files.add(line)
+
+        return files
 
     def depends(self, packages):
         command = [self.runnable, "-W", "-f=${binary:Package}: ${Depends}\\n"]
