@@ -37,21 +37,13 @@ class AptRecipeGenerator:
         return sources
 
     @staticmethod
-    def resolve_includes(runtime_libs):
-        packages = AptRecipeGenerator._map_files_to_packages(runtime_libs)
-        packages = AptRecipeGenerator._remove_excluded_packages(packages)
-        packages = AptRecipeGenerator._remove_nested_dependencies(packages)
-
-        return list(sorted(packages))
-
-    @staticmethod
-    def _map_files_to_packages(runtime_libs):
+    def search_packages(paths):
         dpkg_query = DpkgQuery()
-        packages = dpkg_query.search(runtime_libs)
-        return packages
+        packages, missing = dpkg_query.search(paths)
+        return packages, missing
 
     @staticmethod
-    def _remove_nested_dependencies(packages):
+    def filter_children_packages(packages):
         dpkg_query = DpkgQuery()
         dependencies = dpkg_query.depends(packages)
         for pkd_name, pkg_depends in dependencies.items():
@@ -62,7 +54,7 @@ class AptRecipeGenerator:
         return packages
 
     @staticmethod
-    def _remove_excluded_packages(packages):
+    def filter_excluded_packages(packages):
         exclusion_list = []
         exclusion_list.extend(listings.system_services)
         exclusion_list.extend(listings.graphics)
@@ -86,7 +78,3 @@ class AptRecipeGenerator:
                     sources.append({"sourceline": line.strip()})
 
         return sources
-
-    @staticmethod
-    def resolve_excludes():
-        return []

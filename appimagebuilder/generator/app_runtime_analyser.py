@@ -13,59 +13,66 @@ import fnmatch
 import logging
 import os
 import re
-import shutil
 import subprocess
 
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
-from appimagebuilder.common import shell
+from appimagebuilder.common import shell, elf
+from appimagebuilder.common.finder import Finder
 
 DEPENDS_ON = ["strace", "patchelf"]
 
 
 class AppRuntimeAnalyser:
     def __init__(self, app_dir, bin, args):
-        self.abs_app_dir = os.path.abspath(app_dir)
-        self.bin = os.path.join(self.abs_app_dir, bin)
+        self.appdir = os.path.abspath(app_dir)
+        self.bin = os.path.join(self.appdir, bin)
         self.args = args
         self.runtime_libs = set()
-        self.runtime_bins = set()
+        self.runtime_execs = set()
         self.runtime_data = set()
         self.logger = logging.getLogger("AppRuntimeAnalyser")
         self._deps = shell.resolve_commands_paths(DEPENDS_ON)
 
     def run_app_analysis(self):
         self.runtime_libs.clear()
-        command = "{strace} -f -e trace=openat -E LD_DEBUG=libs {bin} {args}"
-        command = command.format(bin=self.bin, args=self.args, **self._deps)
+        library_paths = self._resolve_appdir_library_paths()
+        library_paths = ":".join(library_paths)
+
+        command = "{strace} -ff -e trace=openat -E LD_LIBRARY_PATH={library_paths} {bin} {args}"
+        command = command.format(
+            bin=self.bin, args=self.args, **self._deps, library_paths=library_paths
+        )
 
         self.logger.info(command)
         output = subprocess.run(command, stderr=subprocess.PIPE, shell=True)
 
         stderr_data = output.stderr.decode("utf-8")
-        self.runtime_libs = re.findall("init: (?P<lib>/.*)", stderr_data, re.IGNORECASE)
-        self.runtime_bins = re.findall(
-            "program: (?P<bin>.*)", stderr_data, re.IGNORECASE
-        )
-        self.runtime_bins = [shutil.which(path) for path in self.runtime_bins]
-        self.runtime_data = re.findall(
+        runtime_files = re.findall(
             r'openat\(.*?"(?P<path>.*?)".*', stderr_data, re.IGNORECASE
         )
 
         # remove dirs, non existent files and excluded paths
-        self.runtime_data = [
+        runtime_files = [
             path
-            for path in self.runtime_data
+            for path in runtime_files
             if os.path.exists(path)
             and not os.path.isdir(path)
+            and not path.startswith(self.appdir)
             and not self._is_excluded_data_path(path)
         ]
 
-        interpreter_paths = self._resolve_bin_interpreters()
-        self.runtime_bins.extend(interpreter_paths)
+        self.runtime_execs = [
+            path for path in runtime_files if os.access(path, os.X_OK)
+        ]
+        self.runtime_libs = [path for path in runtime_files if elf.has_soname(path)]
+        self.runtime_data = [
+            path
+            for path in runtime_files
+            if path not in self.runtime_execs and path not in self.runtime_libs
+        ]
 
-        self.runtime_bins = sorted(self.runtime_bins)
-        self.runtime_libs = sorted(self.runtime_libs)
-        self.runtime_data = sorted(self.runtime_data)
+        interpreter_paths = self._resolve_bin_interpreters()
+        self.runtime_execs.extend(interpreter_paths)
 
         if not self.runtime_libs:
             logging.warning(
@@ -73,11 +80,19 @@ class AppRuntimeAnalyser:
                 "please make sure that all the required libraries are reachable."
             )
 
+        return runtime_files
+
+    def _resolve_appdir_library_paths(self):
+        finder = Finder(self.appdir)
+        lib_paths = finder.find("*", [Finder.is_elf_shared_lib])
+        library_paths = set([os.path.dirname(path) for path in lib_paths])
+        return library_paths
+
     def _resolve_bin_interpreters(self):
         patch_elf = PatchElf()
         patch_elf.log_stderr = False
         interpreter_paths = set()
-        for bin in self.runtime_bins:
+        for bin in self.runtime_execs:
             try:
                 interpreter = patch_elf.get_interpreter(bin)
                 if not interpreter.startswith("/tmp"):
@@ -96,6 +111,7 @@ class AppRuntimeAnalyser:
             "/etc/ld.so.cache",
             "/etc/nsswitch.conf",
             "/etc/passwd",
+            "/usr/lib/locale/*",
             "*/.local/*",
             "*/.fonts/*",
             "*/.cache/*",

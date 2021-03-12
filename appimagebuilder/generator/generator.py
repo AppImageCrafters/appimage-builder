@@ -60,20 +60,27 @@ class RecipeGenerator:
         runtime_analyser = AppRuntimeAnalyser(
             self.app_dir, self.app_info_exec, self.app_info_exec_args
         )
-        runtime_analyser.run_app_analysis()
+        required_files = runtime_analyser.run_app_analysis()
 
+        # try use apt-get to resolve the dependencies
         if shutil.which("apt-get"):
             self.logger.info("Guessing APT configuration")
             self.apt_arch = AptRecipeGenerator.get_arch()
             self.apt_sources = AptRecipeGenerator.get_sources()
-            self.apt_includes = AptRecipeGenerator.resolve_includes(
-                runtime_analyser.runtime_libs
-            )
-            self.apt_excludes = AptRecipeGenerator.resolve_excludes()
-        else:
-            self.logger.warning("apt-get not found")
-            self.logger.info("Generating direct file include list")
-            self._generate_files_include_list(runtime_analyser)
+
+            self.logger.info("Resolving dependencies packages")
+            (packages, missing_files) = AptRecipeGenerator.search_packages(required_files)
+
+            packages = AptRecipeGenerator.filter_children_packages(packages)
+            packages = AptRecipeGenerator.filter_excluded_packages(packages)
+
+            self.apt_includes = packages
+            self.apt_excludes = []
+
+            # remove files included in packages from the require list
+            required_files = missing_files
+
+        self.files_include = required_files
 
         self.files_exclude = [
             "usr/share/man",
@@ -90,16 +97,6 @@ class RecipeGenerator:
                 runtime_analyser.runtime_libs
             )
         }
-
-    def _generate_files_include_list(self, runtime_analyser):
-        self.files_include = set()
-        self.files_include = self.files_include.union(runtime_analyser.runtime_bins)
-        self.files_include = self.files_include.union(runtime_analyser.runtime_libs)
-        self.files_include = self.files_include.union(runtime_analyser.runtime_data)
-        self.files_include = sorted(self.files_include)
-        self.files_include = [
-            file for file in self.files_include if not file.startswith(self.app_dir)
-        ]
 
     def setup_questions(self):
         # AppDir -> app_info
