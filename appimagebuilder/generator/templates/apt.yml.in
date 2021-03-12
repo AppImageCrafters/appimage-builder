@@ -12,10 +12,6 @@ AppDir:
     exec: !Var app_info_exec
     exec_args: !Var app_info_exec_args
 
-  runtime:
-    env:
-      !Var runtime_env
-
   apt:
     arch: !Var apt_arch
     # UNSAFE! Please set the sources list key_url property
