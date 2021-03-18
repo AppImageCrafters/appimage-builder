@@ -17,8 +17,17 @@ from .base_helper import BaseHelper
 from ..environment import Environment
 
 
-class GLibSchemas(BaseHelper):
+class GLib(BaseHelper):
     def configure(self, env: Environment):
+        self._configure_schemas(env)
+        self._configure_girepository(env)
+
+    def _configure_girepository(self, env):
+        path = self.finder.find_one("*/girepository-1.0", [Finder.is_dir])
+        if path:
+            env.set("GI_TYPELIB_PATH", path)
+
+    def _configure_schemas(self, env):
         path = self.finder.find_one("*/glib-2.0/schemas", [Finder.is_dir])
         if path:
             bin_path = shutil.which("glib-compile-schemas")

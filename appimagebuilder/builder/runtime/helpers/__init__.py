@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 
 from .gdk_pixbuf import GdkPixbuf
-from .glib_schemas import GLibSchemas
+from .glib import GLib
 from .gstreamer import GStreamer
 from .gtk import Gtk
 from .interpreter import Interpreter
