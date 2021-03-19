@@ -34,7 +34,6 @@ class GdkPixbuf(BaseHelper):
 
             global_env.set("GDK_PIXBUF_MODULEDIR", loaders_dir_path)
             global_env.set("GDK_PIXBUF_MODULE_FILE", loaders_cache_path)
-            global_env.append("APPDIR_LIBRARY_PATH", loaders_dir_path)
 
     def _generate_loaders_cache(self, loaders_cache_path):
         bin_path = self._find_gdk_pixbuf_query_loaders_bin()
@@ -47,9 +46,9 @@ class GdkPixbuf(BaseHelper):
 
         proc = subprocess.run(bin_path, stdout=subprocess.PIPE)
 
-        query_output = proc.stdout.decode("utf-8")
+        query_output = proc.stdout.decode()
         # remove absolute paths from module names
-        query_output = re.sub("(/.*/)", "", query_output)
+        query_output = re.sub(r"\"(/.*/)(.+)\"\n", r'"\2"\n', query_output)
 
         with open(loaders_cache_path, "w") as f:
             f.write(query_output)
