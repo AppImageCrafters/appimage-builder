@@ -118,7 +118,7 @@ class RuntimeGenerator:
 
             global_env.set(k, v)
 
-        global_env.set("PATH_MAPPINGS", self.path_mappings)
+        global_env.set("APPRUN_PATH_MAPPINGS", self.path_mappings)
 
         return global_env
 

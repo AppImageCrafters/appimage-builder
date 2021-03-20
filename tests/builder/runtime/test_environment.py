@@ -28,6 +28,7 @@ class TestEnvironment(TestCase):
                     "c": "d",
                 },
                 "APPDIR_LIBRARY_PATH": ["/AppDir/usr/lib"],
+                "APPRUN_PATH_MAPPINGS": ["a:b", "c:d"],
                 "NONE": None,
             }
         )
@@ -40,6 +41,7 @@ class TestEnvironment(TestCase):
             "LIST=1:2\n"
             "DICT=a:b;c:d;\n"
             "APPDIR_LIBRARY_PATH=/AppDir/usr/lib\n"
+            "APPRUN_PATH_MAPPINGS=a:b;c:d;\n"
             'NONE=""\n'
         )
 
