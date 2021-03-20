@@ -80,7 +80,6 @@ jobs:
   publish-appimage:
     runs-on: ubuntu-20.04
     needs: test
-    if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v2
       - name: Download AppImage from build job
