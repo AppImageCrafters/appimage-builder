@@ -74,6 +74,7 @@ class Interpreter(BaseHelper):
                 "*/qt5/plugins*",
                 "*/perl*",
                 "*/perl-base*",
+                "*/gio/modules",
             ],
         )
 

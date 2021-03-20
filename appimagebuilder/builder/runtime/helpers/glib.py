@@ -19,8 +19,14 @@ from ..environment import Environment
 
 class GLib(BaseHelper):
     def configure(self, env: Environment):
+        self._configure_gio_modules(env)
         self._configure_schemas(env)
         self._configure_girepository(env)
+
+    def _configure_gio_modules(self, env):
+        gio_modules_dir = self.finder.find_one("**/gio/modules")
+        if gio_modules_dir:
+            env.set("GIO_MODULE_DIR", str(gio_modules_dir))
 
     def _configure_girepository(self, env):
         path = self.finder.find_one("*/girepository-1.0", [Finder.is_dir])
