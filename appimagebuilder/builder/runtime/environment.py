@@ -55,6 +55,9 @@ class Environment:
                 if k == "EXEC_ARGS":
                     lines.append("%s=%s\n" % (k, " ".join(v)))
                     continue
+                elif k == "APPRUN_PATH_MAPPINGS":
+                        lines.append("%s=%s;\n" % (k, ";".join(v)))
+                        continue
                 else:
                     lines.append("%s=%s\n" % (k, ":".join(v)))
                     continue

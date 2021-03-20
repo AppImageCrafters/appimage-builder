@@ -20,6 +20,7 @@ AppDir:
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
 
     include:
+      - coreutils
       - gimp
       - libgtk2.0-0
       - librsvg2-common
@@ -87,8 +88,10 @@ AppDir:
       - usr/include
   runtime:
     path_mappings:
-      - /etc/gimp/2.0/:$APPDIR/etc/gimp/2.0/
-      - /usr/share/gimp/2.0/:$APPDIR/usr/share/gimp/2.0/
+      - /etc/gimp:$APPDIR/etc/gimp
+      - /usr/lib/gimp:$APPDIR/usr/lib/gimp
+      - /usr/share/gimp:$APPDIR/usr/share/gimp
+
     env:
       APPDIR_LIBRARY_PATH: '$APPDIR/usr/lib/x86_64-linux-gnu:$APPDIR/lib/x86_64-linux-gnu:$APPDIR/usr/lib:$APPDIR/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders'
       GTK_EXE_PREFIX: $APPDIR/usr
