@@ -69,7 +69,9 @@ class RecipeGenerator:
             self.apt_sources = AptRecipeGenerator.get_sources()
 
             self.logger.info("Resolving dependencies packages")
-            (packages, missing_files) = AptRecipeGenerator.search_packages(required_files)
+            (packages, missing_files) = AptRecipeGenerator.search_packages(
+                required_files
+            )
 
             packages = AptRecipeGenerator.filter_children_packages(packages)
             packages = AptRecipeGenerator.filter_excluded_packages(packages)

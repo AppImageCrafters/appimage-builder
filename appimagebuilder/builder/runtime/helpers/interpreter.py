@@ -75,6 +75,8 @@ class Interpreter(BaseHelper):
                 "*/perl*",
                 "*/perl-base*",
                 "*/gio/modules",
+                "*/gtk-*/modules",
+                "*/libgtk-*-0",
             ],
         )
 

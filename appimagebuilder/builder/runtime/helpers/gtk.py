@@ -9,8 +9,6 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import glob
-import logging
 import os
 import re
 import subprocess
@@ -26,56 +24,15 @@ class Gtk(BaseHelper):
     """
 
     def configure(self, env: Environment):
-        try:
-            exe_prefix = (
-                subprocess.check_output(
-                    ["pkg-config", "--variable=exec_prefix", "gtk+-3.0"]
-                )
-                .decode()
-                .strip()
-            )
-            libdir = (
-                subprocess.check_output(["pkg-config", "--variable=libdir", "gtk+-3.0"])
-                .decode()
-                .strip()
-            )
-            binary_version = (
-                subprocess.check_output(
-                    ["pkg-config", "--variable=gtk_binary_version", "gtk+-3.0"]
-                )
-                .decode()
-                .strip()
-            )
+        prefix = self.app_dir / "usr"
+        env.set("GTK_EXE_PREFIX", str(prefix))
+        env.set("GTK_DATA_PREFIX", str(prefix))
 
-            path = libdir + "/gtk-3.0"
-            env.set("GTK_EXE_PREFIX", str(self.app_dir) + exe_prefix)
-            env.set("GTK_PATH", str(self.app_dir) + path)
-            env.set("GTK_DATA_PREFIX", str(self.app_dir))
+        gtk_path = [
+            str(path)
+            for path in self.finder.find("lib/**/gtk-?.0", [self.finder.is_dir])
+        ]
+        env.set("GTK_PATH", gtk_path)
 
-            immodules_dir = os.path.join(path, binary_version, "immodules")
-            env.set("GTK_IM_MODULE_DIR", str(self.app_dir) + immodules_dir)
-
-            gtk_query_immodules_tool_path = glob.glob(
-                "/usr/**/gtk-query-immodules-3.0", recursive=True
-            )
-            if not gtk_query_immodules_tool_path:
-                logging.error("Missing tool: gtk-query-immodules-3.0")
-                return
-
-            query_immodules_output = subprocess.check_output(
-                [gtk_query_immodules_tool_path[0]]
-            ).decode()
-
-            # remove absolute paths from module names
-            query_immodules_output = re.sub(
-                r"\"(/.*/)(\S+)\"\s*\n", r'"\2"\n', query_immodules_output
-            )
-
-            immodules_cache_file = os.path.join(path, binary_version, "immodules.cache")
-            with open(str(self.app_dir) + immodules_cache_file, "w") as f:
-                f.write(query_immodules_output)
-
-            env.set("GTK_IM_MODULE_FILE", str(self.app_dir) + immodules_cache_file)
-
-        except subprocess.CalledProcessError as err:
-            logging.error(err)
+        for path in self.finder.find("usr/share/icons/*", [self.finder.is_dir]):
+            subprocess.run(["gtk-update-icon-cache", str(path)])
