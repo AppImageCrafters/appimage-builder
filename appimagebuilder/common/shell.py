@@ -22,7 +22,7 @@ def resolve_commands_paths(commands: [str]):
 
 def assert_successful_result(proc):
     if proc.returncode:
-        logging.error("\"%s\" execution failed" % proc.args)
+        logging.error('"%s" execution failed' % proc.args)
         if proc.stderr:
             for line in proc.stderr.decode().splitlines():
                 logging.error(line)
