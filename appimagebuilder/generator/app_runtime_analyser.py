@@ -44,9 +44,17 @@ class AppRuntimeAnalyser:
         )
 
         self.logger.info(command)
-        output = subprocess.run(command, stderr=subprocess.PIPE, shell=True)
+        _proc = subprocess.run(command, stderr=subprocess.PIPE, shell=True)
 
-        stderr_data = output.stderr.decode("utf-8")
+        if _proc.returncode != 0:
+            self.logger.warning(
+                "%s exited with code %d" % (_proc.args, _proc.returncode)
+            )
+            self.logger.warning(
+                "This may produce an incomplete/wrong recipe. Please make sure that the application runs properly."
+            )
+
+        stderr_data = _proc.stderr.decode("utf-8")
         runtime_files = re.findall(
             r'openat\(.*?"(?P<path>.*?)".*', stderr_data, re.IGNORECASE
         )
