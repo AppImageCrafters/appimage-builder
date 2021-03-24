@@ -130,6 +130,10 @@ class AppRuntimeAnalyser:
             "/usr/share/fonts/*",
             "/var/cache/fontconfig",
             "/var/cache/fontconfig/*",
+            "**/gdk-pixbuf-2.0/**/loaders.cache",
+            "**/gio/**/giomodule.cache",
+            "**/glib-2.0/**/gschemas.compiled",
+            "/run/**",
         ]
 
         for expr in excluded_data_paths:
