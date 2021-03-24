@@ -38,6 +38,9 @@ class AptRecipeGenerator:
 
     @staticmethod
     def search_packages(paths):
+        # Resolve symlinks before calling dpkg-query -S increments the number of files found
+        paths = [os.path.realpath(path) for path in paths]
+
         dpkg_query = DpkgQuery()
         packages, missing = dpkg_query.search(paths)
         return packages, missing
