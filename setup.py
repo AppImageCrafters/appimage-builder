@@ -25,7 +25,6 @@ setuptools.setup(
     description="Recipe based AppImage creation meta-tool",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    scripts=["appimage-modules", "appimage-inspector"],
     entry_points={
         "console_scripts": [
             "appimage-builder = appimagebuilder.__main__:__main__",
