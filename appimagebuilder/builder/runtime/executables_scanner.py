@@ -96,7 +96,7 @@ class ExecutablesScanner:
         with open(path, "rb") as f:
             buf = f.read(128)
 
-            if buf[0] != ord("#") or buf[1] != ord("!"):
+            if len(buf) < 2 or buf[0] != ord("#") or buf[1] != ord("!"):
                 return None
 
             end_idx = buf.find(b"\n")
