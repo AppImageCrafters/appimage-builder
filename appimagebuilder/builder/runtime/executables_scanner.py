@@ -12,14 +12,13 @@
 import logging
 import os
 
-import appimagebuilder.common.elf
-from appimagebuilder.common.finder import Finder
 from appimagebuilder.builder.runtime.executables import (
     Executable,
     BinaryExecutable,
     InterpretedExecutable,
 )
-from appimagebuilder.common import file_utils
+from appimagebuilder.common import elf
+from appimagebuilder.common.finder import Finder
 
 
 class MissingInterpreterError(RuntimeError):
@@ -47,8 +46,8 @@ class ExecutablesScanner:
                     )
                     break
             else:
-                if appimagebuilder.common.elf.has_start_symbol(path):
-                    arch = appimagebuilder.common.elf.get_arch(path)
+                if elf.has_magic_bytes(path) and elf.has_start_symbol(path):
+                    arch = elf.get_arch(path)
                     executable = BinaryExecutable(path, arch)
                     binary_found = True
                 else:
