@@ -9,6 +9,7 @@
 #
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
+import re
 import urllib
 from pathlib import Path
 
@@ -32,7 +33,12 @@ class Package:
         file_name = "%s_%s_%s.deb" % (self.name, self.version, self.arch)
 
         # apt encodes invalid chars to comply the deb file naming convention
-        file_name = urllib.parse.quote(file_name, safe="+*~").lower()
+        file_name = urllib.parse.quote(file_name, safe="+*~")
+
+        # Only converts the case of letters from percent-encoding, not the entire string.
+        file_name = re.sub(r'%[0-9A-Z]{2}',
+                           lambda matchobj: matchobj.group(0).lower(),
+                           file_name)
         return file_name
 
     def get_apt_install_string(self):
