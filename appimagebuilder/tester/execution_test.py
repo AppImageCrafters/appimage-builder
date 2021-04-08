@@ -61,7 +61,9 @@ class ExecutionTest:
         try:
             self.logger.info("before command")
             self._run_command(
-                "useradd -mu %s %s" % (os.getuid(), os.getenv("USER")), container
+                "useradd -mu %s %s" % (os.getuid(), os.getenv("USER")),
+                container,
+                accepted_exit_codes=[0, 9],
             )
             self._run_command(
                 "mkdir -p /home/%s/.config" % os.getenv("USER"),
