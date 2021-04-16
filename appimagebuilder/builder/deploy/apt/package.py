@@ -36,9 +36,9 @@ class Package:
         file_name = urllib.parse.quote(file_name, safe="+*~")
 
         # Only converts the case of letters from percent-encoding, not the entire string.
-        file_name = re.sub(r'%[0-9A-Z]{2}',
-                           lambda matchobj: matchobj.group(0).lower(),
-                           file_name)
+        file_name = re.sub(
+            r"%[0-9A-Z]{2}", lambda matchobj: matchobj.group(0).lower(), file_name
+        )
         return file_name
 
     def get_apt_install_string(self):

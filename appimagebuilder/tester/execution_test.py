@@ -61,7 +61,9 @@ class ExecutionTest:
         try:
             self.logger.info("before command")
             self._run_command(
-                "useradd -mu %s %s" % (os.getuid(), os.getenv("USER")), container
+                "useradd -mu %s %s" % (os.getuid(), os.getenv("USER")),
+                container,
+                accepted_exit_codes=[0, 9],
             )
             self._run_command(
                 "mkdir -p /home/%s/.config" % os.getenv("USER"),
@@ -74,12 +76,15 @@ class ExecutionTest:
         finally:
             container.kill()
 
-    def _run_command(self, command, container, user="root"):
+    def _run_command(self, command, container, user="root", accepted_exit_codes=None):
+        if accepted_exit_codes is None:
+            accepted_exit_codes = [0]
+
         print("$ %s" % command)
         exit_code, output = container.exec_run(command, user=user, tty=True)
         print(output.decode())
 
-        if exit_code != 0:
+        if exit_code not in accepted_exit_codes:
             print("$ %s FAILED, exit code: %s" % (command, exit_code))
             raise TestFailed()
 
