@@ -14,15 +14,25 @@ AppDir:
     exec_args: $@
 
   pacman:
-    Architecture: x86_64
+    Architecture: aarch64
     repositories:
       core:
-        - https://mirror.rackspace.com/archlinux/$repo/os/$arch
-        - https://mirror.leaseweb.net/archlinux/$repo/os/$arch
+        - http://mirror.archlinuxarm.org/$arch/$repo
     include:
       - bash
     exclude:
       - perl
+    options:
+      SigLevel: "Optional TrustAll"
+
+  files:
+    exclude:
+      - usr/lib/x86_64-linux-gnu/gconv
+      - usr/share/man
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
 
   test:
     debian:

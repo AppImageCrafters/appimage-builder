@@ -175,5 +175,8 @@ class Builder:
         desktop_entry_editor.generate(self.app_info)
 
     def _setup_pacman_venv(self):
-        apt_venv = deploy.PacmanVenv(Path(self.cache_dir) / "pacman")
+        arch = self.recipe.get_item("AppDir/pacman/Architecture", "auto")
+        repositories = self.recipe.get_item("AppDir/pacman/repositories", None)
+        user_options = self.recipe.get_item("AppDir/pacman/options", None)
+        apt_venv = deploy.PacmanVenv(Path(self.cache_dir) / "pacman", repositories, arch, user_options)
         return apt_venv

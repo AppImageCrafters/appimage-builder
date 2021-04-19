@@ -32,11 +32,11 @@ class Venv:
     default_options = []
 
     def __init__(
-        self,
-        root,
-        repositories: {str: [str]} = None,
-        architecture: str = "auto",
-        user_options: {} = None,
+            self,
+            root,
+            repositories: {str: [str]} = None,
+            architecture: str = "auto",
+            user_options: {} = None,
     ):
         self._root = Path(root)
         self._config_path = self._root / "pacman.conf"
@@ -155,6 +155,10 @@ class Venv:
             if not self._repositories:
                 f.write("Include = /etc/pacman.conf\n")
 
+            for k, v in self._options.items():
+                self._logger.warning("Setting pacman option: %s = %s" % (k, v))
+                f.write("%s = %s\n" % (k, v))
+
             if self._repositories:
                 for repository in self._repositories:
                     f.write("[%s]\n" % repository)
@@ -193,13 +197,13 @@ class Venv:
             proc_gpgagent.terminate()
 
     def _run_command(
-        self,
-        command,
-        stdout=sys.stdout,
-        assert_success=True,
-        wait_for_completion=True,
-        wait_for_completion_timeout=None,
-        **kwargs,
+            self,
+            command,
+            stdout=sys.stdout,
+            assert_success=True,
+            wait_for_completion=True,
+            wait_for_completion_timeout=None,
+            **kwargs,
     ):
         """
         Runs a command as a subprocess
