@@ -214,7 +214,7 @@ class RecipeGenerator:
         desktop_entries = []
         for file_name in os.listdir(os.path.abspath(self.app_dir)):
             if file_name.lower().endswith("desktop"):
-                desktop_entries.append(file_name)
+                desktop_entries.append(os.path.join(self.app_dir, file_name))
 
         for root, dir, files in os.walk(
             os.path.join(self.app_dir, "usr", "share", "applications")
