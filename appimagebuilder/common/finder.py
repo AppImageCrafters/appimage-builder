@@ -51,7 +51,7 @@ class Finder:
     def is_elf(path: pathlib.Path):
         try:
             return appimagebuilder.common.elf.has_magic_bytes(path)
-        except:
+        except RuntimeError:
             return False
 
     @staticmethod
@@ -60,7 +60,7 @@ class Finder:
             return appimagebuilder.common.elf.has_soname(path)
         except shell.CommandNotFoundError:
             raise
-        except:
+        except RuntimeError:
             return False
 
     @staticmethod
