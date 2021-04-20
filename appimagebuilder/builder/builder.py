@@ -177,6 +177,11 @@ class Builder:
     def _setup_pacman_venv(self):
         arch = self.recipe.get_item("AppDir/pacman/Architecture", "auto")
         repositories = self.recipe.get_item("AppDir/pacman/repositories", None)
-        user_options = self.recipe.get_item("AppDir/pacman/options", None)
-        apt_venv = deploy.PacmanVenv(Path(self.cache_dir) / "pacman", repositories, arch, user_options)
+        user_options = self.recipe.get_item("AppDir/pacman/options", {})
+        apt_venv = deploy.PacmanVenv(
+            root=Path(self.cache_dir) / "pacman",
+            repositories=repositories,
+            architecture=arch,
+            user_options=user_options,
+        )
         return apt_venv

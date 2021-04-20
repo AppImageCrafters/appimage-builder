@@ -62,6 +62,7 @@ class RecipeSchema:
             {
                 Optional("Architecture"): Or("auto", "x86_64", "i686", "aarch64"),
                 Optional("repositories"): {str: [str]},
+                Optional("keyrings"): [str],
                 Optional("options"): {str: str},
                 "include": [str],
                 Optional("exclude"): [str],

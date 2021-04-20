@@ -32,11 +32,11 @@ class Venv:
     default_options = []
 
     def __init__(
-            self,
-            root,
-            repositories: {str: [str]} = None,
-            architecture: str = "auto",
-            user_options: {} = None,
+        self,
+        root,
+        repositories: {str: [str]} = None,
+        architecture: str = "auto",
+        user_options: {} = None,
     ):
         self._root = Path(root)
         self._config_path = self._root / "pacman.conf"
@@ -44,8 +44,9 @@ class Venv:
         self._cache_dir = self._root / "pkg"
         self._gpg_dir = self._root / "gnupg"
         self._repositories = repositories
+        self._keyrings = []
         self._architecture = architecture
-        self._options = user_options
+        self._options = user_options if user_options else {}
         self._deps = dict()
 
         self._db_path.mkdir(parents=True, exist_ok=True)
@@ -55,7 +56,13 @@ class Venv:
         self._logger = logging.getLogger("pacman")
         self._deps = shell.resolve_commands_paths(DEPENDS_ON)
         self._generate_config()
+        self._start_gpg_agent()
         self._configure_keyring()
+
+    def __del__(self):
+        # cleanup
+        if self._gpg_agent_proc:
+            self._gpg_agent_proc.terminate()
 
     def update(self):
         self._run_command("{fakeroot} {pacman} --config {config} -Sy --quiet")
@@ -156,7 +163,7 @@ class Venv:
                 f.write("Include = /etc/pacman.conf\n")
 
             for k, v in self._options.items():
-                self._logger.warning("Setting pacman option: %s = %s" % (k, v))
+                self._logger.warning("Setting option: %s = %s" % (k, v))
                 f.write("%s = %s\n" % (k, v))
 
             if self._repositories:
@@ -166,44 +173,40 @@ class Venv:
                         f.write("Server = %s\n" % server)
 
     def _configure_keyring(self):
-        keyrings = list(
-            map(
-                lambda x: x.split(".gpg")[0],
-                [
-                    os.path.basename(x)
-                    for x in glob.glob("/usr/share/pacman/keyrings/*.gpg")
-                ],
-            )
+        if not self._keyrings:
+            self._logger.info("Using system keyrings")
+            default_keyrigns_path = Path("/usr/share/pacman/keyrings/")
+            for x in default_keyrigns_path.glob("*.gpg"):
+                self._keyrings.append(x.stem)
+
+        # Ensure the keyring is properly initialized
+        self._run_command("{fakeroot} {pacman-key} --config {config} --init")
+
+        self._run_command(
+            "{fakeroot} {pacman-key} --config {config} --populate {keyrings}",
+            keyrings=" ".join(self._keyrings),
         )
 
-        with TemporaryDirectory(prefix="appimage-builder.") as temp_dir:
-            temp_gnupg_dir = str(Path(temp_dir) / "gnupg")
-
-            os.symlink(
-                self._gpg_dir.absolute(), temp_gnupg_dir, target_is_directory=True
-            )
-
-            proc_gpgagent = self._run_command(
-                "{fakeroot} {gpg-agent} --homedir" f" {temp_gnupg_dir}" " --daemon",
+    def _start_gpg_agent(self):
+        # start gpg-agent if not running
+        #   (pkill -0 doesn't kill the process just checks if it's running)
+        if subprocess.call(["pkill", "-0", "gpg-agent"]) != 0:
+            self._gpg_agent_proc = self._run_command(
+                "{gpg-agent} --homedir" f" {self._gpg_dir}" " --server",
                 assert_success=False,
                 wait_for_completion=False,
             )
-            self._run_command("{fakeroot} {pacman-key} --config {config} --init")
-            self._run_command(
-                "{fakeroot} {pacman-key} --config {config} --populate "
-                f"{' '.join(keyrings)}"
-            )
-
-            proc_gpgagent.terminate()
+        else:
+            self._gpg_agent_proc = None
 
     def _run_command(
-            self,
-            command,
-            stdout=sys.stdout,
-            assert_success=True,
-            wait_for_completion=True,
-            wait_for_completion_timeout=None,
-            **kwargs,
+        self,
+        command,
+        stdout=sys.stdout,
+        assert_success=True,
+        wait_for_completion=True,
+        wait_for_completion_timeout=None,
+        **kwargs,
     ):
         """
         Runs a command as a subprocess
