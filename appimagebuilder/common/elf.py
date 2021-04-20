@@ -11,6 +11,8 @@
 #  all copies or substantial portions of the Software.
 import subprocess
 
+from appimagebuilder.common import shell
+
 
 def has_magic_bytes(path):
     with open(path, "rb") as f:
@@ -27,13 +29,16 @@ def has_soname(path):
 
     Elf must have a SONAME tag in the dynamic section
     """
-    has_soname_tag = False
+    command_args = shell.resolve_commands_paths(["readelf"])
+    command_args["path"] = path
     _proc = subprocess.run(
-        "readelf -d %s" % path,
+        "{readelf} -d {path}".format(**command_args),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         shell=True,
     )
+
+    has_soname_tag = False
     if _proc.returncode == 0:
         output = _proc.stdout.decode("utf-8")
         has_soname_tag = "SONAME" in output
@@ -47,13 +52,16 @@ def has_start_symbol(path):
     The `_start` symbol must be present in every runnable elf file.
     http://www.dbp-consulting.com/tutorials/debugging/linuxProgramStartup.html
     """
-    has_main_method = False
+    command_args = shell.resolve_commands_paths(["readelf"])
+    command_args["path"] = path
     _proc = subprocess.run(
-        "readelf -s %s" % path,
+        "{readelf} -s {path}".format(**command_args),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         shell=True,
     )
+
+    has_main_method = False
     if _proc.returncode == 0:
         output = _proc.stdout.decode("utf-8")
         has_main_method = "_start" in output
