@@ -5,6 +5,10 @@ import subprocess
 import tempfile
 
 
+class CommandNotFoundError(RuntimeError):
+    pass
+
+
 def resolve_commands_paths(commands: [str]):
     """
     Iterates through all items in <commands> searching for their paths
@@ -16,7 +20,9 @@ def resolve_commands_paths(commands: [str]):
         if paths[dep] is None:
             # shutil.which returns None if the executable
             # was not found on PATH
-            raise RuntimeError("Could not find '{exe}' on $PATH.".format(exe=dep))
+            raise CommandNotFoundError(
+                "Could not find '{exe}' on $PATH.".format(exe=dep)
+            )
     return paths
 
 

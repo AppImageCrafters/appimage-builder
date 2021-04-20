@@ -15,6 +15,7 @@ import os
 import pathlib
 
 import appimagebuilder.common.elf
+from appimagebuilder.common import shell
 
 
 class Finder:
@@ -57,6 +58,8 @@ class Finder:
     def is_elf_shared_lib(path: pathlib.Path):
         try:
             return appimagebuilder.common.elf.has_soname(path)
+        except shell.CommandNotFoundError:
+            raise
         except:
             return False
 
@@ -64,14 +67,16 @@ class Finder:
     def is_dynamically_linked_executable(path: pathlib.Path):
         try:
             return appimagebuilder.common.elf.has_start_symbol(path)
+        except shell.CommandNotFoundError:
+            raise
         except:
             return False
 
     def find_dirs_containing(
-        self,
-        pattern="*",
-        file_checks: [] = None,
-        excluded_patterns=None,
+            self,
+            pattern="*",
+            file_checks: [] = None,
+            excluded_patterns=None,
     ):
         if file_checks is None:
             file_checks = []
