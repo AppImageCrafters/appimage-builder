@@ -14,6 +14,7 @@ import fnmatch
 import glob
 import logging
 import os
+import pathlib
 import shutil
 
 
@@ -134,21 +135,11 @@ class FileDeploy:
 
     def clean(self, paths: [str]):
         self.logger.info("Removing excluded files:")
-        expanded_list = set()
-        for path in paths:
-            root_abs_path = os.path.join(self.app_dir, path)
-            self.unlink_files(root_abs_path)
+        base_paths = [pathlib.Path(self.app_dir), pathlib.Path(self.app_dir) / "opt" / "libc"]
 
-            libc_abs_path = os.path.join(self.app_dir, "opt/libc", path)
-            self.unlink_files(libc_abs_path)
-
-        for dirName, subdirList, fileList in os.walk(self.app_dir):
-            if not subdirList and not fileList:
-                os.rmdir(dirName)
-
-    def unlink_files(self, glob_expr):
-        self.logger.info(glob_expr)
-        for match in glob.glob(glob_expr, recursive=True):
-            self.logger.debug(match)
-            if os.path.isfile(match):
-                os.unlink(match)
+        for base_path in base_paths:
+            for pattern in paths:
+                for match in base_path.glob(pattern):
+                    self.logger.info(match)
+                    # it's ok to ignore files that were already deleted
+                    shutil.rmtree(match, ignore_errors=True)
