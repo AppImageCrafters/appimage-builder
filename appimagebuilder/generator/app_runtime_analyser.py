@@ -59,6 +59,7 @@ class AppRuntimeAnalyser:
 
         interpreter_paths = self._resolve_bin_interpreters()
         self.runtime_execs.extend(interpreter_paths)
+        runtime_files.extend(interpreter_paths)
 
         if not self.runtime_libs:
             logging.warning(
