@@ -135,11 +135,17 @@ class FileDeploy:
 
     def clean(self, paths: [str]):
         self.logger.info("Removing excluded files:")
-        base_paths = [pathlib.Path(self.app_dir), pathlib.Path(self.app_dir) / "opt" / "libc"]
+        base_paths = [
+            pathlib.Path(self.app_dir),
+            pathlib.Path(self.app_dir) / "opt" / "libc",
+        ]
 
         for base_path in base_paths:
             for pattern in paths:
-                for match in base_path.glob(pattern):
-                    self.logger.info(match)
+                try:
+                    for match in base_path.glob(pattern):
+                        self.logger.info(match)
+                        shutil.rmtree(match, ignore_errors=True)
+                except FileNotFoundError:
                     # it's ok to ignore files that were already deleted
-                    shutil.rmtree(match, ignore_errors=True)
+                    pass
