@@ -35,29 +35,7 @@ class AppRuntimeAnalyser:
 
     def run_app_analysis(self):
         self.runtime_libs.clear()
-        library_paths = self._resolve_appdir_library_paths()
-        library_paths = ":".join(library_paths)
-
-        command = "{strace} -ff -e trace=openat -E LD_LIBRARY_PATH={library_paths} {bin} {args}"
-        command = command.format(
-            bin=self.bin, args=self.args, **self._deps, library_paths=library_paths
-        )
-
-        self.logger.info(command)
-        _proc = subprocess.run(command, stderr=subprocess.PIPE, shell=True)
-
-        if _proc.returncode != 0:
-            self.logger.warning(
-                "%s exited with code %d" % (_proc.args, _proc.returncode)
-            )
-            self.logger.warning(
-                "This may produce an incomplete/wrong recipe. Please make sure that the application runs properly."
-            )
-
-        stderr_data = _proc.stderr.decode("utf-8")
-        runtime_files = re.findall(
-            r'openat\(.*?"(?P<path>.*?)".*', stderr_data, re.IGNORECASE
-        )
+        runtime_files = self._trace_app_execution()
 
         # remove dirs, non existent files and excluded paths
         runtime_files = [
@@ -89,6 +67,36 @@ class AppRuntimeAnalyser:
             )
 
         return runtime_files
+
+    def _trace_app_execution(self):
+        # find dirs containing libraries that may be needed by the application at runtime
+        library_paths = self._resolve_appdir_library_paths()
+        library_paths = ":".join(library_paths)
+
+        # use strace to discover which files are accessed at runtime
+        # arguments:
+        #   "-f" trace children processes
+        #   "-E LD_LIBRARY_PATH={library_paths}" set LD_LIBRARY_PATH in the application environment
+        #   "-e trace=openat --status=successful" trace file access operations that succeed
+        command = "{strace} -f -E LD_LIBRARY_PATH={library_paths} -e trace=openat --status=successful {bin} {args}"
+        command = command.format(
+            bin=self.bin, args=self.args, **self._deps, library_paths=library_paths
+        )
+        self.logger.info(command)
+        _proc = subprocess.run(command, stderr=subprocess.PIPE, shell=True)
+
+        if _proc.returncode != 0:
+            self.logger.warning(
+                "%s exited with code %d" % (_proc.args, _proc.returncode)
+            )
+            self.logger.warning(
+                "This may produce an incomplete/wrong recipe. Please make sure that the application runs properly."
+            )
+
+        # parse results
+        stderr_data = _proc.stderr.decode()
+        accessed_files = re.findall(r'openat\(.*?"(?P<path>.*?)".*', stderr_data)
+        return accessed_files
 
     def _resolve_appdir_library_paths(self):
         finder = Finder(self.appdir)
