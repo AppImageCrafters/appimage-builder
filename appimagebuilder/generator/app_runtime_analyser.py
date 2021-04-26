@@ -131,6 +131,7 @@ class AppRuntimeAnalyser:
             # don't include user settings or cache
             os.getenv("HOME") + "/.cache/*",
             os.getenv("HOME") + "/.config/*",
+            os.getenv("HOME") + "/.Xauthority",
             # don't include dbus as it will not be reachable from the bundle
             "/var/lib/dbus/*",
             # do not include font files
