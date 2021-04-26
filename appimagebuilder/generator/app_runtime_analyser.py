@@ -120,28 +120,28 @@ class AppRuntimeAnalyser:
     @staticmethod
     def _is_excluded_data_path(path):
         excluded_data_paths = [
-            os.getenv("HOME") + "/*",
-            "/sys/*",
-            "/proc/*",
-            "/dev/*",
-            "/etc/ld.so.cache",
-            "/etc/nsswitch.conf",
-            "/etc/passwd",
-            "/usr/lib/locale/*",
-            "*/.local/*",
-            "*/.fonts/*",
-            "*/.cache/*",
-            "*/.config/*",
-            "*/locale.alias",
+            # don't include virtual fs
+            "/sys/**",
+            "/proc/**",
+            "/dev/**",
+            "/run/**",
+            # don't include system settings
+            "/etc/**",
+            # don't include user settings or cache
+            os.getenv("HOME") + "/.cache/*",
+            os.getenv("HOME") + "/.config/*",
+            # don't include dbus as it will not be reachable from the bundle
             "/var/lib/dbus/*",
-            "/usr/local/share/fonts",
-            "/usr/share/fonts/*",
-            "/var/cache/fontconfig",
-            "/var/cache/fontconfig/*",
+            # do not include font files
+            "**/fonts/*.conf",
+            "**/fonts/*.otf",
+            "**/fontconfig/**/*.conf",
+            "**/fontconfig/**/*.cache*",
+            os.getenv("HOME") + "/.fonts/*",
+            # don't include GTK caches
             "**/gdk-pixbuf-2.0/**/loaders.cache",
             "**/gio/**/giomodule.cache",
             "**/glib-2.0/**/gschemas.compiled",
-            "/run/**",
         ]
 
         for expr in excluded_data_paths:
