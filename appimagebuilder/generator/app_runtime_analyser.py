@@ -106,12 +106,16 @@ class AppRuntimeAnalyser:
         return library_paths
 
     def _resolve_bin_interpreters(self):
+        self.logger.info("Reading PT_INTERP from executables")
         patch_elf = PatchElf()
+        patch_elf.log_command = False
+        patch_elf.log_stdout = False
         patch_elf.log_stderr = False
+
         interpreter_paths = set()
-        for bin in self.runtime_execs:
+        for path in [self.bin, *self.runtime_execs]:
             try:
-                interpreter = patch_elf.get_interpreter(bin)
+                interpreter = patch_elf.get_interpreter(path)
                 if not interpreter.startswith("/tmp"):
                     interpreter_paths.add(interpreter)
             except PatchElfError:
