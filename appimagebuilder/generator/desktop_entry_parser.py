@@ -12,58 +12,38 @@
 
 import configparser
 import os
+import pathlib
+import shlex
+
+from appimagebuilder.generator.app_info import AppInfo
 
 
-class DesktopFileParser:
-    def __init__(self, file_path):
-        self.file_path = file_path
-        self.parser = configparser.RawConfigParser()
-        self.parser.read(file_path)
+class DesktopEntryParser:
+    def parse(self, entry_path) -> AppInfo:
+        entry_path = pathlib.Path(entry_path)
 
-        exec = self.parser["Desktop Entry"]["Exec"].strip()
-        self.exec_path, self.exec_args = self._split_exec_path_and_args(exec)
+        app_info = AppInfo()
+
+        parser = configparser.RawConfigParser()
+        parser.read(entry_path)
+
+        app_info.id = entry_path.stem
+        app_info.name = parser["Desktop Entry"]["Name"]
+        app_info.icon = parser["Desktop Entry"]["Icon"]
+
+        # process exec
+        exec_str = parser["Desktop Entry"]["Exec"].strip()
 
         # convert desktop file exec args to bash notation
-        self.exec_args = self.exec_args.replace("%f", "$@")
-        self.exec_args = self.exec_args.replace("%F", "$@")
-        self.exec_args = self.exec_args.replace("%U", "$@")
-        self.exec_args = self.exec_args.replace("%u", "$@")
+        exec_str = exec_str.replace("%f", "$1")
+        exec_str = exec_str.replace("%F", "$@")
+        exec_str = exec_str.replace("%U", "$@")
+        exec_str = exec_str.replace("%u", "$1")
 
-    @staticmethod
-    def _split_exec_path_and_args(exec):
-        if exec[0] == "'" or exec[0] == '"':
-            end = exec.find(exec[0], 1)
-            while end != -1 and exec[end - 1] == "\\":
-                end = exec.find(exec[0], end + 1)
-            if end == -1:
-                end = len(exec)
+        exec_str_parts = shlex.split(exec_str)
+        app_info.exec = exec_str_parts[0]
 
-            exec_path = exec[1:end].strip()
-            exec_args = exec[end + 1 :].strip()
+        if len(exec_str_parts) > 1:
+            app_info.exec_args = exec_str_parts[1:]
 
-            return exec_path, exec_args
-        else:
-            end = exec.find(" ")
-            if end == -1:
-                end = len(exec)
-
-            exec_path = exec[:end].strip()
-            exec_args = exec[end + 1 :].strip()
-
-            return exec_path, exec_args
-
-    def get_name(self):
-        return self.parser["Desktop Entry"]["Name"]
-
-    def get_icon(self):
-        return self.parser["Desktop Entry"]["Icon"]
-
-    def get_exec_path(self):
-        return self.exec_path
-
-    def get_exec_args(self):
-        return self.exec_args
-
-    def get_id(self):
-        filename, file_extension = os.path.splitext(os.path.basename(self.file_path))
-        return filename
+        return app_info
