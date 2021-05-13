@@ -11,7 +11,6 @@
 #  all copies or substantial portions of the Software.
 
 import configparser
-import os
 import pathlib
 import shlex
 

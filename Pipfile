@@ -14,6 +14,7 @@ packaging = "*"
 questionary = "*"
 emrichen = "*"
 shutils = "*"
+"ruamel.yaml" = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.8"

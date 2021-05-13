@@ -19,7 +19,7 @@ from appimagebuilder.common import shell
 from appimagebuilder import recipe
 from appimagebuilder.builder.builder import Builder
 from appimagebuilder.appimage import AppImageCreator
-from appimagebuilder.generator.generator import RecipeGenerator
+from appimagebuilder.generator.command_generate import CommandGenerate
 from appimagebuilder.tester import ExecutionTest
 from appimagebuilder.tester.errors import TestFailed
 
@@ -74,7 +74,7 @@ def __main__():
     logging.basicConfig(level=numeric_level)
 
     if args.generate:
-        generator = RecipeGenerator()
+        generator = CommandGenerate()
         generator.generate()
         exit(0)
 

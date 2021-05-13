@@ -9,27 +9,11 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import fnmatch
-import pathlib
+from appimagebuilder.generator.package_managers.apt import PackageRepositoryResolver
 
 
-class DummyPath:
-    """Mocks pathlib.Path"""
-
-    def __init__(self, path: str, children: [str] = None):
-        self.path = path
-        self.children = children
-
-    def glob(self, pattern):
-        results = []
-        for file in self.children:
-            if fnmatch.fnmatch(file, pattern):
-                results.append(DummyPath(file, []))
-
-        return results
-
-    def __str__(self):
-        return self.path
-
-    def __eq__(self, o: object) -> bool:
-        return self.__class__ == o.__class__ and self.path == o.path
+class FakePackageRepositoryResolver(PackageRepositoryResolver):
+    def resolve_source_lines(self, packages) -> []:
+        return [
+            "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse"
+        ]

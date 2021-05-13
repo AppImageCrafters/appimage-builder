@@ -11,31 +11,12 @@
 #  all copies or substantial portions of the Software.
 import pathlib
 
-from appimagebuilder.generator.app_info import AppInfo
+from appimagebuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
 
 
-class BundleInfo:
-    """Application information"""
+class FakeAppRuntimeAnalyser(AppRuntimeAnalyser):
+    def __init__(self, expected_result):
+        self.expected_result = expected_result
 
-    app_dir: pathlib.Path
-
-    app_info: AppInfo
-
-    # update string to be attached into
-    update_string: str
-
-    # appimage runtime arch
-    runtime_arch: str
-
-    def __init__(
-        self,
-        app_dir: pathlib.Path = None,
-        app_info: AppInfo = None,
-        update_string: str = None,
-        runtime_arch: str = None,
-    ):
-        self.app_dir = app_dir
-        self.app_info = AppInfo() if not app_info else app_info
-
-        self.update_string = update_string
-        self.runtime_arch = runtime_arch
+    def run_app_analysis(self, app_dir: pathlib.Path, exec: str, exec_args: str):
+        return self.expected_result
