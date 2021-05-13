@@ -26,9 +26,9 @@ class AptSectionGenerator(PackageManagerSectionGenerator):
     _package_repository_resolver: apt.PackageRepositoryResolver
 
     def __init__(
-            self,
-            file_package_resolver: apt.FilePackageResolver,
-            package_repository_resolver: apt.PackageRepositoryResolver,
+        self,
+        file_package_resolver: apt.FilePackageResolver,
+        package_repository_resolver: apt.PackageRepositoryResolver,
     ):
         self._file_package_resolver = file_package_resolver
         self._package_repository_resolver = package_repository_resolver
