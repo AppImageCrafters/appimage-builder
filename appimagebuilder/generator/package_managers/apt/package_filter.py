@@ -9,6 +9,8 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import fnmatch
+
 from appimagebuilder.builder.deploy.apt import listings
 from appimagebuilder.commands.dpkg_query import DpkgQuery
 
@@ -20,6 +22,11 @@ class PackageFilter:
     - packages that are known to reduce the bundle portability
     - packages that are useless in a bundle (i.e.: system services)
     """
+
+    def __init__(self):
+        self.exclusion_patterns = set().union(
+            listings.apt_core, listings.system_services, listings.graphics
+        )
 
     def filter(self, packages):
         # discard duplicates and ease future operations
@@ -34,14 +41,16 @@ class PackageFilter:
         filtered_packages = set()
         for pkg in packages:
             pkg_name = pkg.split(":")[0]
-            if (
-                pkg_name not in listings.apt_core
-                and pkg_name not in listings.system_services
-                and pkg_name not in listings.graphics
-            ):
+            if not self._is_package_blacklisted(pkg_name):
                 filtered_packages.add(pkg)
 
         return filtered_packages
+
+    def _is_package_blacklisted(self, pkg_name):
+        for pattern in self.exclusion_patterns:
+            if fnmatch.fnmatch(pkg_name, pattern):
+                return True
+        return False
 
     def discard_simblings(self, packages):
         dpkg_query = DpkgQuery()
