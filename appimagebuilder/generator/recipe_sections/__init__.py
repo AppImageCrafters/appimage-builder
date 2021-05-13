@@ -9,21 +9,3 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.generator.bundle_info_gatherer_ui import BundleInfoGathererUi
-
-
-class DummyBundleInfoGathererUi(BundleInfoGathererUi):
-    default_result = "fake input"
-    edit_postfix = " edited"
-
-    def ask_text(self, text, default=None):
-        if default:
-            return default + self.edit_postfix
-        else:
-            return self.default_result
-
-    def ask_select(self, text, choices, default=None):
-        if default:
-            return default
-        else:
-            return choices[-1]

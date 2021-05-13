@@ -12,6 +12,7 @@
 import fnmatch
 import logging
 import os
+import pathlib
 import re
 import subprocess
 
@@ -23,55 +24,41 @@ DEPENDS_ON = ["strace", "patchelf"]
 
 
 class AppRuntimeAnalyser:
-    def __init__(self, app_dir, bin, args):
-        self.appdir = os.path.abspath(app_dir)
-        self.bin = os.path.join(self.appdir, bin)
-        self.args = args
-        self.runtime_libs = set()
-        self.runtime_execs = set()
-        self.runtime_data = set()
+    def __init__(self):
         self.logger = logging.getLogger("AppRuntimeAnalyser")
         self._deps = shell.resolve_commands_paths(DEPENDS_ON)
 
-    def run_app_analysis(self):
-        self.runtime_libs.clear()
-        runtime_files = self._trace_app_execution()
+    def run_app_analysis(self, app_dir: pathlib.Path, exec: str, exec_args: str):
+        full_exec_path = app_dir / exec
+        accessed_files = self._trace_file_access(app_dir, full_exec_path, exec_args)
 
         # remove dirs, non existent files and excluded paths
-        runtime_files = [
+        accessed_files = [
             path
-            for path in runtime_files
+            for path in accessed_files
             if os.path.exists(path)
             and not os.path.isdir(path)
-            and not path.startswith(self.appdir)
             and not self._is_excluded_data_path(path)
         ]
 
-        self.runtime_execs = [
-            path for path in runtime_files if os.access(path, os.X_OK)
+        # include the main executable in the list
+        accessed_files.append(full_exec_path)
+
+        # include binary interpreters in the list
+        interpreter_paths = self._resolve_bin_interpreters(accessed_files)
+        accessed_files.extend(interpreter_paths)
+
+        # exclude files from the bundle
+        accessed_files = [
+            path for path in accessed_files if not str(path).startswith(str(app_dir))
         ]
-        self.runtime_libs = [path for path in runtime_files if elf.has_soname(path)]
-        self.runtime_data = [
-            path
-            for path in runtime_files
-            if path not in self.runtime_execs and path not in self.runtime_libs
-        ]
+        return accessed_files
 
-        interpreter_paths = self._resolve_bin_interpreters()
-        self.runtime_execs.extend(interpreter_paths)
-        runtime_files.extend(interpreter_paths)
+    def _trace_file_access(self, app_dir, exec_path, exec_args):
+        """Execute the application using strace to find which files are accessed at runtime"""
 
-        if not self.runtime_libs:
-            logging.warning(
-                "No dependencies were found, "
-                "please make sure that all the required libraries are reachable."
-            )
-
-        return runtime_files
-
-    def _trace_app_execution(self):
         # find dirs containing libraries that may be needed by the application at runtime
-        library_paths = self._resolve_appdir_library_paths()
+        library_paths = self._resolve_appdir_library_paths(app_dir)
         library_paths = ":".join(library_paths)
 
         # use strace to discover which files are accessed at runtime
@@ -81,7 +68,7 @@ class AppRuntimeAnalyser:
         #   "-e trace=openat --status=successful" trace file access operations that succeed
         command = "{strace} -f -E LD_LIBRARY_PATH={library_paths} -e trace=openat --status=successful {bin} {args}"
         command = command.format(
-            bin=self.bin, args=self.args, **self._deps, library_paths=library_paths
+            bin=exec_path, args=exec_args, **self._deps, library_paths=library_paths
         )
         self.logger.info(command)
         _proc = subprocess.run(command, stderr=subprocess.PIPE, shell=True)
@@ -96,16 +83,21 @@ class AppRuntimeAnalyser:
 
         # parse results
         stderr_data = _proc.stderr.decode()
-        accessed_files = re.findall(r'openat\(.*?"(?P<path>.*?)".*', stderr_data)
-        return accessed_files
+        return self._parse_strace_results(stderr_data)
 
-    def _resolve_appdir_library_paths(self):
-        finder = Finder(self.appdir)
+    @staticmethod
+    def _parse_strace_results(stderr_data):
+        openat_calls = re.findall(r'openat\(.*?"(?P<path>.*?)".*', stderr_data)
+        stat_calls = re.findall(r'stat\(.*?"(?P<path>.*?)".*', stderr_data)
+        return [*openat_calls, *stat_calls]
+
+    def _resolve_appdir_library_paths(self, app_dir):
+        finder = Finder(app_dir)
         lib_paths = finder.find("*", [Finder.is_elf_shared_lib])
         library_paths = set([os.path.dirname(path) for path in lib_paths])
         return library_paths
 
-    def _resolve_bin_interpreters(self):
+    def _resolve_bin_interpreters(self, executable_files):
         self.logger.info("Reading PT_INTERP from executables")
         patch_elf = PatchElf()
         patch_elf.log_command = False
@@ -113,7 +105,7 @@ class AppRuntimeAnalyser:
         patch_elf.log_stderr = False
 
         interpreter_paths = set()
-        for path in [self.bin, *self.runtime_execs]:
+        for path in executable_files:
             try:
                 interpreter = patch_elf.get_interpreter(path)
                 if not interpreter.startswith("/tmp"):

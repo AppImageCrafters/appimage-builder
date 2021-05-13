@@ -23,22 +23,22 @@ class BundleInfoGatherer:
     - user input
     """
 
-    _app_dir: pathlib.Path
     _ui: BundleInfoGathererUi
     _desktop_entry_parser: DesktopEntryParser
 
     _bundle_info: BundleInfo
 
-    def __init__(self, app_dir: pathlib.Path, ui, desktop_entry_parser):
-        self._app_dir = app_dir
+    def __init__(self, ui, desktop_entry_parser):
         self._ui = ui
         self._desktop_entry_parser = desktop_entry_parser
 
         self._bundle_info = BundleInfo()
 
-    def gather_info(self):
+    def gather_info(self, app_dir: pathlib.Path) -> BundleInfo:
+        self._bundle_info = BundleInfo(app_dir=app_dir)
+
         # search desktop entries
-        entries = self._search_desktop_entries()
+        entries = self._search_desktop_entries(app_dir)
 
         # select main desktop entry
         if entries:
@@ -58,8 +58,9 @@ class BundleInfoGatherer:
 
         return self._bundle_info
 
-    def _search_desktop_entries(self):
-        return list(self._app_dir.glob("**/*.desktop"))
+    @staticmethod
+    def _search_desktop_entries(app_dir: pathlib.Path):
+        return list(app_dir.glob("**/*.desktop"))
 
     def _select_main_entry(self, entries):
         if not entries:
@@ -83,46 +84,49 @@ class BundleInfoGatherer:
 
     def _confirm_bundle_architecture(self):
         self._bundle_info.runtime_arch = self._ui.ask_select(
-            "Architecture :",
-            choices=["amd64", "arm64", "i386", "armhf"],
+            "Architecture:",
+            choices=["x86_64", "i686", "armhf", "aarch64"],
             default=self._bundle_info.runtime_arch,
         )
 
     def _confirm_bundle_update_information(self):
         self._bundle_info.update_string = self._ui.ask_text(
-            "Update Information [Default: guess] :", default="guess"
+            "Update Information [Default: guess]:", default="guess"
         )
 
     def _confirm_application_version(self):
         self._bundle_info.app_info.version = self._ui.ask_text(
-            "Version [Eg: 1.0.0]", default=self._bundle_info.app_info.version
+            "Version [Eg: 1.0.0]:", default=self._bundle_info.app_info.version
         )
 
     def _confirm_application_exec_args(self):
         self._bundle_info.app_info.exec_args = self._ui.ask_text(
-            "Arguments [Default: $@] :", default=self._bundle_info.app_info.exec_args
+            "Arguments [Default: $@]:", default=self._bundle_info.app_info.exec_args
         )
 
     def _confirm_application_exec(self):
         self._bundle_info.app_info.exec = self._ui.ask_text(
-            "Executable path relative to AppDir [usr/bin/app] :",
+            "Executable path relative to AppDir [usr/bin/app]:",
             default=self._bundle_info.app_info.exec,
         )
 
     def _confirm_application_icon(self):
+        if not self._bundle_info.app_info.icon:
+            self._bundle_info.app_info.icon = "application-vnd.appimage"
+
         self._bundle_info.app_info.icon = self._ui.ask_text(
-            "Icon", default=self._bundle_info.app_info.icon
+            "Icon:", default=self._bundle_info.app_info.icon
         )
 
     def _confirm_application_name(self):
         self._bundle_info.app_info.name = self._ui.ask_text(
-            "Application Name", default=self._bundle_info.app_info.name
+            "Application Name:", default=self._bundle_info.app_info.name
         )
 
     def _confirm_application_id(self):
         if not self._bundle_info.app_info.id:
             self._bundle_info.app_info.id = self._ui.ask_text(
-                "ID [Eg: com.example.app]"
+                "ID [Eg: com.example.app]:"
             )
 
     def _gather_update_information(self):

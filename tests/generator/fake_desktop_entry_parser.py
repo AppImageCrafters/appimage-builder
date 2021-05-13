@@ -9,33 +9,13 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import pathlib
-
 from appimagebuilder.generator.app_info import AppInfo
+from appimagebuilder.generator.desktop_entry_parser import DesktopEntryParser
 
 
-class BundleInfo:
-    """Application information"""
+class FakeDesktopEntryParser(DesktopEntryParser):
+    def __init__(self, app_info: AppInfo):
+        self.app_info = app_info
 
-    app_dir: pathlib.Path
-
-    app_info: AppInfo
-
-    # update string to be attached into
-    update_string: str
-
-    # appimage runtime arch
-    runtime_arch: str
-
-    def __init__(
-        self,
-        app_dir: pathlib.Path = None,
-        app_info: AppInfo = None,
-        update_string: str = None,
-        runtime_arch: str = None,
-    ):
-        self.app_dir = app_dir
-        self.app_info = AppInfo() if not app_info else app_info
-
-        self.update_string = update_string
-        self.runtime_arch = runtime_arch
+    def parse(self, entry_path) -> AppInfo:
+        return self.app_info

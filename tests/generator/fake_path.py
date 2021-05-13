@@ -9,13 +9,26 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.generator.app_info import AppInfo
-from appimagebuilder.generator.desktop_entry_parser import DesktopEntryParser
+import fnmatch
 
 
-class DummyDesktopEntryParser(DesktopEntryParser):
-    def __init__(self, app_info: AppInfo):
-        self.app_info = app_info
+class FakePath:
+    """Mocks pathlib.Path"""
 
-    def parse(self, entry_path) -> AppInfo:
-        return self.app_info
+    def __init__(self, path: str, children: [str] = None):
+        self.path = path
+        self.children = children
+
+    def glob(self, pattern):
+        results = []
+        for file in self.children:
+            if fnmatch.fnmatch(file, pattern):
+                results.append(FakePath(file, []))
+
+        return results
+
+    def __str__(self):
+        return self.path
+
+    def __eq__(self, o: object) -> bool:
+        return self.__class__ == o.__class__ and self.path == o.path
