@@ -21,7 +21,7 @@ class FilePackageResolver:
     """Resolve which deb packages provide a given file using `dpkg-query -S` """
 
     def __init__(self):
-        self.logger = logging.getLogger(str(self.__class__))
+        self.logger = logging.getLogger(str(self.__class__.__name__))
         self._cli_tools = shell.resolve_commands_paths(CLI_REQUIRE)
 
     def resolve(self, files) -> {}:
@@ -42,5 +42,9 @@ class FilePackageResolver:
         results = {}
         for line in stdout_data.splitlines():
             line_parts = line.split(sep=": ", maxsplit=1)
-            results[line_parts[1]] = line_parts[0]
+            pkg_names = line_parts[0]
+            file_path = line_parts[1]
+            for pkg_name in pkg_names.split(","):
+                pkg_name = pkg_name.strip()
+                results[file_path] = pkg_name
         return results

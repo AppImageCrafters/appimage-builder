@@ -35,9 +35,9 @@ class PackageFilter:
         for pkg in packages:
             pkg_name = pkg.split(":")[0]
             if (
-                    pkg_name not in listings.apt_core
-                    and pkg_name not in listings.system_services
-                    and pkg_name not in listings.graphics
+                pkg_name not in listings.apt_core
+                and pkg_name not in listings.system_services
+                and pkg_name not in listings.graphics
             ):
                 filtered_packages.add(pkg)
 

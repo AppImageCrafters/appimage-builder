@@ -17,7 +17,7 @@ class PackageRepositoryResolver:
     """Resolve which repository provides a given package"""
 
     def __init__(self):
-        self.logger = logging.getLogger(str(self.__class__))
+        self.logger = logging.getLogger(str(self.__class__.__name__))
 
     def resolve_source_lines(self, packages) -> []:
         source_lines = []
