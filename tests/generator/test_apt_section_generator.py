@@ -34,7 +34,7 @@ from tests.generator.fake_package_repository_resolver import (
 )
 
 
-class TestAptPackageManagerSectionGenerator(TestCase):
+class TestAptSectionGenerator(TestCase):
     def test_generate(self):
         generator = AptSectionGenerator(
             FakeFilePackageResolver({"/lib64/ld-linux-x86-64.so.2": "libc6:amd64"}),

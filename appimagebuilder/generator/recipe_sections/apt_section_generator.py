@@ -11,7 +11,10 @@
 #  all copies or substantial portions of the Software.
 import logging
 
+from appimagebuilder.builder import deploy
+from appimagebuilder.builder.deploy.apt import listings as apt_listings
 from appimagebuilder.generator.bundle_info import BundleInfo
+from appimagebuilder.generator.package_managers.apt.package_filter import PackageFilter
 from appimagebuilder.generator.recipe_sections.package_manager_recipe_section_generator import (
     PackageManagerSectionGenerator,
 )
@@ -23,9 +26,9 @@ class AptSectionGenerator(PackageManagerSectionGenerator):
     _package_repository_resolver: apt.PackageRepositoryResolver
 
     def __init__(
-        self,
-        file_package_resolver: apt.FilePackageResolver,
-        package_repository_resolver: apt.PackageRepositoryResolver,
+            self,
+            file_package_resolver: apt.FilePackageResolver,
+            package_repository_resolver: apt.PackageRepositoryResolver,
     ):
         self._file_package_resolver = file_package_resolver
         self._package_repository_resolver = package_repository_resolver
@@ -39,7 +42,8 @@ class AptSectionGenerator(PackageManagerSectionGenerator):
         dependency_map = self._file_package_resolver.resolve(dependencies)
         unresolved_dependencies = set(dependencies).difference(dependency_map.keys())
 
-        include_list = dependency_map.values()
+        package_filter = PackageFilter()
+        include_list = package_filter.filter(dependency_map.values())
 
         # map packages to repositories to create the sources lists
         source_lines = self._package_repository_resolver.resolve_source_lines(
