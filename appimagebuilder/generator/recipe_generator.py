@@ -18,6 +18,7 @@ from appimagebuilder.generator.bundle_info_gatherer import BundleInfoGatherer
 from appimagebuilder.generator.recipe_sections.package_manager_recipe_section_generator import (
     PackageManagerSectionGenerator,
 )
+from appimagebuilder.generator.recipe_sections.test_section_generator import TestSectionGenerator
 
 
 class RecipeGenerator:
@@ -34,10 +35,10 @@ class RecipeGenerator:
     _runtime_analyser: AppRuntimeAnalyser
 
     def __init__(
-        self,
-        package_managers: [PackageManagerSectionGenerator],
-        bundle_info_gatherer: BundleInfoGatherer,
-        runtime_analyser: AppRuntimeAnalyser,
+            self,
+            package_managers: [PackageManagerSectionGenerator],
+            bundle_info_gatherer: BundleInfoGatherer,
+            runtime_analyser: AppRuntimeAnalyser,
     ):
         self._package_manager_sections_generators = package_managers
         self._bundle_info_gatherer = bundle_info_gatherer
@@ -105,4 +106,8 @@ class RecipeGenerator:
         for id, section in sections.items():
             recipe["AppDir"][id] = section
 
+        test_section_generator = TestSectionGenerator()
+        recipe["AppDir"]["test"] = test_section_generator.generate()
+
         return recipe
+
