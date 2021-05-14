@@ -51,7 +51,7 @@ class AptSectionGenerator(PackageManagerSectionGenerator):
         )
 
         architectures = self._extract_architecture_from_package_names(
-            dependency_map.values()
+            include_list
         )
 
         result = {
