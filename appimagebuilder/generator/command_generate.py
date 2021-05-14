@@ -29,6 +29,9 @@ from appimagebuilder.generator.recipe_generator import RecipeGenerator
 from appimagebuilder.generator.recipe_sections.apt_section_generator import (
     AptSectionGenerator,
 )
+from appimagebuilder.generator.recipe_sections.files_section_generator import (
+    FilesSectionGenerator,
+)
 
 
 class GenerateMethodError(RuntimeError):
@@ -51,6 +54,9 @@ class CommandGenerate:
                 file_package_resolver, package_repository_resolver
             )
             package_manager_section_generators.append(apt_section_generator)
+
+        # append files section generator at last as it will catch all the dependencies
+        package_manager_section_generators.append(FilesSectionGenerator())
 
         bundle_info_gatherer_ui = BundleInfoGathererCLI()
         desktop_entry_parser = DesktopEntryParser()
