@@ -27,6 +27,7 @@ class FileDeploy:
         "graphics": [
             "**/libEGL.so*",
             "**/libGL.so*",
+            "**/libGLX_mesa.so*",
             "**/libX11-xcb.so*",
             "**/libX11.so",
             "**/libdrm.so*",
