@@ -48,7 +48,7 @@ class BundleInfoGatherer:
             self._bundle_info.app_info = self._desktop_entry_parser.parse(main_entry)
 
         # confirm application information
-        self._confirm_application_information()
+        self._confirm_application_information(self._bundle_info)
 
         # ask for the update information
         self._gather_update_information()
@@ -74,13 +74,16 @@ class BundleInfoGatherer:
             )
             return result
 
-    def _confirm_application_information(self):
-        self._confirm_application_id()
-        self._confirm_application_name()
-        self._confirm_application_icon()
-        self._confirm_application_exec()
-        self._confirm_application_exec_args()
-        self._confirm_application_version()
+    def _confirm_application_information(self, bundle_info):
+        app_info = bundle_info.app_info
+        app_info.id = self._confirm_application_id(app_info.id)
+        app_info.name = self._confirm_application_name(app_info.name)
+        app_info.icon = self._confirm_application_icon(app_info.icon)
+        app_info.exec = self._confirm_application_exec(
+            bundle_info.app_dir, app_info.exec
+        )
+        app_info.exec_args = self._confirm_application_exec_args(app_info.exec_args)
+        app_info.version = self._confirm_application_version(app_info.version)
 
     def _confirm_bundle_architecture(self):
         self._bundle_info.runtime_arch = self._ui.ask_select(
@@ -94,40 +97,44 @@ class BundleInfoGatherer:
             "Update Information [Default: guess]:", default="guess"
         )
 
-    def _confirm_application_version(self):
-        self._bundle_info.app_info.version = self._ui.ask_text(
-            "Version [Eg: 1.0.0]:", default=self._bundle_info.app_info.version
-        )
+    def _confirm_application_version(self, preset):
+        return self._ui.ask_text("Version [Eg: 1.0.0]:", default=preset)
 
-    def _confirm_application_exec_args(self):
-        self._bundle_info.app_info.exec_args = self._ui.ask_text(
-            "Arguments [Default: $@]:", default=self._bundle_info.app_info.exec_args
-        )
+    def _confirm_application_exec_args(self, preset):
+        return self._ui.ask_text("Arguments [Default: $@]:", default=preset)
 
-    def _confirm_application_exec(self):
-        self._bundle_info.app_info.exec = self._ui.ask_text(
+    def _confirm_application_exec(self, app_dir, preset):
+        if preset:
+            options = self._resolve_exec_path(app_dir, preset)
+            if options:
+                return self._ui.ask_select(
+                    "Executable path:",
+                    choices=options,
+                )
+
+        return self._ui.ask_text(
             "Executable path relative to AppDir [usr/bin/app]:",
-            default=self._bundle_info.app_info.exec,
+            default=preset,
         )
 
-    def _confirm_application_icon(self):
-        if not self._bundle_info.app_info.icon:
-            self._bundle_info.app_info.icon = "application-vnd.appimage"
+    def _resolve_exec_path(self, app_dir: pathlib.Path, default_value):
+        # search binary inside the AppDir
+        matches = list(app_dir.glob("**/" + default_value))
+        rel_paths = [str(match.relative_to(app_dir)) for match in matches]
 
-        self._bundle_info.app_info.icon = self._ui.ask_text(
-            "Icon:", default=self._bundle_info.app_info.icon
-        )
+        return rel_paths
 
-    def _confirm_application_name(self):
-        self._bundle_info.app_info.name = self._ui.ask_text(
-            "Application Name:", default=self._bundle_info.app_info.name
-        )
+    def _confirm_application_icon(self, preset):
+        if not preset:
+            preset = "application-vnd.appimage"
 
-    def _confirm_application_id(self):
-        if not self._bundle_info.app_info.id:
-            self._bundle_info.app_info.id = self._ui.ask_text(
-                "ID [Eg: com.example.app]:"
-            )
+        return self._ui.ask_text("Icon:", default=preset)
+
+    def _confirm_application_name(self, preset):
+        return self._ui.ask_text("Application Name:", default=preset)
+
+    def _confirm_application_id(self, preset):
+        return self._ui.ask_text("ID [Eg: com.example.app]:", default=preset)
 
     def _gather_update_information(self):
         self._confirm_bundle_update_information()

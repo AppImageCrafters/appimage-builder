@@ -50,9 +50,7 @@ class AptSectionGenerator(PackageManagerSectionGenerator):
             include_list
         )
 
-        architectures = self._extract_architecture_from_package_names(
-            include_list
-        )
+        architectures = self._extract_architecture_from_package_names(include_list)
 
         result = {
             "arch": architectures,

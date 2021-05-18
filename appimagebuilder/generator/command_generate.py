@@ -82,7 +82,7 @@ class CommandGenerate:
         recipe_header = "# appimage-builder recipe see https://appimage-builder.readthedocs.io for details\n"
         with open("AppImageBuilder.yml", "w") as f:
             f.write(recipe_header)
-            rendered_yml = yaml.dump(recipe, f)
+            yaml.dump(recipe, f)
 
     @staticmethod
     def _locate_app_dir():

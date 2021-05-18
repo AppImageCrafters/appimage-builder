@@ -28,7 +28,7 @@ class TestBundleInfoGatherer(TestCase):
                 icon="fooview",
                 exec="usr/bin/fooview",
                 exec_args="$@",
-            )
+            ),
         )
 
         self.entry_path = FakePath("/tmp/appdir/usr/share/applications/fooview.desktop")
@@ -72,56 +72,77 @@ class TestBundleInfoGatherer(TestCase):
         )
 
     def test__confirm_application_version(self):
-        self.gatherer._bundle_info.app_info.version = "1.0.0"
-        self.gatherer._confirm_application_version()
+        preset = "1.0.0"
+        result = self.gatherer._confirm_application_version(preset)
         self.assertEqual(
-            self.gatherer._bundle_info.app_info.version,
-            "1.0.0" + FakeBundleInfoGathererUi.edit_postfix,
+            result,
+            preset + FakeBundleInfoGathererUi.edit_postfix,
         )
 
     def test__confirm_application_exec_args(self):
-        self.gatherer._bundle_info.app_info.exec_args = "$@"
-        self.gatherer._confirm_application_exec_args()
+        preset = "$@"
+        result = self.gatherer._confirm_application_exec_args(preset)
         self.assertEqual(
-            self.gatherer._bundle_info.app_info.exec_args,
+            result,
             "$@" + FakeBundleInfoGathererUi.edit_postfix,
         )
 
-    def test__confirm_application_exec(self):
-        self.gatherer._bundle_info.app_info.exec = "bin/app"
-        self.gatherer._confirm_application_exec()
+    def test__confirm_application_exec_rel_path(self):
+        preset = "app"
+        fake_appdir = FakePath("/tmp/AppDir", ["/tmp/AppDir/usr/bin/app"])
+        result = self.gatherer._confirm_application_exec(fake_appdir, preset)
         self.assertEqual(
-            self.gatherer._bundle_info.app_info.exec,
-            "bin/app" + FakeBundleInfoGathererUi.edit_postfix,
+            result,
+            "usr/bin/app",
+        )
+
+    def test__confirm_application_exec_abs_path(self):
+        preset = "/bin/app"
+        fake_appdir = FakePath("/tmp/AppDir", ["/tmp/AppDir/bin/app"])
+        result = self.gatherer._confirm_application_exec(fake_appdir, preset)
+        self.assertEqual(
+            result,
+            preset + FakeBundleInfoGathererUi.edit_postfix,
+        )
+
+    def test__confirm_application_exec_no_preset(self):
+        preset = ""
+        result = self.gatherer._confirm_application_exec(
+            FakePath("/tmp/AppDir", []), preset
+        )
+        self.assertEqual(
+            result,
+            FakeBundleInfoGathererUi.default_result,
         )
 
     def test__confirm_application_icon(self):
-        self.gatherer._bundle_info.app_info.icon = "app"
-        self.gatherer._confirm_application_icon()
+        preset = "app"
+        result = self.gatherer._confirm_application_icon(preset)
         self.assertEqual(
-            self.gatherer._bundle_info.app_info.icon,
-            "app" + FakeBundleInfoGathererUi.edit_postfix,
+            result,
+            preset + FakeBundleInfoGathererUi.edit_postfix,
         )
 
     def test__confirm_application_name(self):
-        self.gatherer._bundle_info.app_info.name = "App"
-        self.gatherer._confirm_application_name()
+        preset = "App"
+        result = self.gatherer._confirm_application_name(preset)
         self.assertEqual(
-            self.gatherer._bundle_info.app_info.name,
-            "App" + FakeBundleInfoGathererUi.edit_postfix,
+            result,
+            preset + FakeBundleInfoGathererUi.edit_postfix,
         )
 
     def test__confirm_application_id_empty(self):
-        self.gatherer._confirm_application_id()
+        preset = ""
+        result = self.gatherer._confirm_application_id(preset)
         self.assertEqual(
-            self.gatherer._bundle_info.app_info.id,
+            result,
             FakeBundleInfoGathererUi.default_result,
         )
 
     def test__confirm_application_id_preset(self):
-        self.gatherer._bundle_info.app_info.id = "myapp"
-        self.gatherer._confirm_application_id()
+        preset = "myapp"
+        result = self.gatherer._confirm_application_id(preset)
         self.assertEqual(
-            self.gatherer._bundle_info.app_info.id,
-            "myapp",
+            result,
+            preset + FakeBundleInfoGathererUi.edit_postfix,
         )

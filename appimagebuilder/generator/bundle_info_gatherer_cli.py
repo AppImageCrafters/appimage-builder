@@ -28,6 +28,7 @@ class BundleInfoGathererCLI(BundleInfoGathererUi):
 
     def ask_select(self, text, choices, default=None):
         # workaround "TypeError: object of type 'NoneType' has no len()" when default is None
+        choices = [str(choice) for choice in choices]
         if default:
             question = questionary.select(
                 message=text, choices=choices, default=default
