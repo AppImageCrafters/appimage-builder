@@ -79,6 +79,14 @@ class TestBundleInfoGatherer(TestCase):
             preset + FakeBundleInfoGathererUi.edit_postfix,
         )
 
+    def test__confirm_application_version_empty(self):
+        preset = ""
+        result = self.gatherer._confirm_application_version(preset)
+        self.assertEqual(
+            result,
+            "latest" + FakeBundleInfoGathererUi.edit_postfix,
+        )
+
     def test__confirm_application_exec_args(self):
         preset = "$@"
         result = self.gatherer._confirm_application_exec_args(preset)

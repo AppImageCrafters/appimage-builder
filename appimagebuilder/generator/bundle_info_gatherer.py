@@ -98,6 +98,8 @@ class BundleInfoGatherer:
         )
 
     def _confirm_application_version(self, preset):
+        if not preset:
+            preset = "latest"
         return self._ui.ask_text("Version [Eg: 1.0.0]:", default=preset)
 
     def _confirm_application_exec_args(self, preset):
