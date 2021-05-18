@@ -21,14 +21,9 @@ from appimagebuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
 from appimagebuilder.generator.bundle_info_gatherer import BundleInfoGatherer
 from appimagebuilder.generator.bundle_info_gatherer_cli import BundleInfoGathererCLI
 from appimagebuilder.generator.desktop_entry_parser import DesktopEntryParser
-from appimagebuilder.generator.package_managers.apt import (
-    FilePackageResolver,
-    PackageRepositoryResolver,
-)
+from appimagebuilder.generator.package_managers import apt, pacman
 from appimagebuilder.generator.recipe_generator import RecipeGenerator
-from appimagebuilder.generator.recipe_sections.apt_section_generator import (
-    AptSectionGenerator,
-)
+from appimagebuilder.generator import recipe_sections
 from appimagebuilder.generator.recipe_sections.files_section_generator import (
     FilesSectionGenerator,
 )
@@ -48,14 +43,20 @@ class CommandGenerate:
         # configure Recipe Generator
         package_manager_section_generators = []
         if shutil.which("apt-get"):
-            file_package_resolver = FilePackageResolver()
-            package_repository_resolver = PackageRepositoryResolver()
-            apt_section_generator = AptSectionGenerator(
-                file_package_resolver, package_repository_resolver
+            apt_file_package_resolver = apt.FilePackageResolver()
+            apt_package_repository_resolver = apt.PackageRepositoryResolver()
+            apt_section_generator = recipe_sections.AptSectionGenerator(
+                apt_file_package_resolver, apt_package_repository_resolver
             )
             package_manager_section_generators.append(apt_section_generator)
+        if shutil.which("pacman"):
+            pacman_file_package_resolver = pacman.FilePackageResolver()
+            pacman_section_generator = recipe_sections.PacmanSectionGenerator(
+                pacman_file_package_resolver
+            )
+            package_manager_section_generators.append(pacman_section_generator)
 
-        # append files section generator at last as it will catch all the dependencies
+            # append files section generator at last as it will catch all the dependencies
         package_manager_section_generators.append(FilesSectionGenerator())
 
         bundle_info_gatherer_ui = BundleInfoGathererCLI()

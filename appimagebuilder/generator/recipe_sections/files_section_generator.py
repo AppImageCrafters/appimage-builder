@@ -39,7 +39,7 @@ class FilesSectionGenerator(PackageManagerSectionGenerator):
 
     def generate(self, dependencies: [str], bundle_info: BundleInfo) -> ({}, [str]):
         include_list = [
-            path for path in dependencies if not self._is_file_blacklisted(path)
+            str(path) for path in dependencies if not self._is_file_blacklisted(path)
         ]
 
         result = {
