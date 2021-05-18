@@ -10,6 +10,7 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import fnmatch
+import os.path
 
 
 class FakePath:
@@ -26,6 +27,9 @@ class FakePath:
                 results.append(FakePath(file, []))
 
         return results
+
+    def relative_to(self, fake_path):
+        return os.path.relpath(self.path, fake_path.path)
 
     def __str__(self):
         return self.path
