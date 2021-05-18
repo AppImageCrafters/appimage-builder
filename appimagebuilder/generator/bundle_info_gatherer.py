@@ -103,6 +103,9 @@ class BundleInfoGatherer:
         return self._ui.ask_text("Version [Eg: 1.0.0]:", default=preset)
 
     def _confirm_application_exec_args(self, preset):
+        if not preset:
+            preset = "$@"
+
         return self._ui.ask_text("Arguments [Default: $@]:", default=preset)
 
     def _confirm_application_exec(self, app_dir, preset):
