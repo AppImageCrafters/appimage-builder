@@ -51,6 +51,7 @@ setuptools.setup(
         "packaging",
         "questionary",
         "emrichen",
+        "ruamel.yaml",
     ],
     python_requires=">=3.6",
     package_data={
