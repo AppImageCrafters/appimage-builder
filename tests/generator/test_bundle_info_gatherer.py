@@ -95,6 +95,14 @@ class TestBundleInfoGatherer(TestCase):
             "$@" + FakeBundleInfoGathererUi.edit_postfix,
         )
 
+    def test__confirm_application_exec_args_empty(self):
+        preset = ""
+        result = self.gatherer._confirm_application_exec_args(preset)
+        self.assertEqual(
+            result,
+            "$@" + FakeBundleInfoGathererUi.edit_postfix,
+        )
+
     def test__confirm_application_exec_rel_path(self):
         preset = "app"
         fake_appdir = FakePath("/tmp/AppDir", ["/tmp/AppDir/usr/bin/app"])
