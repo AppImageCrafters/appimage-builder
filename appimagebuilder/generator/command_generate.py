@@ -56,7 +56,7 @@ class CommandGenerate:
             )
             package_manager_section_generators.append(pacman_section_generator)
 
-            # append files section generator at last as it will catch all the dependencies
+        # append files section generator at last as it will catch all the dependencies
         package_manager_section_generators.append(FilesSectionGenerator())
 
         bundle_info_gatherer_ui = BundleInfoGathererCLI()
