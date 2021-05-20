@@ -28,11 +28,7 @@ def __main__():
     cli_arguments = CliArguments()
     args = cli_arguments.parse()
 
-    logger = logging.getLogger("appimage-builder")
-    numeric_level = getattr(logging, args.loglevel.upper())
-    if not isinstance(numeric_level, int):
-        logging.error("Invalid log level: %s" % args.loglevel)
-    logging.basicConfig(level=numeric_level)
+    _setup_logging_config(args)
 
     if args.generate:
         generator = CommandGenerate()
@@ -65,8 +61,8 @@ def __main__():
                     for test in test_cases:
                         test.run()
                 except TestFailed as err:
-                    logger.error("Tests failed")
-                    logger.error(err)
+                    logging.error("Tests failed")
+                    logging.error(err)
 
                     exit(1)
 
@@ -74,9 +70,19 @@ def __main__():
             creator = AppImageCreator(recipe_data)
             creator.create()
     else:
-        logger.error("Unknown recipe version: %s" % recipe_version)
-        logger.info("Please make sure you're using the latest appimage-builder version")
+        logging.error("Unknown recipe version: %s" % recipe_version)
+        logging.info(
+            "Please make sure you're using the latest appimage-builder version"
+        )
         exit(1)
+
+
+def _setup_logging_config(args):
+    numeric_level = getattr(logging, args.loglevel.upper())
+    if not isinstance(numeric_level, int):
+        logging.error("Invalid log level: %s" % args.loglevel)
+
+    logging.basicConfig(level=numeric_level)
 
 
 def _load_tests(recipe_data):
