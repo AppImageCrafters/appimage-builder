@@ -11,62 +11,23 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-import argparse
 import logging
 import os
 
-from appimagebuilder.common import shell
 from appimagebuilder import recipe
-from appimagebuilder.builder.builder import Builder
 from appimagebuilder.appimage import AppImageCreator
+from appimagebuilder.builder.builder import Builder
+from appimagebuilder.cli.cli_arguments import CliArguments
+from appimagebuilder.common import shell
 from appimagebuilder.generator.command_generate import CommandGenerate
 from appimagebuilder.tester import ExecutionTest
 from appimagebuilder.tester.errors import TestFailed
 
 
 def __main__():
-    parser = argparse.ArgumentParser(description="AppImage crafting tool")
-    parser.add_argument(
-        "--recipe",
-        dest="recipe",
-        default=os.path.join(os.getcwd(), "AppImageBuilder.yml"),
-        help="recipe file path (default: $PWD/AppImageBuilder.yml)",
-    )
-    parser.add_argument(
-        "--log", dest="loglevel", default="INFO", help="logging level (default: INFO)"
-    )
-    parser.add_argument(
-        "--skip-script",
-        dest="skip_script",
-        action="store_true",
-        help="Skip script execution",
-    )
-    parser.add_argument(
-        "--skip-build",
-        dest="skip_build",
-        action="store_true",
-        help="Skip AppDir building",
-    )
-    parser.add_argument(
-        "--skip-tests",
-        dest="skip_tests",
-        action="store_true",
-        help="Skip AppDir testing",
-    )
-    parser.add_argument(
-        "--skip-appimage",
-        dest="skip_appimage",
-        action="store_true",
-        help="Skip AppImage generation",
-    )
-    parser.add_argument(
-        "--generate",
-        dest="generate",
-        action="store_true",
-        help="Try to generate recipe from an AppDir",
-    )
+    cli_arguments = CliArguments()
+    args = cli_arguments.parse()
 
-    args = parser.parse_args()
     logger = logging.getLogger("appimage-builder")
     numeric_level = getattr(logging, args.loglevel.upper())
     if not isinstance(numeric_level, int):
