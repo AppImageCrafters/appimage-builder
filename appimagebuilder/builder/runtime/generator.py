@@ -22,7 +22,6 @@ from .executables import BinaryExecutable, InterpretedExecutable
 from .executables_scanner import ExecutablesScanner
 from .executables_wrapper import ExecutablesWrapper
 from ...common.elf import get_arch
-from ...recipe import Recipe
 
 
 class RuntimeGeneratorError(RuntimeError):
@@ -30,15 +29,15 @@ class RuntimeGeneratorError(RuntimeError):
 
 
 class RuntimeGenerator:
-    def __init__(self, recipe: Recipe, finder: Finder):
-        self.appdir_path = Path(recipe.get_item("AppDir/path")).absolute()
-        self.main_exec = recipe.get_item("AppDir/app_info/exec")
-        self.main_exec_args = recipe.get_item("AppDir/app_info/exec_args", "$@")
-        self.apprun_version = recipe.get_item("AppDir/runtime/version", "v1.2.4")
-        self.apprun_debug = recipe.get_item("AppDir/runtime/debug", False)
-        user_env_input = recipe.get_item("AppDir/runtime/env", {})
+    def __init__(self, recipe: {}, finder: Finder):
+        self.appdir_path = Path(recipe.AppDir.path()).absolute()
+        self.main_exec = recipe.AppDir.app_info.exec()
+        self.main_exec_args = recipe.AppDir.app_info.exec_args() or "$@"
+        self.apprun_version = recipe.AppDir.runtime.version() or "v1.2.4"
+        self.apprun_debug = recipe.AppDir.runtime.debug()
+        user_env_input = recipe.AppDir.runtime.env() or {}
         self.user_env = self.parse_env_input(user_env_input)
-        self.path_mappings = recipe.get_item("AppDir/runtime/path_mappings", [])
+        self.path_mappings = recipe.AppDir.runtime.path_mappings()
 
         self.finder = finder
 

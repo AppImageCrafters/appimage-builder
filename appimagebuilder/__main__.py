@@ -14,6 +14,8 @@
 import logging
 import os
 
+import roam
+
 from appimagebuilder import recipe
 from appimagebuilder.appimage import AppImageCreator
 from appimagebuilder.builder.builder import Builder
@@ -36,20 +38,18 @@ def __main__():
         exit(0)
 
     recipe_loader = recipe.Loader()
-    raw_recipe = recipe_loader.load(args.recipe)
-    recipe_data = recipe.Recipe(raw_recipe)
+    recipe_data = recipe_loader.load(args.recipe)
 
-    recipe_version = recipe_data.get_item("version")
-    if recipe_version == 1:
+    if recipe_data.version() == 1:
         recipe_schema = recipe.Schema()
-        recipe_schema.v1.validate(raw_recipe)
+        recipe_schema.v1.validate(recipe_data())
 
         if not args.skip_script:
-            script_instructions = recipe_data.get_item("script", [])
+            script_instructions = recipe_data.script()
             logging.info("======")
             logging.info("Script")
             logging.info("======")
-            appdir = recipe_data.get_item("AppDir/path")
+            appdir = recipe_data.AppDir.path()
             shell.execute(script_instructions, env={"APPDIR": os.path.abspath(appdir)})
 
         if not args.skip_build:
@@ -57,7 +57,7 @@ def __main__():
             creator.build()
 
         if not args.skip_tests:
-            if recipe_data.get_item("AppDir/test", []):
+            if recipe_data.AppDir.test():
                 logging.info("============")
                 logging.info("AppDir tests")
                 logging.info("============")
@@ -76,7 +76,7 @@ def __main__():
             creator = AppImageCreator(recipe_data)
             creator.create()
     else:
-        logging.error("Unknown recipe version: %s" % recipe_version)
+        logging.error("Unknown recipe version: %s" % recipe_data.version())
         logging.info(
             "Please make sure you're using the latest appimage-builder version"
         )
@@ -94,21 +94,21 @@ def _setup_logging_config(args):
 def _load_tests(recipe_data):
     test_cases = []
 
-    appdir = recipe_data.get_item("AppDir/path", "AppDir")
+    appdir = recipe_data.AppDir.path() or "AppDir"
     appdir = os.path.abspath(appdir)
-    test_case_configs = recipe_data.get_item("AppDir/test", [])
 
-    for name in test_case_configs:
-        env = recipe_data.get_item("AppDir/test/%s/env" % name, [])
+    for name, data in recipe_data.AppDir.test().items():
+        data_accessor = roam.Roamer(data)
+        env = data_accessor.env() or []
         if isinstance(env, dict):
             env = ["%s=%s" % (k, v) for k, v in env.items()]
 
         test = ExecutionTest(
             appdir=appdir,
             name=name,
-            image=recipe_data.get_item("AppDir/test/%s/image" % name),
-            command=recipe_data.get_item("AppDir/test/%s/command" % name),
-            use_host_x=recipe_data.get_item("AppDir/test/%s/use_host_x" % name, False),
+            image=data_accessor.image(),
+            command=data_accessor.command(),
+            use_host_x=data_accessor.use_host_x(),
             env=env,
         )
         test_cases.append(test)
