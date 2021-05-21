@@ -18,11 +18,11 @@ from appimagebuilder.commands.appimagetool import AppImageToolCommand
 
 class AppImageCreator:
     def __init__(self, recipe):
-        self.app_dir = recipe.get_item("AppDir/path")
-        self.target_arch = recipe.get_item("AppImage/arch")
-        self.app_name = recipe.get_item("AppDir/app_info/name")
-        self.app_version = recipe.get_item("AppDir/app_info/version")
-        self.update_information = recipe.get_item("AppImage/update-information", "None")
+        self.app_dir = recipe.AppDir.path()
+        self.target_arch = recipe.AppImage.arch()
+        self.app_name = recipe.AppDir.app_info.name()
+        self.app_version = recipe.AppDir.app_info.version()
+        self.update_information = recipe.AppImage["update-information"] or "None"
         self.guess_update_information = False
 
         if self.update_information == "None":
@@ -34,7 +34,7 @@ class AppImageCreator:
             self.update_information = None
             self.guess_update_information = True
 
-        self.sing_key = recipe.get_item("AppImage/sign-key", "None")
+        self.sing_key = recipe.AppImage["sign-key"] or "None"
         if self.sing_key == "None":
             self.sing_key = None
 
@@ -42,7 +42,7 @@ class AppImageCreator:
             os.getcwd(),
             "%s-%s-%s.AppImage" % (self.app_name, self.app_version, self.target_arch),
         )
-        self.target_file = recipe.get_item("AppImage/file_name", fallback_file_name)
+        self.target_file = recipe.AppImage.file_name or fallback_file_name
 
     def create(self):
         self._assert_target_architecture()

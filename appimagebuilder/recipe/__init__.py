@@ -11,5 +11,4 @@
 #   all copies or substantial portions of the Software.
 
 from .loader import Loader
-from .recipe import Recipe
 from .schema import RecipeSchema as Schema

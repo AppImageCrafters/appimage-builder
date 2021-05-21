@@ -12,6 +12,7 @@
 import os
 import re
 
+import roam
 from ruamel import yaml
 
 from appimagebuilder.recipe.errors import RecipeError
@@ -72,4 +73,5 @@ class Loader:
 
     def load(self, path):
         with open(path) as recipe_file:
-            return yaml.load(recipe_file, Loader=self._loader)
+            data = yaml.load(recipe_file, Loader=self._loader)
+            return roam.Roamer(data)

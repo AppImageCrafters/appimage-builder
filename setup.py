@@ -52,6 +52,7 @@ setuptools.setup(
         "questionary",
         "emrichen",
         "ruamel.yaml",
+        "roam",
     ],
     python_requires=">=3.6",
     package_data={

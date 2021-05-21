@@ -25,13 +25,14 @@ class AppInfoLoader:
         return app_info
 
     def _read_config_fields(self, recipe):
+        recipe_app_info = recipe.AppDir.app_info
         app_info = AppInfo()
-        app_info.id = recipe.get_item("AppDir/app_info/id")
-        app_info.name = recipe.get_item("AppDir/app_info/name")
-        app_info.version = recipe.get_item("AppDir/app_info/version")
-        app_info.icon = recipe.get_item("AppDir/app_info/icon")
-        app_info.exec = recipe.get_item("AppDir/app_info/exec")
-        app_info.exec_args = recipe.get_item("AppDir/app_info/exec_args", "$@")
+        app_info.id = recipe_app_info.id()
+        app_info.name = recipe_app_info.name()
+        app_info.version = recipe_app_info.version()
+        app_info.icon = recipe_app_info.icon()
+        app_info.exec = recipe_app_info.exec()
+        app_info.exec_args = recipe_app_info.exec_args() or "$@"
         return app_info
 
     @staticmethod
