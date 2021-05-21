@@ -35,9 +35,15 @@ def __main__():
         generator.generate()
         exit(0)
 
-    recipe_data = load_recipe(args.recipe)
+    recipe_loader = recipe.Loader()
+    raw_recipe = recipe_loader.load(args.recipe)
+    recipe_data = recipe.Recipe(raw_recipe)
+
     recipe_version = recipe_data.get_item("version")
     if recipe_version == 1:
+        recipe_schema = recipe.Schema()
+        recipe_schema.v1.validate(raw_recipe)
+
         if not args.skip_script:
             script_instructions = recipe_data.get_item("script", [])
             logging.info("======")
@@ -108,15 +114,6 @@ def _load_tests(recipe_data):
         test_cases.append(test)
 
     return test_cases
-
-
-def load_recipe(path):
-    recipe_data = recipe.read_recipe(path=path)
-    recipe_validator = recipe.Schema()
-    recipe_validator.v1.validate(recipe_data)
-    recipe_access = recipe.Recipe(recipe_data)
-
-    return recipe_access
 
 
 if __name__ == "__main__":

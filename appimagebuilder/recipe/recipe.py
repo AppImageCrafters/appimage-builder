@@ -81,7 +81,8 @@ class Recipe:
 
         return variable
 
-    def _replace_env_variables_in_str(self, variable):
+    @staticmethod
+    def _replace_env_variables_in_str(variable):
         new_val = variable
         for item in re.findall(r"{{\s?\w+\s?}}", variable):
             var_name = item[2:-2]
