@@ -9,9 +9,11 @@
 #
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
-
+import logging
 
 from schema import Schema, And, Optional, Or
+
+from appimagebuilder.recipe.roamer import Roamer
 
 
 class RecipeSchema:
@@ -102,3 +104,13 @@ class RecipeSchema:
                 "AppImage": self.v1_appimage,
             }
         )
+
+    def validate(self, recipe: Roamer):
+        if recipe.version() == 1:
+            return self.v1.validate(recipe())
+        else:
+            logging.error("Unknown recipe version: %s" % recipe.version())
+            logging.info(
+                "Please make sure you're using the latest appimage-builder version"
+            )
+            exit(1)
