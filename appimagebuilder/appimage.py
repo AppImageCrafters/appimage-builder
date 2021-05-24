@@ -22,7 +22,7 @@ class AppImageCreator:
         self.target_arch = recipe.AppImage.arch()
         self.app_name = recipe.AppDir.app_info.name()
         self.app_version = recipe.AppDir.app_info.version()
-        self.update_information = recipe.AppImage["update-information"] or "None"
+        self.update_information = recipe.AppImage["update-information"]() or "None"
         self.guess_update_information = False
 
         if self.update_information == "None":
