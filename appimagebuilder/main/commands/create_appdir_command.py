@@ -22,5 +22,6 @@ class CreateAppDirCommand(Command):
         return "build"
 
     def __call__(self, *args, **kwargs):
-        creator = Builder(self.recipe)
-        creator.build()
+        # creator = Builder(self.recipe)
+        # creator.build()
+        pass
