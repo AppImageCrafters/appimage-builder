@@ -9,6 +9,10 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import os
+import pathlib
+
+from appimagebuilder.main.commands.apt_deploy_command import AptDeployCommand
 from appimagebuilder.main.commands.create_appdir_command import CreateAppDirCommand
 from appimagebuilder.main.commands.create_appimage_command import CreateAppImageCommand
 from appimagebuilder.main.commands.run_shell_script_command import RunShellScriptCommand
@@ -19,6 +23,9 @@ from appimagebuilder.recipe.roamer import Roamer
 class Orchestrator:
     """Transforms a recipe into a command list"""
 
+    def __init__(self):
+        self._cache_dir_name = "appimage-builder-cache"
+
     def prepare_commands(self, recipe: Roamer, args):
         if recipe.version() == 1:
             return self._prepare_commands_for_recipe_v1(args, recipe)
@@ -28,12 +35,13 @@ class Orchestrator:
     def _prepare_commands_for_recipe_v1(self, args, recipe):
         commands = []
         if not args.skip_script:
-            command = RunShellScriptCommand(recipe.AppDir.path(), recipe.script)
+            command = RunShellScriptCommand(
+                "main script", recipe.AppDir.path(), recipe.script
+            )
             commands.append(command)
 
         if not args.skip_build:
-            command = CreateAppDirCommand(recipe)
-            commands.append(command)
+            commands.extend(self._create_app_dir_commands(recipe))
 
         if not args.skip_tests and recipe.AppDir.test:
             command = RunTestCommand(recipe.AppDir.path(), recipe.AppDir.test)
@@ -44,3 +52,55 @@ class Orchestrator:
             commands.append(command)
 
         return commands
+
+    def _create_app_dir_commands(self, recipe):
+        commands = []
+        app_dir_path = recipe.AppDir.path()
+        cache_dir_path = os.path.join(os.getcwd(), self._cache_dir_name)
+
+        # bundle section
+        if recipe.AppDir.before_bundle:
+            command = RunShellScriptCommand(
+                "before bundle script", app_dir_path, recipe.AppDir.before_bundle
+            )
+            commands.append(command)
+
+        apt_section = recipe.AppDir.apt
+        if apt_section:
+            command = self._generate_apt_deploy_command(app_dir_path, apt_section, cache_dir_path)
+            commands.append(command)
+
+        if recipe.AppDir.after_bundle:
+            command = RunShellScriptCommand(
+                "after bundle script", app_dir_path, recipe.AppDir.after_bundle
+            )
+            commands.append(command)
+
+        # runtime section
+
+        return commands
+
+    def _generate_apt_deploy_command(self, app_dir_path, apt_section, cache_dir_path):
+        apt_archs = apt_section.arch()
+        if isinstance(apt_archs, str):
+            apt_archs = [apt_archs]
+
+        sources = []
+        keys = []
+        for item in apt_section.sources():
+            if "sourceline" in item:
+                sources.append(item["sourceline"])
+            if "key_url" in item:
+                keys.append(item["key_url"])
+
+        return AptDeployCommand(
+            app_dir_path,
+            cache_dir_path,
+            {},
+            apt_section.include(),
+            apt_section.exclude() or [],
+            apt_archs,
+            sources,
+            keys,
+            apt_section.allow_unauthenticated() or False,
+        )

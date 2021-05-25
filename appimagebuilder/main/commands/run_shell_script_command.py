@@ -24,8 +24,8 @@ class RunShellScriptCommand(Command):
     variables
     """
 
-    def __init__(self, app_dir: str, instructions: Roamer, env=None):
-        super().__init__("script")
+    def __init__(self, description, app_dir: str, instructions: Roamer, env=None):
+        super().__init__(description)
 
         self.app_dir = app_dir
         self.instructions = instructions
