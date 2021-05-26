@@ -10,11 +10,10 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import os
-import pathlib
 
 from appimagebuilder.main.commands.apt_deploy_command import AptDeployCommand
-from appimagebuilder.main.commands.create_appdir_command import CreateAppDirCommand
 from appimagebuilder.main.commands.create_appimage_command import CreateAppImageCommand
+from appimagebuilder.main.commands.pacman_deploy_command import PacmanDeployCommand
 from appimagebuilder.main.commands.run_shell_script_command import RunShellScriptCommand
 from appimagebuilder.main.commands.run_test_command import RunTestCommand
 from appimagebuilder.recipe.roamer import Roamer
@@ -67,7 +66,16 @@ class Orchestrator:
 
         apt_section = recipe.AppDir.apt
         if apt_section:
-            command = self._generate_apt_deploy_command(app_dir_path, apt_section, cache_dir_path)
+            command = self._generate_apt_deploy_command(
+                app_dir_path, apt_section, cache_dir_path
+            )
+            commands.append(command)
+
+        pacman_section = recipe.AppDir.pacman
+        if pacman_section:
+            command = self._generate_pacman_deploy_command(
+                app_dir_path, pacman_section, cache_dir_path
+            )
             commands.append(command)
 
         if recipe.AppDir.after_bundle:
@@ -103,4 +111,18 @@ class Orchestrator:
             sources,
             keys,
             apt_section.allow_unauthenticated() or False,
+        )
+
+    def _generate_pacman_deploy_command(
+        self, app_dir_path, pacman_section, cache_dir_path
+    ):
+        return PacmanDeployCommand(
+            app_dir_path,
+            cache_dir_path,
+            {},
+            pacman_section.include(),
+            pacman_section.exclude(),
+            pacman_section["Architecture"](),
+            pacman_section.repositories(),
+            pacman_section.options(),
         )

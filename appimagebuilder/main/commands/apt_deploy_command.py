@@ -11,27 +11,24 @@
 #  all copies or substantial portions of the Software.
 from pathlib import Path
 
-from appimagebuilder.builder.deploy.apt import deploy, Deploy, Venv
-from appimagebuilder.main.commands.command import Command
+from appimagebuilder.builder.deploy.apt import Deploy, Venv
+from appimagebuilder.main.commands.deploy_command import DeployCommand
 
 
-class AptDeployCommand(Command):
+class AptDeployCommand(DeployCommand):
     def __init__(
-            self,
-            app_dir: str,
-            cache_dir: str,
-            deploy_record: {},
-            packages: [str],
-            exclude: [str] = None,
-            architectures: [str] = None,
-            sources: [str] = None,
-            keys: [str] = None,
-            allow_unauthenticated: str = None,
+        self,
+        app_dir: str,
+        cache_dir: str,
+        deploy_record: {},
+        packages: [str],
+        exclude: [str] = None,
+        architectures: [str] = None,
+        sources: [str] = None,
+        keys: [str] = None,
+        allow_unauthenticated: str = None,
     ):
-        super().__init__("apt deploy")
-        self._app_dir = app_dir
-        self._cache_dir = cache_dir
-        self.deploy_record = deploy_record
+        super().__init__("apt deploy", app_dir, cache_dir, deploy_record)
         self.packages = packages
         self._exclude = exclude
         self._allow_unauthenticated = allow_unauthenticated
