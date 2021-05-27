@@ -48,7 +48,7 @@ class AptDeployCommand(DeployCommand):
             self.packages, self._app_dir, self._exclude
         )
 
-        self.deploy_record["apt"] = {
+        self._deploy_record["apt"] = {
             "sources": apt_venv.sources,
             "packages": deployed_packages,
         }

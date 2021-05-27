@@ -67,14 +67,14 @@ class Orchestrator:
         apt_section = recipe.AppDir.apt
         if apt_section:
             command = self._generate_apt_deploy_command(
-                app_dir_path, apt_section, cache_dir_path
+                app_dir_path, apt_section, cache_dir_path, {}
             )
             commands.append(command)
 
         pacman_section = recipe.AppDir.pacman
         if pacman_section:
             command = self._generate_pacman_deploy_command(
-                app_dir_path, pacman_section, cache_dir_path
+                app_dir_path, pacman_section, cache_dir_path, {}
             )
             commands.append(command)
 
@@ -88,7 +88,9 @@ class Orchestrator:
 
         return commands
 
-    def _generate_apt_deploy_command(self, app_dir_path, apt_section, cache_dir_path):
+    def _generate_apt_deploy_command(
+        self, app_dir_path, apt_section, cache_dir_path, deploy_record
+    ):
         apt_archs = apt_section.arch()
         if isinstance(apt_archs, str):
             apt_archs = [apt_archs]
@@ -104,7 +106,7 @@ class Orchestrator:
         return AptDeployCommand(
             app_dir_path,
             cache_dir_path,
-            {},
+            deploy_record,
             apt_section.include(),
             apt_section.exclude() or [],
             apt_archs,
@@ -114,12 +116,12 @@ class Orchestrator:
         )
 
     def _generate_pacman_deploy_command(
-        self, app_dir_path, pacman_section, cache_dir_path
+        self, app_dir_path, pacman_section, cache_dir_path, deploy_record
     ):
         return PacmanDeployCommand(
             app_dir_path,
             cache_dir_path,
-            {},
+            deploy_record,
             pacman_section.include(),
             pacman_section.exclude(),
             pacman_section["Architecture"](),
