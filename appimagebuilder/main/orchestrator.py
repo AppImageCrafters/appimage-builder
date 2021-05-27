@@ -13,6 +13,7 @@ import os
 
 from appimagebuilder.main.commands.apt_deploy_command import AptDeployCommand
 from appimagebuilder.main.commands.create_appimage_command import CreateAppImageCommand
+from appimagebuilder.main.commands.file_deploy_command import FileDeployCommand
 from appimagebuilder.main.commands.pacman_deploy_command import PacmanDeployCommand
 from appimagebuilder.main.commands.run_shell_script_command import RunShellScriptCommand
 from appimagebuilder.main.commands.run_test_command import RunTestCommand
@@ -75,6 +76,17 @@ class Orchestrator:
         if pacman_section:
             command = self._generate_pacman_deploy_command(
                 app_dir_path, pacman_section, cache_dir_path, {}
+            )
+            commands.append(command)
+
+        files_section = recipe.AppDir.files
+        if files_section:
+            command = FileDeployCommand(
+                app_dir_path,
+                cache_dir_path,
+                {},
+                files_section.include() or [],
+                files_section.exclude() or [],
             )
             commands.append(command)
 
