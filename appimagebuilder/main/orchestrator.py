@@ -18,6 +18,7 @@ from appimagebuilder.main.commands.file_deploy_command import FileDeployCommand
 from appimagebuilder.main.commands.pacman_deploy_command import PacmanDeployCommand
 from appimagebuilder.main.commands.run_shell_script_command import RunShellScriptCommand
 from appimagebuilder.main.commands.run_test_command import RunTestCommand
+from appimagebuilder.main.commands.setup_runtime_command import SetupRuntimeCommand
 from appimagebuilder.main.commands.setup_symlinks_command import SetupSymlinksCommand
 from appimagebuilder.recipe.roamer import Roamer
 
@@ -62,7 +63,7 @@ class Orchestrator:
 
         self._create_deploy_commands(app_dir_path, cache_dir_path, commands, recipe)
 
-        self._create_setup_commands(app_dir_path, commands)
+        self._create_setup_commands(app_dir_path, commands, recipe)
 
         return commands
 
@@ -101,15 +102,23 @@ class Orchestrator:
             )
             commands.append(command)
 
-    def _create_setup_commands(self, app_dir_path, commands):
-        # runtime section
-        finder = Finder(app_dir_path)
-        commands.append(
-            SetupSymlinksCommand(
-                app_dir_path,
-                finder
+    def _create_setup_commands(self, app_dir_path, commands, recipe):
+        if recipe.AppDir.before_runtime:
+            command = RunShellScriptCommand(
+                "before runtime script", app_dir_path, recipe.AppDir.before_runtime
             )
-        )
+            commands.append(command)
+
+        finder = Finder(app_dir_path)
+        commands.append(SetupSymlinksCommand(app_dir_path, finder))
+
+        commands.append(SetupRuntimeCommand(recipe, finder))
+
+        if recipe.AppDir.after_runtime:
+            command = RunShellScriptCommand(
+                "after runtime script", app_dir_path, recipe.AppDir.after_runtime
+            )
+            commands.append(command)
 
     def _generate_apt_deploy_command(
         self, app_dir_path, apt_section, cache_dir_path, deploy_record
