@@ -1,0 +1,50 @@
+#  Copyright  2021 Alexis Lopez Zubieta
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+import os
+import pathlib
+
+from appimagebuilder.common.finder import Finder
+from appimagebuilder.main.commands.command import Command
+
+
+class SetupSymlinksCommand(Command):
+    def __init__(self, app_dir, finder: Finder):
+        super().__init__("symlinks setup")
+        self._app_dir = pathlib.Path(app_dir)
+        self._finder = finder
+
+    def id(self):
+        return "symlinks-setup"
+
+    def __call__(self, *args, **kwargs):
+        for link in self._finder.find("*", [Finder.is_symlink]):
+            relative_root = (
+                self._app_dir
+                if "opt/libc" not in str(link)
+                else self._app_dir / "opt" / "libc"
+            )
+            self._make_symlink_relative(link, relative_root)
+
+    @staticmethod
+    def _make_symlink_relative(path, relative_root):
+        path = pathlib.Path(path)
+        relative_root = pathlib.Path(relative_root)
+
+        if path.is_symlink():
+            target = pathlib.Path(os.readlink(path))
+            if target.is_absolute():
+                # workaround issue with concatenating paths using the "/" operator
+                new_target = str(relative_root) + str(target)
+                new_target = os.path.relpath(new_target, path.parent)
+
+                path.unlink()
+                path.symlink_to(new_target)
