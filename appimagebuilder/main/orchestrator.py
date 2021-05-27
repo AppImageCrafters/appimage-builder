@@ -60,27 +60,31 @@ class Orchestrator:
         app_dir_path = recipe.AppDir.path()
         cache_dir_path = os.path.join(os.getcwd(), self._cache_dir_name)
 
+        self._create_deploy_commands(app_dir_path, cache_dir_path, commands, recipe)
+
+        self._create_setup_commands(app_dir_path, commands)
+
+        return commands
+
+    def _create_deploy_commands(self, app_dir_path, cache_dir_path, commands, recipe):
         # bundle section
         if recipe.AppDir.before_bundle:
             command = RunShellScriptCommand(
                 "before bundle script", app_dir_path, recipe.AppDir.before_bundle
             )
             commands.append(command)
-
         apt_section = recipe.AppDir.apt
         if apt_section:
             command = self._generate_apt_deploy_command(
                 app_dir_path, apt_section, cache_dir_path, {}
             )
             commands.append(command)
-
         pacman_section = recipe.AppDir.pacman
         if pacman_section:
             command = self._generate_pacman_deploy_command(
                 app_dir_path, pacman_section, cache_dir_path, {}
             )
             commands.append(command)
-
         files_section = recipe.AppDir.files
         if files_section:
             command = FileDeployCommand(
@@ -91,13 +95,13 @@ class Orchestrator:
                 files_section.exclude() or [],
             )
             commands.append(command)
-
         if recipe.AppDir.after_bundle:
             command = RunShellScriptCommand(
                 "after bundle script", app_dir_path, recipe.AppDir.after_bundle
             )
             commands.append(command)
 
+    def _create_setup_commands(self, app_dir_path, commands):
         # runtime section
         finder = Finder(app_dir_path)
         commands.append(
@@ -106,8 +110,6 @@ class Orchestrator:
                 finder
             )
         )
-
-        return commands
 
     def _generate_apt_deploy_command(
         self, app_dir_path, apt_section, cache_dir_path, deploy_record
