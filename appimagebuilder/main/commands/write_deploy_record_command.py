@@ -9,26 +9,28 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.builder.app_info.desktop_entry_generator import (
-    DesktopEntryGenerator,
-)
-from appimagebuilder.builder.app_info.icon_bundler import IconBundler
-from appimagebuilder.generator.app_info import AppInfo
+import logging
+import os
+
+from ruamel.yaml import YAML
+
 from appimagebuilder.main.commands.command import Command
 
 
-class SetupAppInfoCommand(Command):
-    def __init__(self, app_dir, app_info: AppInfo):
-        super().__init__("desktop entry setup")
+class WriteDeployRecordCommand(Command):
+    def __init__(self, app_dir, deploy_record: dict):
+        super().__init__("deploy record generation")
         self._app_dir = app_dir
-        self._app_info = app_info
+        self._deploy_record = deploy_record
 
     def id(self):
-        return "app-info-setup"
+        return "write-deploy-record"
 
     def __call__(self, *args, **kwargs):
-        icon_bundler = IconBundler(self._app_dir, self._app_info.icon)
-        icon_bundler.bundle_icon()
-
-        desktop_entry_generator = DesktopEntryGenerator(self._app_dir)
-        desktop_entry_generator.generate(self._app_info)
+        path = os.path.join(self._app_dir, ".bundle.yml")
+        with open(path, "w") as f:
+            logging.info(
+                "Writing deploy record to: %s" % os.path.relpath(path, self._app_dir)
+            )
+            yaml = YAML()
+            yaml.dump(self._deploy_record, f)
