@@ -22,6 +22,9 @@ from appimagebuilder.main.commands.run_test_command import RunTestCommand
 from appimagebuilder.main.commands.setup_app_info_command import SetupAppInfoCommand
 from appimagebuilder.main.commands.setup_runtime_command import SetupRuntimeCommand
 from appimagebuilder.main.commands.setup_symlinks_command import SetupSymlinksCommand
+from appimagebuilder.main.commands.write_deploy_record_command import (
+    WriteDeployRecordCommand,
+)
 from appimagebuilder.recipe.roamer import Roamer
 
 
@@ -60,27 +63,26 @@ class Orchestrator:
 
     def _create_app_dir_commands(self, recipe):
         commands = []
+        deploy_record = {}
         app_dir_path = recipe.AppDir.path()
         cache_dir_path = os.path.join(os.getcwd(), self._cache_dir_name)
 
-        self._create_deploy_commands(app_dir_path, cache_dir_path, commands, recipe)
+        commands.extend(
+            self._create_deploy_commands(
+                app_dir_path, cache_dir_path, recipe, deploy_record
+            )
+        )
 
-        self._create_setup_commands(app_dir_path, commands, recipe)
+        commands.extend(self._create_setup_commands(app_dir_path, recipe))
 
-        app_info_section = recipe.AppDir.app_info
-        commands.append(SetupAppInfoCommand(app_dir_path, AppInfo(
-            app_info_section.id(),
-            app_info_section.name(),
-            app_info_section.icon(),
-            app_info_section.version(),
-            app_info_section.exec(),
-            app_info_section.exec_args(),
-        )))
+        commands.append(WriteDeployRecordCommand(app_dir_path, deploy_record))
 
         return commands
 
-    def _create_deploy_commands(self, app_dir_path, cache_dir_path, commands, recipe):
-        # bundle section
+    def _create_deploy_commands(
+        self, app_dir_path, cache_dir_path, recipe, deploy_record
+    ):
+        commands = []
         if recipe.AppDir.before_bundle:
             command = RunShellScriptCommand(
                 "before bundle script", app_dir_path, recipe.AppDir.before_bundle
@@ -89,13 +91,13 @@ class Orchestrator:
         apt_section = recipe.AppDir.apt
         if apt_section:
             command = self._generate_apt_deploy_command(
-                app_dir_path, apt_section, cache_dir_path, {}
+                app_dir_path, apt_section, cache_dir_path, deploy_record
             )
             commands.append(command)
         pacman_section = recipe.AppDir.pacman
         if pacman_section:
             command = self._generate_pacman_deploy_command(
-                app_dir_path, pacman_section, cache_dir_path, {}
+                app_dir_path, pacman_section, cache_dir_path, deploy_record
             )
             commands.append(command)
         files_section = recipe.AppDir.files
@@ -103,7 +105,7 @@ class Orchestrator:
             command = FileDeployCommand(
                 app_dir_path,
                 cache_dir_path,
-                {},
+                deploy_record,
                 files_section.include() or [],
                 files_section.exclude() or [],
             )
@@ -114,7 +116,10 @@ class Orchestrator:
             )
             commands.append(command)
 
-    def _create_setup_commands(self, app_dir_path, commands, recipe):
+        return commands
+
+    def _create_setup_commands(self, app_dir_path, recipe):
+        commands = []
         if recipe.AppDir.before_runtime:
             command = RunShellScriptCommand(
                 "before runtime script", app_dir_path, recipe.AppDir.before_runtime
@@ -126,14 +131,31 @@ class Orchestrator:
 
         commands.append(SetupRuntimeCommand(recipe, finder))
 
+        app_info_section = recipe.AppDir.app_info
+        commands.append(
+            SetupAppInfoCommand(
+                app_dir_path,
+                AppInfo(
+                    app_info_section.id(),
+                    app_info_section.name(),
+                    app_info_section.icon(),
+                    app_info_section.version(),
+                    app_info_section.exec(),
+                    app_info_section.exec_args(),
+                ),
+            )
+        )
+
         if recipe.AppDir.after_runtime:
             command = RunShellScriptCommand(
                 "after runtime script", app_dir_path, recipe.AppDir.after_runtime
             )
             commands.append(command)
 
+        return commands
+
     def _generate_apt_deploy_command(
-            self, app_dir_path, apt_section, cache_dir_path, deploy_record
+        self, app_dir_path, apt_section, cache_dir_path, deploy_record
     ):
         apt_archs = apt_section.arch()
         if isinstance(apt_archs, str):
@@ -160,7 +182,7 @@ class Orchestrator:
         )
 
     def _generate_pacman_deploy_command(
-            self, app_dir_path, pacman_section, cache_dir_path, deploy_record
+        self, app_dir_path, pacman_section, cache_dir_path, deploy_record
     ):
         return PacmanDeployCommand(
             app_dir_path,
