@@ -12,12 +12,14 @@
 import os
 
 from appimagebuilder.common.finder import Finder
+from appimagebuilder.generator.app_info import AppInfo
 from appimagebuilder.main.commands.apt_deploy_command import AptDeployCommand
 from appimagebuilder.main.commands.create_appimage_command import CreateAppImageCommand
 from appimagebuilder.main.commands.file_deploy_command import FileDeployCommand
 from appimagebuilder.main.commands.pacman_deploy_command import PacmanDeployCommand
 from appimagebuilder.main.commands.run_shell_script_command import RunShellScriptCommand
 from appimagebuilder.main.commands.run_test_command import RunTestCommand
+from appimagebuilder.main.commands.setup_app_info_command import SetupAppInfoCommand
 from appimagebuilder.main.commands.setup_runtime_command import SetupRuntimeCommand
 from appimagebuilder.main.commands.setup_symlinks_command import SetupSymlinksCommand
 from appimagebuilder.recipe.roamer import Roamer
@@ -64,6 +66,16 @@ class Orchestrator:
         self._create_deploy_commands(app_dir_path, cache_dir_path, commands, recipe)
 
         self._create_setup_commands(app_dir_path, commands, recipe)
+
+        app_info_section = recipe.AppDir.app_info
+        commands.append(SetupAppInfoCommand(app_dir_path, AppInfo(
+            app_info_section.id(),
+            app_info_section.name(),
+            app_info_section.icon(),
+            app_info_section.version(),
+            app_info_section.exec(),
+            app_info_section.exec_args(),
+        )))
 
         return commands
 
@@ -121,7 +133,7 @@ class Orchestrator:
             commands.append(command)
 
     def _generate_apt_deploy_command(
-        self, app_dir_path, apt_section, cache_dir_path, deploy_record
+            self, app_dir_path, apt_section, cache_dir_path, deploy_record
     ):
         apt_archs = apt_section.arch()
         if isinstance(apt_archs, str):
@@ -148,7 +160,7 @@ class Orchestrator:
         )
 
     def _generate_pacman_deploy_command(
-        self, app_dir_path, pacman_section, cache_dir_path, deploy_record
+            self, app_dir_path, pacman_section, cache_dir_path, deploy_record
     ):
         return PacmanDeployCommand(
             app_dir_path,
