@@ -9,10 +9,10 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.builder.app_info.desktop_entry_generator import (
+from appimagebuilder.builder.setup.desktop_entry_generator import (
     DesktopEntryGenerator,
 )
-from appimagebuilder.builder.app_info.icon_bundler import IconBundler
+from appimagebuilder.builder.setup.icon_bundler import IconBundler
 from appimagebuilder.generator.app_info import AppInfo
 from appimagebuilder.main.commands.command import Command
 
