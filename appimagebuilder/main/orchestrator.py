@@ -12,7 +12,7 @@
 import os
 
 from appimagebuilder.common.finder import Finder
-from appimagebuilder.generator.app_info import AppInfo
+from appimagebuilder.modules.generate.app_info import AppInfo
 from appimagebuilder.main.commands.apt_deploy_command import AptDeployCommand
 from appimagebuilder.main.commands.create_appimage_command import CreateAppImageCommand
 from appimagebuilder.main.commands.file_deploy_command import FileDeployCommand

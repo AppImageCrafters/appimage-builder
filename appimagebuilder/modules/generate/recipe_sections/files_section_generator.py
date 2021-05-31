@@ -12,8 +12,8 @@
 import fnmatch
 
 from appimagebuilder.modules.deploy import FileDeploy
-from appimagebuilder.generator.bundle_info import BundleInfo
-from appimagebuilder.generator.recipe_sections.package_manager_recipe_section_generator import (
+from appimagebuilder.modules.generate.bundle_info import BundleInfo
+from appimagebuilder.modules.generate.recipe_sections.package_manager_recipe_section_generator import (
     PackageManagerSectionGenerator,
 )
 

@@ -12,12 +12,12 @@
 import pathlib
 from unittest import TestCase
 
-from appimagebuilder.generator.app_info import AppInfo
-from appimagebuilder.generator.bundle_info import BundleInfo
+from appimagebuilder.modules.generate.app_info import AppInfo
+from appimagebuilder.modules.generate import BundleInfo
 from appimagebuilder.recipe.schema import RecipeSchema
 from tests.generator.fake_path import FakePath
 from tests.generator.fake_runtime_analyser import FakeAppRuntimeAnalyser
-from appimagebuilder.generator.recipe_generator import RecipeGenerator
+from appimagebuilder.modules.generate import RecipeGenerator
 from tests.generator.fake_bundle_info_gatherer import FakeBundleInfoGatherer
 from tests.generator.fake_package_manager_section_generator import (
     FakePackageManagerSectionGenerator,

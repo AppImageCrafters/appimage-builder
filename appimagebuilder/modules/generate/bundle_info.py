@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import pathlib
 
-from appimagebuilder.generator.app_info import AppInfo
+from appimagebuilder.modules.generate.app_info import AppInfo
 
 
 class BundleInfo:

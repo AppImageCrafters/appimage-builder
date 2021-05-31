@@ -9,7 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.generator.bundle_info_gatherer_ui import BundleInfoGathererUi
+from appimagebuilder.modules.generate.bundle_info_gatherer_ui import BundleInfoGathererUi
 
 
 class FakeBundleInfoGathererUi(BundleInfoGathererUi):

@@ -10,15 +10,14 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import pathlib
-from ruamel.yaml import YAML
 
-from appimagebuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
-from appimagebuilder.generator.bundle_info import BundleInfo
-from appimagebuilder.generator.bundle_info_gatherer import BundleInfoGatherer
-from appimagebuilder.generator.recipe_sections.package_manager_recipe_section_generator import (
+from appimagebuilder.modules.generate.app_runtime_analyser import AppRuntimeAnalyser
+from appimagebuilder.modules.generate.bundle_info import BundleInfo
+from appimagebuilder.modules.generate.bundle_info_gatherer import BundleInfoGatherer
+from appimagebuilder.modules.generate.recipe_sections.package_manager_recipe_section_generator import (
     PackageManagerSectionGenerator,
 )
-from appimagebuilder.generator.recipe_sections.test_section_generator import (
+from appimagebuilder.modules.generate.recipe_sections.test_section_generator import (
     TestSectionGenerator,
 )
 

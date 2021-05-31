@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import questionary
 
-from appimagebuilder.generator.bundle_info_gatherer_ui import BundleInfoGathererUi
+from appimagebuilder.modules.generate.bundle_info_gatherer_ui import BundleInfoGathererUi
 
 
 class BundleInfoGathererCLI(BundleInfoGathererUi):

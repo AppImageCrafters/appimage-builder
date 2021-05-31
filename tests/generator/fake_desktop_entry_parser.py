@@ -9,8 +9,8 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.generator.app_info import AppInfo
-from appimagebuilder.generator.desktop_entry_parser import DesktopEntryParser
+from appimagebuilder.modules.generate.app_info import AppInfo
+from appimagebuilder.modules.generate.desktop_entry_parser import DesktopEntryParser
 
 
 class FakeDesktopEntryParser(DesktopEntryParser):
