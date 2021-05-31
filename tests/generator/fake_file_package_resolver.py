@@ -9,7 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.generator.package_managers.apt import FilePackageResolver
+from appimagebuilder.modules.generate.package_managers.apt import FilePackageResolver
 
 
 class FakeFilePackageResolver(FilePackageResolver):

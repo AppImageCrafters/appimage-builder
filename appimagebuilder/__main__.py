@@ -15,7 +15,7 @@ import logging
 
 from appimagebuilder import recipe
 from appimagebuilder.cli.cli_arguments import CliArguments
-from appimagebuilder.generator.command_generate import CommandGenerate
+from appimagebuilder.modules.generate.command_generate import CommandGenerate
 from appimagebuilder.main.invoker import Invoker
 from appimagebuilder.main.orchestrator import Orchestrator
 

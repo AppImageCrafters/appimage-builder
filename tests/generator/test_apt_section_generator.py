@@ -24,8 +24,8 @@
 import pathlib
 from unittest import TestCase
 
-from appimagebuilder.generator.bundle_info import BundleInfo
-from appimagebuilder.generator.recipe_sections.apt_section_generator import (
+from appimagebuilder.modules.generate import BundleInfo
+from appimagebuilder.modules.generate.recipe_sections.apt_section_generator import (
     AptSectionGenerator,
 )
 from tests.generator.fake_file_package_resolver import FakeFilePackageResolver

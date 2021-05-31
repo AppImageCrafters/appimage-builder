@@ -17,14 +17,14 @@ import shutil
 
 from ruamel.yaml import YAML
 
-from appimagebuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
-from appimagebuilder.generator.bundle_info_gatherer import BundleInfoGatherer
-from appimagebuilder.generator.bundle_info_gatherer_cli import BundleInfoGathererCLI
-from appimagebuilder.generator.desktop_entry_parser import DesktopEntryParser
-from appimagebuilder.generator.package_managers import apt, pacman
-from appimagebuilder.generator.recipe_generator import RecipeGenerator
-from appimagebuilder.generator import recipe_sections
-from appimagebuilder.generator.recipe_sections.files_section_generator import (
+from appimagebuilder.modules.generate.app_runtime_analyser import AppRuntimeAnalyser
+from appimagebuilder.modules.generate.bundle_info_gatherer import BundleInfoGatherer
+from appimagebuilder.modules.generate.bundle_info_gatherer_cli import BundleInfoGathererCLI
+from appimagebuilder.modules.generate.desktop_entry_parser import DesktopEntryParser
+from appimagebuilder.modules.generate.package_managers import apt, pacman
+from appimagebuilder.modules.generate.recipe_generator import RecipeGenerator
+from appimagebuilder.modules.generate import recipe_sections
+from appimagebuilder.modules.generate.recipe_sections.files_section_generator import (
     FilesSectionGenerator,
 )
 

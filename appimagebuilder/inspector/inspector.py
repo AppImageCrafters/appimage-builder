@@ -10,14 +10,12 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import logging
 import os
-import subprocess
 
 from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
 from appimagebuilder.common.appimage_mount import AppImageMount
 from appimagebuilder.common.elf import has_magic_bytes
-from appimagebuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
+from appimagebuilder.modules.generate import AppRuntimeAnalyser
 
 
 class Inspector:

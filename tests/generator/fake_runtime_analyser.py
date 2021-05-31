@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import pathlib
 
-from appimagebuilder.generator.app_runtime_analyser import AppRuntimeAnalyser
+from appimagebuilder.modules.generate import AppRuntimeAnalyser
 
 
 class FakeAppRuntimeAnalyser(AppRuntimeAnalyser):

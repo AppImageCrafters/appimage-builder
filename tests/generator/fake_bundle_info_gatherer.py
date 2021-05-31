@@ -11,8 +11,8 @@
 #  all copies or substantial portions of the Software.
 import pathlib
 
-from appimagebuilder.generator.bundle_info import BundleInfo
-from appimagebuilder.generator.bundle_info_gatherer import BundleInfoGatherer
+from appimagebuilder.modules.generate import BundleInfo
+from appimagebuilder.modules.generate import BundleInfoGatherer
 
 
 class FakeBundleInfoGatherer(BundleInfoGatherer):

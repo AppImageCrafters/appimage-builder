@@ -12,7 +12,7 @@
 import pathlib
 from unittest import TestCase
 
-from appimagebuilder.generator.package_managers.pacman.file_package_resolver import (
+from appimagebuilder.modules.generate.package_managers.pacman.file_package_resolver import (
     FilePackageResolver,
 )
 

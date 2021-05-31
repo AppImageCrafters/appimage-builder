@@ -10,7 +10,7 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-from appimagebuilder.generator.bundle_info import BundleInfo
+from appimagebuilder.modules.generate.bundle_info import BundleInfo
 
 
 class PackageManagerSectionGenerator:
