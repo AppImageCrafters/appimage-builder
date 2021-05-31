@@ -15,11 +15,11 @@ from pathlib import Path
 from unittest import TestCase
 
 from appimagebuilder.common.finder import Finder
-from appimagebuilder.builder.runtime.executables import (
+from appimagebuilder.builder.setup.executables import (
     BinaryExecutable,
     InterpretedExecutable,
 )
-from appimagebuilder.builder.runtime.executables_scanner import ExecutablesScanner
+from appimagebuilder.builder.setup.executables_scanner import ExecutablesScanner
 
 
 class TestExecutablesScanner(TestCase):
