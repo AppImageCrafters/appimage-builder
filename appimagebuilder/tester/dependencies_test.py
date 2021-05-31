@@ -15,7 +15,7 @@ import re
 
 import docker
 
-from appimagebuilder.inspector.inspector import Inspector
+from appimagebuilder.modules.analisys.inspector import Inspector
 from appimagebuilder.tester.errors import TestFailed
 
 

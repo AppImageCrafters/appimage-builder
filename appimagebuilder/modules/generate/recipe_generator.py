@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import pathlib
 
-from appimagebuilder.modules.generate.app_runtime_analyser import AppRuntimeAnalyser
+from appimagebuilder.modules.analisys.app_runtime_analyser import AppRuntimeAnalyser
 from appimagebuilder.modules.generate.bundle_info import BundleInfo
 from appimagebuilder.modules.generate.bundle_info_gatherer import BundleInfoGatherer
 from appimagebuilder.modules.generate.recipe_sections.package_manager_recipe_section_generator import (
