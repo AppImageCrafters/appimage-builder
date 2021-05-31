@@ -14,11 +14,11 @@ import os
 import shutil
 from pathlib import Path
 
-from appimagebuilder.builder.setup.apprun_binaries_resolver import (
+from appimagebuilder.modules.setup.apprun_binaries_resolver import (
     AppRunBinariesResolver,
 )
-from appimagebuilder.builder.setup.environment import Environment
-from appimagebuilder.builder.setup.executables import (
+from appimagebuilder.modules.setup.environment import Environment
+from appimagebuilder.modules.setup.executables import (
     Executable,
     BinaryExecutable,
     InterpretedExecutable,

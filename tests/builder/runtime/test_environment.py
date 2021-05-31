@@ -12,7 +12,7 @@
 
 from unittest import TestCase
 
-from appimagebuilder.builder.setup.environment import Environment
+from appimagebuilder.modules.setup.environment import Environment
 
 
 class TestEnvironment(TestCase):

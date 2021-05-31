@@ -9,7 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.builder.setup.generator import RuntimeGenerator
+from appimagebuilder.modules.setup.generator import RuntimeGenerator
 from appimagebuilder.main.commands.command import Command
 
 

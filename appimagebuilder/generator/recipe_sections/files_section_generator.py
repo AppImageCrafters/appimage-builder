@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import fnmatch
 
-from appimagebuilder.builder.deploy import FileDeploy
+from appimagebuilder.modules.deploy import FileDeploy
 from appimagebuilder.generator.bundle_info import BundleInfo
 from appimagebuilder.generator.recipe_sections.package_manager_recipe_section_generator import (
     PackageManagerSectionGenerator,

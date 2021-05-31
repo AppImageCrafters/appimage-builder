@@ -11,8 +11,8 @@
 #  all copies or substantial portions of the Software.
 from pathlib import Path
 
-from appimagebuilder.builder.deploy.pacman.deploy import Deploy
-from appimagebuilder.builder.deploy.pacman.venv import Venv
+from appimagebuilder.modules.deploy.pacman.deploy import Deploy
+from appimagebuilder.modules.deploy.pacman.venv import Venv
 from appimagebuilder.main.commands.deploy_command import DeployCommand
 
 
