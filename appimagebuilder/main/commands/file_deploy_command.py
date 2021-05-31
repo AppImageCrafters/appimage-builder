@@ -12,7 +12,7 @@
 import pathlib
 import shutil
 
-from appimagebuilder.builder.deploy import FileDeploy
+from appimagebuilder.modules.deploy import FileDeploy
 from appimagebuilder.main.commands.deploy_command import DeployCommand
 
 

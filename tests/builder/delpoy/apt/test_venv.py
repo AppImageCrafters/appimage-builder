@@ -14,7 +14,7 @@ import glob
 import shutil
 from unittest import TestCase
 
-from appimagebuilder.builder.deploy.apt.venv import Venv
+from appimagebuilder.modules.deploy.apt.venv import Venv
 
 
 class TestVenv(TestCase):

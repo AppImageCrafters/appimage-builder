@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import fnmatch
 
-from appimagebuilder.builder.deploy.apt import listings
+from appimagebuilder.modules.deploy.apt import listings
 from appimagebuilder.commands.dpkg_query import DpkgQuery
 
 

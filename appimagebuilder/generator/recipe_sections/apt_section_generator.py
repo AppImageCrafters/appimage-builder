@@ -11,8 +11,8 @@
 #  all copies or substantial portions of the Software.
 import logging
 
-from appimagebuilder.builder import deploy
-from appimagebuilder.builder.deploy.apt import listings as apt_listings
+from appimagebuilder.modules import deploy
+from appimagebuilder.modules.deploy.apt import listings as apt_listings
 from appimagebuilder.generator.bundle_info import BundleInfo
 from appimagebuilder.generator.package_managers.apt.package_filter import PackageFilter
 from appimagebuilder.generator.recipe_sections.package_manager_recipe_section_generator import (

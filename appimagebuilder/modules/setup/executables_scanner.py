@@ -12,7 +12,7 @@
 import logging
 import os
 
-from appimagebuilder.builder.setup.executables import (
+from appimagebuilder.modules.setup.executables import (
     Executable,
     BinaryExecutable,
     InterpretedExecutable,

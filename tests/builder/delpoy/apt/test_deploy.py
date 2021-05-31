@@ -14,8 +14,8 @@ import logging
 import shutil
 from pathlib import Path
 from unittest import TestCase
-from appimagebuilder.builder.deploy.apt import Deploy
-from appimagebuilder.builder.deploy.apt.venv import Venv
+from appimagebuilder.modules.deploy.apt import Deploy
+from appimagebuilder.modules.deploy.apt.venv import Venv
 
 
 class TestDeploy(TestCase):
