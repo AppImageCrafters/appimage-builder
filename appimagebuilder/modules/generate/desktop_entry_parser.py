@@ -14,7 +14,7 @@ import configparser
 import pathlib
 import shlex
 
-from appimagebuilder.modules.generate.app_info import AppInfo
+from appimagebuilder.app_info import AppInfo
 
 
 class DesktopEntryParser:
