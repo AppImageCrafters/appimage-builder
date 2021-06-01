@@ -9,9 +9,10 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+
 import pathlib
 
-from appimagebuilder.modules.generate.app_info import AppInfo
+from appimagebuilder.app_info import AppInfo
 
 
 class BundleInfo:
@@ -28,11 +29,11 @@ class BundleInfo:
     runtime_arch: str
 
     def __init__(
-        self,
-        app_dir: pathlib.Path = None,
-        app_info: AppInfo = None,
-        update_string: str = None,
-        runtime_arch: str = None,
+            self,
+            app_dir: pathlib.Path = None,
+            app_info: AppInfo = None,
+            update_string: str = None,
+            runtime_arch: str = None,
     ):
         self.app_dir = app_dir
         self.app_info = AppInfo() if not app_info else app_info

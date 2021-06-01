@@ -12,7 +12,7 @@
 import pathlib
 from unittest import TestCase
 
-from appimagebuilder.modules.generate.app_info import AppInfo
+from appimagebuilder.app_info import AppInfo
 from appimagebuilder.modules.generate import BundleInfo
 from appimagebuilder.recipe.schema import RecipeSchema
 from tests.generator.fake_path import FakePath

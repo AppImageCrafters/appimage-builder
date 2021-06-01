@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 from unittest import TestCase
 
-from appimagebuilder.modules.generate.app_info import AppInfo
+from appimagebuilder.app_info import AppInfo
 from appimagebuilder.modules.generate import BundleInfo
 from appimagebuilder.modules.generate import BundleInfoGatherer
 from tests.generator.fake_bundle_info_gatherer_ui import FakeBundleInfoGathererUi

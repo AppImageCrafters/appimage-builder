@@ -13,7 +13,7 @@ from appimagebuilder.modules.setup.desktop_entry_generator import (
     DesktopEntryGenerator,
 )
 from appimagebuilder.modules.setup.icon_bundler import IconBundler
-from appimagebuilder.modules.generate.app_info import AppInfo
+from appimagebuilder.app_info import AppInfo
 from appimagebuilder.commands.command import Command
 
 
