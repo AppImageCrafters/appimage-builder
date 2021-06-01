@@ -28,7 +28,6 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "appimage-builder = appimagebuilder.__main__:__main__",
-            "appimage-tester = appimagebuilder.tester.__main__:__main__",
         ]
     },
     url="https://github.com/AppImageCrafters/appimage-builder",
@@ -56,12 +55,7 @@ setuptools.setup(
     ],
     python_requires=">=3.6",
     package_data={
-        "": [
-            "appimagebuilder/generator/templates/apt.yml.in",
-            "appimagebuilder/generator/templates/files.yml.in",
-            "appimagebuilder/tester/utils/entry_point.sh",
-            "appimagebuilder/tester/utils/static_test.sh",
-        ]
+        "": []
     },
     include_package_data=True,
 )

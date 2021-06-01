@@ -17,7 +17,7 @@ from pathlib import Path
 
 import docker
 
-from appimagebuilder.tester.errors import TestFailed
+from appimagebuilder.modules.test.errors import TestFailed
 
 
 class ExecutionTest:

@@ -12,6 +12,9 @@ AppDir:
     version: 17.12.3
     exec: usr/bin/kcalc
 
+  after_runtime:
+    - echo "HI! $USER"
+    - ls
   apt:
     arch: amd64
     sources:
@@ -39,6 +42,7 @@ AppDir:
       - usr/share/doc/*/changelog.*
       - usr/share/doc/*/NEWS.*
       - usr/share/doc/*/TODO.*
+      - usr/share/metainfo/org.kde.kcalc.appdata.xml
   runtime:
     version: "continuous"
 

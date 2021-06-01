@@ -16,7 +16,7 @@ import re
 import docker
 
 from appimagebuilder.modules.analisys.inspector import Inspector
-from appimagebuilder.tester.errors import TestFailed
+from appimagebuilder.modules.test.errors import TestFailed
 
 
 class DependenciesTest:
