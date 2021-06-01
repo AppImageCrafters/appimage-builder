@@ -14,7 +14,7 @@ import os
 
 from .command import Command
 from ...recipe.roamer import Roamer
-from ...tester import ExecutionTest, TestFailed
+from appimagebuilder.modules.test import ExecutionTest, TestFailed
 
 
 class RunTestCommand(Command):
