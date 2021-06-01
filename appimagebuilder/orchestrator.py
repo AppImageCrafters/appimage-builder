@@ -13,16 +13,16 @@ import os
 
 from appimagebuilder.utils.finder import Finder
 from appimagebuilder.app_info import AppInfo
-from appimagebuilder.commands.apt_deploy_command import AptDeployCommand
-from appimagebuilder.commands.create_appimage_command import CreateAppImageCommand
-from appimagebuilder.commands.file_deploy_command import FileDeployCommand
-from appimagebuilder.commands.pacman_deploy_command import PacmanDeployCommand
-from appimagebuilder.commands.run_shell_script_command import RunShellScriptCommand
-from appimagebuilder.commands.run_test_command import RunTestCommand
-from appimagebuilder.commands.setup_app_info_command import SetupAppInfoCommand
-from appimagebuilder.commands.setup_runtime_command import SetupRuntimeCommand
-from appimagebuilder.commands.setup_symlinks_command import SetupSymlinksCommand
-from appimagebuilder.commands.write_deploy_record_command import (
+from appimagebuilder.commands.apt_deploy import AptDeployCommand
+from appimagebuilder.commands.create_appimage import CreateAppImageCommand
+from appimagebuilder.commands.file_deploy import FileDeployCommand
+from appimagebuilder.commands.pacman_deploy import PacmanDeployCommand
+from appimagebuilder.commands.run_shell_script import RunShellScriptCommand
+from appimagebuilder.commands.run_test import RunTestCommand
+from appimagebuilder.commands.setup_app_info import SetupAppInfoCommand
+from appimagebuilder.commands.setup_runtime import SetupRuntimeCommand
+from appimagebuilder.commands.setup_symlinks import SetupSymlinksCommand
+from appimagebuilder.commands.deploy_record import (
     WriteDeployRecordCommand,
 )
 from appimagebuilder.recipe.roamer import Roamer
@@ -34,11 +34,11 @@ class Orchestrator:
     def __init__(self):
         self._cache_dir_name = "appimage-builder-cache"
 
-    def prepare_commands(self, recipe: Roamer, args):
+    def process(self, recipe: Roamer, args):
         if recipe.version() == 1:
             return self._prepare_commands_for_recipe_v1(args, recipe)
 
-        return []
+        raise RuntimeError("Unknown recipe version:  %s" % recipe.version())
 
     def _prepare_commands_for_recipe_v1(self, args, recipe):
         commands = []

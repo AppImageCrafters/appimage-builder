@@ -13,7 +13,7 @@ import argparse
 import os
 
 
-class CliArguments:
+class ArgumentsParser:
     """CLI setup"""
 
     def __init__(self):

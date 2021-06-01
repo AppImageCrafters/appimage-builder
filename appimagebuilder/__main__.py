@@ -1,4 +1,17 @@
 #!/usr/bin/env python3
+
+#  Copyright  2021 Alexis Lopez Zubieta
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+
 #  Copyright  2020 Alexis Lopez Zubieta
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a
@@ -14,15 +27,15 @@
 import logging
 
 from appimagebuilder import recipe
-from appimagebuilder.cli.cli_arguments import CliArguments
+from appimagebuilder.cli.argparse import ArgumentsParser
 from appimagebuilder.modules.generate.command_generate import CommandGenerate
 from appimagebuilder.invoker import Invoker
 from appimagebuilder.orchestrator import Orchestrator
 
 
 def __main__():
-    cli_arguments = CliArguments()
-    args = cli_arguments.parse()
+    parser = ArgumentsParser()
+    args = parser.parse()
 
     _setup_logging_config(args)
 
@@ -38,10 +51,10 @@ def __main__():
     schema.validate(recipe_data)
 
     orchestrator = Orchestrator()
-    tasks = orchestrator.prepare_commands(recipe_data, args)
+    commands = orchestrator.process(recipe_data, args)
 
     invoker = Invoker()
-    invoker.execute(tasks)
+    invoker.execute(commands)
 
 
 def _setup_logging_config(args):

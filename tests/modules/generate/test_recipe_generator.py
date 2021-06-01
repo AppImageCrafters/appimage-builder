@@ -15,11 +15,11 @@ from unittest import TestCase
 from appimagebuilder.app_info import AppInfo
 from appimagebuilder.modules.generate import BundleInfo
 from appimagebuilder.recipe.schema import RecipeSchema
-from tests.generator.fake_path import FakePath
-from tests.generator.fake_runtime_analyser import FakeAppRuntimeAnalyser
+from tests.modules.generate.fake_path import FakePath
+from tests.modules.generate.fake_runtime_analyser import FakeAppRuntimeAnalyser
 from appimagebuilder.modules.generate import RecipeGenerator
-from tests.generator.fake_bundle_info_gatherer import FakeBundleInfoGatherer
-from tests.generator.fake_package_manager_section_generator import (
+from tests.modules.generate.fake_bundle_info_gatherer import FakeBundleInfoGatherer
+from tests.modules.generate.fake_package_manager_section_generator import (
     FakePackageManagerSectionGenerator,
 )
 

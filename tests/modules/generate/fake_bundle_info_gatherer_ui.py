@@ -9,18 +9,23 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.commands.command import Command
+from appimagebuilder.modules.generate.bundle_info_gatherer_ui import (
+    BundleInfoGathererUi,
+)
 
 
-class CreateAppDirCommand(Command):
-    def __init__(self, recipe):
-        super().__init__("AppDir creation")
-        self.recipe = recipe
+class FakeBundleInfoGathererUi(BundleInfoGathererUi):
+    default_result = "fake input"
+    edit_postfix = " edited"
 
-    def id(self):
-        return "build"
+    def ask_text(self, text, default=None):
+        if default:
+            return default + self.edit_postfix
+        else:
+            return self.default_result
 
-    def __call__(self, *args, **kwargs):
-        # creator = Builder(self.recipe)
-        # creator.build()
-        pass
+    def ask_select(self, text, choices, default=None):
+        if default:
+            return default
+        else:
+            return choices[-1]

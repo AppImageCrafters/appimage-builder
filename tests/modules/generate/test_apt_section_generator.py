@@ -28,8 +28,8 @@ from appimagebuilder.modules.generate import BundleInfo
 from appimagebuilder.modules.generate.recipe_sections.apt_section_generator import (
     AptSectionGenerator,
 )
-from tests.generator.fake_file_package_resolver import FakeFilePackageResolver
-from tests.generator.fake_package_repository_resolver import (
+from tests.modules.generate.fake_file_package_resolver import FakeFilePackageResolver
+from tests.modules.generate.fake_package_repository_resolver import (
     FakePackageRepositoryResolver,
 )
 

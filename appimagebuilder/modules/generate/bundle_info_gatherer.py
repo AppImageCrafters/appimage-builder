@@ -12,7 +12,9 @@
 import pathlib
 
 from appimagebuilder.bundle_info import BundleInfo
-from appimagebuilder.modules.generate.bundle_info_gatherer_ui import BundleInfoGathererUi
+from appimagebuilder.modules.generate.bundle_info_gatherer_ui import (
+    BundleInfoGathererUi,
+)
 from appimagebuilder.modules.generate.desktop_entry_parser import DesktopEntryParser
 
 

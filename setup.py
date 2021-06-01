@@ -27,7 +27,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     entry_points={
         "console_scripts": [
-            "appimage-builder = appimagebuilder.cli.__main__:__main__",
+            "appimage-builder = appimagebuilder.__main__:__main__",
         ]
     },
     url="https://github.com/AppImageCrafters/appimage-builder",
@@ -54,8 +54,6 @@ setuptools.setup(
         "roam",
     ],
     python_requires=">=3.6",
-    package_data={
-        "": []
-    },
+    package_data={"": []},
     include_package_data=True,
 )
