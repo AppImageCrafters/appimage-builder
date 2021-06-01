@@ -13,7 +13,7 @@ from pathlib import Path
 
 from appimagebuilder.modules.deploy.pacman.deploy import Deploy
 from appimagebuilder.modules.deploy.pacman.venv import Venv
-from appimagebuilder.main.commands.deploy_command import DeployCommand
+from appimagebuilder.commands.deploy_command import DeployCommand
 
 
 class PacmanDeployCommand(DeployCommand):

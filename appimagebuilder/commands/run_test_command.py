@@ -13,7 +13,7 @@ import logging
 import os
 
 from .command import Command
-from ...recipe.roamer import Roamer
+from appimagebuilder.recipe.roamer import Roamer
 from appimagebuilder.modules.test import ExecutionTest, TestFailed
 
 

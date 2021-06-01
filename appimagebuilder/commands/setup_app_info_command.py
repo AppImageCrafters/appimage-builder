@@ -14,7 +14,7 @@ from appimagebuilder.modules.setup.desktop_entry_generator import (
 )
 from appimagebuilder.modules.setup.icon_bundler import IconBundler
 from appimagebuilder.modules.generate.app_info import AppInfo
-from appimagebuilder.main.commands.command import Command
+from appimagebuilder.commands.command import Command
 
 
 class SetupAppInfoCommand(Command):

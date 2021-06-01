@@ -13,7 +13,7 @@ import os
 import pathlib
 
 from appimagebuilder.utils.finder import Finder
-from appimagebuilder.main.commands.command import Command
+from appimagebuilder.commands.command import Command
 
 
 class SetupSymlinksCommand(Command):

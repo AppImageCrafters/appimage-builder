@@ -9,19 +9,18 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.modules.appimage import AppImageCreator
-from appimagebuilder.main.commands.command import Command
-from appimagebuilder.recipe.roamer import Roamer
+from appimagebuilder.commands.command import Command
 
 
-class CreateAppImageCommand(Command):
-    def __init__(self, recipe: Roamer):
-        super().__init__("AppImage creation")
-        self.recipe = recipe
+class DeployCommand(Command):
+    """
+    Command used to deploy files into the AppDir
 
-    def id(self):
-        super().id()
+    Thees command must log the deployed files their sources into the deploy record.
+    """
 
-    def __call__(self, *args, **kwargs):
-        creator = AppImageCreator(self.recipe)
-        creator.create()
+    def __init__(self, description, app_dir, cache_dir, deploy_record):
+        super().__init__(description)
+        self._app_dir = app_dir
+        self._cache_dir = cache_dir
+        self._deploy_record = deploy_record
