@@ -14,14 +14,14 @@ import logging
 import uuid
 from pathlib import Path
 
-from appimagebuilder.common.finder import Finder
+from appimagebuilder.utils.finder import Finder
 from . import helpers
 from .apprun_binaries_resolver import AppRunBinariesResolver
 from .environment import Environment
 from .executables import BinaryExecutable, InterpretedExecutable
 from .executables_scanner import ExecutablesScanner
 from .executables_wrapper import ExecutablesWrapper
-from ...common.elf import get_arch
+from ...utils.elf import get_arch
 
 
 class RuntimeGeneratorError(RuntimeError):

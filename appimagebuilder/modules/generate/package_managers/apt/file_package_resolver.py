@@ -12,7 +12,7 @@
 import logging
 import subprocess
 
-from appimagebuilder.common import shell
+from appimagebuilder.utils import shell
 
 CLI_REQUIRE = ["dpkg-query"]
 

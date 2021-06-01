@@ -17,8 +17,8 @@ from appimagebuilder.modules.setup.executables import (
     BinaryExecutable,
     InterpretedExecutable,
 )
-from appimagebuilder.common import elf
-from appimagebuilder.common.finder import Finder
+from appimagebuilder.utils import elf
+from appimagebuilder.utils.finder import Finder
 
 
 class MissingInterpreterError(RuntimeError):

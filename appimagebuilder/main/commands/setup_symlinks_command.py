@@ -12,7 +12,7 @@
 import os
 import pathlib
 
-from appimagebuilder.common.finder import Finder
+from appimagebuilder.utils.finder import Finder
 from appimagebuilder.main.commands.command import Command
 
 

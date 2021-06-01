@@ -24,7 +24,7 @@
 import pathlib
 from unittest import TestCase
 
-from appimagebuilder.common.finder import Finder
+from appimagebuilder.utils.finder import Finder
 
 
 class TestFinder(TestCase):

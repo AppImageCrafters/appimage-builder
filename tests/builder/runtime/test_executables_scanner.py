@@ -14,7 +14,7 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from appimagebuilder.common.finder import Finder
+from appimagebuilder.utils.finder import Finder
 from appimagebuilder.modules.setup.executables import (
     BinaryExecutable,
     InterpretedExecutable,

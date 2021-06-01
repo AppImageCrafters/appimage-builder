@@ -10,7 +10,7 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-from appimagebuilder.common.finder import Finder
+from appimagebuilder.utils.finder import Finder
 
 
 class BaseHelper:

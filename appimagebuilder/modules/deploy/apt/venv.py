@@ -19,7 +19,7 @@ import subprocess
 from pathlib import Path
 from urllib import request
 
-from appimagebuilder.common import shell
+from appimagebuilder.utils import shell
 from .package import Package
 
 DEPENDS_ON = ["dpkg-deb", "apt-get", "apt-key", "fakeroot", "apt-cache"]

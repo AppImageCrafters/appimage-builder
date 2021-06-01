@@ -15,7 +15,7 @@ import pathlib
 import re
 import subprocess
 
-from appimagebuilder.common import shell
+from appimagebuilder.utils import shell
 
 
 class FilePackageResolver:

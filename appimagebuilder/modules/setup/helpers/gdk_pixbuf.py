@@ -15,7 +15,7 @@ import re
 import subprocess
 import shutil
 
-from appimagebuilder.common.finder import Finder
+from appimagebuilder.utils.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 

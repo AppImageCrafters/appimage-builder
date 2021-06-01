@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from appimagebuilder.common import shell
+from appimagebuilder.utils import shell
 
 DEPENDS_ON = ["bsdtar", "pacman", "pacman-key", "fakeroot", "gpg-agent"]
 

@@ -12,7 +12,7 @@
 import logging
 import os
 
-from appimagebuilder.common.finder import Finder
+from appimagebuilder.utils.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 
