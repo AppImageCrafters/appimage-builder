@@ -27,7 +27,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     entry_points={
         "console_scripts": [
-            "appimage-builder = appimagebuilder.__main__:__main__",
+            "appimage-builder = appimagebuilder.cli.__main__:__main__",
         ]
     },
     url="https://github.com/AppImageCrafters/appimage-builder",
