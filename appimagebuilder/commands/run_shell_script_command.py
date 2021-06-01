@@ -14,7 +14,7 @@ import os
 import subprocess
 import tempfile
 
-from appimagebuilder.main.commands.command import Command
+from appimagebuilder.commands.command import Command
 from appimagebuilder.recipe.roamer import Roamer
 
 

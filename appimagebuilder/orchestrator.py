@@ -9,20 +9,32 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+
+#  Copyright  2021 Alexis Lopez Zubieta
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
 import os
 
 from appimagebuilder.utils.finder import Finder
 from appimagebuilder.modules.generate.app_info import AppInfo
-from appimagebuilder.main.commands.apt_deploy_command import AptDeployCommand
-from appimagebuilder.main.commands.create_appimage_command import CreateAppImageCommand
-from appimagebuilder.main.commands.file_deploy_command import FileDeployCommand
-from appimagebuilder.main.commands.pacman_deploy_command import PacmanDeployCommand
-from appimagebuilder.main.commands.run_shell_script_command import RunShellScriptCommand
-from appimagebuilder.main.commands.run_test_command import RunTestCommand
-from appimagebuilder.main.commands.setup_app_info_command import SetupAppInfoCommand
-from appimagebuilder.main.commands.setup_runtime_command import SetupRuntimeCommand
-from appimagebuilder.main.commands.setup_symlinks_command import SetupSymlinksCommand
-from appimagebuilder.main.commands.write_deploy_record_command import (
+from appimagebuilder.commands.apt_deploy_command import AptDeployCommand
+from appimagebuilder.commands.create_appimage_command import CreateAppImageCommand
+from appimagebuilder.commands.file_deploy_command import FileDeployCommand
+from appimagebuilder.commands.pacman_deploy_command import PacmanDeployCommand
+from appimagebuilder.commands.run_shell_script_command import RunShellScriptCommand
+from appimagebuilder.commands.run_test_command import RunTestCommand
+from appimagebuilder.commands.setup_app_info_command import SetupAppInfoCommand
+from appimagebuilder.commands.setup_runtime_command import SetupRuntimeCommand
+from appimagebuilder.commands.setup_symlinks_command import SetupSymlinksCommand
+from appimagebuilder.commands.write_deploy_record_command import (
     WriteDeployRecordCommand,
 )
 from appimagebuilder.recipe.roamer import Roamer

@@ -9,26 +9,18 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import pathlib
-import shutil
-
-from appimagebuilder.modules.deploy import FileDeploy
-from appimagebuilder.main.commands.deploy_command import DeployCommand
+from appimagebuilder.commands.command import Command
 
 
-class FileDeployCommand(DeployCommand):
-    def __init__(self, app_dir, cache_dir, deploy_record, paths, exclude):
-        super().__init__("file deploy", app_dir, cache_dir, deploy_record)
-        self._paths = paths
-        self._exclude = exclude
+class CreateAppDirCommand(Command):
+    def __init__(self, recipe):
+        super().__init__("AppDir creation")
+        self.recipe = recipe
 
     def id(self):
-        return "file-deploy"
+        return "build"
 
     def __call__(self, *args, **kwargs):
-        helper = FileDeploy(self._app_dir)
-        if self._paths:
-            helper.deploy(self._paths)
-
-        if self._exclude:
-            helper.clean(self._exclude)
+        # creator = Builder(self.recipe)
+        # creator.build()
+        pass

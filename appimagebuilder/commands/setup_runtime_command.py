@@ -9,3 +9,19 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+from appimagebuilder.modules.setup.generator import RuntimeGenerator
+from appimagebuilder.commands.command import Command
+
+
+class SetupRuntimeCommand(Command):
+    def __init__(self, recipe, finder):
+        super().__init__("runtime setup")
+        self._recipe = recipe
+        self._finder = finder
+
+    def id(self):
+        return "runtime-setup"
+
+    def __call__(self, *args, **kwargs):
+        runtime = RuntimeGenerator(self._recipe, self._finder)
+        runtime.generate()

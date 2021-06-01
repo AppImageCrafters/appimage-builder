@@ -9,28 +9,24 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import logging
-import os
 
-from ruamel.yaml import YAML
-
-from appimagebuilder.main.commands.command import Command
+from appimagebuilder.modules.deploy import FileDeploy
+from appimagebuilder.commands.deploy_command import DeployCommand
 
 
-class WriteDeployRecordCommand(Command):
-    def __init__(self, app_dir, deploy_record: dict):
-        super().__init__("deploy record generation")
-        self._app_dir = app_dir
-        self._deploy_record = deploy_record
+class FileDeployCommand(DeployCommand):
+    def __init__(self, app_dir, cache_dir, deploy_record, paths, exclude):
+        super().__init__("file deploy", app_dir, cache_dir, deploy_record)
+        self._paths = paths
+        self._exclude = exclude
 
     def id(self):
-        return "write-deploy-record"
+        return "file-deploy"
 
     def __call__(self, *args, **kwargs):
-        path = os.path.join(self._app_dir, ".bundle.yml")
-        with open(path, "w") as f:
-            logging.info(
-                "Writing deploy record to: %s" % os.path.relpath(path, self._app_dir)
-            )
-            yaml = YAML()
-            yaml.dump(self._deploy_record, f)
+        helper = FileDeploy(self._app_dir)
+        if self._paths:
+            helper.deploy(self._paths)
+
+        if self._exclude:
+            helper.clean(self._exclude)
