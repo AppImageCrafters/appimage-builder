@@ -14,9 +14,9 @@ from unittest import TestCase
 from appimagebuilder.app_info import AppInfo
 from appimagebuilder.modules.generate import BundleInfo
 from appimagebuilder.modules.generate import BundleInfoGatherer
-from tests.generator.fake_bundle_info_gatherer_ui import FakeBundleInfoGathererUi
-from tests.generator.fake_desktop_entry_parser import FakeDesktopEntryParser
-from tests.generator.fake_path import FakePath
+from tests.modules.generate.fake_bundle_info_gatherer_ui import FakeBundleInfoGathererUi
+from tests.modules.generate.fake_desktop_entry_parser import FakeDesktopEntryParser
+from tests.modules.generate.fake_path import FakePath
 
 
 class TestBundleInfoGatherer(TestCase):

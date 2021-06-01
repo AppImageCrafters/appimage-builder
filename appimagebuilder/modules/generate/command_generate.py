@@ -19,7 +19,9 @@ from ruamel.yaml import YAML
 
 from appimagebuilder.modules.analisys.app_runtime_analyser import AppRuntimeAnalyser
 from appimagebuilder.modules.generate.bundle_info_gatherer import BundleInfoGatherer
-from appimagebuilder.modules.generate.bundle_info_gatherer_cli import BundleInfoGathererCLI
+from appimagebuilder.modules.generate.bundle_info_gatherer_cli import (
+    BundleInfoGathererCLI,
+)
 from appimagebuilder.modules.generate.desktop_entry_parser import DesktopEntryParser
 from appimagebuilder.modules.generate.package_managers import apt, pacman
 from appimagebuilder.modules.generate.recipe_generator import RecipeGenerator
