@@ -14,8 +14,8 @@ import logging
 import os
 import pathlib
 
-import appimagebuilder.common.elf
-from appimagebuilder.common import shell
+import appimagebuilder.utils.elf
+from appimagebuilder.utils import shell
 
 
 class Finder:
@@ -50,14 +50,14 @@ class Finder:
     @staticmethod
     def is_elf(path: pathlib.Path):
         try:
-            return appimagebuilder.common.elf.has_magic_bytes(path)
+            return appimagebuilder.utils.elf.has_magic_bytes(path)
         except RuntimeError:
             return False
 
     @staticmethod
     def is_elf_shared_lib(path: pathlib.Path):
         try:
-            return appimagebuilder.common.elf.has_soname(path)
+            return appimagebuilder.utils.elf.has_soname(path)
         except shell.CommandNotFoundError:
             raise
         except RuntimeError:
@@ -66,7 +66,7 @@ class Finder:
     @staticmethod
     def is_dynamically_linked_executable(path: pathlib.Path):
         try:
-            return appimagebuilder.common.elf.has_start_symbol(path)
+            return appimagebuilder.utils.elf.has_start_symbol(path)
         except shell.CommandNotFoundError:
             raise
         except:

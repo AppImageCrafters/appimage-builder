@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import subprocess
 
-from appimagebuilder.common import shell
+from appimagebuilder.utils import shell
 
 
 def has_magic_bytes(path):

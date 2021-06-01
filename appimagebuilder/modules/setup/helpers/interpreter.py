@@ -17,7 +17,7 @@ from functools import reduce
 from packaging import version
 
 from appimagebuilder.gateways.patchelf import PatchElf, PatchElfError
-from appimagebuilder.common.finder import Finder
+from appimagebuilder.utils.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
 

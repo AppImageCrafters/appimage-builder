@@ -24,7 +24,7 @@
 
 from unittest import TestCase
 
-from appimagebuilder.common import shell
+from appimagebuilder.utils import shell
 
 
 class TestShell(TestCase):

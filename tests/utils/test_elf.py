@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from appimagebuilder.common.elf import get_arch
+from appimagebuilder.utils.elf import get_arch
 
 
 class Test(TestCase):

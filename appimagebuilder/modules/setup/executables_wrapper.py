@@ -23,7 +23,7 @@ from appimagebuilder.modules.setup.executables import (
     BinaryExecutable,
     InterpretedExecutable,
 )
-from appimagebuilder.common import file_utils
+from appimagebuilder.utils import file_utils
 
 
 class ExecutablesWrapper:

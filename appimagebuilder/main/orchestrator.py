@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from appimagebuilder.common.finder import Finder
+from appimagebuilder.utils.finder import Finder
 from appimagebuilder.modules.generate.app_info import AppInfo
 from appimagebuilder.main.commands.apt_deploy_command import AptDeployCommand
 from appimagebuilder.main.commands.create_appimage_command import CreateAppImageCommand
