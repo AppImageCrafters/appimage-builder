@@ -37,7 +37,7 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
+from appimagebuilder.gateways.patchelf import PatchElf, PatchElfError
 from appimagebuilder.common.appimage_mount import AppImageMount
 from appimagebuilder.common.elf import has_magic_bytes
 from appimagebuilder.modules.analisys.app_runtime_analyser import AppRuntimeAnalyser

@@ -11,15 +11,12 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
-import pathlib
 import re
-import stat
-from distutils.command.check import check
 from functools import reduce
 
 from packaging import version
 
-from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
+from appimagebuilder.gateways.patchelf import PatchElf, PatchElfError
 from appimagebuilder.common.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment

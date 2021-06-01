@@ -16,8 +16,8 @@ import pathlib
 import re
 import subprocess
 
-from appimagebuilder.commands.patchelf import PatchElf, PatchElfError
-from appimagebuilder.common import shell, elf
+from appimagebuilder.gateways.patchelf import PatchElf, PatchElfError
+from appimagebuilder.common import shell
 from appimagebuilder.common.finder import Finder
 
 DEPENDS_ON = ["strace", "patchelf"]

@@ -13,8 +13,8 @@ import fnmatch
 import os
 
 from appimagebuilder.modules.deploy.apt import listings
-from appimagebuilder.commands.dpkg_architecture import DpkgArchitecture
-from appimagebuilder.commands.dpkg_query import DpkgQuery
+from appimagebuilder.gateways.dpkg_architecture import DpkgArchitecture
+from appimagebuilder.gateways.dpkg_query import DpkgQuery
 
 
 class AptRecipeGenerator:
