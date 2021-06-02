@@ -11,24 +11,23 @@
 #  all copies or substantial portions of the Software.
 from pathlib import Path
 
+from appimagebuilder.commands import Command
+from appimagebuilder.context import Context
 from appimagebuilder.modules.deploy.pacman.deploy import Deploy
 from appimagebuilder.modules.deploy.pacman.venv import Venv
-from appimagebuilder.commands.deploy_command import DeployCommand
 
 
-class PacmanDeployCommand(DeployCommand):
+class PacmanDeployCommand(Command):
     def __init__(
         self,
-        app_dir: str,
-        cache_dir: str,
-        deploy_record,
+        context: Context,
         packages: [str],
         exclude: [str],
         architecture: str,
         repositories: [str],
         options: dict,
     ):
-        super().__init__("pacman deploy", app_dir, cache_dir, deploy_record)
+        super().__init__(context, "pacman deploy")
 
         self._packages = packages
         self._exclude = exclude
@@ -41,7 +40,7 @@ class PacmanDeployCommand(DeployCommand):
 
     def __call__(self, *args, **kwargs):
         venv = Venv(
-            root=Path(self._cache_dir) / "pacman",
+            root=Path(self.context.cache_dir) / "pacman",
             repositories=self._repositories,
             architecture=self._architecture,
             user_options=self._options,
@@ -49,8 +48,8 @@ class PacmanDeployCommand(DeployCommand):
 
         pacman_deploy = Deploy(venv)
         deployed_packages = pacman_deploy.deploy(
-            self._packages, self._app_dir, self._exclude
+            self._packages, self.context.app_dir, self._exclude
         )
-        self._deploy_record["pacman"] = {
+        self.context.record["pacman"] = {
             "packages": deployed_packages,
         }

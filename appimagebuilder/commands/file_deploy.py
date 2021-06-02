@@ -9,14 +9,14 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-
+from appimagebuilder.commands import Command
+from appimagebuilder.context import Context
 from appimagebuilder.modules.deploy import FileDeploy
-from appimagebuilder.commands.deploy_command import DeployCommand
 
 
-class FileDeployCommand(DeployCommand):
-    def __init__(self, app_dir, cache_dir, deploy_record, paths, exclude):
-        super().__init__("file deploy", app_dir, cache_dir, deploy_record)
+class FileDeployCommand(Command):
+    def __init__(self, context: Context, paths, exclude):
+        super().__init__(context, "file deploy")
         self._paths = paths
         self._exclude = exclude
 
@@ -24,7 +24,7 @@ class FileDeployCommand(DeployCommand):
         return "file-deploy"
 
     def __call__(self, *args, **kwargs):
-        helper = FileDeploy(self._app_dir)
+        helper = FileDeploy(str(self.context.app_dir))
         if self._paths:
             helper.deploy(self._paths)
 

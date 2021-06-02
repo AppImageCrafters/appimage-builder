@@ -9,12 +9,14 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+from appimagebuilder.context import Context
 
 
 class Command:
     """Represent a single action in the AppImage creation process"""
 
-    def __init__(self, description):
+    def __init__(self, context: Context, description):
+        self.context = context
         self.description = description
 
     def id(self):

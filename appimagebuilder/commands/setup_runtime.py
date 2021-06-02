@@ -14,8 +14,8 @@ from appimagebuilder.commands.command import Command
 
 
 class SetupRuntimeCommand(Command):
-    def __init__(self, recipe, finder):
-        super().__init__("runtime setup")
+    def __init__(self, context, recipe, finder):
+        super().__init__(context, "runtime setup")
         self._recipe = recipe
         self._finder = finder
 

@@ -17,9 +17,8 @@ from appimagebuilder.commands.command import Command
 
 
 class SetupSymlinksCommand(Command):
-    def __init__(self, app_dir, finder: Finder):
-        super().__init__("symlinks setup")
-        self._app_dir = pathlib.Path(app_dir)
+    def __init__(self, context, finder: Finder):
+        super().__init__(context, "symlinks setup")
         self._finder = finder
 
     def id(self):
@@ -28,9 +27,9 @@ class SetupSymlinksCommand(Command):
     def __call__(self, *args, **kwargs):
         for link in self._finder.find("*", [Finder.is_symlink]):
             relative_root = (
-                self._app_dir
+                self.context.app_dir
                 if "opt/libc" not in str(link)
-                else self._app_dir / "opt" / "libc"
+                else self.context.app_dir / "opt" / "libc"
             )
             self._make_symlink_relative(link, relative_root)
 

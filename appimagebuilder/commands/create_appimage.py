@@ -15,8 +15,8 @@ from appimagebuilder.recipe.roamer import Roamer
 
 
 class CreateAppImageCommand(Command):
-    def __init__(self, recipe: Roamer):
-        super().__init__("AppImage creation")
+    def __init__(self, context, recipe: Roamer):
+        super().__init__(context, "AppImage creation")
         self.recipe = recipe
 
     def id(self):

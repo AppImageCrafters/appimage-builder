@@ -18,19 +18,18 @@ from appimagebuilder.commands.command import Command
 
 
 class WriteDeployRecordCommand(Command):
-    def __init__(self, app_dir, deploy_record: dict):
-        super().__init__("deploy record generation")
-        self._app_dir = app_dir
-        self._deploy_record = deploy_record
+    def __init__(self, context):
+        super().__init__(context, "deploy record generation")
 
     def id(self):
         return "write-deploy-record"
 
     def __call__(self, *args, **kwargs):
-        path = os.path.join(self._app_dir, ".bundle.yml")
+        path = self.context.app_dir / ".bundle.yml"
         with open(path, "w") as f:
             logging.info(
-                "Writing deploy record to: %s" % os.path.relpath(path, self._app_dir)
+                "Writing deploy record to: %s"
+                % os.path.relpath(path, self.context.app_dir)
             )
             yaml = YAML()
-            yaml.dump(self._deploy_record, f)
+            yaml.dump(self.context.record, f)

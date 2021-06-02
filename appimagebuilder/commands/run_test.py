@@ -15,12 +15,13 @@ import os
 from .command import Command
 from appimagebuilder.recipe.roamer import Roamer
 from appimagebuilder.modules.test import ExecutionTest, TestFailed
+from ..context import Context
 
 
 class RunTestCommand(Command):
-    def __init__(self, app_dir: str, tests_settings: Roamer):
-        super().__init__("AppDir tests")
-        self.app_dir = os.path.abspath(app_dir)
+    def __init__(self, context: Context, tests_settings: Roamer):
+        super().__init__(context, "AppDir tests")
+        self.app_dir = context.app_dir
         self.tests_settings = tests_settings
 
     def id(self):

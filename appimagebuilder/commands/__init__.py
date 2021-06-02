@@ -11,8 +11,6 @@
 #  all copies or substantial portions of the Software.
 
 from .command import Command
-from .deploy_command import DeployCommand
-
 from .apt_deploy import AptDeployCommand
 from .create_appimage import CreateAppImageCommand
 from .deploy_record import WriteDeployRecordCommand
