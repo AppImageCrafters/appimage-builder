@@ -15,6 +15,7 @@ import subprocess
 import tempfile
 
 from appimagebuilder.commands.command import Command
+from appimagebuilder.context import Context
 from appimagebuilder.recipe.roamer import Roamer
 
 
@@ -24,10 +25,9 @@ class RunShellScriptCommand(Command):
     variables
     """
 
-    def __init__(self, description, app_dir: str, instructions: Roamer, env=None):
-        super().__init__(description)
+    def __init__(self, context: Context, description, instructions: Roamer, env=None):
+        super().__init__(context, description)
 
-        self.app_dir = app_dir
         self.instructions = instructions
 
         if not env:
@@ -53,7 +53,7 @@ class RunShellScriptCommand(Command):
 
         with tempfile.NamedTemporaryFile() as exported_env:
             run_env["BUILDER_ENV"] = exported_env.name
-            run_env["APPDIR"] = self.app_dir
+            run_env["APPDIR"] = str(self.context.app_dir)
 
             _proc = subprocess.Popen(
                 ["bash", "-ve"], stdin=subprocess.PIPE, env=run_env

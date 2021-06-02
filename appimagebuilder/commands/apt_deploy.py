@@ -11,16 +11,15 @@
 #  all copies or substantial portions of the Software.
 from pathlib import Path
 
+from appimagebuilder.commands import Command
+from appimagebuilder.context import Context
 from appimagebuilder.modules.deploy.apt import Deploy, Venv
-from appimagebuilder.commands.deploy_command import DeployCommand
 
 
-class AptDeployCommand(DeployCommand):
+class AptDeployCommand(Command):
     def __init__(
         self,
-        app_dir: str,
-        cache_dir: str,
-        deploy_record: {},
+        context: Context,
         packages: [str],
         exclude: [str] = None,
         architectures: [str] = None,
@@ -28,7 +27,7 @@ class AptDeployCommand(DeployCommand):
         keys: [str] = None,
         allow_unauthenticated: str = None,
     ):
-        super().__init__("apt deploy", app_dir, cache_dir, deploy_record)
+        super().__init__(context, "apt deploy")
         self.packages = packages
         self._exclude = exclude
         self._allow_unauthenticated = allow_unauthenticated
@@ -45,10 +44,10 @@ class AptDeployCommand(DeployCommand):
         apt_deploy = Deploy(apt_venv)
 
         deployed_packages = apt_deploy.deploy(
-            self.packages, self._app_dir, self._exclude
+            self.packages, self.context.app_dir, self._exclude
         )
 
-        self._deploy_record["apt"] = {
+        self.context.record["apt"] = {
             "sources": apt_venv.sources,
             "packages": deployed_packages,
         }
@@ -59,7 +58,7 @@ class AptDeployCommand(DeployCommand):
             "Acquire::AllowInsecureRepositories": self._allow_unauthenticated,
         }
         apt_venv = Venv(
-            str(Path(self._cache_dir) / "apt"),
+            str(Path(self.context.cache_dir) / "apt"),
             self._sources,
             self._keys,
             self._architectures,

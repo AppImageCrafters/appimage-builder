@@ -9,10 +9,32 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-
 import pathlib
 
-from appimagebuilder.app_info import AppInfo
+
+class AppInfo:
+    id: str
+    name: str
+    icon: str
+    version: str
+    exec: str
+    exec_args: str
+
+    def __init__(
+        self,
+        id: str = None,
+        name: str = None,
+        icon: str = None,
+        version: str = None,
+        exec: str = None,
+        exec_args: str = None,
+    ):
+        self.id = id
+        self.name = name
+        self.icon = icon
+        self.version = version
+        self.exec = exec
+        self.exec_args = exec_args
 
 
 class BundleInfo:
@@ -28,15 +50,47 @@ class BundleInfo:
     # appimage runtime arch
     runtime_arch: str
 
+    # sign key to be used
+    sign_key: str
+
+    # resulting file name
+    file_name: str
+
     def __init__(
         self,
         app_dir: pathlib.Path = None,
         app_info: AppInfo = None,
         update_string: str = None,
         runtime_arch: str = None,
+        sign_key: str = None,
+        file_name: str = None,
     ):
         self.app_dir = app_dir
         self.app_info = AppInfo() if not app_info else app_info
 
         self.update_string = update_string
         self.runtime_arch = runtime_arch
+        self.sign_key = sign_key
+        self.file_name = file_name
+
+
+class Context:
+    """Define a context for commands"""
+
+    app_info: AppInfo
+    bundle_info: BundleInfo
+
+    app_dir: pathlib.Path
+    cache_dir: pathlib.Path
+
+    # Used by command to register their actions
+    record: dict
+
+    def __init__(
+        self, app_info, bundle_info, app_dir: pathlib.Path, cache_dir: pathlib.Path
+    ):
+        self.app_info = app_info
+        self.bundle_info = bundle_info
+        self.app_dir = app_dir.absolute()
+        self.cache_dir = cache_dir.absolute()
+        self.record = {}

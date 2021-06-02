@@ -10,9 +10,10 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import os
+import pathlib
 
 from appimagebuilder.utils.finder import Finder
-from appimagebuilder.app_info import AppInfo
+from appimagebuilder.context import AppInfo, Context, BundleInfo
 from appimagebuilder.commands.apt_deploy import AptDeployCommand
 from appimagebuilder.commands.create_appimage import CreateAppImageCommand
 from appimagebuilder.commands.file_deploy import FileDeployCommand
@@ -41,122 +42,91 @@ class Orchestrator:
         raise RuntimeError("Unknown recipe version:  %s" % recipe.version())
 
     def _prepare_commands_for_recipe_v1(self, args, recipe):
+        context = self._extract_v1_recipe_context(args, recipe)
         commands = []
         if not args.skip_script:
-            command = RunShellScriptCommand(
-                "main script", recipe.AppDir.path(), recipe.script
-            )
+            command = RunShellScriptCommand(context, "main script", recipe.script)
             commands.append(command)
 
         if not args.skip_build:
-            commands.extend(self._create_app_dir_commands(recipe))
+            commands.extend(self._create_app_dir_commands(context, recipe))
 
         if not args.skip_tests and recipe.AppDir.test:
-            command = RunTestCommand(recipe.AppDir.path(), recipe.AppDir.test)
+            command = RunTestCommand(context, recipe.AppDir.test)
             commands.append(command)
 
         if not args.skip_appimage:
-            command = CreateAppImageCommand(recipe)
+            command = CreateAppImageCommand(context, recipe)
             commands.append(command)
 
         return commands
 
-    def _create_app_dir_commands(self, recipe):
+    def _create_app_dir_commands(self, context, recipe):
         commands = []
-        deploy_record = {}
-        app_dir_path = recipe.AppDir.path()
-        cache_dir_path = os.path.join(os.getcwd(), self._cache_dir_name)
 
-        commands.extend(
-            self._create_deploy_commands(
-                app_dir_path, cache_dir_path, recipe, deploy_record
-            )
-        )
+        commands.extend(self._create_deploy_commands(context, recipe))
 
-        commands.extend(self._create_setup_commands(app_dir_path, recipe))
+        commands.extend(self._create_setup_commands(context, recipe))
 
-        commands.append(WriteDeployRecordCommand(app_dir_path, deploy_record))
+        commands.append(WriteDeployRecordCommand(context))
 
         return commands
 
-    def _create_deploy_commands(
-        self, app_dir_path, cache_dir_path, recipe, deploy_record
-    ):
+    def _create_deploy_commands(self, context, recipe):
         commands = []
         if recipe.AppDir.before_bundle:
             command = RunShellScriptCommand(
-                "before bundle script", app_dir_path, recipe.AppDir.before_bundle
+                context, "before bundle script", recipe.AppDir.before_bundle
             )
             commands.append(command)
         apt_section = recipe.AppDir.apt
         if apt_section:
-            command = self._generate_apt_deploy_command(
-                app_dir_path, apt_section, cache_dir_path, deploy_record
-            )
+            command = self._generate_apt_deploy_command(context, apt_section)
             commands.append(command)
         pacman_section = recipe.AppDir.pacman
         if pacman_section:
-            command = self._generate_pacman_deploy_command(
-                app_dir_path, pacman_section, cache_dir_path, deploy_record
-            )
+            command = self._generate_pacman_deploy_command(context, pacman_section)
             commands.append(command)
         files_section = recipe.AppDir.files
         if files_section:
             command = FileDeployCommand(
-                app_dir_path,
-                cache_dir_path,
-                deploy_record,
+                context,
                 files_section.include() or [],
                 files_section.exclude() or [],
             )
             commands.append(command)
         if recipe.AppDir.after_bundle:
             command = RunShellScriptCommand(
-                "after bundle script", app_dir_path, recipe.AppDir.after_bundle
+                context, "after bundle script", recipe.AppDir.after_bundle
             )
             commands.append(command)
 
         return commands
 
-    def _create_setup_commands(self, app_dir_path, recipe):
+    def _create_setup_commands(self, context, recipe):
         commands = []
         if recipe.AppDir.before_runtime:
             command = RunShellScriptCommand(
-                "before runtime script", app_dir_path, recipe.AppDir.before_runtime
+                context, "before runtime script", recipe.AppDir.before_runtime
             )
             commands.append(command)
 
-        finder = Finder(app_dir_path)
-        commands.append(SetupSymlinksCommand(app_dir_path, finder))
+        finder = Finder(context.app_dir)
+        commands.append(SetupSymlinksCommand(context, finder))
 
-        commands.append(SetupRuntimeCommand(recipe, finder))
+        commands.append(SetupRuntimeCommand(context, recipe, finder))
 
-        app_info_section = recipe.AppDir.app_info
-        commands.append(
-            SetupAppInfoCommand(
-                app_dir_path,
-                AppInfo(
-                    app_info_section.id(),
-                    app_info_section.name(),
-                    app_info_section.icon(),
-                    app_info_section.version(),
-                    app_info_section.exec(),
-                    app_info_section.exec_args(),
-                ),
-            )
-        )
+        commands.append(SetupAppInfoCommand(context))
 
         if recipe.AppDir.after_runtime:
             command = RunShellScriptCommand(
-                "after runtime script", app_dir_path, recipe.AppDir.after_runtime
+                context, "after runtime script", recipe.AppDir.after_runtime
             )
             commands.append(command)
 
         return commands
 
-    def _generate_apt_deploy_command(
-        self, app_dir_path, apt_section, cache_dir_path, deploy_record
-    ):
+    def _generate_apt_deploy_command(self, context, apt_section):
         apt_archs = apt_section.arch()
         if isinstance(apt_archs, str):
             apt_archs = [apt_archs]
@@ -170,9 +140,7 @@ class Orchestrator:
                 keys.append(item["key_url"])
 
         return AptDeployCommand(
-            app_dir_path,
-            cache_dir_path,
-            deploy_record,
+            context,
             apt_section.include(),
             apt_section.exclude() or [],
             apt_archs,
@@ -181,16 +149,40 @@ class Orchestrator:
             apt_section.allow_unauthenticated() or False,
         )
 
-    def _generate_pacman_deploy_command(
-        self, app_dir_path, pacman_section, cache_dir_path, deploy_record
-    ):
+    def _generate_pacman_deploy_command(self, context, pacman_section):
         return PacmanDeployCommand(
-            app_dir_path,
-            cache_dir_path,
-            deploy_record,
+            context,
             pacman_section.include(),
             pacman_section.exclude(),
             pacman_section["Architecture"](),
             pacman_section.repositories(),
             pacman_section.options(),
+        )
+
+    def _extract_v1_recipe_context(self, args, recipe):
+        app_dir_path = pathlib.Path(recipe.AppDir.path())
+        cache_dir_path = pathlib.Path.cwd() / self._cache_dir_name
+
+        app_info_section = recipe.AppDir.app_info
+        app_info = AppInfo(
+            app_info_section.id(),
+            app_info_section.name(),
+            app_info_section.icon(),
+            app_info_section.version(),
+            app_info_section.exec(),
+            app_info_section.exec_args(),
+        )
+        bundle_info = BundleInfo(
+            app_dir=app_dir_path,
+            app_info=app_info,
+            update_string=recipe.AppImage["update-information"]() or "guess",
+            runtime_arch=recipe.AppImage.arch(),
+            sign_key=recipe.AppImage["sign-key"]() or None,
+            file_name=recipe.AppImage["file_name"] or None,
+        )
+        return Context(
+            app_info=app_info,
+            bundle_info=bundle_info,
+            app_dir=app_dir_path,
+            cache_dir=cache_dir_path,
         )

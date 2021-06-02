@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
+import pathlib
 from pathlib import Path
 
 from . import listings
@@ -25,7 +26,7 @@ class Deploy:
         self.logger = logging.getLogger("AptPackageDeploy")
 
     def deploy(
-        self, include_patterns: [str], appdir_root: str, exclude_patterns=None
+        self, include_patterns: [str], appdir_root: pathlib.Path, exclude_patterns=None
     ) -> [str]:
         """Deploy the packages and their dependencies to appdir_root.
 
@@ -71,7 +72,7 @@ class Deploy:
     def _extract_packages(self, appdir_root, packages):
         # manually extract downloaded packages to be able to create the opt/libc partition
         # where the glibc library and other related packages will be placed
-        appdir_root = Path(appdir_root).absolute()
+
         # ensure target directories exists
         libc_root = appdir_root / "opt" / "libc"
         appdir_root.mkdir(exist_ok=True, parents=True)

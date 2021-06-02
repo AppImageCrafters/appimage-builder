@@ -13,22 +13,20 @@ from appimagebuilder.modules.setup.desktop_entry_generator import (
     DesktopEntryGenerator,
 )
 from appimagebuilder.modules.setup.icon_bundler import IconBundler
-from appimagebuilder.app_info import AppInfo
+from appimagebuilder.context import AppInfo, Context
 from appimagebuilder.commands.command import Command
 
 
 class SetupAppInfoCommand(Command):
-    def __init__(self, app_dir, app_info: AppInfo):
-        super().__init__("desktop entry setup")
-        self._app_dir = app_dir
-        self._app_info = app_info
+    def __init__(self, context: Context):
+        super().__init__(context, "desktop entry setup")
 
     def id(self):
         return "app-info-setup"
 
     def __call__(self, *args, **kwargs):
-        icon_bundler = IconBundler(self._app_dir, self._app_info.icon)
+        icon_bundler = IconBundler(self.context.app_dir, self.context.app_info.icon)
         icon_bundler.bundle_icon()
 
-        desktop_entry_generator = DesktopEntryGenerator(self._app_dir)
-        desktop_entry_generator.generate(self._app_info)
+        desktop_entry_generator = DesktopEntryGenerator(self.context.app_dir)
+        desktop_entry_generator.generate(self.context.app_info)
