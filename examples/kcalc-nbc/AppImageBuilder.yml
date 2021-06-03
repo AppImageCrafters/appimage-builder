@@ -1,0 +1,71 @@
+# non backward compatible recipe
+version: 1
+script:
+  - rm -rf AppDir || true
+
+AppDir:
+  path: ./AppDir
+
+  app_info:
+    id: org.kde.kcalc
+    name: kcalc
+    icon: accessories-calculator
+    version: 17.12.3
+    exec: usr/bin/kcalc
+
+  apt:
+    arch: amd64
+    sources:
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ xenial main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+
+    include:
+      - kcalc
+      - libpulse0
+    exclude:
+      - phonon4qt5
+      - libkf5service-bin
+      - perl
+      - perl-base
+      - libpam-runtime
+      - procps
+      - dh-python
+      - samba-libs
+      - docbook-xml
+      - sound-theme-freedesktop
+
+  files:
+    exclude:
+      # exclude glibc for a smaller but non backward compatible bundles
+      - opt/libc
+
+  runtime:
+    version: "continuous"
+
+  test:
+    debian:
+      image: appimagecrafters/tests-env:debian-stable
+      command: "./AppRun"
+      use_host_x: True
+    centos:
+      image: appimagecrafters/tests-env:centos-7
+      command: "./AppRun"
+      use_host_x: True
+    arch:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: "./AppRun"
+      use_host_x: True
+    fedora:
+      image: appimagecrafters/tests-env:fedora-30
+      command: "./AppRun"
+      use_host_x: True
+    ubuntu:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: "./AppRun"
+      use_host_x: True
+
+
+AppImage:
+  update-information: None
+  sign-key: None
+  arch: x86_64

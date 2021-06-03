@@ -48,14 +48,20 @@ class Interpreter(BaseHelper):
 
         env.set("APPDIR_LIBRARY_PATH", self._get_appdir_library_paths())
 
-        env.set("LIBC_LIBRARY_PATH", self._get_libc_library_paths())
+        try:
+            glibc_path = self.get_glibc_path()
+            glibc_version = self.guess_libc_version(glibc_path)
+            env.set("APPDIR_LIBC_VERSION", glibc_version)
 
-        glibc_path = self.get_glibc_path()
-        glibc_version = self.guess_libc_version(glibc_path)
-        env.set("APPDIR_LIBC_VERSION", glibc_version)
+            env.set("LIBC_LIBRARY_PATH", self._get_libc_library_paths())
 
-        self._patch_executables_interpreter(env.get("APPIMAGE_UUID"))
-        env.set("SYSTEM_INTERP", list(self.interpreters.keys()))
+            self._patch_executables_interpreter(env.get("APPIMAGE_UUID"))
+            env.set("SYSTEM_INTERP", list(self.interpreters.keys()))
+        except InterpreterHandlerError as err:
+            logging.warning("%s" % err)
+            logging.warning(
+                "The resulting bundle will not be backward compatible as libc is not present"
+            )
 
     def set_path_env(self, app_run):
         bin_paths = sorted(self._get_bin_paths())
