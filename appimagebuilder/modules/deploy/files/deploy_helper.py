@@ -103,7 +103,7 @@ class FileDeploy:
 
     def __init__(self, app_dir: str):
         self.app_dir = os.path.abspath(app_dir)
-        self.logger = logging.getLogger("FileDeployHelper")
+        self.logger = logging.getLogger("FileDeploy")
 
     def deploy(self, paths: [str]):
         expanded_list = set()
@@ -136,7 +136,7 @@ class FileDeploy:
         return self.app_dir.rstrip("/") + "/"
 
     def clean(self, paths: [str]):
-        self.logger.info("Removing excluded files:")
+        self.logger.info("Removing excluded files")
         base_paths = [
             pathlib.Path(self.app_dir),
             pathlib.Path(self.app_dir) / "opt" / "libc",
@@ -146,7 +146,7 @@ class FileDeploy:
             for pattern in paths:
                 try:
                     for match in base_path.glob(pattern):
-                        self.logger.info(match)
+                        self.logger.info(match.relative_to(self.app_dir))
                         if match.is_dir():
                             shutil.rmtree(match, ignore_errors=True)
                         else:
