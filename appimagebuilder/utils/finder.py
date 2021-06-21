@@ -49,6 +49,9 @@ class Finder:
 
     @staticmethod
     def is_elf(path: pathlib.Path):
+        if not path.is_file():
+            return False
+
         try:
             return appimagebuilder.utils.elf.has_magic_bytes(path)
         except RuntimeError:
@@ -73,10 +76,10 @@ class Finder:
             return False
 
     def find_dirs_containing(
-        self,
-        pattern="*",
-        file_checks: [] = None,
-        excluded_patterns=None,
+            self,
+            pattern="*",
+            file_checks: [] = None,
+            excluded_patterns=None,
     ):
         if file_checks is None:
             file_checks = []
