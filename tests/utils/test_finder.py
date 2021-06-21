@@ -21,12 +21,14 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import os.path
 import pathlib
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 from appimagebuilder.utils.finder import Finder
 
 
+@skipIf(not os.path.isfile("/usr/bin/python3"), "/usr/bin/python3 is required")
 class TestFinder(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -64,6 +66,7 @@ class TestFinder(TestCase):
         self.assertIn(pathlib.Path("/usr/bin/python3"), results)
         self.assertNotIn(pathlib.Path("/usr/share/python3"), results)
 
+    skipIf(os.path.isfile("/lib/x86_64-linux-gnu/libc.so.6"), "/lib/x86_64-linux-gnu/libc.so.6 is required")
     def test_find_elf_lib_and_executable(self):
         finder = Finder("/lib")
         results = finder.find(
