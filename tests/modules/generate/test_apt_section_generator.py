@@ -22,7 +22,8 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import pathlib
-from unittest import TestCase
+import shutil
+from unittest import TestCase, skipIf
 
 from appimagebuilder.context import BundleInfo
 from appimagebuilder.modules.generate.recipe_sections.apt_section_generator import (
@@ -34,6 +35,7 @@ from tests.modules.generate.fake_package_repository_resolver import (
 )
 
 
+@skipIf(not shutil.which("apt-get"), reason="requires apt-get")
 class TestAptSectionGenerator(TestCase):
     def test_generate(self):
         generator = AptSectionGenerator(
