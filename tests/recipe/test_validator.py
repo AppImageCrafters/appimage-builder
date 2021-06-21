@@ -1,3 +1,15 @@
+#  Copyright  2021 Alexis Lopez Zubieta
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+
 #   Copyright  2020 Alexis Lopez Zubieta
 #
 #   Permission is hereby granted, free of charge, to any person obtaining a
@@ -9,12 +21,14 @@
 #
 #   The above copyright notice and this permission notice shall be included in
 #   all copies or substantial portions of the Software.
+import os
 from pathlib import Path
 from unittest import TestCase
 
 import yaml
 
-from .schema import RecipeSchema
+from appimagebuilder import recipe
+from appimagebuilder.recipe.schema import RecipeSchema
 
 
 class TestRecipeSchema(TestCase):
@@ -86,9 +100,13 @@ class TestRecipeSchema(TestCase):
         self.schema.v1_apt.validate(recipe)
 
     def test_validate_examples(self):
+        os.environ["APP_VERSION"] = "latest"
+        os.environ["TARGET_ARCH"] = "auto"
+
         files = Path(__file__).parent.glob("../../examples/*/*.yml")
         schema = RecipeSchema()
         for file in files:
-            with open(file) as f:
-                data = yaml.load(f, Loader=yaml.FullLoader)
-                schema.v1.validate(data)
+            recipe_loader = recipe.Loader()
+            raw_recipe_data = recipe_loader.load(file)
+            recipe_roamer = recipe.Roamer(raw_recipe_data)
+            schema.validate(recipe_roamer)
