@@ -45,13 +45,14 @@ def __main__():
         exit(0)
 
     recipe_loader = recipe.Loader()
-    recipe_data = recipe_loader.load(args.recipe)
+    raw_recipe_data = recipe_loader.load(args.recipe)
+    recipe_roamer = recipe.Roamer(raw_recipe_data)
 
     schema = recipe.Schema()
-    schema.validate(recipe_data)
+    schema.validate(recipe_roamer)
 
     orchestrator = Orchestrator()
-    commands = orchestrator.process(recipe_data, args)
+    commands = orchestrator.process(recipe_roamer, args)
 
     invoker = Invoker()
     invoker.execute(commands)
