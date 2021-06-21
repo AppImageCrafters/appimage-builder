@@ -13,11 +13,11 @@
 import logging
 import shutil
 from pathlib import Path
-from unittest import TestCase
+from unittest import TestCase, skipIf
 from appimagebuilder.modules.deploy.apt import Deploy
 from appimagebuilder.modules.deploy.apt.venv import Venv
 
-
+@skipIf(not shutil.which("apt-get"), reason="requires apt-get")
 class TestDeploy(TestCase):
     venv_path = None
     appdir_path = None
