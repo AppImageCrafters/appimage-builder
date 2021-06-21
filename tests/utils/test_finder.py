@@ -21,6 +21,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import fnmatch
 import os.path
 import pathlib
 from unittest import TestCase, skipIf
@@ -53,12 +54,14 @@ class TestFinder(TestCase):
         results = self.finder.find("bin/*", [], [Finder.is_elf])
         self.assertNotIn(pathlib.Path("/usr/bin/python3"), results)
 
+    @skipIf(not os.path.isdir("/usr/share/python3"), "/usr/share/python3 required")
     def test_find_dir(self):
         finder = Finder("/usr/")
         results = finder.find("python3", [Finder.is_dir])
         self.assertIn(pathlib.Path("/usr/share/python3"), results)
         self.assertNotIn(pathlib.Path("/usr/bin/python3"), results)
 
+    @skipIf(not os.path.isdir("/usr/share/python3"), "/usr/share/python3 required")
     def test_find_dynamically_linked_executable(self):
         results = self.finder.find(
             "python3", [Finder.is_file, Finder.is_dynamically_linked_executable]
@@ -66,7 +69,7 @@ class TestFinder(TestCase):
         self.assertIn(pathlib.Path("/usr/bin/python3"), results)
         self.assertNotIn(pathlib.Path("/usr/share/python3"), results)
 
-    skipIf(os.path.isfile("/lib/x86_64-linux-gnu/libc.so.6"), "/lib/x86_64-linux-gnu/libc.so.6 is required")
+    @skipIf(not os.path.isfile("/lib/x86_64-linux-gnu/libc.so.6"), "/lib/x86_64-linux-gnu/libc.so.6 required")
     def test_find_elf_lib_and_executable(self):
         finder = Finder("/lib")
         results = finder.find(
@@ -82,6 +85,7 @@ class TestFinder(TestCase):
             )
         )
 
+    @skipIf(not os.path.exists("/lib/x86_64-linux-gnu"), "/lib/x86_64-linux-gnu required")
     def test_find_dirs_containing(self):
         finder = Finder("/lib")
         results = finder.find_dirs_containing(
