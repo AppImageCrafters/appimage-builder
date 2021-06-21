@@ -10,14 +10,27 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
+#  Copyright  2021 Alexis Lopez Zubieta
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+
 import shutil
 from pathlib import Path
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 from appimagebuilder.modules.deploy.pacman.venv import Venv
 from appimagebuilder.modules.deploy.pacman.deploy import Deploy
 
 
+@skipIf(not shutil.which("pacman"), reason="requires pacman")
 class TestDeploy(TestCase):
     venv_path = None
     appdir_path = None
@@ -26,7 +39,7 @@ class TestDeploy(TestCase):
     def setUpClass(cls):
         cls.appdir_path = Path("/tmp/AppDir")
         cls.venv_path = Path("/tmp/pacman-venv")
-        cls.pacman_venv = Venv(cls.venv_path, sources=[], keys=[], architecture=[])
+        cls.pacman_venv = Venv(cls.venv_path)
         cls.pacman_venv.update()
         cls.appdir_path.mkdir(parents=True, exist_ok=True)
 

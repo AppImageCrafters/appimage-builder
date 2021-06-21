@@ -10,13 +10,13 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 
-import glob
 import shutil
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 from appimagebuilder.modules.deploy.apt.venv import Venv
 
 
+@skipIf(not shutil.which("apt-get"), reason="requires apt-get")
 class TestVenv(TestCase):
     venv_path = None
 
