@@ -24,7 +24,7 @@
 import pathlib
 from unittest import TestCase
 
-from appimagebuilder.modules.generate import BundleInfo
+from appimagebuilder.context import BundleInfo
 from appimagebuilder.modules.generate.recipe_sections.apt_section_generator import (
     AptSectionGenerator,
 )
