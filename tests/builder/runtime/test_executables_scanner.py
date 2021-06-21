@@ -9,17 +9,17 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-
+import pathlib
 import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from appimagebuilder.utils.finder import Finder
 from appimagebuilder.modules.setup.executables import (
     BinaryExecutable,
     InterpretedExecutable,
 )
 from appimagebuilder.modules.setup.executables_scanner import ExecutablesScanner
+from appimagebuilder.utils.finder import Finder
 
 
 class TestExecutablesScanner(TestCase):
@@ -67,7 +67,8 @@ class TestExecutablesScanner(TestCase):
 
     def test_scan_file_interpreted_executable_abs_path(self):
         results = self.scanner.scan_file(self.script_abs_shebang_path)
-        python_binary = BinaryExecutable("/usr/bin/python3.6", "x86_64")
+        python3_bin_path = pathlib.Path("/usr/bin/python3").resolve()
+        python_binary = BinaryExecutable(str(python3_bin_path), "x86_64")
         script = InterpretedExecutable(
             self.script_abs_shebang_path, ["/usr/bin/python3"]
         )
@@ -77,7 +78,8 @@ class TestExecutablesScanner(TestCase):
 
     def test_scan_file_interpreted_executable_rel_path(self):
         results = self.scanner.scan_file(self.script_rel_shebang_path)
-        python_binary = BinaryExecutable("/usr/bin/python3.6", "x86_64")
+        python3_bin_path = pathlib.Path("/usr/bin/python3").resolve()
+        python_binary = BinaryExecutable(str(python3_bin_path), "x86_64")
         script = InterpretedExecutable(
             self.script_rel_shebang_path, ["/usr/bin/env", "python3"]
         )
