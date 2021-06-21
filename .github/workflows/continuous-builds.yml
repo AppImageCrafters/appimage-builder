@@ -11,8 +11,33 @@ on:
       - '!**'
 
 jobs:
+  pytest-ubuntu-focal:
+    runs-on: ubuntu-20.04
+    container: ubuntu:20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          apt-get update && apt-get install -y python3 python3-pip python3-pytest fakeroot binutils
+          python3 -m pip install -e .[dev]
+      - name: Run pytest
+        run: python3 -m pytest ./tests
+
+  pytest-archlinux:
+    runs-on: ubuntu-20.04
+    container: archlinux
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          pacman -Sy --noconfirm python-pip python-pytest python-setuptools binutils patchelf fakeroot strace
+          python3 -m pip install -e .[dev]
+      - name: Run pytest
+        run: python3 -m pytest ./tests
+
   build:
     runs-on: ubuntu-20.04
+    needs: [ pytest-ubuntu-focal, pytest-archlinux ]
     steps:
       - uses: actions/checkout@v2
       - name: Get Version
@@ -35,7 +60,7 @@ jobs:
         with:
           name: appimage-builder
           path: './appimage-builder*.AppImage*'
-  test:
+  test-pack-bash:
     runs-on: ubuntu-16.04
     needs: build
     steps:
@@ -59,7 +84,7 @@ jobs:
           path: './bash*.AppImage*'
   publish:
     runs-on: ubuntu-20.04
-    needs: test
+    needs: test-pack-bash
     if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v2
