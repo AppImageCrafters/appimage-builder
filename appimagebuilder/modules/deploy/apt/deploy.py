@@ -34,6 +34,10 @@ class Deploy:
         Packages from the system services and graphics listings will be added by default to the exclude list.
         Packages from the glibc listing will be deployed using <target>/opt/libc as prefix
         """
+        if not include_patterns:
+            # quick return if there is no packages to be deployed
+            return
+
         self._prepare_apt_venv()
         deploy_list = self._resolve_packages_to_deploy(
             include_patterns, exclude_patterns
