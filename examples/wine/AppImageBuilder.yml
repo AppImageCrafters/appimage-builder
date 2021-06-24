@@ -11,7 +11,7 @@ AppDir:
     exec: opt/wine-stable/bin/wine64
 
   apt:
-    arch: amd64
+    arch: [amd64, i386]
     sources:
       - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse'
       - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse'
@@ -24,19 +24,9 @@ AppDir:
       - winehq-stable
       - libfreetype6
       - libfontconfig1
-    exclude: []
-
-  files:
     exclude:
-      - usr/lib/x86_64-linux-gnu/gconv
-      - usr/share/man
-      - usr/share/doc/*/README.*
-      - usr/share/doc/*/changelog.*
-      - usr/share/doc/*/NEWS.*
-      - usr/share/doc/*/TODO.*
+      - dpkg
   runtime:
-    env:
-      APPDIR_LIBRARY_PATH: $APPDIR/lib/x86_64-linux-gnu:$APPDIR/usr/lib/x86_64-linux-gnu:$APPDIR/usr/lib/x86_64-linux-gnu/pulseaudio:$APPDIR/lib/i386-linux-gnu:$APPDIR/usr/lib/i386-linux-gnu
     path_mappings:
     - /opt/wine-stable:$APPDIR/opt/wine-stable
 
@@ -61,7 +51,6 @@ AppDir:
       image: appimagecrafters/tests-env:ubuntu-xenial
       command: "./AppRun --version"
       use_host_x: True
-
 
 AppImage:
   update-information: None
