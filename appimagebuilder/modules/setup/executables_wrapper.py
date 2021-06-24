@@ -30,10 +30,10 @@ class ExecutablesWrapper:
     EXPORTED_FILES_PREFIX = "/tmp/appimage-"
 
     def __init__(
-        self,
-        appdir_path: str,
-        binaries_resolver: AppRunBinariesResolver,
-        env: Environment,
+            self,
+            appdir_path: str,
+            binaries_resolver: AppRunBinariesResolver,
+            env: Environment,
     ):
         self.appdir_path = Path(appdir_path)
         self.binaries_resolver = binaries_resolver
@@ -55,7 +55,7 @@ class ExecutablesWrapper:
         apprun_env = self._generate_executable_env(executable, wrapped_path)
         self._deploy_env(executable, apprun_env)
         self.deploy_apprun(executable.arch, executable.path)
-        self.deploy_hooks_lib(executable.arch)
+        self.deploy_hooks_lib(executable.arch, executable.path.parent)
 
     def deploy_apprun(self, arch, target_path):
         apprun_path = self.binaries_resolver.resolve_executable(arch)
@@ -131,7 +131,7 @@ class ExecutablesWrapper:
         output.write(b"#!%s" % local_env_path.encode())
         shebang_main = executable.shebang[0]
         if shebang_main.startswith("/usr/bin/env") or shebang_main.startswith(
-            self.EXPORTED_FILES_PREFIX
+                self.EXPORTED_FILES_PREFIX
         ):
             args_start = 2
         else:
