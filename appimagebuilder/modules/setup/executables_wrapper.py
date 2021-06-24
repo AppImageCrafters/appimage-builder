@@ -62,21 +62,9 @@ class ExecutablesWrapper:
         shutil.copyfile(apprun_path, target_path, follow_symlinks=True)
         file_utils.set_permissions_rx_all(target_path)
 
-    def deploy_hooks_lib(self, arch):
-        if not "APPDIR_LIBRARY_PATH" in self.env:
-            raise RuntimeError("Missing APPDIR_LIBRARY_PATH")
-
+    def deploy_hooks_lib(self, arch, dir):
         source_path = self.binaries_resolver.resolve_hooks_library(arch)
-
-        paths = self.env.get("APPDIR_LIBRARY_PATH")
-        if len(paths) <= 0:
-            raise RuntimeError(
-                "Please make sure APPDIR_LIBRARY_PATH is properly defined"
-            )
-
-        target_path = paths[0]
-        target_path = Path(target_path) / "libapprun_hooks.so"
-
+        target_path = dir / "libapprun_hooks.so"
         shutil.copy2(source_path, target_path, follow_symlinks=True)
 
     def is_wrapped(self, path):
