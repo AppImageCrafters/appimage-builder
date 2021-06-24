@@ -69,7 +69,10 @@ class TestFinder(TestCase):
         self.assertIn(pathlib.Path("/usr/bin/python3"), results)
         self.assertNotIn(pathlib.Path("/usr/share/python3"), results)
 
-    @skipIf(not os.path.isfile("/lib/x86_64-linux-gnu/libc.so.6"), "/lib/x86_64-linux-gnu/libc.so.6 required")
+    @skipIf(
+        not os.path.isfile("/lib/x86_64-linux-gnu/libc.so.6"),
+        "/lib/x86_64-linux-gnu/libc.so.6 required",
+    )
     def test_find_elf_lib_and_executable(self):
         finder = Finder("/lib")
         results = finder.find(
@@ -85,7 +88,9 @@ class TestFinder(TestCase):
             )
         )
 
-    @skipIf(not os.path.exists("/lib/x86_64-linux-gnu"), "/lib/x86_64-linux-gnu required")
+    @skipIf(
+        not os.path.exists("/lib/x86_64-linux-gnu"), "/lib/x86_64-linux-gnu required"
+    )
     def test_find_dirs_containing(self):
         finder = Finder("/lib")
         results = finder.find_dirs_containing(

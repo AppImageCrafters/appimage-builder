@@ -21,7 +21,7 @@ from .environment import Environment
 from .executables import BinaryExecutable, InterpretedExecutable
 from .executables_scanner import ExecutablesScanner
 from .executables_wrapper import ExecutablesWrapper
-from ...utils.elf import get_arch
+from appimagebuilder.utils import elf
 
 
 class RuntimeGeneratorError(RuntimeError):
@@ -54,6 +54,7 @@ class RuntimeGenerator:
         self._wrap_interpreted_executables(executables, runtime_env, wrapper)
 
         self._deploy_appdir_apprun(wrapper, runtime_env)
+        self._deploy_appdir_hooks(wrapper)
 
     def _wrap_interpreted_executables(self, executables, runtime_env, wrapper):
         interpreted_executables = [
@@ -142,9 +143,12 @@ class RuntimeGenerator:
 
     def _deploy_appdir_apprun(self, wrapper, global_environment):
         self._write_appdir_env(global_environment)
-        arch = get_arch(self.appdir_path / self.main_exec)
-        wrapper.deploy_apprun(arch, self.appdir_path / "AppRun")
-        wrapper.deploy_hooks_lib(arch)
+        bin_path = self.appdir_path / self.main_exec
+        if not elf.has_magic_bytes(bin_path):
+            raise RuntimeError(f"Main executable is not an elf executable: {bin_path}")
+
+        main_arch = elf.get_arch(bin_path)
+        wrapper.deploy_apprun(main_arch, self.appdir_path / "AppRun")
 
     def _write_appdir_env(self, global_environment):
         apprun_env = Environment(
@@ -182,3 +186,17 @@ class RuntimeGenerator:
             env[k] = v
 
         return env
+
+    def _deploy_appdir_hooks(self, wrapper):
+        binaries = self.finder.find(
+            "lib/**/*so*",
+            check_true=[self.finder.is_elf, self.finder.is_elf_shared_lib],
+        )
+        arch_mappings = {}
+        for path in binaries:
+            arch = elf.get_arch(path)
+            if arch not in arch_mappings:
+                arch_mappings[arch] = path.parent
+
+        for arch, path in arch_mappings.items():
+            wrapper.deploy_hooks_lib(arch, path)

@@ -32,11 +32,11 @@ class Venv:
     default_options = []
 
     def __init__(
-            self,
-            root,
-            repositories: {str: [str]} = None,
-            architecture: str = "auto",
-            user_options: {} = None,
+        self,
+        root,
+        repositories: {str: [str]} = None,
+        architecture: str = "auto",
+        user_options: {} = None,
     ):
         self._root = Path(root)
         self._config_path = self._root / "pacman.conf"
@@ -61,7 +61,7 @@ class Venv:
 
     def __del__(self):
         # cleanup
-        if hasattr(self, '_gpg_agent_proc') and self._gpg_agent_proc:
+        if hasattr(self, "_gpg_agent_proc") and self._gpg_agent_proc:
             self._gpg_agent_proc.terminate()
 
     def update(self):
@@ -200,13 +200,13 @@ class Venv:
             self._gpg_agent_proc = None
 
     def _run_command(
-            self,
-            command,
-            stdout=sys.stdout,
-            assert_success=True,
-            wait_for_completion=True,
-            wait_for_completion_timeout=None,
-            **kwargs,
+        self,
+        command,
+        stdout=sys.stdout,
+        assert_success=True,
+        wait_for_completion=True,
+        wait_for_completion_timeout=None,
+        **kwargs,
     ):
         """
         Runs a command as a subprocess

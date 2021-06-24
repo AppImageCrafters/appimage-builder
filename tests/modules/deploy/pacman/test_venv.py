@@ -28,6 +28,7 @@ from unittest import TestCase, skipIf
 
 from appimagebuilder.modules.deploy.pacman.venv import Venv
 
+
 @skipIf(not shutil.which("pacman"), reason="requires pacman")
 class TestVenv(TestCase):
     venv_path = None

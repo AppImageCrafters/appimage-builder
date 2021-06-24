@@ -31,8 +31,7 @@ class Environment:
 
     def append(self, key, value):
         if key in self._env:
-            values = self._env[key]
-            self._env[key] = values.append(value)
+            self._env[key].append(value)
         else:
             self._env[key] = [value]
 
