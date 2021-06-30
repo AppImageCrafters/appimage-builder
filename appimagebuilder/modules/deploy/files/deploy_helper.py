@@ -150,7 +150,7 @@ class FileDeploy:
                         if match.is_dir():
                             shutil.rmtree(match, ignore_errors=True)
                         else:
-                            match.unlink(missing_ok=True)
+                            match.unlink()
                 except FileNotFoundError:
                     # it's ok to ignore files that were already deleted
                     pass
