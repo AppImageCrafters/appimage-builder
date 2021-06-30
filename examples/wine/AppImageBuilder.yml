@@ -26,6 +26,14 @@ AppDir:
       - libfontconfig1
     exclude:
       - dpkg
+  files:
+    exclude:
+      - usr/lib/x86_64-linux-gnu/gconv
+      - usr/share/man
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
   runtime:
     path_mappings:
     - /opt/wine-stable:$APPDIR/opt/wine-stable
