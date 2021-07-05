@@ -23,5 +23,30 @@ class CreateAppImageCommand(Command):
         super().id()
 
     def __call__(self, *args, **kwargs):
-        creator = Type2Creator(self.recipe)
+        appimage_format = self.recipe.AppImage.format() or 2
+        if appimage_format == 2:
+            self._create_type_2_appimage()
+            return
+
+        raise RuntimeError(f"Unknown AppImage format {appimage_format}")
+
+    def _create_type_2_appimage(self):
+        app_dir = self.recipe.AppDir.path()
+        target_arch = self.recipe.AppImage.arch()
+        app_name = self.recipe.AppDir.app_info.name()
+        app_version = self.recipe.AppDir.app_info.version()
+        update_information = self.recipe.AppImage["update-information"]() or "None"
+        file_name = self.recipe.AppDir.app_info.file_name()
+        sign_key = self.recipe.AppImage["sign-key"] or "None"
+        if sign_key == "None":
+            sign_key = None
+        creator = Type2Creator(
+            app_dir,
+            app_name,
+            app_version,
+            target_arch,
+            update_information,
+            sign_key,
+            file_name,
+        )
         creator.create()
