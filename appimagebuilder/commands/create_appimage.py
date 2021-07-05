@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 from appimagebuilder.modules.prime.type_2 import Type2Creator
 from appimagebuilder.commands.command import Command
+from appimagebuilder.modules.prime.type_3 import Type3Creator
 from appimagebuilder.recipe.roamer import Roamer
 
 
@@ -24,14 +25,20 @@ class CreateAppImageCommand(Command):
 
     def __call__(self, *args, **kwargs):
         appimage_format = self.recipe.AppImage.format() or 2
+        self.app_dir = self.recipe.AppDir.path()
+
         if appimage_format == 2:
             self._create_type_2_appimage()
+            return
+
+        if appimage_format == 3:
+            self._create_type_3_appimage()
             return
 
         raise RuntimeError(f"Unknown AppImage format {appimage_format}")
 
     def _create_type_2_appimage(self):
-        app_dir = self.recipe.AppDir.path()
+
         target_arch = self.recipe.AppImage.arch()
         app_name = self.recipe.AppDir.app_info.name()
         app_version = self.recipe.AppDir.app_info.version()
@@ -41,7 +48,7 @@ class CreateAppImageCommand(Command):
         if sign_key == "None":
             sign_key = None
         creator = Type2Creator(
-            app_dir,
+            self.app_dir,
             app_name,
             app_version,
             target_arch,
@@ -49,4 +56,8 @@ class CreateAppImageCommand(Command):
             sign_key,
             file_name,
         )
+        creator.create()
+
+    def _create_type_3_appimage(self):
+        creator = Type3Creator(self.app_dir)
         creator.create()
