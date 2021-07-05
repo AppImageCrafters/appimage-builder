@@ -9,19 +9,3 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.modules.prime.type_2 import Type2Creator
-from appimagebuilder.commands.command import Command
-from appimagebuilder.recipe.roamer import Roamer
-
-
-class CreateAppImageCommand(Command):
-    def __init__(self, context, recipe: Roamer):
-        super().__init__(context, "AppImage creation")
-        self.recipe = recipe
-
-    def id(self):
-        super().id()
-
-    def __call__(self, *args, **kwargs):
-        creator = Type2Creator(self.recipe)
-        creator.create()
