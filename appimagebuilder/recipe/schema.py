@@ -93,6 +93,7 @@ class RecipeSchema:
                 Optional("update-information"): str,
                 Optional("sign-key"): str,
                 Optional("file_name"): str,
+                Optional("format"): Or(2, 3),
             }
         )
 
