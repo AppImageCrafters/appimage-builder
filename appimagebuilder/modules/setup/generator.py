@@ -11,6 +11,8 @@
 #  all copies or substantial portions of the Software.
 
 import logging
+import random
+import string
 import uuid
 from pathlib import Path
 
@@ -98,9 +100,14 @@ class RuntimeGenerator:
         return executables
 
     def _configure_runtime_environment(self):
+        bundle_id = "".join(
+            random.SystemRandom().choice(string.ascii_letters + string.digits)
+            for _ in range(7)
+        )
+        
         global_env = Environment(
             {
-                "APPIMAGE_UUID": str(uuid.uuid4()),
+                "APPIMAGE_UUID": bundle_id,
                 "XDG_DATA_DIRS": [
                     "$APPDIR/usr/local/share",
                     "$APPDIR/usr/share",
@@ -179,9 +186,9 @@ class RuntimeGenerator:
                 v = v.replace("${APPDIR}", self.appdir_path.__str__())
 
                 if (
-                    k == "PATH"
-                    or k == "APPDIR_LIBRARY_PATH"
-                    or k == "LIBC_LIBRARY_PATH"
+                        k == "PATH"
+                        or k == "APPDIR_LIBRARY_PATH"
+                        or k == "LIBC_LIBRARY_PATH"
                 ):
                     v = v.split(":")
 
