@@ -46,8 +46,6 @@ class LibC(BaseHelper):
     def configure(self, env: Environment):
         self.set_path_env(env)
 
-        env.set("APPDIR_LIBRARY_PATH", self._get_appdir_library_paths())
-
         try:
             glibc_path = self.get_glibc_path()
             glibc_version = self.guess_libc_version(glibc_path)
@@ -67,23 +65,6 @@ class LibC(BaseHelper):
         bin_paths = sorted(self._get_bin_paths())
         bin_paths.append("$PATH")
         app_run.set("PATH", bin_paths)
-
-    def _get_appdir_library_paths(self):
-        paths = self.finder.find_dirs_containing(
-            pattern="*.so*",
-            file_checks=[Finder.is_file, Finder.is_elf_shared_lib],
-            excluded_patterns=[
-                "*/opt/libc*",
-                "*/qt5/plugins*",
-                "*/perl*",
-                "*/perl-base*",
-                "*/gio/modules",
-                "*/gtk-*/modules",
-                "*/libgtk-*-0",
-            ],
-        )
-
-        return [path.__str__() for path in paths]
 
     def _get_libc_library_paths(self):
         paths = self.finder.find_dirs_containing(
