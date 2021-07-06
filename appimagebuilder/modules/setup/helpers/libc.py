@@ -44,8 +44,6 @@ class LibC(BaseHelper):
         return path
 
     def configure(self, env: Environment):
-        self.set_path_env(env)
-
         try:
             glibc_path = self.get_glibc_path()
             glibc_version = self.guess_libc_version(glibc_path)
@@ -60,11 +58,6 @@ class LibC(BaseHelper):
             logging.warning(
                 "The resulting bundle will not be backward compatible as libc is not present"
             )
-
-    def set_path_env(self, app_run):
-        bin_paths = sorted(self._get_bin_paths())
-        bin_paths.append("$PATH")
-        app_run.set("PATH", bin_paths)
 
     def _get_libc_library_paths(self):
         paths = self.finder.find_dirs_containing(
@@ -140,11 +133,3 @@ class LibC(BaseHelper):
     @staticmethod
     def _gen_interpreter_link_path(real_interpreter, uuid):
         return "/tmp/appimage-%s-%s" % (uuid, os.path.basename(real_interpreter))
-
-    def _get_bin_paths(self):
-        paths = self.finder.find_dirs_containing(
-            pattern="*",
-            file_checks=[Finder.is_file, Finder.is_executable],
-            excluded_patterns=["*/opt/libc*"],
-        )
-        return [path.__str__() for path in paths]

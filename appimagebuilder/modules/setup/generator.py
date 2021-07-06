@@ -108,6 +108,7 @@ class RuntimeGenerator:
                 ],
                 "XDG_CONFIG_DIRS": ["$APPDIR/etc/xdg", "$XDG_CONFIG_DIRS"],
                 "APPDIR_LIBRARY_PATH": self._get_appdir_library_paths(),
+                "PATH": [*self._get_bin_paths(), "$PATH"],
                 "LD_PRELOAD": "libapprun_hooks.so",
             }
         )
@@ -190,8 +191,8 @@ class RuntimeGenerator:
 
     def _deploy_appdir_hooks(self, wrapper):
         binaries = self.finder.find(
-            "lib/**/*so*",
-            check_true=[self.finder.is_elf, self.finder.is_elf_shared_lib],
+            "lib/**/*.so*",
+            check_true=[Finder.is_file, Finder.is_elf_shared_lib],
         )
         arch_mappings = {}
         for path in binaries:
@@ -218,3 +219,11 @@ class RuntimeGenerator:
         )
 
         return [path.__str__() for path in paths]
+
+    def _get_bin_paths(self):
+        paths = self.finder.find_dirs_containing(
+            pattern="*",
+            file_checks=[Finder.is_file, Finder.is_executable],
+            excluded_patterns=["*/opt/libc*"],
+        )
+        return sorted([path.__str__() for path in paths])
