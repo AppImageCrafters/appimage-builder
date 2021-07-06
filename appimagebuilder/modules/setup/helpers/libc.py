@@ -26,7 +26,7 @@ class InterpreterHandlerError(RuntimeError):
     pass
 
 
-class Interpreter(BaseHelper):
+class LibC(BaseHelper):
     def __init__(self, app_dir, finder):
         super().__init__(app_dir, finder)
 
