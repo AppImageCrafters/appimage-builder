@@ -128,7 +128,7 @@ class RuntimeGenerator:
             helpers.GLib,
             helpers.GStreamer,
             helpers.Gtk,
-            helpers.Interpreter,
+            helpers.LibC,
             helpers.Java,
             helpers.LibGL,
             helpers.OpenSSL,
