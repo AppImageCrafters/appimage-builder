@@ -107,6 +107,7 @@ class RuntimeGenerator:
                     "$XDG_DATA_DIRS",
                 ],
                 "XDG_CONFIG_DIRS": ["$APPDIR/etc/xdg", "$XDG_CONFIG_DIRS"],
+                "APPDIR_LIBRARY_PATH": self._get_appdir_library_paths(),
                 "LD_PRELOAD": "libapprun_hooks.so",
             }
         )
@@ -200,3 +201,20 @@ class RuntimeGenerator:
 
         for arch, path in arch_mappings.items():
             wrapper.deploy_hooks_lib(arch, path)
+
+    def _get_appdir_library_paths(self):
+        paths = self.finder.find_dirs_containing(
+            pattern="*.so*",
+            file_checks=[Finder.is_file, Finder.is_elf_shared_lib],
+            excluded_patterns=[
+                "*/opt/libc*",
+                "*/qt5/plugins*",
+                "*/perl*",
+                "*/perl-base*",
+                "*/gio/modules",
+                "*/gtk-*/modules",
+                "*/libgtk-*-0",
+            ],
+        )
+
+        return [path.__str__() for path in paths]
