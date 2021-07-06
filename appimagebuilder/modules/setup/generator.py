@@ -51,12 +51,11 @@ class RuntimeGenerator:
         wrapper = ExecutablesWrapper(self.appdir_path, resolver, runtime_env)
 
         executables = self._find_executables(scanner)
-        self._find_embed_archs(executables)
+        embed_archs = self._find_embed_archs(executables)
+        self._deploy_appdir_hooks(wrapper, runtime_env, embed_archs)
 
         self._wrap_interpreted_executables(executables, runtime_env, wrapper)
-
         self._deploy_appdir_apprun(wrapper, runtime_env)
-        self._deploy_appdir_hooks(wrapper)
 
     def _wrap_interpreted_executables(self, executables, runtime_env, wrapper):
         interpreted_executables = [
@@ -83,12 +82,14 @@ class RuntimeGenerator:
                 )
 
     def _find_embed_archs(self, executables):
-        embed_archs = []
+        embed_archs = set()
         for executable in executables:
             if isinstance(executable, BinaryExecutable):
-                embed_archs.append(executable.arch)
+                embed_archs.add(executable.arch)
         if not embed_archs:
             raise RuntimeError("Unable to determine the bundle architecture")
+
+        return embed_archs
 
     def _find_executables(self, scanner):
         executables = []
@@ -104,7 +105,7 @@ class RuntimeGenerator:
             random.SystemRandom().choice(string.ascii_letters + string.digits)
             for _ in range(7)
         )
-        
+
         global_env = Environment(
             {
                 "APPIMAGE_UUID": bundle_id,
@@ -196,19 +197,12 @@ class RuntimeGenerator:
 
         return env
 
-    def _deploy_appdir_hooks(self, wrapper):
-        binaries = self.finder.find(
-            "lib/**/*.so*",
-            check_true=[Finder.is_file, Finder.is_elf_shared_lib],
-        )
-        arch_mappings = {}
-        for path in binaries:
-            arch = elf.get_arch(path)
-            if arch not in arch_mappings:
-                arch_mappings[arch] = path.parent
-
-        for arch, path in arch_mappings.items():
+    def _deploy_appdir_hooks(self, wrapper, runtime_env, embed_archs):
+        for arch in embed_archs:
+            path = self.appdir_path / "lib" / arch
+            path.mkdir(parents=True, exist_ok=True)
             wrapper.deploy_hooks_lib(arch, path)
+            runtime_env.append("APPDIR_LIBRARY_PATH", path.__str__())
 
     def _get_appdir_library_paths(self):
         paths = self.finder.find_dirs_containing(
