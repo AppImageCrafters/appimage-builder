@@ -10,12 +10,61 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import logging
+import os
+import pathlib
+import shutil
+import subprocess
+
+from appimagebuilder.utils import shell, elf
 
 
 class Type3Creator:
     def __init__(self, app_dir):
         self.logger = logging.getLogger()
-        self.app_dir = app_dir
+        self.app_dir = pathlib.Path(app_dir).absolute()
 
-    def create(self):
-        self.logger.warning("Type 3 AppImages are still experimental and under development!")
+        self.required_tool_paths = shell.resolve_commands_paths(["mksquashfs"])
+
+    def create(self, filename):
+        self.logger.warning(
+            "Type 3 AppImages are still experimental and under development!"
+        )
+
+        squashfs_path = self._squash_appdir()
+
+        executable_path = self._resolve_executable()
+
+        self._merge_parts(executable_path, squashfs_path, filename)
+
+    def _squash_appdir(self):
+        squashfs_path = "./AppDir.sqfs"
+
+        self.logger.info("Squashing AppDir")
+        command = "{mksquashfs} {AppDir} {squashfs_path}".format(
+            AppDir=self.app_dir, squashfs_path=squashfs_path, **self.required_tool_paths
+        )
+        _proc = subprocess.run(
+            command,
+            stderr=subprocess.PIPE,
+            shell=True,
+        )
+
+        shell.assert_successful_result(_proc)
+        return squashfs_path
+
+    def _resolve_executable(self):
+        launcher_arch = elf.get_arch(self.app_dir / "AppRun")
+        return "appimage-builder-cache/runtime-experimental"
+
+    def _merge_parts(self, executable_path, squashfs_path, filename):
+        shutil.copyfile(executable_path, filename)
+
+        with open(filename, "r+b") as exec_fd:
+            payload_offset = exec_fd.seek(0, 2)
+
+            with open(squashfs_path, "rb") as sqfs_fd:
+                sqfs_data = sqfs_fd.read()
+                exec_fd.write(memoryview(sqfs_data))
+
+                sqfs_fd.seek(0, 0)
+                shutil.copyfileobj(sqfs_fd, exec_fd)

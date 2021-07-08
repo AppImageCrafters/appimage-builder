@@ -9,6 +9,8 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import os
+
 from appimagebuilder.modules.prime.type_2 import Type2Creator
 from appimagebuilder.commands.command import Command
 from appimagebuilder.modules.prime.type_3 import Type3Creator
@@ -27,6 +29,16 @@ class CreateAppImageCommand(Command):
         appimage_format = self.recipe.AppImage.format() or 2
         self.app_dir = self.recipe.AppDir.path()
 
+        self.target_arch = self.recipe.AppImage.arch()
+        self.app_name = self.recipe.AppDir.app_info.name()
+        self.app_version = self.recipe.AppDir.app_info.version()
+
+        fallback_file_name = os.path.join(
+            os.getcwd(),
+            "%s-%s-%s.AppImage" % (self.app_name, self.app_version, self.target_arch),
+        )
+        self.file_name = self.recipe.AppDir.app_info.file_name() or fallback_file_name
+
         if appimage_format == 2:
             self._create_type_2_appimage()
             return
@@ -39,25 +51,20 @@ class CreateAppImageCommand(Command):
 
     def _create_type_2_appimage(self):
 
-        target_arch = self.recipe.AppImage.arch()
-        app_name = self.recipe.AppDir.app_info.name()
-        app_version = self.recipe.AppDir.app_info.version()
         update_information = self.recipe.AppImage["update-information"]() or "None"
-        file_name = self.recipe.AppDir.app_info.file_name()
+
         sign_key = self.recipe.AppImage["sign-key"] or "None"
         if sign_key == "None":
             sign_key = None
         creator = Type2Creator(
             self.app_dir,
-            app_name,
-            app_version,
-            target_arch,
+            self.target_arch,
             update_information,
             sign_key,
-            file_name,
+            self.file_name,
         )
         creator.create()
 
     def _create_type_3_appimage(self):
         creator = Type3Creator(self.app_dir)
-        creator.create()
+        creator.create(self.file_name)
