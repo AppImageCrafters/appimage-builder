@@ -111,7 +111,8 @@ class FileDeploy:
             expanded_list = expanded_list.union(glob.glob(path, recursive=True))
 
         for path in expanded_list:
-            self._deploy_path(path)
+            if os.path.isfile(path):
+                self._deploy_path(path)
 
     def _deploy_path(self, path):
         deploy_prefix = self._resolve_deploy_prefix(path)
