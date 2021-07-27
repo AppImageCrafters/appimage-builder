@@ -67,7 +67,14 @@ class GdkPixbuf(BaseHelper):
         # shutil.which API. => $PATH
         if shutil.which("gdk-pixbuf-query-loaders"):
             return shutil.which("gdk-pixbuf-query-loaders")
-        raise RuntimeError("Missing 'gdk-pixbuf-query-loaders' executable")
+        # fedora provides gdk-pixbuf-query-loaders-64 instead 
+        # of gdk-pixbuf-query-loaders in /usr/bin
+        if shutil.which("gdk-pixbuf-query-loaders-64"):
+            return shutil.which("gdk-pixbuf-query-loaders-64")
+
+        raise RuntimeError(
+            "Missing 'gdk-pixbuf-query-loaders' "
+            "or 'gdk-pixbuf-query-loaders-64' executable")
 
     def _remove_loaders_path_prefixes(self, loaders_cache):
         output = []
