@@ -25,16 +25,21 @@ class Type3Creator:
 
         self.required_tool_paths = shell.resolve_commands_paths(["mksquashfs"])
 
-    def create(self, filename):
+    def create(self, output_filename):
         self.logger.warning(
             "Type 3 AppImages are still experimental and under development!"
         )
 
         squashfs_path = self._squash_appdir()
 
-        executable_path = self._resolve_executable()
+        runtime_path = self._resolve_executable()
 
-        self._merge_parts(executable_path, squashfs_path, filename)
+        self._merge_parts(runtime_path, squashfs_path, output_filename)
+
+        payload_offset = os.path.getsize(runtime_path)
+        resources_offset = os.path.getsize(output_filename)
+
+        self._fill_header(output_filename, payload_offset, resources_offset, 0)
 
     def _squash_appdir(self):
         squashfs_path = "./AppDir.sqfs"
@@ -54,7 +59,7 @@ class Type3Creator:
 
     def _resolve_executable(self):
         launcher_arch = elf.get_arch(self.app_dir / "AppRun")
-        return "appimage-builder-cache/runtime-experimental"
+        return "/home/alexis/Workspace/AppImage/type3-runtime/cmake-build-debug/src/runtime/runtime"
 
     def _merge_parts(self, executable_path, squashfs_path, filename):
         shutil.copyfile(executable_path, filename)
@@ -68,3 +73,10 @@ class Type3Creator:
 
                 sqfs_fd.seek(0, 0)
                 shutil.copyfileobj(sqfs_fd, exec_fd)
+
+    def _fill_header(self, output_filename, payload_offset, resources_offset, signature_offset):
+        with open(output_filename, "r+b") as f:
+            f.seek(0x410, 0)
+            f.write(payload_offset.to_bytes(8, 'little'))
+            f.write(resources_offset.to_bytes(8, 'little'))
+            f.write(signature_offset.to_bytes(8, 'little'))
