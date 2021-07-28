@@ -34,7 +34,7 @@ class AppImageCreator:
             self.update_information = None
             self.guess_update_information = True
 
-        self.sing_key = recipe.AppImage["sign-key"] or "None"
+        self.sing_key = recipe.AppImage["sign-key"]() or "None"
         if self.sing_key == "None":
             self.sing_key = None
 
@@ -42,7 +42,7 @@ class AppImageCreator:
             os.getcwd(),
             "%s-%s-%s.AppImage" % (self.app_name, self.app_version, self.target_arch),
         )
-        self.target_file = recipe.AppImage.file_name or fallback_file_name
+        self.target_file = recipe.AppImage.file_name() or fallback_file_name
 
     def create(self):
         self._assert_target_architecture()
