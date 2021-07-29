@@ -45,7 +45,7 @@ class Type3Creator:
         self._fill_header(output_filename, payload_offset, resources_offset, 0)
 
     def _squash_appdir(self):
-        squashfs_path = "./AppDir.sqfs"
+        squashfs_path = self.cache_dir / "AppDir.sqfs"
 
         self.logger.info("Squashing AppDir")
         command = "{mksquashfs} {AppDir} {squashfs_path}".format(
