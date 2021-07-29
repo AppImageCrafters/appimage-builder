@@ -111,16 +111,19 @@ class FileDeploy:
             expanded_list = expanded_list.union(glob.glob(path, recursive=True))
 
         for path in expanded_list:
-            if os.path.isfile(path):
-                self._deploy_path(path)
+            self._deploy_path(path)
 
     def _deploy_path(self, path):
         deploy_prefix = self._resolve_deploy_prefix(path)
         deploy_path = deploy_prefix + path.lstrip("/")
 
         self.logger.info("deploying %s" % path)
-        os.makedirs(os.path.dirname(deploy_path), exist_ok=True)
-        shutil.copy2(path, deploy_path)
+        if os.path.isfile(path):
+            os.makedirs(os.path.dirname(deploy_path), exist_ok=True)
+            shutil.copy2(path, deploy_path)
+        elif os.path.isdir(path):
+            os.makedirs(deploy_path, exist_ok=True)
+        # special files (devices, sockets, etc.) get ignored here
 
     def _is_a_graphic_library(self, path):
         for pattern in self.listings["graphics"]:
