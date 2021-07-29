@@ -15,13 +15,16 @@ import pathlib
 import shutil
 import subprocess
 
+from appimagebuilder.modules.prime import common
 from appimagebuilder.utils import shell, elf
 
 
 class Type3Creator:
-    def __init__(self, app_dir):
+    def __init__(self, app_dir, cache_dir="appimage-builder-cache"):
         self.logger = logging.getLogger()
         self.app_dir = pathlib.Path(app_dir).absolute()
+        self.cache_dir = pathlib.Path(cache_dir)
+        self.runtime_project_url = "https://github.com/AppImageCrafters/appimage-runtime"
 
         self.required_tool_paths = shell.resolve_commands_paths(["mksquashfs"])
 
@@ -59,7 +62,11 @@ class Type3Creator:
 
     def _resolve_executable(self):
         launcher_arch = elf.get_arch(self.app_dir / "AppRun")
-        return "/home/alexis/Workspace/AppImage/type3-runtime/cmake-build-debug/src/runtime/runtime"
+        url = self._get_runtime_url(launcher_arch)
+        path = self._get_runtime_path(launcher_arch)
+        common.download_if_required(url, path.__str__())
+
+        return path
 
     def _merge_parts(self, executable_path, squashfs_path, filename):
         shutil.copyfile(executable_path, filename)
@@ -80,3 +87,14 @@ class Type3Creator:
             f.write(payload_offset.to_bytes(8, 'little'))
             f.write(resources_offset.to_bytes(8, 'little'))
             f.write(signature_offset.to_bytes(8, 'little'))
+
+    def _get_runtime_path(self, arch):
+        self.cache_dir.parent.mkdir(parents=True, exist_ok=True)
+        runtime_path = self.cache_dir / f"runtime-{arch}"
+
+        return runtime_path
+
+    def _get_runtime_url(self, arch):
+        runtime_url_template = self.runtime_project_url + "/releases/download/continuous/runtime-Release-%s"
+        runtime_url = runtime_url_template % arch
+        return runtime_url

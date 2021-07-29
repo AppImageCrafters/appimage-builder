@@ -26,6 +26,7 @@ import logging
 from urllib import request
 
 from appimagebuilder.gateways.appimagetool import AppImageToolCommand
+from appimagebuilder.modules.prime import common
 
 
 class Type2Creator:
@@ -61,7 +62,7 @@ class Type2Creator:
 
         runtime_url = self._get_runtime_url()
         runtime_path = self._get_runtime_path()
-        self._download_runtime_if_required(runtime_path, runtime_url)
+        common.download_if_required(runtime_url, runtime_path)
 
         self._generate_appimage(runtime_path)
 
@@ -73,11 +74,6 @@ class Type2Creator:
         appimage_tool.sign_key = self.sing_key
         appimage_tool.runtime_file = runtime_path
         appimage_tool.run()
-
-    def _download_runtime_if_required(self, runtime_path, runtime_url):
-        if not os.path.exists(runtime_path):
-            logging.info("Downloading runtime: %s" % runtime_url)
-            request.urlretrieve(runtime_url, runtime_path)
 
     def _get_runtime_path(self):
         os.makedirs("appimage-builder-cache", exist_ok=True)
