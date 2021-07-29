@@ -51,7 +51,7 @@ class Type3Creator:
         squashfs_path = self.cache_dir / "AppDir.sqfs"
 
         self.logger.info("Squashing AppDir")
-        command = "{mksquashfs} {AppDir} {squashfs_path}".format(
+        command = "{mksquashfs} {AppDir} {squashfs_path} -reproducible".format(
             AppDir=self.app_dir, squashfs_path=squashfs_path, **self.required_tool_paths
         )
         _proc = subprocess.run(
