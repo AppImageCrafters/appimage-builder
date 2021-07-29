@@ -75,7 +75,7 @@ class Type3Creator:
         shutil.copyfile(executable_path, filename)
 
         with open(filename, "r+b") as exec_fd:
-            payload_offset = exec_fd.seek(0, 2)
+            exec_fd.seek(0, 2)
 
             with open(squashfs_path, "rb") as sqfs_fd:
                 sqfs_data = sqfs_fd.read()
