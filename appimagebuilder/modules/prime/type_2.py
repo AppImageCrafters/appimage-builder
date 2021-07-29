@@ -67,7 +67,7 @@ class Type2Creator:
         self._generate_appimage(runtime_path)
 
     def _generate_appimage(self, runtime_path):
-        appimage_tool = AppImageToolCommand(self.app_dir, self.target_file)
+        appimage_tool = AppImageToolCommand(self.app_dir, self.file_name)
         appimage_tool.target_arch = self.target_arch
         appimage_tool.update_information = self.update_information
         appimage_tool.guess_update_information = self.guess_update_information
