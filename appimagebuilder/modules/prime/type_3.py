@@ -17,6 +17,7 @@ import subprocess
 
 from appimagebuilder.modules.prime import common
 from appimagebuilder.utils import shell, elf
+from appimagebuilder.utils import file_utils
 
 
 class Type3Creator:
@@ -37,7 +38,7 @@ class Type3Creator:
 
         runtime_path = self._resolve_executable()
 
-        self._merge_parts(runtime_path, squashfs_path, output_filename)
+        file_utils.extend_file(runtime_path, squashfs_path, output_filename)
 
         payload_offset = os.path.getsize(runtime_path)
         resources_offset = os.path.getsize(output_filename)
@@ -70,19 +71,6 @@ class Type3Creator:
         common.download_if_required(url, path.__str__())
 
         return path
-
-    def _merge_parts(self, executable_path, squashfs_path, filename):
-        shutil.copyfile(executable_path, filename)
-
-        with open(filename, "r+b") as exec_fd:
-            exec_fd.seek(0, 2)
-
-            with open(squashfs_path, "rb") as sqfs_fd:
-                sqfs_data = sqfs_fd.read()
-                exec_fd.write(memoryview(sqfs_data))
-
-                sqfs_fd.seek(0, 0)
-                shutil.copyfileobj(sqfs_fd, exec_fd)
 
     def _fill_header(self, output_filename, payload_offset, resources_offset, signature_offset):
         with open(output_filename, "r+b") as f:
