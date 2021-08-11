@@ -30,12 +30,12 @@ def set_permissions_rx_all(path):
 def extend_file(base_filename, extension_filename, output_filename):
     shutil.copyfile(base_filename, output_filename)
 
-    with open(output_filename, "r+b") as exec_fd:
-        exec_fd.seek(0, 2)
+    with open(output_filename, "r+b") as base_fd:
+        base_fd.seek(0, 2)
 
-        with open(extension_filename, "rb") as sqfs_fd:
-            sqfs_data = sqfs_fd.read()
-            exec_fd.write(memoryview(sqfs_data))
+        with open(extension_filename, "rb") as extensions_fd:
+            raw_data = extensions_fd.read()
+            base_fd.write(memoryview(raw_data))
 
-            sqfs_fd.seek(0, 0)
-            shutil.copyfileobj(sqfs_fd, exec_fd)
+            extensions_fd.seek(0, 0)
+            shutil.copyfileobj(extensions_fd, base_fd)

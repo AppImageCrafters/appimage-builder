@@ -187,9 +187,9 @@ class RuntimeGenerator:
                 v = v.replace("${APPDIR}", self.appdir_path.__str__())
 
                 if (
-                        k == "PATH"
-                        or k == "APPDIR_LIBRARY_PATH"
-                        or k == "LIBC_LIBRARY_PATH"
+                    k == "PATH"
+                    or k == "APPDIR_LIBRARY_PATH"
+                    or k == "LIBC_LIBRARY_PATH"
                 ):
                     v = v.split(":")
 

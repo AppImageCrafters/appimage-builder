@@ -67,4 +67,11 @@ class CreateAppImageCommand(Command):
 
     def _create_type_3_appimage(self):
         creator = Type3Creator(self.app_dir)
-        creator.create(self.file_name)
+        creator.create(
+            self.file_name,
+            {
+                "update-information": self.recipe.AppImage["update-information"]()
+                or "None"
+            },
+            [self.recipe.AppImage["sign-key"]() or "None"],
+        )
