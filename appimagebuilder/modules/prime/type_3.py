@@ -33,18 +33,17 @@ class Type3Creator:
 
         self.required_tool_paths = shell.resolve_commands_paths(["mksquashfs", "gpg"])
 
-    def create(self, output_filename, metadata=None, gnupg_keys=None):
+    def create(
+        self, output_filename, metadata=None, gnupg_key=None, compression_method="gzip"
+    ):
         if metadata is None:
             metadata = {}
-
-        if gnupg_keys is None:
-            gnupg_keys = []
 
         self.logger.warning(
             "Type 3 AppImages are still experimental and under development!"
         )
 
-        squashfs_path = self._squash_appdir()
+        squashfs_path = self._squash_appdir(compression_method)
 
         runtime_path = self._resolve_executable()
 
@@ -58,16 +57,19 @@ class Type3Creator:
             output_filename, payload_offset, metadata_offset, signatures_offset
         )
 
-        self._sign_bundle(output_filename, gnupg_keys, signatures_offset)
+        self._sign_bundle(output_filename, gnupg_key, signatures_offset)
         # remove squashfs
         squashfs_path.unlink()
 
-    def _squash_appdir(self):
+    def _squash_appdir(self, compression_method):
         squashfs_path = self.cache_dir / "AppDir.sqfs"
 
         self.logger.info("Squashing AppDir")
-        command = "{mksquashfs} {AppDir} {squashfs_path} -reproducible".format(
-            AppDir=self.app_dir, squashfs_path=squashfs_path, **self.required_tool_paths
+        command = "{mksquashfs} {AppDir} {squashfs_path} -reproducible -comp {compression} ".format(
+            AppDir=self.app_dir,
+            squashfs_path=squashfs_path,
+            compression=compression_method,
+            **self.required_tool_paths,
         )
         _proc = subprocess.run(
             command,
@@ -116,22 +118,23 @@ class Type3Creator:
             fd.seek(0, 2)
             fd.write(raw)
 
-    def _sign_bundle(self, output_filename, gnupg_keys, signatures_offset):
-        signatures = []
+    def _sign_bundle(self, output_filename, keyid, signatures_offset):
+        signature = self._generate_bundle_signature_using_gpg(
+            keyid, output_filename, signatures_offset
+        )
 
-        for keyid in gnupg_keys:
-            signature = self._generate_bundle_signature_using_gpg(
-                keyid, output_filename, signatures_offset
-            )
-            signatures.append(
-                {
-                    "method": "gpg",
-                    "keyid": keyid,
-                    "data": signature,
-                }
-            )
+        encoded_signatures = bson.dumps(
+            {
+                "signatures": [
+                    {
+                        "method": "gpg",
+                        "keyid": keyid,
+                        "data": signature,
+                    }
+                ]
+            }
+        )
 
-        encoded_signatures = bson.dumps({"signatures": signatures})
         with open(output_filename, "r+b") as fd:
             fd.seek(signatures_offset, 0)
             fd.write(encoded_signatures)
