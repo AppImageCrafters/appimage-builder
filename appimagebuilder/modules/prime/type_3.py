@@ -34,7 +34,7 @@ class Type3Creator:
         self.required_tool_paths = shell.resolve_commands_paths(["mksquashfs", "gpg"])
 
     def create(
-        self, output_filename, metadata=None, gnupg_key=None, compression_method="gzip"
+            self, output_filename, metadata=None, gnupg_key=None, compression_method="gzip"
     ):
         if metadata is None:
             metadata = {}
@@ -57,7 +57,9 @@ class Type3Creator:
             output_filename, payload_offset, metadata_offset, signatures_offset
         )
 
-        self._sign_bundle(output_filename, gnupg_key, signatures_offset)
+        if gnupg_key:
+            self._sign_bundle(output_filename, gnupg_key, signatures_offset)
+
         # remove squashfs
         squashfs_path.unlink()
 
@@ -89,7 +91,7 @@ class Type3Creator:
         return path
 
     def _fill_header(
-        self, output_filename, payload_offset, metadata_offset, signature_offset
+            self, output_filename, payload_offset, metadata_offset, signature_offset
     ):
         with open(output_filename, "r+b") as f:
             f.seek(0x410, 0)
@@ -105,8 +107,8 @@ class Type3Creator:
 
     def _get_runtime_url(self, arch):
         runtime_url_template = (
-            self.runtime_project_url
-            + "/releases/download/continuous/runtime-Release-%s"
+                self.runtime_project_url
+                + "/releases/download/continuous/runtime-Release-%s"
         )
         runtime_url = runtime_url_template % arch
         return runtime_url
