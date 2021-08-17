@@ -39,7 +39,15 @@ class RuntimeGenerator:
         self.apprun_debug = recipe.AppDir.runtime.debug()
         user_env_input = recipe.AppDir.runtime.env() or {}
         self.user_env = self.parse_env_input(user_env_input)
+
+        self.deploy_hooks = not recipe.AppDir.runtime.no_hooks()
+        if not self.deploy_hooks:
+            logging.warning("Runtime hooks will not be deployed")
+
         self.path_mappings = recipe.AppDir.runtime.path_mappings()
+        if self.path_mappings and not self.deploy_hooks:
+            logging.error("Hooks required when setting path mappings")
+            raise RuntimeError("Path Mappings set without hooks")
 
         self.finder = finder
 
@@ -52,7 +60,8 @@ class RuntimeGenerator:
 
         executables = self._find_executables(scanner)
         embed_archs = self._find_embed_archs(executables)
-        self._deploy_appdir_hooks(wrapper, runtime_env, embed_archs)
+        if self.deploy_hooks:
+            self._deploy_appdir_hooks(wrapper, runtime_env, embed_archs)
 
         self._wrap_interpreted_executables(executables, runtime_env, wrapper)
         self._deploy_appdir_apprun(wrapper, runtime_env)
@@ -117,7 +126,6 @@ class RuntimeGenerator:
                 "XDG_CONFIG_DIRS": ["$APPDIR/etc/xdg", "$XDG_CONFIG_DIRS"],
                 "APPDIR_LIBRARY_PATH": self._get_appdir_library_paths(),
                 "PATH": [*self._get_bin_paths(), "$PATH"],
-                "LD_PRELOAD": "libapprun_hooks.so",
             }
         )
 
@@ -198,6 +206,9 @@ class RuntimeGenerator:
         return env
 
     def _deploy_appdir_hooks(self, wrapper, runtime_env, embed_archs):
+        if self.deploy_hooks:
+            runtime_env.set("LD_PRELOAD", "libapprun_hooks.so")
+            
         for arch in embed_archs:
             path = self.appdir_path / "lib" / arch
             path.mkdir(parents=True, exist_ok=True)
