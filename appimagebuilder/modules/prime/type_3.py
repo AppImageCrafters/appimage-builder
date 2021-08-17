@@ -63,6 +63,8 @@ class Type3Creator:
         # remove squashfs
         squashfs_path.unlink()
 
+        file_utils.set_permissions_rx_all(output_filename)
+
     def _squash_appdir(self, compression_method):
         squashfs_path = self.cache_dir / "AppDir.sqfs"
 
