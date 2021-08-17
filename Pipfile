@@ -16,6 +16,7 @@ emrichen = "*"
 shutils = "*"
 "ruamel.yaml" = "*"
 "roam" = "*"
+bson = "*"
 
 [requires]
 python_version = "3.8"

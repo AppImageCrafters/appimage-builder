@@ -1,3 +1,15 @@
+#  Copyright  2021 Alexis Lopez Zubieta
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+
 #  Copyright  2020 Alexis Lopez Zubieta
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a
@@ -14,15 +26,14 @@ import logging
 from urllib import request
 
 from appimagebuilder.gateways.appimagetool import AppImageToolCommand
+from appimagebuilder.modules.prime import common
 
 
-class AppImageCreator:
-    def __init__(self, recipe):
-        self.app_dir = recipe.AppDir.path()
-        self.target_arch = recipe.AppImage.arch()
-        self.app_name = recipe.AppDir.app_info.name()
-        self.app_version = recipe.AppDir.app_info.version()
-        self.update_information = recipe.AppImage["update-information"]() or "None"
+class Type2Creator:
+    def __init__(self, appdir, target_arch, update_information, sign_key, output_filename):
+        self.app_dir = appdir
+        self.target_arch = target_arch
+        self.update_information = update_information
         self.guess_update_information = False
 
         if self.update_information == "None":
@@ -34,22 +45,18 @@ class AppImageCreator:
             self.update_information = None
             self.guess_update_information = True
 
-        self.sing_key = recipe.AppImage["sign-key"]() or "None"
+        self.sing_key = sign_key
         if self.sing_key == "None":
             self.sing_key = None
 
-        fallback_file_name = os.path.join(
-            os.getcwd(),
-            "%s-%s-%s.AppImage" % (self.app_name, self.app_version, self.target_arch),
-        )
-        self.target_file = recipe.AppImage.file_name() or fallback_file_name
+        self.target_file = output_filename
 
     def create(self):
         self._assert_target_architecture()
 
         runtime_url = self._get_runtime_url()
         runtime_path = self._get_runtime_path()
-        self._download_runtime_if_required(runtime_path, runtime_url)
+        common.download_if_required(runtime_url, runtime_path)
 
         self._generate_appimage(runtime_path)
 
@@ -61,11 +68,6 @@ class AppImageCreator:
         appimage_tool.sign_key = self.sing_key
         appimage_tool.runtime_file = runtime_path
         appimage_tool.run()
-
-    def _download_runtime_if_required(self, runtime_path, runtime_url):
-        if not os.path.exists(runtime_path):
-            logging.info("Downloading runtime: %s" % runtime_url)
-            request.urlretrieve(runtime_url, runtime_path)
 
     def _get_runtime_path(self):
         os.makedirs("appimage-builder-cache", exist_ok=True)

@@ -10,6 +10,7 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import os
+import shutil
 import stat
 
 
@@ -24,3 +25,14 @@ def set_permissions_rx_all(path):
         | stat.S_IXOTH
         | stat.S_IWUSR,
     )
+
+
+def extend_file(base_filename, extension_filename, output_filename):
+    shutil.copyfile(base_filename, output_filename)
+
+    with open(output_filename, "r+b") as base_fd:
+        # seek until the end of the base file
+        base_fd.seek(0, 2)
+
+        with open(extension_filename, "rb") as extension_fd:
+            shutil.copyfileobj(extension_fd, base_fd)

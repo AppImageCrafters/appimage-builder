@@ -93,7 +93,11 @@ class RecipeSchema:
                 "arch": str,
                 Optional("update-information"): str,
                 Optional("sign-key"): str,
+                Optional("compression-method"): Or(
+                    "gzip", "lzma", "lzo", "lz4", "xz", "zstd"
+                ),
                 Optional("file_name"): str,
+                Optional("format"): Or(2, 3),
             }
         )
 

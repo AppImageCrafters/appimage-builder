@@ -52,6 +52,7 @@ setuptools.setup(
         "emrichen",
         "ruamel.yaml",
         "roam",
+        "bson",
     ],
     python_requires=">=3.6",
     package_data={"": []},
