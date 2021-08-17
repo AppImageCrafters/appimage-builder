@@ -50,7 +50,6 @@ class CreateAppImageCommand(Command):
         raise RuntimeError(f"Unknown AppImage format {appimage_format}")
 
     def _create_type_2_appimage(self):
-
         update_information = self.recipe.AppImage["update-information"]() or "None"
 
         sign_key = self.recipe.AppImage["sign-key"] or "None"
