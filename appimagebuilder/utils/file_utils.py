@@ -31,11 +31,8 @@ def extend_file(base_filename, extension_filename, output_filename):
     shutil.copyfile(base_filename, output_filename)
 
     with open(output_filename, "r+b") as base_fd:
+        # seek until the end of the base file
         base_fd.seek(0, 2)
 
-        with open(extension_filename, "rb") as extensions_fd:
-            raw_data = extensions_fd.read()
-            base_fd.write(memoryview(raw_data))
-
-            extensions_fd.seek(0, 0)
-            shutil.copyfileobj(extensions_fd, base_fd)
+        with open(extension_filename, "rb") as extension_fd:
+            shutil.copyfileobj(extension_fd, base_fd)
