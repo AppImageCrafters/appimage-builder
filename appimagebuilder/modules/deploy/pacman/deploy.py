@@ -84,17 +84,21 @@ class Deploy:
             deployed_packages.append("%s=%s" % (name, version))
 
         # create symlinks existent in a regular archlinux system
-        os.symlink("usr/bin", appdir_root / "bin")
-        os.symlink("usr/bin", appdir_root / "sbin")
-        os.symlink("usr/lib", appdir_root / "lib")
-        os.symlink("usr/lib", appdir_root / "lib64")
-        os.symlink("lib", appdir_root / "usr" / "lib64")
-        os.symlink("bin", appdir_root / "usr" / "sbin")
-
-        os.symlink("usr/bin", appdir_root / "opt" / "libc" / "bin")
-        os.symlink("usr/bin", appdir_root / "opt" / "libc" / "sbin")
-        os.symlink("usr/lib", appdir_root / "opt" / "libc" / "lib")
-        os.symlink("usr/lib", appdir_root / "opt" / "libc" / "lib64")
-        os.symlink("lib", appdir_root / "opt" / "libc" / "usr" / "lib64")
-        os.symlink("bin", appdir_root / "opt" / "libc" / "usr" / "sbin")
+        self._recreate_archlinux_fs_structure(appdir_root)
         return deployed_packages
+
+    def _recreate_archlinux_fs_structure(self, appdir_root):
+        links = {
+            "bin": "usr/bin",
+            "sbin": "usr/bin",
+            "lib": "usr/lib",
+            "lib64": "usr/lib",
+            "usr/lib64": "lib",
+            "usr/sbin": "bin",
+        }
+
+        for prefix in [appdir_root, appdir_root / "opt" / "lib"]:
+            for dst, src in links.items():
+                dst = prefix / dst
+                if not dst.exists() and (prefix / src).exists():
+                    os.symlink(src, dst)
