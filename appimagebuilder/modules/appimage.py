@@ -55,7 +55,16 @@ class AppImageCreator:
 
     def _generate_appimage(self, runtime_path):
         appimage_tool = AppImageToolCommand(self.app_dir, self.target_file)
-        appimage_tool.target_arch = self.target_arch
+
+        # appimagetool uses different architecture names than AppImageKit runtime releases
+        if self.target_arch == "aarch64":
+            appimage_tool_arch = 'arm_aarch64'
+        elif self.target_arch == 'armhf':
+            appimage_tool_arch = 'arm'
+        else:
+            appimage_tool_arch = self.target_arch
+
+        appimage_tool.target_arch = appimage_tool_arch
         appimage_tool.update_information = self.update_information
         appimage_tool.guess_update_information = self.guess_update_information
         appimage_tool.sign_key = self.sing_key
@@ -75,20 +84,11 @@ class AppImageCreator:
 
     def _get_runtime_url(self):
         runtime_url_template = "https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-%s"
-
-        # AppImageKit uses different architectures than are used in the runtime downloads for 32 and 64 bit ARM
-        if self.target_arch == "arm_aarch64":
-            runtime_arch = 'aarch64'
-        elif self.target_arch == 'arm':
-            runtime_arch = 'armhf'
-        else:
-            runtime_arch = self.target_arch
-
-        runtime_url = runtime_url_template % runtime_arch
+        runtime_url = runtime_url_template % self.target_arch
         return runtime_url
 
     def _assert_target_architecture(self):
-        supported_architectures = ["i686", "arm_aarch64", "arm", "x86_64"]
+        supported_architectures = ["i686", "aarch64", "armhf", "x86_64"]
         if self.target_arch not in supported_architectures:
             logging.error(
                 "There is not a prebuild runtime for the %s architecture."
