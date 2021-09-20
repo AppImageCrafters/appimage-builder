@@ -103,6 +103,7 @@ class ExecutablesScanner:
                 end_idx = len(buf)
 
             buf = buf[2:end_idx].decode()
+            buf = buf.strip()
 
             parts = buf.split(" ")
             parts = [part.strip() for part in parts if part]
