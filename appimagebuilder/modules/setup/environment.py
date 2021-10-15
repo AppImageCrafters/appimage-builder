@@ -21,6 +21,12 @@ class Environment:
     def __contains__(self, item):
         return item in self._env
 
+    def __getitem__(self, item):
+        return self._env[item]
+
+    def __delattr__(self, item):
+        del self._env[item]
+
     def set(self, key, value):
         self._env[key] = value
 
@@ -28,6 +34,9 @@ class Environment:
         if key not in self._env:
             raise RuntimeError("Environment '%s' required but not found" % key)
         return self._env[key]
+
+    def keys(self):
+        return self._env.keys()
 
     def append(self, key, value):
         if key in self._env:
