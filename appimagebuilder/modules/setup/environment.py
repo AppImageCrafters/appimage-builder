@@ -24,6 +24,12 @@ class Environment:
     def __getitem__(self, item):
         return self._env[item]
 
+    def __setitem__(self, key, value):
+        self._env[key] = value
+
+    def __delitem__(self, key):
+        del self._env[key]
+
     def __delattr__(self, item):
         del self._env[item]
 
@@ -61,7 +67,7 @@ class Environment:
         for k, v in self.items():
             lines.append(self._serialize_entry(k, v))
 
-        lines = [line + '\n' for line in lines]
+        lines = [line + "\n" for line in lines]
         return "".join(lines)
 
     def _serialize_entry(self, k, v):
