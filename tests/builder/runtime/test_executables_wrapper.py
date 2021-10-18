@@ -125,4 +125,4 @@ class TestExecutablesWrapper(TestCase):
             "PYTHONHOME": "$APPDIR/usr",
         }
 
-        self.assertEqual(result, expected)
+        self.assertEqual(result._env, expected)
