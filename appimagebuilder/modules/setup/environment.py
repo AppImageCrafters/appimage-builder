@@ -39,7 +39,7 @@ class Environment:
         return self._env.keys()
 
     def append(self, key, value):
-        if key in self._env:
+        if key in self._env and self._env[key]:
             self._env[key].append(value)
         else:
             self._env[key] = [value]
@@ -59,27 +59,31 @@ class Environment:
     def serialize(self):
         lines = []
         for k, v in self.items():
-            if isinstance(v, list):
-                if k == "EXEC_ARGS":
-                    lines.append("%s=%s\n" % (k, " ".join(v)))
-                    continue
-                elif k == "APPRUN_PATH_MAPPINGS":
-                    lines.append("%s=%s;\n" % (k, ";".join(v)))
-                    continue
-                else:
-                    lines.append("%s=%s\n" % (k, ":".join(v)))
-                    continue
+            lines.append(self._serialize_entry(k, v))
 
-            if isinstance(v, dict):
-                entries = ["%s:%s;" % (k, v) for (k, v) in v.items()]
-                lines.append("%s=%s\n" % (k, "".join(entries)))
-                continue
+        lines = [line + '\n' for line in lines]
+        return "".join(lines)
 
-            if v is None:
-                lines.append('%s=""\n' % (k))
-                continue
+    def _serialize_entry(self, k, v):
+        if k == "EXEC_ARGS" and isinstance(v, list):
+            return self._serialize_list(k, v, " ")
 
-            lines.append("%s=%s\n" % (k, v))
+        if k == "APPRUN_PATH_MAPPINGS":
+            return self._serialize_list(k, v, ";") + ";"
 
-        result = "".join(lines)
-        return result
+        if isinstance(v, list):
+            return self._serialize_list(k, v, ":")
+
+        if isinstance(v, dict):
+            entries = ["%s:%s;" % (k, v) for (k, v) in v.items()]
+            entries_str = "".join(entries)
+            return f"{k}={entries_str}"
+
+        if v is None:
+            return f'{k}=""'
+
+        return f"{k}={v}"
+
+    def _serialize_list(self, k, values, separator):
+        values_str = separator.join(values)
+        return f"{k}={values_str}"
