@@ -6,7 +6,7 @@ AppDir:
   path: ./AppDir
 
   app_info:
-    id: org.xfce.parole
+    id: org.xfce.Parole
     name: parole
     icon: parole
     version: latest
@@ -42,9 +42,6 @@ AppDir:
       - usr/share/doc/*/NEWS.*
       - usr/share/doc/*/TODO.*
       - usr/share/metainfo/org.kde.kcalc.appdata.xml
-  runtime:
-    version: "continuous"
-
   test:
     debian:
       image: appimagecrafters/tests-env:debian-stable
