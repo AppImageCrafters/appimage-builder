@@ -182,7 +182,9 @@ class RuntimeGenerator:
         apprun_env.merge(self.user_env)
 
         # map build dir to allow caches to work
-        apprun_env.append("APPRUN_PATH_MAPPINGS", self.appdir_path.__str__() + ":$APPDIR")
+        apprun_env.append(
+            "APPRUN_PATH_MAPPINGS", self.appdir_path.__str__() + ":$APPDIR"
+        )
 
         apprun_env.drop_empty_keys()
 
@@ -202,9 +204,9 @@ class RuntimeGenerator:
                 v = v.replace("${APPDIR}", self.appdir_path.__str__())
 
                 if (
-                        k == "PATH"
-                        or k == "APPDIR_LIBRARY_PATH"
-                        or k == "LIBC_LIBRARY_PATH"
+                    k == "PATH"
+                    or k == "APPDIR_LIBRARY_PATH"
+                    or k == "LIBC_LIBRARY_PATH"
                 ):
                     v = v.split(":")
 

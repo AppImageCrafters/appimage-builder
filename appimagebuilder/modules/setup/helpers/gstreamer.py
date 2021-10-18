@@ -71,7 +71,9 @@ class GStreamer(BaseHelper):
                 logging.warning(f"GST_REGISTRY generation failed!")
                 del env["GST_REGISTRY"]
         else:
-            logging.warning(f"gst-launch-1.0 not found! It is required to generate gstreamer registry")
+            logging.warning(
+                f"gst-launch-1.0 not found! It is required to generate gstreamer registry"
+            )
 
     def _prepare_gst_launch_env(self, env):
         gst_launch_env = os.environ
