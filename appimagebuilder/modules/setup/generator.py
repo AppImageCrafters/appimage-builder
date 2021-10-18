@@ -180,11 +180,18 @@ class RuntimeGenerator:
 
         apprun_env.merge(global_environment)
         apprun_env.merge(self.user_env)
+
+        # map build dir to allow caches to work
+        apprun_env.append("APPRUN_PATH_MAPPINGS", self.appdir_path.__str__() + ":$APPDIR")
+
         apprun_env.drop_empty_keys()
 
         with open(self.appdir_path / ".env", "w") as f:
+            appdir_path_str = str(self.appdir_path)
             result = apprun_env.serialize()
-            result = result.replace(str(self.appdir_path), "$APPDIR")
+            result = result.replace(appdir_path_str, "$APPDIR")
+            # restore build dir mapping if exists
+            result = result.replace("$APPDIR:$APPDIR;", appdir_path_str + ":$APPDIR;")
             f.write(result)
 
     def parse_env_input(self, user_env_input):
@@ -208,7 +215,7 @@ class RuntimeGenerator:
     def _deploy_appdir_hooks(self, wrapper, runtime_env, embed_archs):
         if self.deploy_hooks:
             runtime_env.set("LD_PRELOAD", "libapprun_hooks.so")
-            
+
         for arch in embed_archs:
             path = self.appdir_path / "lib" / arch
             path.mkdir(parents=True, exist_ok=True)
