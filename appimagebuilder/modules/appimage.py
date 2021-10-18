@@ -58,9 +58,9 @@ class AppImageCreator:
 
         # appimagetool uses different architecture names than AppImageKit runtime releases
         if self.target_arch == "aarch64":
-            appimage_tool_arch = 'arm_aarch64'
-        elif self.target_arch == 'armhf':
-            appimage_tool_arch = 'arm'
+            appimage_tool_arch = "arm_aarch64"
+        elif self.target_arch == "armhf":
+            appimage_tool_arch = "arm"
         else:
             appimage_tool_arch = self.target_arch
 
