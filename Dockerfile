@@ -8,14 +8,13 @@ ADD . /opt/appimage-builder
 WORKDIR /opt/appimage-builder
 RUN python3 ./setup.py install && rm -rf /opt/appimage-builder
 
-WORKDIR /tmp
-RUN wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage && \
-    chmod +x /tmp/appimagetool-x86_64.AppImage && \
-    cd /opt && /tmp/appimagetool-x86_64.AppImage --appimage-extract && \
-    mv squashfs-root appimage-tool.AppDir && \
-    ln -s /opt/appimage-tool.AppDir/AppRun /usr/bin/appimagetool && \
-    rm /tmp/appimagetool-x86_64.AppImage
+RUN wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -O /opt/appimagetool \
+    && chmod +x /opt/appimagetool \
+    && cd /opt/; sed -i 's|AI\x02|\x00\x00\x00|' appimagetool; /opt/appimagetool --appimage-extract \ 
+    && mv /opt/squashfs-root /opt/appimagetool.AppDir \
+    && ln -s /opt/appimagetool.AppDir/AppRun /usr/local/bin/appimagetool
 
+WORKDIR /tmp
 RUN wget https://github.com/NixOS/patchelf/releases/download/0.12/patchelf-0.12.tar.bz2; \
     tar -xvf patchelf-0.12.tar.bz2;  \
     cd patchelf-0.12.20200827.8d3a16e; \
