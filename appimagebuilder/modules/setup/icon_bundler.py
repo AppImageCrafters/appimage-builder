@@ -75,7 +75,7 @@ class IconBundler:
                 new_path = os.path.join(root, png_icon_name)
                 new_size = self._extract_icon_size_from_path(new_path)
 
-                if new_size > size:
+                if new_size >= size:
                     size = new_size
                     path = new_path
 
