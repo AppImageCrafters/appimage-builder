@@ -135,7 +135,7 @@ class FileDeploy:
     def _resolve_deploy_prefix(self, path: str):
         for pattern in self.listings["glibc"]:
             if fnmatch.fnmatch(path, pattern):
-                return self.app_dir.rstrip("/") + "/opt/libc/"
+                return self.app_dir.rstrip("/") + "/runtime/compat/"
 
         return self.app_dir.rstrip("/") + "/"
 
@@ -143,7 +143,7 @@ class FileDeploy:
         self.logger.info("Removing excluded files")
         base_paths = [
             pathlib.Path(self.app_dir),
-            pathlib.Path(self.app_dir) / "opt" / "libc",
+            pathlib.Path(self.app_dir) / "runtime" / "compat",
         ]
 
         for base_path in base_paths:

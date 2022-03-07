@@ -28,8 +28,8 @@ class SetupSymlinksCommand(Command):
         for link in self._finder.find("*", [Finder.is_symlink]):
             relative_root = (
                 self.context.app_dir
-                if "opt/libc" not in str(link)
-                else self.context.app_dir / "opt" / "libc"
+                if "runtime/compat" not in str(link)
+                else self.context.app_dir / "runtime" / "compat"
             )
             self._make_symlink_relative(link, relative_root)
 

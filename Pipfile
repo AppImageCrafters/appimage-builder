@@ -15,7 +15,7 @@ questionary = "*"
 emrichen = "*"
 shutils = "*"
 "ruamel.yaml" = "*"
-"roam" = "*"
+roam = "*"
 
 [requires]
 python_version = "3.8"

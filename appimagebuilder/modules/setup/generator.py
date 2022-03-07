@@ -35,7 +35,7 @@ class RuntimeGenerator:
         self.appdir_path = Path(recipe.AppDir.path()).absolute()
         self.main_exec = recipe.AppDir.app_info.exec()
         self.main_exec_args = recipe.AppDir.app_info.exec_args() or "$@"
-        self.apprun_version = recipe.AppDir.runtime.version() or "v1.2.5"
+        self.apprun_version = recipe.AppDir.runtime.version() or "v2.0.0"
         self.apprun_debug = recipe.AppDir.runtime.debug()
         user_env_input = recipe.AppDir.runtime.env() or {}
         self.user_env = self.parse_env_input(user_env_input)
@@ -56,7 +56,7 @@ class RuntimeGenerator:
 
         scanner = ExecutablesScanner(self.appdir_path, self.finder)
         resolver = AppRunBinariesResolver(self.apprun_version, self.apprun_debug)
-        wrapper = ExecutablesWrapper(self.appdir_path, resolver, runtime_env)
+        wrapper = ExecutablesWrapper(self.appdir_path.__str__(), resolver, runtime_env)
 
         executables = self._find_executables(scanner)
         embed_archs = self._find_embed_archs(executables)
@@ -65,6 +65,7 @@ class RuntimeGenerator:
 
         self._wrap_interpreted_executables(executables, runtime_env, wrapper)
         self._deploy_appdir_apprun(wrapper, runtime_env)
+        self._create_default_runtime(runtime_env)
 
     def _wrap_interpreted_executables(self, executables, runtime_env, wrapper):
         interpreted_executables = [
@@ -188,7 +189,7 @@ class RuntimeGenerator:
 
         apprun_env.drop_empty_keys()
 
-        with open(self.appdir_path / ".env", "w") as f:
+        with open(self.appdir_path / "AppRun.env", "w") as f:
             appdir_path_str = str(self.appdir_path)
             result = apprun_env.serialize()
             result = result.replace(appdir_path_str, "$APPDIR")
@@ -204,9 +205,9 @@ class RuntimeGenerator:
                 v = v.replace("${APPDIR}", self.appdir_path.__str__())
 
                 if (
-                    k == "PATH"
-                    or k == "APPDIR_LIBRARY_PATH"
-                    or k == "LIBC_LIBRARY_PATH"
+                        k == "PATH"
+                        or k == "APPDIR_LIBRARY_PATH"
+                        or k == "LIBC_LIBRARY_PATH"
                 ):
                     v = v.split(":")
 
@@ -229,7 +230,7 @@ class RuntimeGenerator:
             pattern="*.so*",
             file_checks=[Finder.is_file, Finder.is_elf_shared_lib],
             excluded_patterns=[
-                "*/opt/libc*",
+                "*/runtime/compat*",
                 "*/qt5/plugins*",
                 "*/perl*",
                 "*/perl-base*",
@@ -245,6 +246,16 @@ class RuntimeGenerator:
         paths = self.finder.find_dirs_containing(
             pattern="*",
             file_checks=[Finder.is_file, Finder.is_executable],
-            excluded_patterns=["*/opt/libc*"],
+            excluded_patterns=["*/runtime/compat*"],
         )
         return sorted([path.__str__() for path in paths])
+
+    def _create_default_runtime(self, runtime_env):
+        default_runtime_path = self.appdir_path / "runtime" / "default"
+        default_runtime_path.mkdir(parents=True, exist_ok=True)
+
+        ld_paths = runtime_env.get("APPRUN_LD_PATHS")
+        for ld_path in ld_paths:
+            default_path = default_runtime_path / ld_path
+            default_path.parent.mkdir(exist_ok=True, parents=True)
+            default_path.symlink_to("/" + ld_path)
