@@ -16,7 +16,7 @@
  a different partition.
 """
 
-# libc, libstdc++ its close dependencies, those packages will be deployed to AppDir/opt/libc
+# libc, libstdc++ its close dependencies, those packages will be deployed to AppDir/runtime/compat
 glibc = ["libc6", "zlib1g", "libstdc++6"]
 
 # packages that apt and dpkg assume as installed

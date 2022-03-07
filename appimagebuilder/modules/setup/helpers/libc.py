@@ -33,7 +33,7 @@ class LibC(BaseHelper):
         self.priority = 100
         self.patch_elf = PatchElf()
         self.patch_elf.logger.level = logging.WARNING
-        self.interpreters = {}
+        self.interpreters = set()
 
     def get_glibc_path(self) -> str:
         path = self.finder.find_one("*/libc.so.*", [Finder.is_elf_shared_lib])
@@ -45,14 +45,9 @@ class LibC(BaseHelper):
 
     def configure(self, env: Environment):
         try:
-            glibc_path = self.get_glibc_path()
-            glibc_version = self.guess_libc_version(glibc_path)
-            env.set("APPDIR_LIBC_VERSION", glibc_version)
-
+            self._patch_executables_interpreter()
+            env.set("APPRUN_LD_PATHS", list(self.interpreters))
             env.set("LIBC_LIBRARY_PATH", self._get_libc_library_paths())
-
-            self._patch_executables_interpreter(env.get("APPIMAGE_UUID"))
-            env.set("SYSTEM_INTERP", list(self.interpreters.keys()))
         except InterpreterHandlerError as err:
             logging.warning("%s" % err)
             logging.warning(
@@ -61,7 +56,7 @@ class LibC(BaseHelper):
 
     def _get_libc_library_paths(self):
         paths = self.finder.find_dirs_containing(
-            pattern="*/opt/libc/*.so*",
+            pattern="*/runtime/compat/*.so*",
             file_checks=[Finder.is_file, Finder.is_elf_shared_lib],
         )
         return [path.__str__() for path in paths]
@@ -89,7 +84,7 @@ class LibC(BaseHelper):
             else:
                 raise InterpreterHandlerError("Unable to determine glibc version")
 
-    def _patch_executables_interpreter(self, uuid):
+    def _patch_executables_interpreter(self):
         binaries = self.finder.find(
             pattern="*",
             check_true=[
@@ -99,37 +94,19 @@ class LibC(BaseHelper):
                 Finder.is_dynamically_linked_executable,
             ],
         )
-        for bin in binaries:
-            self._set_interpreter(bin, uuid)
+        for bin_path in binaries:
+            self._make_interpreter_path_relative(bin_path)
 
-    def _set_interpreter(self, file, uuid):
+    def _make_interpreter_path_relative(self, bin_path):
         try:
             patchelf_command = PatchElf()
             patchelf_command.log_stderr = False
             patchelf_command.log_stdout = False
 
-            original_interpreter = patchelf_command.get_interpreter(file)
-            if original_interpreter.startswith("/tmp/appimage-"):
-                # skip, the binary has been patched already
-                return
-
-            apprun_interpreter = self._gen_interpreter_link_path(
-                original_interpreter, uuid
-            )
-            if original_interpreter and original_interpreter != apprun_interpreter:
-                # only include interpreters from standard paths
-                if original_interpreter.startswith("/lib"):
-                    self.interpreters[original_interpreter] = apprun_interpreter
-                logging.info(
-                    "Replacing PT_INTERP on: %s" % os.path.relpath(file, self.app_dir)
-                )
-                logging.debug(
-                    '\t"%s"  => "%s"' % (original_interpreter, apprun_interpreter)
-                )
-                patchelf_command.set_interpreter(file, apprun_interpreter)
+            interpreter_path = patchelf_command.get_interpreter(bin_path)
+            if interpreter_path.startswith("/"):
+                rel_path = interpreter_path.lstrip("/")
+                patchelf_command.set_interpreter(bin_path, rel_path)
+                self.interpreters.add(rel_path)
         except PatchElfError:
             pass
-
-    @staticmethod
-    def _gen_interpreter_link_path(real_interpreter, uuid):
-        return "/tmp/appimage-%s-%s" % (uuid, os.path.basename(real_interpreter))
