@@ -49,6 +49,8 @@ class RuntimeGenerator:
             logging.error("Hooks required when setting path mappings")
             raise RuntimeError("Path Mappings set without hooks")
 
+        self.preserve_paths = recipe.AppDir.runtime.preserve()
+
         self.finder = finder
 
     def generate(self):
@@ -129,7 +131,20 @@ class RuntimeGenerator:
             }
         )
 
-        self._run_configuration_helpers(global_env)
+        preserve_files = []
+        base_paths = [
+            self.finder.base_path,
+            self.finder.base_path / "opt" / "libc",
+        ]
+        for pattern in self.preserve_paths:
+            for base_path in base_paths:
+                for match in base_path.glob(pattern):
+                    if match.is_dir():
+                        preserve_files.extend(match.glob("**/*"))
+                    else:
+                        preserve_files.append(match)
+
+        self._run_configuration_helpers(global_env, preserve_files)
         for k, v in self.user_env.items():
             if k in global_env:
                 logging.info("Overriding runtime environment %s" % k)
@@ -140,7 +155,7 @@ class RuntimeGenerator:
 
         return global_env
 
-    def _run_configuration_helpers(self, global_env):
+    def _run_configuration_helpers(self, global_env, preserve_files: [Path]):
         execution_list = [
             helpers.GdkPixbuf,
             helpers.GLib,
@@ -157,7 +172,7 @@ class RuntimeGenerator:
         for helper in execution_list:
             logging.info("Running configuration helper: %s" % helper.__name__)
             inst = helper(self.appdir_path, self.finder)
-            inst.configure(global_env)
+            inst.configure(global_env, preserve_files)
 
     def _deploy_appdir_apprun(self, wrapper, global_environment):
         self._write_appdir_env(global_environment)

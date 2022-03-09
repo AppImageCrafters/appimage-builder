@@ -67,6 +67,9 @@ class TestRecipeSchema(TestCase):
                 "env": {
                     "PATH": "${APPDIR}/usr/bin:${PATH}",
                 },
+                "preserve": [
+                    "usr/bin/example"
+                ],
                 "debug": False,
             },
             "files": {"include": ["/one", "/two"], "exclude": ["three", "four"]},

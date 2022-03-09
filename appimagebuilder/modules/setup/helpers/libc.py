@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
+import pathlib
 import re
 from functools import reduce
 
@@ -43,7 +44,7 @@ class LibC(BaseHelper):
         logging.info("Libc found at: %s" % os.path.relpath(path, self.app_dir))
         return path
 
-    def configure(self, env: Environment):
+    def configure(self, env: Environment, preserve_files: [pathlib.Path]):
         try:
             glibc_path = self.get_glibc_path()
             glibc_version = self.guess_libc_version(glibc_path)
@@ -51,7 +52,7 @@ class LibC(BaseHelper):
 
             env.set("LIBC_LIBRARY_PATH", self._get_libc_library_paths())
 
-            self._patch_executables_interpreter(env.get("APPIMAGE_UUID"))
+            self._patch_executables_interpreter(env.get("APPIMAGE_UUID"), preserve_files)
             env.set("SYSTEM_INTERP", list(self.interpreters.keys()))
         except InterpreterHandlerError as err:
             logging.warning("%s" % err)
@@ -89,7 +90,7 @@ class LibC(BaseHelper):
             else:
                 raise InterpreterHandlerError("Unable to determine glibc version")
 
-    def _patch_executables_interpreter(self, uuid):
+    def _patch_executables_interpreter(self, uuid, preserve_files: [pathlib.Path]):
         binaries = self.finder.find(
             pattern="*",
             check_true=[
@@ -99,8 +100,15 @@ class LibC(BaseHelper):
                 Finder.is_dynamically_linked_executable,
             ],
         )
+
         for bin in binaries:
-            self._set_interpreter(bin, uuid)
+            allowed = True
+            for preserve_file in preserve_files:
+                if preserve_file.samefile(bin):
+                    allowed = False
+                    break
+            if allowed:
+                self._set_interpreter(bin, uuid)
 
     def _set_interpreter(self, file, uuid):
         try:

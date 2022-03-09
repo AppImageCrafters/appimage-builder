@@ -18,7 +18,7 @@ from ..environment import Environment
 
 
 class Python(BaseHelper):
-    def configure(self, env: Environment):
+    def configure(self, env: Environment, preserve_files):
         python_path = self.finder.find_one(
             "*/bin/python?", [Finder.is_file, Finder.is_executable]
         )

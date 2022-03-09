@@ -17,7 +17,7 @@ from ..environment import Environment
 
 
 class LibGL(BaseHelper):
-    def configure(self, env: Environment):
+    def configure(self, env: Environment, preserve_files):
         dri_path = self.finder.find_one("*/dri", [Finder.is_dir])
         if dri_path:
             env.set("LIBGL_DRIVERS_PATH", dri_path)

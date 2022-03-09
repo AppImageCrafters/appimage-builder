@@ -18,7 +18,7 @@ from ..environment import Environment
 
 
 class Java(BaseHelper):
-    def configure(self, env: Environment):
+    def configure(self, env: Environment, preserve_files):
         java_path = self.finder.find_one("java", [Finder.is_file, Finder.is_executable])
         if java_path:
             java_home = Path(java_path).parent.parent
