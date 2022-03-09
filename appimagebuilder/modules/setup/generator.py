@@ -49,7 +49,7 @@ class RuntimeGenerator:
             logging.error("Hooks required when setting path mappings")
             raise RuntimeError("Path Mappings set without hooks")
 
-        self.preserve_paths = recipe.AppDir.runtime.preserve()
+        self.preserve_paths = recipe.AppDir.runtime.preserve() or []
 
         self.finder = finder
 
