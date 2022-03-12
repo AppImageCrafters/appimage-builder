@@ -29,4 +29,4 @@ class SetupAppInfoCommand(Command):
         icon_bundler.bundle_icon()
 
         desktop_entry_generator = DesktopEntryGenerator(self.context.app_dir)
-        desktop_entry_generator.generate(self.context.app_info)
+        desktop_entry_generator.generate(self.context.app_info, self.context.bundle_info.runtime_arch)
