@@ -11,7 +11,6 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
-import platform
 
 
 class DesktopEntryGenerator:
@@ -23,7 +22,7 @@ class DesktopEntryGenerator:
         self.contents = []
         self.app_dir = app_dir
 
-    def generate(self, app_info):
+    def generate(self, app_info, arch):
         try:
             self._load_app_desktop_entry(app_info.id)
         except DesktopEntryGenerator.Error as err:
@@ -32,7 +31,7 @@ class DesktopEntryGenerator:
 
         self._add_appimage_name(app_info.name)
         self._add_appimage_version(app_info.version)
-        self._add_appimage_arch(platform.machine())
+        self._add_appimage_arch(arch)
 
         self._save_app_dir_desktop_entry(app_info.id)
 
