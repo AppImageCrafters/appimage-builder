@@ -152,7 +152,7 @@ class RuntimeGenerator:
             helpers.OpenSSL,
             helpers.Python,
             helpers.Qt,
-            helpers.Mime,
+            helpers.MIME,
         ]
 
         for helper in execution_list:

@@ -20,4 +20,4 @@ from .libgl import LibGL
 from .openssl import OpenSSL
 from .python import Python
 from .qt import Qt
-from .mime import Mime
+from .mime import MIME

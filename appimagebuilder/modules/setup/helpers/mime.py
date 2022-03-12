@@ -15,7 +15,7 @@ import subprocess
 from .base_helper import BaseHelper
 
 
-class Mime(BaseHelper):
+class MIME(BaseHelper):
     def configure(self, env, preserve_files):
         path = self.finder.base_path / "usr" / "share" / "mime"
         if path.is_dir():
