@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import logging
 import pathlib
 
 
@@ -19,16 +20,20 @@ class ExecutablesPatcherError(RuntimeError):
 class ExecutablesPatcher:
     def __init__(self):
         self.used_interpreters_paths = {}
+        self.logger = logging.getLogger("ExecutablesPatcher")
 
     def patch_interpreted_executable(self, path: pathlib.Path):
-        with open(path, "r+") as f:
-            shebang = f.readline()
-            patched_shebang = self.make_bin_path_in_shebang_relative(shebang)
+        try:
+            with open(path, "r+") as f:
+                shebang = f.readline()
+                patched_shebang = self.make_bin_path_in_shebang_relative(shebang)
 
-            f.seek(0)
-            f.write(patched_shebang)
+                f.seek(0)
+                f.write(patched_shebang)
 
-            self._register_interpreter_used_in_shebang(path, patched_shebang)
+                self._register_interpreter_used_in_shebang(path, patched_shebang)
+        except Exception as e:
+            self.logger.warning("Unable to patch script shebang %s: %s", path, e)
 
     def _register_interpreter_used_in_shebang(self, executable_path, shebang):
         interpreter_path = self.read_interpreter_path_from_shebang(shebang)
