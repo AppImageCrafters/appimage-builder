@@ -16,7 +16,7 @@ import shutil
 import string
 from pathlib import Path
 
-from appimagebuilder.utils import elf
+from appimagebuilder.utils import elf, file_utils
 from appimagebuilder.utils.finder import Finder
 from . import helpers
 from .apprun_binaries_resolver import AppRunBinariesResolver
@@ -64,8 +64,9 @@ class RuntimeGenerator:
             self._deploy_apprun_hooks(resolver, runtime_env, embed_archs)
 
         self._wrap_interpreted_executables(executables, runtime_env, wrapper)
-        self._deploy_appdir_apprun(wrapper, runtime_env)
         self._create_default_runtime(runtime_env)
+        self._write_appdir_env(runtime_env)
+        self._deploy_apprun(resolver)
 
     def _wrap_interpreted_executables(self, executables, runtime_env, wrapper):
         interpreted_executables = [
@@ -160,14 +161,18 @@ class RuntimeGenerator:
             inst = helper(self.appdir_path, self.finder)
             inst.configure(global_env)
 
-    def _deploy_appdir_apprun(self, wrapper, global_environment):
-        self._write_appdir_env(global_environment)
+    def _deploy_apprun(self, resolver: AppRunBinariesResolver):
         bin_path = self.appdir_path / self.main_exec
         if not elf.has_magic_bytes(bin_path):
             raise RuntimeError(f"Main executable is not an elf executable: {bin_path}")
 
         main_arch = elf.get_arch(bin_path)
-        wrapper.deploy_apprun(main_arch, self.appdir_path / "AppRun")
+
+        target_path = self.appdir_path / "AppRun"
+        apprun_path = resolver.resolve_executable(main_arch)
+        shutil.copyfile(apprun_path, target_path, follow_symlinks=True)
+
+        file_utils.set_permissions_rx_all(target_path)
 
     def _write_appdir_env(self, global_environment):
         apprun_env = Environment(
