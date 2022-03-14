@@ -18,7 +18,7 @@ CLI_REQUIRE = ["dpkg-query"]
 
 
 class FilePackageResolver:
-    """Resolve which deb packages provide a given file using `dpkg-query -S` """
+    """Resolve which deb packages provide a given file using `dpkg-query -S`"""
 
     def __init__(self):
         self.logger = logging.getLogger(str(self.__class__.__name__))

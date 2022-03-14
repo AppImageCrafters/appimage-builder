@@ -19,7 +19,7 @@ from appimagebuilder.utils import shell
 
 
 class FilePackageResolver:
-    """Resolve which package provide a given file using `pacman -F` """
+    """Resolve which package provide a given file using `pacman -F`"""
 
     REQUIRED_COMMANDS = ["pacman"]
 
