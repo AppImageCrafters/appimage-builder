@@ -34,7 +34,12 @@ class TestExecutablesScanner(TestCase):
             shebang_script.flush()
 
             shebang = ExecutablesScanner.read_shebang(shebang_script.name)
-            self.assertEqual(shebang, ["/bin/bash",])
+            self.assertEqual(
+                shebang,
+                [
+                    "/bin/bash",
+                ],
+            )
 
     def test_read_spaced_classic_shebang(self):
         with tempfile.NamedTemporaryFile("w+") as shebang_script:
@@ -42,7 +47,12 @@ class TestExecutablesScanner(TestCase):
             shebang_script.flush()
 
             shebang = ExecutablesScanner.read_shebang(shebang_script.name)
-            self.assertEqual(shebang, ["/bin/bash",])
+            self.assertEqual(
+                shebang,
+                [
+                    "/bin/bash",
+                ],
+            )
 
     def test_read_env_shebang(self):
         with tempfile.NamedTemporaryFile("w+") as shebang_script:

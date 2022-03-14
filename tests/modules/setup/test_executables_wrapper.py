@@ -7,7 +7,6 @@ from appimagebuilder.modules.setup.executables_patcher import ExecutablesPatcher
 
 
 class TestExecutablesPatcher(unittest.TestCase):
-
     def test_read_interpreter_path_from_shebang(self):
         r = ExecutablesPatcher.read_interpreter_path_from_shebang("#!/bin/bash")
         self.assertEqual("/bin/bash", r)
@@ -28,7 +27,7 @@ class TestExecutablesPatcher(unittest.TestCase):
     def test_patch_interpreted_executable(self):
         patcher = ExecutablesPatcher()
 
-        with tempfile.NamedTemporaryFile('w+') as file_mock:
+        with tempfile.NamedTemporaryFile("w+") as file_mock:
             file_mock.write("#!/bin/bash\n")
             file_mock.flush()
             os.fsync(file_mock)
@@ -41,8 +40,10 @@ class TestExecutablesPatcher(unittest.TestCase):
 
             expected_shebang = "#! bin/bash\n"
             self.assertEqual(expected_shebang, patched_shebang)
-            self.assertEqual("bin/bash", patcher.used_interpreters_paths[file_mock_path])
+            self.assertEqual(
+                "bin/bash", patcher.used_interpreters_paths[file_mock_path]
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

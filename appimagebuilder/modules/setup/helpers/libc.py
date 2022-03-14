@@ -69,7 +69,9 @@ class LibC(BaseHelper):
         libc_path = self.get_glibc_path()
         version_in_embed_strings = self.read_libc_version_from_embed_strings(libc_path)
         if version_in_embed_strings:
-            logging.info("Taking libc version from embed strings: %s" % version_in_filename)
+            logging.info(
+                "Taking libc version from embed strings: %s" % version_in_filename
+            )
             return version_in_embed_strings
 
         raise InterpreterHandlerError("Unable to determine glibc version")
@@ -77,8 +79,8 @@ class LibC(BaseHelper):
     def _read_libc_version_from_filename(self):
         libc_versioned_path = self.get_glibc_versioned_path()
         if libc_versioned_path:
-            version_str = libc_versioned_path.stem.split('-')[-1]
-            if re.match(r'\d+\.\d+\.?\d*', version_str):
+            version_str = libc_versioned_path.stem.split("-")[-1]
+            if re.match(r"\d+\.\d+\.?\d*", version_str):
                 return version_str
 
         return None
