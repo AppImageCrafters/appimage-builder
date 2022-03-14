@@ -12,10 +12,11 @@
 
 import logging
 import random
+import shutil
 import string
-import uuid
 from pathlib import Path
 
+from appimagebuilder.utils import elf
 from appimagebuilder.utils.finder import Finder
 from . import helpers
 from .apprun_binaries_resolver import AppRunBinariesResolver
@@ -23,7 +24,6 @@ from .environment import Environment
 from .executables import BinaryExecutable, InterpretedExecutable
 from .executables_scanner import ExecutablesScanner
 from .executables_wrapper import ExecutablesWrapper
-from appimagebuilder.utils import elf
 
 
 class RuntimeGeneratorError(RuntimeError):
@@ -61,7 +61,7 @@ class RuntimeGenerator:
         executables = self._find_executables(scanner)
         embed_archs = self._find_embed_archs(executables)
         if self.deploy_hooks:
-            self._deploy_appdir_hooks(wrapper, runtime_env, embed_archs)
+            self._deploy_apprun_hooks(resolver, runtime_env, embed_archs)
 
         self._wrap_interpreted_executables(executables, runtime_env, wrapper)
         self._deploy_appdir_apprun(wrapper, runtime_env)
@@ -215,15 +215,24 @@ class RuntimeGenerator:
 
         return env
 
-    def _deploy_appdir_hooks(self, wrapper, runtime_env, embed_archs):
+    def _deploy_apprun_hooks(
+        self,
+        apprun_binaries_resolver: AppRunBinariesResolver,
+        runtime_env: Environment,
+        embed_archs: [str],
+    ):
         if self.deploy_hooks:
             runtime_env.set("LD_PRELOAD", "libapprun_hooks.so")
 
         for arch in embed_archs:
-            path = self.appdir_path / "lib" / arch
-            path.mkdir(parents=True, exist_ok=True)
-            wrapper.deploy_hooks_lib(arch, path)
-            runtime_env.append("APPDIR_LIBRARY_PATH", path.__str__())
+            dir_path = self.appdir_path / "lib" / arch
+            dir_path.mkdir(parents=True, exist_ok=True)
+
+            target_path = dir_path / "libapprun_hooks.so"
+            source_path = apprun_binaries_resolver.resolve_hooks_library(arch)
+            shutil.copy2(source_path, target_path, follow_symlinks=True)
+
+            runtime_env.append("APPDIR_LIBRARY_PATH", str(dir_path))
 
     def _get_appdir_library_paths(self):
         paths = self.finder.find_dirs_containing(
