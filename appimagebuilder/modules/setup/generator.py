@@ -22,8 +22,8 @@ from . import helpers
 from .apprun_binaries_resolver import AppRunBinariesResolver
 from .environment import Environment
 from .executables import BinaryExecutable, InterpretedExecutable
+from .executables_patcher import ExecutablesPatcher
 from .executables_scanner import ExecutablesScanner
-from .executables_wrapper import ExecutablesWrapper
 
 
 class RuntimeGeneratorError(RuntimeError):
@@ -39,6 +39,9 @@ class RuntimeGenerator:
         self.apprun_debug = recipe.AppDir.runtime.debug()
         user_env_input = recipe.AppDir.runtime.env() or {}
         self.user_env = self.parse_env_input(user_env_input)
+
+        self.default_runtime_path = self.appdir_path / "runtime" / "default"
+        self.compat_runtime_path = self.appdir_path / "runtime" / "compat"
 
         self.deploy_hooks = not recipe.AppDir.runtime.no_hooks()
         if not self.deploy_hooks:
@@ -56,41 +59,28 @@ class RuntimeGenerator:
 
         scanner = ExecutablesScanner(self.appdir_path, self.finder)
         resolver = AppRunBinariesResolver(self.apprun_version, self.apprun_debug)
-        wrapper = ExecutablesWrapper(self.appdir_path.__str__(), resolver, runtime_env)
+        patcher = ExecutablesPatcher()
 
         executables = self._find_executables(scanner)
         embed_archs = self._find_embed_archs(executables)
         if self.deploy_hooks:
             self._deploy_apprun_hooks(resolver, runtime_env, embed_archs)
 
-        self._wrap_interpreted_executables(executables, runtime_env, wrapper)
+        self._patch_interpreted_executables(executables, patcher)
+        self._link_interpreters_from_runtimes(patcher.used_interpreters_paths)
         self._create_default_runtime(runtime_env)
         self._write_appdir_env(runtime_env)
         self._deploy_apprun(resolver)
 
-    def _wrap_interpreted_executables(self, executables, runtime_env, wrapper):
+    def _patch_interpreted_executables(self, executables, patcher: ExecutablesPatcher):
         interpreted_executables = [
             executable
             for executable in executables
             if isinstance(executable, InterpretedExecutable)
         ]
 
-        if interpreted_executables:
-            env_path = self.finder.find_one(
-                "env", [Finder.is_file, Finder.is_executable]
-            )
-            if env_path:
-                runtime_env.set("EXPORTED_BINARIES", env_path)
-                for executable in interpreted_executables:
-                    wrapper.wrap(executable)
-            else:
-                logging.warning(
-                    "Missing 'env' binary. Embed interpreted executables will not work"
-                )
-                logging.warning(
-                    "To ensure a proper behaviour of interpreted executables it's recommended "
-                    "to bundle the 'env' along with the required interpreters."
-                )
+        for executable in interpreted_executables:
+            patcher.patch_interpreted_executable(executable.path)
 
     def _find_embed_archs(self, executables):
         embed_archs = set()
@@ -265,11 +255,39 @@ class RuntimeGenerator:
         return sorted([path.__str__() for path in paths])
 
     def _create_default_runtime(self, runtime_env):
-        default_runtime_path = self.appdir_path / "runtime" / "default"
-        default_runtime_path.mkdir(parents=True, exist_ok=True)
+        self.default_runtime_path.mkdir(parents=True, exist_ok=True)
 
         ld_paths = runtime_env.get("APPRUN_LD_PATHS")
         for ld_path in ld_paths:
-            default_path = default_runtime_path / ld_path
+            default_path = self.default_runtime_path / ld_path
             default_path.parent.mkdir(exist_ok=True, parents=True)
             default_path.symlink_to("/" + ld_path)
+
+    def _link_interpreters_from_runtimes(self, used_interpreters_paths: dict):
+        exported_interpreters = set()
+        for exec_path, interp_path in used_interpreters_paths.items():
+            if interp_path not in exported_interpreters:
+                exported_interpreters.add(interp_path)
+
+                compat_path = self.compat_runtime_path / interp_path
+                default_path = self.default_runtime_path / interp_path
+
+                compat_path.parent.mkdir(parents=True, exist_ok=True)
+                default_path.parent.mkdir(parents=True, exist_ok=True)
+
+                in_bundle_path = self.appdir_path / interp_path
+                if in_bundle_path.exists():
+                    nesting_count = str(interp_path).count("/") + 2
+                    link_target = "../" * nesting_count + interp_path
+
+                    logging.info('Setup bundled interpreter: "%s"' % interp_path)
+                else:
+                    link_target = "/" + interp_path
+                    logging.info('Setup system interpreter: "%s"' % interp_path)
+                    logging.warning(
+                        '"%s" will not run if "%s" is not present in the target system'
+                        % (exec_path, interp_path)
+                    )
+
+                compat_path.symlink_to(link_target)
+                default_path.symlink_to(link_target)
