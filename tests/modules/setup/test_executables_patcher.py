@@ -24,6 +24,13 @@ class TestExecutablesPatcher(unittest.TestCase):
         self.assertEqual(len(orig), len(patched))
         self.assertEqual("#! bin/env python3\n", patched)
 
+    def test_make_bin_path_in_shebang_relative_with_space(self):
+        orig = "#! /bin/env python3\n"
+        patched = ExecutablesPatcher.make_bin_path_in_shebang_relative(orig)
+
+        self.assertEqual(len(orig), len(patched))
+        self.assertEqual("#!  bin/env python3\n", patched)
+
     def test_patch_interpreted_executable(self):
         patcher = ExecutablesPatcher()
 
