@@ -49,7 +49,7 @@ class ExecutablesPatcher:
     def make_bin_path_in_shebang_relative(shebang):
         shebang_len = len(shebang)
         idx = 2
-        while shebang_len > idx and shebang[idx] == "/":
+        while shebang_len > idx and (shebang[idx] == "/" or shebang[idx] == " "):
             idx = idx + 1
 
         patched = shebang[:2] + " " * (idx - 2) + shebang[idx:]
