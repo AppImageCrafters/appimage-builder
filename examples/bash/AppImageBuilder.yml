@@ -1,6 +1,12 @@
 version: 1
 script:
   - rm -rf AppDir | true
+  - mkdir -p AppDir/bin
+  - cp run_tests.sh AppDir/
+  - cp -r tests AppDir
+  - ln -s ../usr/bin/env AppDir/tests/test_internal_binary_env
+  - ln -s /usr/bin/env AppDir/tests/test_external_binary_env
+  - ln -s bash AppDir/bin/nubash
 
 AppDir:
   path: ./AppDir
@@ -14,7 +20,7 @@ AppDir:
     exec_args: $@
 
   apt:
-    arch: [amd64, i386]
+    arch: [ amd64, i386 ]
     allow_unauthenticated: true
     sources:
       - sourceline: 'deb http://archive.ubuntu.com/ubuntu bionic main'
@@ -22,6 +28,7 @@ AppDir:
 
     include:
       - bash
+      - coreutils
       - libc6
       - libc6:i386
     exclude:
@@ -39,26 +46,29 @@ AppDir:
       - usr/share/doc/*/NEWS.*
       - usr/share/doc/*/TODO.*
 
+  runtime:
+    version: continuous
+
   test:
     debian:
       image: appimagecrafters/tests-env:debian-stable
-      command: "./AppRun -c 'echo hello world'"
+      command: "./AppRun ./run_tests.sh"
       use_host_x: True
     centos:
       image: appimagecrafters/tests-env:centos-7
-      command: "./AppRun -c 'echo hello world'"
+      command: "./AppRun ./run_tests.sh"
       use_host_x: True
     arch:
       image: appimagecrafters/tests-env:archlinux-latest
-      command: "./AppRun -c 'echo hello world'"
+      command: "./AppRun ./run_tests.sh"
       use_host_x: True
     fedora:
       image: appimagecrafters/tests-env:fedora-30
-      command: "./AppRun -c 'echo hello world'"
+      command: "./AppRun ./run_tests.sh"
       use_host_x: True
     ubuntu:
       image: appimagecrafters/tests-env:ubuntu-xenial
-      command: "./AppRun -c 'echo hello world'"
+      command: "./AppRun ./run_tests.sh"
       use_host_x: True
 
 
