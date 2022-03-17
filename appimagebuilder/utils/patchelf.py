@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from .command import Command
+from appimagebuilder.gateways.command import Command
 
 
 class PatchElfError(RuntimeError):
@@ -46,12 +46,31 @@ class PatchElf(Command):
 
         return self.stdout
 
-    def set_run_path(self, file, run_paths):
+    def get_rpath(self, file):
         file = file.__str__()
-        self._run(["patchelf", "--set-rpath", ":".join(run_paths), file])
+        self._run(["patchelf", "--print-rpath", file])
 
         if self.return_code != 0:
             raise PatchElfError("\n".join(self.stderr))
+
+        return "".join(self.stdout).split(":")
+
+    def set_rpath(self, file: str, run_paths: [str]):
+        file = file.__str__()
+        command = ["patchelf", "--set-rpath", ":".join(run_paths), file]
+        self._run(command)
+
+        if self.return_code != 0:
+            raise PatchElfError("\n".join(self.stderr))
+
+    def get_soname(self, file):
+        file = file.__str__()
+        self._run(["patchelf", "--print-soname", file])
+
+        if self.return_code != 0:
+            raise PatchElfError("\n".join(self.stderr))
+
+        return self.stdout
 
     def set(self, file, run_path=None, interpreter=None):
         file = file.__str__()
@@ -66,6 +85,13 @@ class PatchElf(Command):
 
         command.append(file)
         self._run(command)
+
+        if self.return_code != 0:
+            raise PatchElfError("\n".join(self.stderr))
+
+    def add_needed(self, file, lib_needed):
+        file = file.__str__()
+        self._run(["patchelf", "--add-needed", lib_needed, file])
 
         if self.return_code != 0:
             raise PatchElfError("\n".join(self.stderr))
