@@ -46,8 +46,8 @@ class Command:
             )
 
     def _run(self, command):
-        self.stdout.clear()
-        self.stderr.clear()
+        self.stdout = []
+        self.stderr = []
 
         if self.log_command:
             self.logger.info(" ".join(command))
