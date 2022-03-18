@@ -52,7 +52,9 @@ class LibC(BaseHelper):
 
             env.set("LIBC_LIBRARY_PATH", self._get_libc_library_paths())
 
-            self._patch_executables_interpreter(env.get("APPIMAGE_UUID"), preserve_files)
+            self._patch_executables_interpreter(
+                env.get("APPIMAGE_UUID"), preserve_files
+            )
             env.set("SYSTEM_INTERP", list(self.interpreters.keys()))
         except InterpreterHandlerError as err:
             logging.warning("%s" % err)
