@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          apt-get update && apt-get install -y python3 python3-pip python3-pytest fakeroot binutils
+          apt-get update && apt-get install -y python3 python3-pip python3-pytest fakeroot binutils patchelf
           python3 -m pip install -e .[dev]
       - name: Run pytest
         run: python3 -m unittest
@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: |
-          pacman -Sy --noconfirm python-pip python-pytest python-setuptools binutils patchelf fakeroot strace
+          pacman -Sy --noconfirm python-pip python-pytest python-setuptools binutils patchelf fakeroot strace patchelf
           python3 -m pip install -e .[dev]
       - name: Run pytest
         run: python3 -m unittest
