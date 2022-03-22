@@ -56,4 +56,4 @@ class TestDeploy(TestCase):
             print(package)
 
         self.assertTrue(next(self.appdir_path.glob("usr")))
-        self.assertTrue(next(self.appdir_path.glob("opt/libc/usr")))
+        self.assertTrue(next(self.appdir_path.glob("runtime/compat/usr")))
