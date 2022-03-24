@@ -72,9 +72,10 @@ jobs:
       - name: Pack bash
         run: |
           BUILDER_PATH=$(find $PWD -name appimage-builder-*.AppImage)
+          RECIPE_PATH=$PWD/examples/bash/AppImageBuilder.yml
           chmod +x $BUILDER_PATH
           cd /tmp
-          $BUILDER_PATH --recipe ./examples/bash/AppImageBuilder.yml --skip-test
+          $BUILDER_PATH --recipe $RECIPE_PATH --skip-test
       - name: Test bash
         run: |
           cd /tmp
