@@ -51,8 +51,8 @@ class LibC(BaseHelper):
     def configure(self, env: Environment):
         try:
             self._patch_executables_interpreter()
-            env.set("APPRUN_LD_PATHS", list(self.interpreters))
-            env.set("LIBC_LIBRARY_PATH", self._get_libc_library_paths())
+            env.set("APPDIR_LIBC_LINKER_PATH", list(self.interpreters))
+            env.set("APPDIR_LIBC_LIBRARY_PATH", self._get_libc_library_paths())
             env.set("APPDIR_LIBC_VERSION", self._guess_libc_version())
         except InterpreterHandlerError as err:
             logging.warning("%s" % err)

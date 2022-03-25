@@ -128,7 +128,7 @@ class RuntimeGenerator:
 
             global_env.set(k, v)
 
-        global_env.set("APPRUN_PATH_MAPPINGS", self.path_mappings)
+        global_env.set("APPDIR_PATH_MAPPINGS", self.path_mappings)
 
         return global_env
 
@@ -169,8 +169,8 @@ class RuntimeGenerator:
             {
                 "APPDIR": "$ORIGIN/",
                 "APPIMAGE_UUID": None,
-                "EXEC_PATH": "$APPDIR/" + self.main_exec,
-                "EXEC_ARGS": self.main_exec_args,
+                "APPDIR_EXEC_PATH": "$APPDIR/" + self.main_exec,
+                "APPDIR_EXEC_ARGS": self.main_exec_args,
             }
         )
 
@@ -179,7 +179,7 @@ class RuntimeGenerator:
 
         # map build dir to allow caches to work
         apprun_env.append(
-            "APPRUN_PATH_MAPPINGS", self.appdir_path.__str__() + ":$APPDIR"
+            "APPDIR_PATH_MAPPINGS", self.appdir_path.__str__() + ":$APPDIR"
         )
 
         apprun_env.drop_empty_keys()
@@ -202,7 +202,7 @@ class RuntimeGenerator:
                 if (
                     k == "PATH"
                     or k == "APPDIR_LIBRARY_PATH"
-                    or k == "LIBC_LIBRARY_PATH"
+                    or k == "APPDIR_LIBC_LIBRARY_PATH"
                 ):
                     v = v.split(":")
 
@@ -255,7 +255,7 @@ class RuntimeGenerator:
     def _create_default_runtime(self, runtime_env):
         self.default_runtime_path.mkdir(parents=True, exist_ok=True)
 
-        ld_paths = runtime_env.get("APPRUN_LD_PATHS")
+        ld_paths = runtime_env.get("APPDIR_LIBC_LINKER_PATH")
         for ld_path in ld_paths:
             default_path = self.default_runtime_path / ld_path
             default_path.parent.mkdir(exist_ok=True, parents=True)

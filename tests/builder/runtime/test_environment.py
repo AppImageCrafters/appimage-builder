@@ -21,14 +21,14 @@ class TestEnvironment(TestCase):
             {
                 "APPDIR": "$ORIGIN/..",
                 "APPIMAGE_UUID": "123",
-                "EXEC_ARGS": ["-f", "$@"],
+                "APPDIR_EXEC_ARGS": ["-f", "$@"],
                 "LIST": ["1", "2"],
                 "DICT": {
                     "a": "b",
                     "c": "d",
                 },
                 "APPDIR_LIBRARY_PATH": ["/AppDir/usr/lib"],
-                "APPRUN_PATH_MAPPINGS": ["a:b", "c:d"],
+                "APPDIR_PATH_MAPPINGS": ["a:b", "c:d"],
                 "NONE": None,
             }
         )
@@ -37,11 +37,11 @@ class TestEnvironment(TestCase):
         expected = (
             "APPDIR=$ORIGIN/..\n"
             "APPIMAGE_UUID=123\n"
-            "EXEC_ARGS=-f $@\n"
+            "APPDIR_EXEC_ARGS=-f $@\n"
             "LIST=1:2\n"
             "DICT=a:b;c:d;\n"
             "APPDIR_LIBRARY_PATH=/AppDir/usr/lib\n"
-            "APPRUN_PATH_MAPPINGS=a:b;c:d;\n"
+            "APPDIR_PATH_MAPPINGS=a:b;c:d;\n"
             'NONE=""\n'
         )
 
