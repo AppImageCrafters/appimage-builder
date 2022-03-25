@@ -216,8 +216,6 @@ class RuntimeGenerator:
         runtime_env: Environment,
         embed_archs: [str],
     ):
-        if self.deploy_hooks:
-            runtime_env.set("LD_PRELOAD", "libapprun_hooks.so")
 
         for arch in embed_archs:
             dir_path = self.appdir_path / "lib" / arch
