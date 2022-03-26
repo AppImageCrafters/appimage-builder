@@ -37,7 +37,7 @@ AppDir:
   files:
     exclude:
       - etc/**
-      - usr/share/doc/**/examples/**
+      - usr/share/doc/**/recipes/**
       - usr/include/**
       - usr/lib/*/gconv/**
       - usr/share/man/**
