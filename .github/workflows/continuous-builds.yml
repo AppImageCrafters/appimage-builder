@@ -74,9 +74,9 @@ jobs:
         run: |
           find .
           BUILDER_PATH=$(find $PWD -name appimage-builder-*.AppImage)
-          RECIPE_PATH=$PWD/recipes/bash/AppImageBuilder.yml
           chmod +x $BUILDER_PATH
-          $BUILDER_PATH --recipe $RECIPE_PATH --skip-test
+          cd recipes/bash/
+          $BUILDER_PATH --skip-test
       - name: Test bash
         run: |
           ./bash*.AppImage --appimage-extract-and-run -c "echo Hello World"
@@ -84,7 +84,7 @@ jobs:
         uses: actions/upload-artifact@v2.1.4
         with:
           name: bash
-          path: './bash*.AppImage*'
+          path: 'recipes/bash/bash*.AppImage*'
   publish:
     runs-on: ubuntu-latest
     needs: test-pack-bash
