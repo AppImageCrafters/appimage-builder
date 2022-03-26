@@ -59,7 +59,6 @@ AppDir:
   runtime:
     version: "continuous"
     env:
-      PATH: '${APPDIR}/usr/bin:${PATH}'
       # Set python home
       # See https://docs.python.org/3/using/cmdline.html#envvar-PYTHONHOME
       PYTHONHOME: '${APPDIR}/usr'
