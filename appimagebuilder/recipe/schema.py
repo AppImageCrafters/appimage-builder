@@ -108,7 +108,7 @@ class RecipeSchema:
 
     def validate(self, recipe: Roamer):
         if recipe.version() == 1:
-            return self.v1.validate(recipe())
+            return self.v1.validate(recipe(resolve_variables=False))
         else:
             logging.error("Unknown recipe version: %s" % recipe.version())
             logging.info(
