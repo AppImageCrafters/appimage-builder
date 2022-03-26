@@ -53,13 +53,14 @@ jobs:
           sudo python3.8 -m pip install .
       - name: Build AppImage
         run: |
+          cd recipes/appimage-builder
           export APPIMAGE_BUILDER_VERSION=${{ steps.get_version.outputs.VERSION }}
           appimage-builder --skip-test
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2.1.4
         with:
           name: appimage-builder
-          path: './appimage-builder*.AppImage*'
+          path: 'recipes/appimage-builder/appimage-builder*.AppImage*'
   test-pack-bash:
     runs-on: ubuntu-latest
     needs: build
@@ -71,8 +72,9 @@ jobs:
           name: appimage-builder
       - name: Pack bash
         run: |
+          find .
           BUILDER_PATH=$(find $PWD -name appimage-builder-*.AppImage)
-          RECIPE_PATH=$PWD/examples/bash/AppImageBuilder.yml
+          RECIPE_PATH=$PWD/recipes/bash/AppImageBuilder.yml
           chmod +x $BUILDER_PATH
           $BUILDER_PATH --recipe $RECIPE_PATH --skip-test
       - name: Test bash

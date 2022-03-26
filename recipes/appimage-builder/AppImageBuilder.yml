@@ -1,19 +1,22 @@
 version: 1
 script:
   # Remove any previous build
+  - echo $PWD
   - rm -rf $APPDIR  || true
-  - mkdir -p $APPDIR/usr/share/icons/hicolor/scalable/apps $APPDIR/usr/bin $APPDIR/opt
-  - cp resources/appimage-builder.svg $APPDIR/usr/share/icons/hicolor/scalable/apps
+  - mkdir -p $APPDIR/usr/share/icons/hicolor/scalable/apps $APPDIR/usr/bin $APPDIR/opt appimage-builder-cache
+  - cp ../../resources/appimage-builder.svg $APPDIR/usr/share/icons/hicolor/scalable/apps
   # deploy appimagetool
+  - cd appimage-builder-cache
   - wget -c https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool.AppImage
   - chmod +x appimagetool.AppImage
   - ./appimagetool.AppImage --appimage-extract
   - cp squashfs-root/usr/bin/appimagetool $APPDIR/usr/bin/appimagetool
   - mkdir -p $APPDIR/usr/lib/appimagekit/
   - cp squashfs-root/usr/lib/appimagekit/mksquashfs $APPDIR/usr/lib/appimagekit/
+  - cd ..
 
   # find bundle version
-  - PACKAGE_VERSION=$(grep -Po 'version="\K((\d|\.)+)' setup.py)
+  - PACKAGE_VERSION=$(grep -Po 'version="\K((\d|\.)+)' ../../setup.py)
   - echo APPIMAGE_BUILDER_VERSION="$PACKAGE_VERSION-$(git rev-parse --short HEAD)" >> $BUILDER_ENV
 
 AppDir:
@@ -23,7 +26,7 @@ AppDir:
     id: org.appimage-crafters.appimage-builder
     name: appimage-builder
     icon: appimage-builder
-    version: '{{APPIMAGE_BUILDER_VERSION}}'
+    version: '${PACKAGE_VERSION}'
     # Set the python executable as entry point
     exec: usr/bin/python3
     # Set the application main script path as argument. Use '$@' to forward CLI parameters
@@ -50,7 +53,7 @@ AppDir:
     exclude: []
 
   after_bundle: |
-    python3.8 -m pip install --ignore-installed --prefix=/usr --root=$APPDIR  install .
+    python3.8 -m pip install --ignore-installed --prefix=/usr --root=$APPDIR  install ../../
     python3.8 -m pip install --ignore-installed --prefix=/usr --root=$APPDIR  install certifi
 
   runtime:
