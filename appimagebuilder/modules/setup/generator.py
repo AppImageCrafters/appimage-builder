@@ -68,6 +68,21 @@ class RuntimeGenerator:
         self._wrap_interpreted_executables(executables, runtime_env, wrapper)
         self._deploy_appdir_apprun(wrapper, runtime_env)
 
+    def _get_preserve_files(self):
+        preserve_files = []
+        base_paths = [
+            self.finder.base_path,
+            self.finder.base_path / "opt" / "libc",
+        ]
+        for pattern in self.preserve_paths:
+            for base_path in base_paths:
+                for match in base_path.glob(pattern):
+                    if match.is_dir():
+                        preserve_files.extend(match.glob("**/*"))
+                    else:
+                        preserve_files.append(match)
+        return preserve_files
+
     def _wrap_interpreted_executables(self, executables, runtime_env, wrapper):
         interpreted_executables = [
             executable
@@ -75,6 +90,7 @@ class RuntimeGenerator:
             if isinstance(executable, InterpretedExecutable)
         ]
 
+        preserve_files = self._get_preserve_files()
         if interpreted_executables:
             env_path = self.finder.find_one(
                 "env", [Finder.is_file, Finder.is_executable]
@@ -82,7 +98,13 @@ class RuntimeGenerator:
             if env_path:
                 runtime_env.set("EXPORTED_BINARIES", env_path)
                 for executable in interpreted_executables:
-                    wrapper.wrap(executable)
+                    allowed = True
+                    for preserve_file in preserve_files:
+                        if preserve_file.samefile(executable):
+                            allowed = False
+                            break
+                    if allowed:
+                        wrapper.wrap(executable)
             else:
                 logging.warning(
                     "Missing 'env' binary. Embed interpreted executables will not work"
@@ -131,19 +153,7 @@ class RuntimeGenerator:
             }
         )
 
-        preserve_files = []
-        base_paths = [
-            self.finder.base_path,
-            self.finder.base_path / "opt" / "libc",
-        ]
-        for pattern in self.preserve_paths:
-            for base_path in base_paths:
-                for match in base_path.glob(pattern):
-                    if match.is_dir():
-                        preserve_files.extend(match.glob("**/*"))
-                    else:
-                        preserve_files.append(match)
-
+        preserve_files = self._get_preserve_files()
         self._run_configuration_helpers(global_env, preserve_files)
         for k, v in self.user_env.items():
             if k in global_env:
