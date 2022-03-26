@@ -1,12 +1,13 @@
 version: 1
 script:
-  - rm -rf AppDir | true
-  - mkdir -p AppDir/bin
-  - cp run_tests.sh AppDir/
-  - cp -r tests AppDir
-  - ln -s ../usr/bin/env AppDir/tests/test_internal_binary_env
-  - ln -s /usr/bin/env AppDir/tests/test_external_binary_env
-  - ln -s bash AppDir/bin/nubash
+  - echo $PWD
+  - rm -rf $APPDIR | true
+  - mkdir -p $APPDIR/bin
+  - cp run_tests.sh $APPDIR
+  - cp -r tests $APPDIR
+  - ln -s ../usr/bin/env $APPDIR/tests/test_internal_binary_env
+  - ln -s /usr/bin/env $APPDIR/tests/test_external_binary_env
+  - ln -s bash $APPDIR/bin/nubash
 
 AppDir:
   path: ./AppDir
