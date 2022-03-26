@@ -53,7 +53,7 @@ class RunShellScriptCommand(Command):
 
         with tempfile.NamedTemporaryFile() as exported_env:
             run_env["BUILDER_ENV"] = exported_env.name
-            run_env["APPDIR"] = str(self.context.app_dir)
+            run_env["APPDIR"] = str(self.context.app_dir.absolute())
 
             _proc = subprocess.Popen(
                 ["bash", "-ve"], stdin=subprocess.PIPE, env=run_env
