@@ -26,7 +26,7 @@ AppDir:
     id: org.appimage-crafters.appimage-builder
     name: appimage-builder
     icon: appimage-builder
-    version: '${PACKAGE_VERSION}'
+    version: '{{APPIMAGE_BUILDER_VERSION}}'
     # Set the python executable as entry point
     exec: usr/bin/python3
     # Set the application main script path as argument. Use '$@' to forward CLI parameters
@@ -40,8 +40,8 @@ AppDir:
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
 
     include:
+      - bash
       - coreutils
-      - dash
       - desktop-file-utils
       - fakeroot
       - libgdk-pixbuf2.0-dev
