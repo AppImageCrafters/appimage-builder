@@ -21,7 +21,7 @@ class AppRunBinariesResolver:
         self,
         version,
         debug,
-        cache_dir="appimage-builder-cache/runtime",
+        cache_dir="appimage-builder-cache/AppRun",
     ):
         self.apprun_version = version
         self.apprun_build_type = "Debug" if debug else "Release"
