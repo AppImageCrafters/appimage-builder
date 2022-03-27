@@ -228,28 +228,30 @@ class RuntimeGenerator:
             runtime_env.append("APPDIR_LIBRARY_PATH", str(dir_path))
 
     def _get_appdir_library_paths(self):
-        paths = self.finder.find_dirs_containing(
-            pattern="*.so*",
-            file_checks=[Finder.is_file, Finder.is_elf_shared_lib],
-            excluded_patterns=[
-                "*/runtime/compat*",
-                "*/qt5/plugins*",
-                "*/perl*",
-                "*/perl-base*",
-                "*/gio/modules",
-                "*/gtk-*/modules",
-                "*/libgtk-*-0",
-            ],
+        paths = list(
+            self.finder.find_dirs_containing(
+                pattern="*.so*",
+                file_checks=[Finder.is_file, Finder.is_elf_shared_lib],
+                excluded_patterns=[
+                    "*/runtime/*",
+                    "*/qt5/plugins*",
+                    "*/perl*",
+                    "*/perl-base*",
+                    "*/gio/modules",
+                    "*/gtk-*/modules",
+                    "*/libgtk-*-0",
+                ],
+            )
         )
-
-        return [path.__str__() for path in paths]
+        paths = set([path.__str__() for path in paths])
+        return sorted(paths)
 
     def _get_bin_paths(self):
-        paths = self.finder.find_dirs_containing(
+        paths = set(self.finder.find_dirs_containing(
             pattern="*",
             file_checks=[Finder.is_file, Finder.is_executable],
             excluded_patterns=["*/runtime/compat*"],
-        )
+        ))
         return sorted([path.__str__() for path in paths])
 
     def _create_default_runtime(self, runtime_env):
@@ -258,8 +260,9 @@ class RuntimeGenerator:
         ld_paths = runtime_env.get("APPDIR_LIBC_LINKER_PATH")
         for ld_path in ld_paths:
             default_path = self.default_runtime_path / ld_path
-            default_path.parent.mkdir(exist_ok=True, parents=True)
-            default_path.symlink_to("/" + ld_path)
+            if not default_path.exists():
+                default_path.parent.mkdir(exist_ok=True, parents=True)
+                default_path.symlink_to("/" + ld_path)
 
     def _link_interpreters_from_runtimes(self, used_interpreters_paths: dict):
         exported_interpreters = set()
