@@ -92,13 +92,13 @@ class Finder:
             if self.match_patterns(root_path, excluded_patterns):
                 continue
 
-            for file in files:
-                path = root_path / file
-                if not self.match_patterns(path, [pattern]):
-                    break
+            for filename in files:
+                path = root_path / filename
+                if not fnmatch.fnmatch(path, pattern):
+                    continue
 
                 if self.check_file(path, file_checks):
-                    yield root_path.absolute()
+                    yield path.parent
                     break
 
     @staticmethod
