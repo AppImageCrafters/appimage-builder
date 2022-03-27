@@ -72,14 +72,13 @@ jobs:
           name: appimage-builder
       - name: Pack bash
         run: |
-          find .
           BUILDER_PATH=$(find $PWD -name appimage-builder-*.AppImage)
           chmod +x $BUILDER_PATH
           cd recipes/bash/
           $BUILDER_PATH --skip-test
       - name: Test bash
         run: |
-          ./bash*.AppImage --appimage-extract-and-run -c "echo Hello World"
+          recipes/bash/bash*.AppImage --appimage-extract-and-run -c "echo Hello World"
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2.1.4
         with:
