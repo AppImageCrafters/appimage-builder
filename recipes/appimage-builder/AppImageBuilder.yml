@@ -74,6 +74,8 @@ AppDir:
       PYTHONPATH: '${APPDIR}/usr/lib/python3.8/site-packages'
       # SSL Certificates are placed in a different location for every system therefore we ship our own copy
       SSL_CERT_FILE: '${APPDIR}/usr/lib/python3.8/site-packages/certifi/cacert.pem'
+    path_mappings:
+      - /bin/:$APPDIR/bin/
 
   test:
     fedora:
