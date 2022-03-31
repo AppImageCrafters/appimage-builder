@@ -42,6 +42,7 @@ AppDir:
     include:
       - bash
       - coreutils
+      - binutils
       - desktop-file-utils
       - fakeroot
       - libgdk-pixbuf2.0-dev
