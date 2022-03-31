@@ -43,6 +43,7 @@ AppDir:
       - bash
       - coreutils
       - binutils
+      - file
       - desktop-file-utils
       - fakeroot
       - libgdk-pixbuf2.0-dev
