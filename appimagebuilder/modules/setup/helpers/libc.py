@@ -14,6 +14,8 @@ import os
 import pathlib
 import re
 from functools import reduce
+from pathlib import Path
+from typing import Optional
 
 from packaging import version
 
@@ -44,9 +46,12 @@ class LibC(BaseHelper):
         logging.info("Libc found at: %s" % os.path.relpath(path, self.app_dir))
         return path
 
-    def get_glibc_versioned_path(self) -> pathlib.Path:
+    def get_glibc_versioned_path(self) -> Optional[Path]:
         path = self.finder.find_one("*/libc-*.so", [Finder.is_elf_shared_lib])
-        return pathlib.Path(path)
+        if path:
+            return pathlib.Path(path)
+        else:
+            return None
 
     def configure(self, env: Environment):
         try:
