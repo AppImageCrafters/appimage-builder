@@ -70,8 +70,12 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: appimage-builder
+      - name: Install dependencies
+        run: |
+          sudo apt install -y adwaita-icon-theme
       - name: Pack bash
         run: |
+          # build bash
           BUILDER_PATH=$(find $PWD -name appimage-builder-*.AppImage)
           chmod +x $BUILDER_PATH
           cd recipes/bash/
