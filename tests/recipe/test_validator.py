@@ -106,7 +106,7 @@ class TestRecipeSchema(TestCase):
         os.environ["APP_VERSION"] = "latest"
         os.environ["TARGET_ARCH"] = "auto"
 
-        files = Path(__file__).parent.glob("../../examples/*/*.yml")
+        files = Path(__file__).parent.glob("../../recipes/*/*.yml")
         schema = RecipeSchema()
         for file in files:
             recipe_loader = recipe.Loader()

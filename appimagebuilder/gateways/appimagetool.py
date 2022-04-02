@@ -12,6 +12,7 @@
 
 
 import logging
+import pathlib
 import subprocess
 
 from .command import Command
@@ -21,12 +22,12 @@ class AppImageToolCommand(Command):
     def __init__(self, app_dir, target_file):
         super().__init__("appimagetool")
 
-        self.app_dir = app_dir
+        self.app_dir = pathlib.Path(app_dir).absolute()
         self.runtime_file = None
         self.update_information = None
         self.guess_update_information = False
         self.sign_key = None
-        self.target_file = target_file
+        self.target_file = pathlib.Path(target_file).absolute()
         self.target_arch = None
 
     def run(self):
@@ -56,5 +57,5 @@ class AppImageToolCommand(Command):
         if self.guess_update_information:
             command.extend(["--guess"])
 
-        command.extend([self.app_dir, self.target_file])
+        command.extend([str(self.app_dir), str(self.target_file)])
         return command

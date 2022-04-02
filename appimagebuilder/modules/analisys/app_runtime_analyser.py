@@ -16,7 +16,7 @@ import pathlib
 import re
 import subprocess
 
-from appimagebuilder.gateways.patchelf import PatchElf, PatchElfError
+from appimagebuilder.utils.patchelf import PatchElf, PatchElfError
 from appimagebuilder.utils import shell
 from appimagebuilder.utils.finder import Finder
 

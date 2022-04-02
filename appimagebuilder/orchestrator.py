@@ -181,6 +181,7 @@ class Orchestrator:
             file_name=recipe.AppImage["file_name"] or None,
         )
         return Context(
+            recipe=pathlib.Path(args.recipe),
             app_info=app_info,
             bundle_info=bundle_info,
             app_dir=app_dir_path,

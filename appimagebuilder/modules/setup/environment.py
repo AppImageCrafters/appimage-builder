@@ -71,10 +71,10 @@ class Environment:
         return "".join(lines)
 
     def _serialize_entry(self, k, v):
-        if k == "EXEC_ARGS" and isinstance(v, list):
+        if k == "APPDIR_EXEC_ARGS" and isinstance(v, list):
             return self._serialize_list(k, v, " ")
 
-        if k == "APPRUN_PATH_MAPPINGS":
+        if k == "APPDIR_PATH_MAPPINGS":
             return self._serialize_list(k, v, ";") + ";"
 
         if isinstance(v, list):

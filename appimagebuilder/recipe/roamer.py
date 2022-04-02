@@ -23,13 +23,23 @@ class Roamer(roam.Roamer):
     traversal operations.
     """
 
-    def __call__(self, *args, _raise=False, _roam=False, _invoke=None, **kwargs):
+    def __call__(
+        self,
+        resolve_variables=True,
+        *args,
+        _raise=False,
+        _roam=False,
+        _invoke=None,
+        **kwargs
+    ):
         result = super().__call__(
             *args, _raise=_raise, _roam=_roam, _invoke=_invoke, **kwargs
         )
 
-        result = self._resolve_variables(result)
-        return result
+        if resolve_variables:
+            return self._resolve_variables(result)
+        else:
+            return result
 
     def __getattr__(self, attr_name):
         result = super().__getattr__(attr_name)

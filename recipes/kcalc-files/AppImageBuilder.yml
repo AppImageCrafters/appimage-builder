@@ -1,0 +1,187 @@
+# appimage-builder recipe see https://appimage-builder.readthedocs.io for details
+version: 1
+script:
+  - rm -rf ./AppDir || true
+
+AppDir:
+  path: AppDir
+  app_info:
+    id: org.kde.kcalc
+    name: kcalc
+    icon: application-vnd.appimage
+    version: latest
+    exec: usr/bin/kcalc
+    exec_args: $@
+  files:
+    include:
+      - /usr/bin/kcalc
+      - /lib64/ld-linux-x86-64.so.2
+      - /usr/lib/x86_64-linux-gnu/qt5/plugins/platforms/*
+      - /usr/lib/x86_64-linux-gnu/libpcre.so.3
+      - /usr/lib/x86_64-linux-gnu/libbz2.so.1.0
+      - /lib/x86_64-linux-gnu/libGLX.so.0
+      - /lib/x86_64-linux-gnu/libGLdispatch.so.0
+      - /lib/x86_64-linux-gnu/libHalf.so.24
+      - /lib/x86_64-linux-gnu/libICE.so.6
+      - /lib/x86_64-linux-gnu/libIex-2_3.so.24
+      - /lib/x86_64-linux-gnu/libIlmImf-2_3.so.24
+      - /lib/x86_64-linux-gnu/libIlmThread-2_3.so.24
+      - /lib/x86_64-linux-gnu/libKF5Archive.so.5
+      - /lib/x86_64-linux-gnu/libKF5AuthCore.so.5
+      - /lib/x86_64-linux-gnu/libKF5Bookmarks.so.5
+      - /lib/x86_64-linux-gnu/libKF5Codecs.so.5
+      - /lib/x86_64-linux-gnu/libKF5Completion.so.5
+      - /lib/x86_64-linux-gnu/libKF5ConfigCore.so.5
+      - /lib/x86_64-linux-gnu/libKF5ConfigGui.so.5
+      - /lib/x86_64-linux-gnu/libKF5ConfigWidgets.so.5
+      - /lib/x86_64-linux-gnu/libKF5CoreAddons.so.5
+      - /lib/x86_64-linux-gnu/libKF5Crash.so.5
+      - /lib/x86_64-linux-gnu/libKF5DBusAddons.so.5
+      - /lib/x86_64-linux-gnu/libKF5GlobalAccel.so.5
+      - /lib/x86_64-linux-gnu/libKF5GuiAddons.so.5
+      - /lib/x86_64-linux-gnu/libKF5I18n.so.5
+      - /lib/x86_64-linux-gnu/libKF5IconThemes.so.5
+      - /lib/x86_64-linux-gnu/libKF5ItemViews.so.5
+      - /lib/x86_64-linux-gnu/libKF5JobWidgets.so.5
+      - /lib/x86_64-linux-gnu/libKF5KIOCore.so.5
+      - /lib/x86_64-linux-gnu/libKF5KIOFileWidgets.so.5
+      - /lib/x86_64-linux-gnu/libKF5KIOGui.so.5
+      - /lib/x86_64-linux-gnu/libKF5KIOWidgets.so.5
+      - /lib/x86_64-linux-gnu/libKF5Notifications.so.5
+      - /lib/x86_64-linux-gnu/libKF5Service.so.5
+      - /lib/x86_64-linux-gnu/libKF5Solid.so.5
+      - /lib/x86_64-linux-gnu/libKF5Style.so.5
+      - /lib/x86_64-linux-gnu/libKF5WaylandClient.so.5
+      - /lib/x86_64-linux-gnu/libKF5WidgetsAddons.so.5
+      - /lib/x86_64-linux-gnu/libKF5WindowSystem.so.5
+      - /lib/x86_64-linux-gnu/libKF5XmlGui.so.5
+      - /lib/x86_64-linux-gnu/libLLVM-12.so.1
+      - /lib/x86_64-linux-gnu/libQt5Core.so.5
+      - /lib/x86_64-linux-gnu/libQt5DBus.so.5
+      - /lib/x86_64-linux-gnu/libQt5Gui.so.5
+      - /lib/x86_64-linux-gnu/libQt5Network.so.5
+      - /lib/x86_64-linux-gnu/libQt5PrintSupport.so.5
+      - /lib/x86_64-linux-gnu/libQt5Qml.so.5
+      - /lib/x86_64-linux-gnu/libQt5QmlModels.so.5
+      - /lib/x86_64-linux-gnu/libQt5Quick.so.5
+      - /lib/x86_64-linux-gnu/libQt5QuickControls2.so.5
+      - /lib/x86_64-linux-gnu/libQt5QuickTemplates2.so.5
+      - /lib/x86_64-linux-gnu/libQt5Svg.so.5
+      - /lib/x86_64-linux-gnu/libQt5TextToSpeech.so.5
+      - /lib/x86_64-linux-gnu/libQt5WaylandClient.so.5
+      - /lib/x86_64-linux-gnu/libQt5Widgets.so.5
+      - /lib/x86_64-linux-gnu/libQt5X11Extras.so.5
+      - /lib/x86_64-linux-gnu/libQt5XcbQpa.so.5
+      - /lib/x86_64-linux-gnu/libQt5Xml.so.5
+      - /lib/x86_64-linux-gnu/libSM.so.6
+      - /lib/x86_64-linux-gnu/libX11.so.6
+      - /lib/x86_64-linux-gnu/libXau.so.6
+      - /lib/x86_64-linux-gnu/libXcursor.so.1
+      - /lib/x86_64-linux-gnu/libXdmcp.so.6
+      - /lib/x86_64-linux-gnu/libXext.so.6
+      - /lib/x86_64-linux-gnu/libXfixes.so.3
+      - /lib/x86_64-linux-gnu/libXrender.so.1
+      - /lib/x86_64-linux-gnu/libXxf86vm.so.1
+      - /lib/x86_64-linux-gnu/libacl.so.1
+      - /lib/x86_64-linux-gnu/libavif.so.12
+      - /lib/x86_64-linux-gnu/libbreezecommon5.so.5
+      - /lib/x86_64-linux-gnu/libbsd.so.0
+      - /lib/x86_64-linux-gnu/libcanberra.so.0
+      - /lib/x86_64-linux-gnu/libdav1d.so.5
+      - /lib/x86_64-linux-gnu/libdbusmenu-qt5.so.2
+      - /lib/x86_64-linux-gnu/libdouble-conversion.so.3
+      - /lib/x86_64-linux-gnu/libedit.so.2
+      - /lib/x86_64-linux-gnu/libelf.so.1
+      - /lib/x86_64-linux-gnu/libfam.so.0
+      - /lib/x86_64-linux-gnu/libffi.so.7
+      - /lib/x86_64-linux-gnu/libfontconfig.so.1
+      - /lib/x86_64-linux-gnu/libfreetype.so.6
+      - /lib/x86_64-linux-gnu/libgcrypt.so.20
+      - /lib/x86_64-linux-gnu/libglapi.so.0
+      - /lib/x86_64-linux-gnu/libglib-2.0.so.0
+      - /lib/x86_64-linux-gnu/libgmp.so.10
+      - /lib/x86_64-linux-gnu/libgraphite2.so.3
+      - /lib/x86_64-linux-gnu/libgssapi_krb5.so.2
+      - /lib/x86_64-linux-gnu/libharfbuzz.so.0
+      - /lib/x86_64-linux-gnu/libicudata.so.66
+      - /lib/x86_64-linux-gnu/libicui18n.so.66
+      - /lib/x86_64-linux-gnu/libicuuc.so.66
+      - /lib/x86_64-linux-gnu/libjasper.so.4
+      - /lib/x86_64-linux-gnu/libjbig.so.0
+      - /lib/x86_64-linux-gnu/libjpeg.so.8
+      - /lib/x86_64-linux-gnu/libk5crypto.so.3
+      - /lib/x86_64-linux-gnu/libkrb5.so.3
+      - /lib/x86_64-linux-gnu/libkrb5support.so.0
+      - /lib/x86_64-linux-gnu/liblcms2.so.2
+      - /lib/x86_64-linux-gnu/libltdl.so.7
+      - /lib/x86_64-linux-gnu/liblz4.so.1
+      - /lib/x86_64-linux-gnu/libmd4c.so.0
+      - /lib/x86_64-linux-gnu/libmng.so.2
+      - /lib/x86_64-linux-gnu/libmpfr.so.6
+      - /lib/x86_64-linux-gnu/libogg.so.0
+      - /lib/x86_64-linux-gnu/libpcre2-16.so.0
+      - /lib/x86_64-linux-gnu/libpcre2-8.so.0
+      - /lib/x86_64-linux-gnu/libpng16.so.16
+      - /lib/x86_64-linux-gnu/libsensors.so.5
+      - /lib/x86_64-linux-gnu/libstdc++.so.6
+      - /lib/x86_64-linux-gnu/libtdb.so.1
+      - /lib/x86_64-linux-gnu/libtiff.so.5
+      - /lib/x86_64-linux-gnu/libvorbis.so.0
+      - /lib/x86_64-linux-gnu/libvorbisfile.so.3
+      - /lib/x86_64-linux-gnu/libvulkan.so.1
+      - /lib/x86_64-linux-gnu/libwayland-client.so.0
+      - /lib/x86_64-linux-gnu/libwayland-cursor.so.0
+      - /lib/x86_64-linux-gnu/libwebp.so.6
+      - /lib/x86_64-linux-gnu/libwebpdemux.so.2
+      - /lib/x86_64-linux-gnu/libwebpmux.so.3
+      - /lib/x86_64-linux-gnu/libxcb-dri2.so.0
+      - /lib/x86_64-linux-gnu/libxcb-dri3.so.0
+      - /lib/x86_64-linux-gnu/libxcb-icccm.so.4
+      - /lib/x86_64-linux-gnu/libxcb-image.so.0
+      - /lib/x86_64-linux-gnu/libxcb-keysyms.so.1
+      - /lib/x86_64-linux-gnu/libxcb-present.so.0
+      - /lib/x86_64-linux-gnu/libxcb-randr.so.0
+      - /lib/x86_64-linux-gnu/libxcb-render-util.so.0
+      - /lib/x86_64-linux-gnu/libxcb-sync.so.1
+      - /lib/x86_64-linux-gnu/libxcb-util.so.1
+      - /lib/x86_64-linux-gnu/libxcb-xinerama.so.0
+      - /lib/x86_64-linux-gnu/libxcb-xinput.so.0
+      - /lib/x86_64-linux-gnu/libxcb-xkb.so.1
+      - /lib/x86_64-linux-gnu/libxkbcommon-x11.so.0
+      - /lib/x86_64-linux-gnu/libxkbcommon.so.0
+      - /lib/x86_64-linux-gnu/libxshmfence.so.1
+      - /lib/x86_64-linux-gnu/libzstd.so.1
+      - /usr/lib/locale/locale-archive
+      - /usr/share/icons/Luv/index.theme
+    exclude:
+      - usr/share/man
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
+  runtime:
+    version: v2.0.0-alpha
+  test:
+    fedora-30:
+      image: appimagecrafters/tests-env:fedora-30
+      command: ./AppRun
+      use_host_x: true
+    debian-stable:
+      image: appimagecrafters/tests-env:debian-stable
+      command: ./AppRun
+      use_host_x: true
+    archlinux-latest:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: ./AppRun
+      use_host_x: true
+    centos-7:
+      image: appimagecrafters/tests-env:centos-7
+      command: ./AppRun
+      use_host_x: true
+    ubuntu-xenial:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: ./AppRun
+      use_host_x: true
+AppImage:
+  arch: x86_64
+  update-information: guess

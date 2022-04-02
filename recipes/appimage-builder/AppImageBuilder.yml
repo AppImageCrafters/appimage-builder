@@ -1,19 +1,22 @@
 version: 1
 script:
   # Remove any previous build
+  - echo $PWD
   - rm -rf $APPDIR  || true
-  - mkdir -p $APPDIR/usr/share/icons/hicolor/scalable/apps $APPDIR/usr/bin $APPDIR/opt
-  - cp resources/appimage-builder.svg $APPDIR/usr/share/icons/hicolor/scalable/apps
+  - mkdir -p $APPDIR/usr/share/icons/hicolor/scalable/apps $APPDIR/usr/bin $APPDIR/opt appimage-builder-cache
+  - cp ../../resources/appimage-builder.svg $APPDIR/usr/share/icons/hicolor/scalable/apps
   # deploy appimagetool
+  - cd appimage-builder-cache
   - wget -c https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool.AppImage
   - chmod +x appimagetool.AppImage
   - ./appimagetool.AppImage --appimage-extract
   - cp squashfs-root/usr/bin/appimagetool $APPDIR/usr/bin/appimagetool
   - mkdir -p $APPDIR/usr/lib/appimagekit/
   - cp squashfs-root/usr/lib/appimagekit/mksquashfs $APPDIR/usr/lib/appimagekit/
+  - cd ..
 
   # find bundle version
-  - PACKAGE_VERSION=$(grep -Po 'version="\K((\d|\.)+)' setup.py)
+  - PACKAGE_VERSION=$(grep -Po 'version="\K((\d|\.)+)' ../../setup.py)
   - echo APPIMAGE_BUILDER_VERSION="$PACKAGE_VERSION-$(git rev-parse --short HEAD)" >> $BUILDER_ENV
 
 AppDir:
@@ -23,7 +26,7 @@ AppDir:
     id: org.appimage-crafters.appimage-builder
     name: appimage-builder
     icon: appimage-builder
-    version: '{{APPIMAGE_BUILDER_VERSION}}'
+    version: 'latest'
     # Set the python executable as entry point
     exec: usr/bin/python3
     # Set the application main script path as argument. Use '$@' to forward CLI parameters
@@ -37,8 +40,10 @@ AppDir:
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
 
     include:
+      - bash
       - coreutils
-      - dash
+      - binutils
+      - file
       - desktop-file-utils
       - fakeroot
       - libgdk-pixbuf2.0-dev
@@ -50,13 +55,17 @@ AppDir:
     exclude: []
 
   after_bundle: |
-    python3.8 -m pip install --ignore-installed --prefix=/usr --root=$APPDIR  install .
+    # configure tools 
+    ln -s fakeroot-sysv $APPDIR/usr/bin/fakeroot
+    ln -s bash $APPDIR/bin/sh
+
+    # install appimage-builder
+    python3.8 -m pip install --ignore-installed --prefix=/usr --root=$APPDIR  install ../../
     python3.8 -m pip install --ignore-installed --prefix=/usr --root=$APPDIR  install certifi
 
   runtime:
     version: "continuous"
     env:
-      PATH: '${APPDIR}/usr/bin:${PATH}'
       # Set python home
       # See https://docs.python.org/3/using/cmdline.html#envvar-PYTHONHOME
       PYTHONHOME: '${APPDIR}/usr'
@@ -65,6 +74,8 @@ AppDir:
       PYTHONPATH: '${APPDIR}/usr/lib/python3.8/site-packages'
       # SSL Certificates are placed in a different location for every system therefore we ship our own copy
       SSL_CERT_FILE: '${APPDIR}/usr/lib/python3.8/site-packages/certifi/cacert.pem'
+    path_mappings:
+      - /bin/:$APPDIR/bin/
 
   test:
     fedora:
@@ -89,6 +100,7 @@ AppDir:
       use_host_x: true
 
 AppImage:
+  file_name: "appimage-builder-{{APPIMAGE_BUILDER_VERSION}}-x86_64.AppImage"
   update-information: 'gh-releases-zsync|AppImageCrafters|appimage-builder|latest|-*x86_64.AppImage.zsync'
   sign-key: None
   arch: x86_64

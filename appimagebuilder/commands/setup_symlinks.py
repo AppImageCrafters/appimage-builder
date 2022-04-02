@@ -25,7 +25,7 @@ class SetupSymlinksCommand(Command):
         self._preserve_files = []
         base_paths = [
             self._finder.base_path,
-            self._finder.base_path / "opt" / "libc",
+            self._finder.base_path / "runtime" / "compat",
         ]
         preserve_paths = recipe.AppDir.runtime.preserve() or []
         for pattern in preserve_paths:
@@ -47,12 +47,12 @@ class SetupSymlinksCommand(Command):
                     allowed = False
                     break
             if allowed:
-                relative_root = (
-                    self.context.app_dir
-                    if "opt/libc" not in str(link)
-                    else self.context.app_dir / "opt" / "libc"
-                )
-                self._make_symlink_relative(link, relative_root)
+              relative_root = (
+                  self.context.app_dir
+                  if "runtime/compat" not in str(link)
+                  else self.context.app_dir / "runtime" / "compat"
+              )
+              self._make_symlink_relative(link, relative_root)
 
     @staticmethod
     def _make_symlink_relative(path, relative_root):

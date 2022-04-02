@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+black = "*"
 
 [packages]
 pyyaml = "*"
@@ -15,7 +16,7 @@ questionary = "*"
 emrichen = "*"
 shutils = "*"
 "ruamel.yaml" = "*"
-"roam" = "*"
+roam = "*"
 
 [requires]
 python_version = "3.8"

@@ -2,8 +2,8 @@
 .idea
 
 # Example builds
-/examples/*/AppDir
-/examples/*/appimage-builder-cache
+/recipes/*/AppDir
+/recipes/*/appimage-builder-cache
 /AppDir
 /appimage-builder-cache
 

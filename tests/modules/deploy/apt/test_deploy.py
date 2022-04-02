@@ -46,4 +46,4 @@ class TestDeploy(TestCase):
         apt_deploy = Deploy(self.apt_venv)
         apt_deploy.deploy(["perl", "util-linux"], self.appdir_path)
         self.assertTrue(next(self.appdir_path.glob("usr")))
-        self.assertTrue(next(self.appdir_path.glob("opt/libc/lib")))
+        self.assertTrue(next(self.appdir_path.glob("runtime/compat/lib")))

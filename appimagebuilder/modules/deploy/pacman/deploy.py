@@ -74,7 +74,7 @@ class Deploy:
         for file in package_files:
             name, version = self.pacman_venv.read_package_data(file)
             target = (
-                appdir_root / "opt" / "libc"
+                appdir_root / "runtime" / "compat"
                 if name in self.listings["glibc"]
                 else appdir_root
             )
@@ -91,10 +91,10 @@ class Deploy:
         os.symlink("lib", appdir_root / "usr" / "lib64")
         os.symlink("bin", appdir_root / "usr" / "sbin")
 
-        os.symlink("usr/bin", appdir_root / "opt" / "libc" / "bin")
-        os.symlink("usr/bin", appdir_root / "opt" / "libc" / "sbin")
-        os.symlink("usr/lib", appdir_root / "opt" / "libc" / "lib")
-        os.symlink("usr/lib", appdir_root / "opt" / "libc" / "lib64")
-        os.symlink("lib", appdir_root / "opt" / "libc" / "usr" / "lib64")
-        os.symlink("bin", appdir_root / "opt" / "libc" / "usr" / "sbin")
+        os.symlink("usr/bin", appdir_root / "runtime" / "compat" / "bin")
+        os.symlink("usr/bin", appdir_root / "runtime" / "compat" / "sbin")
+        os.symlink("usr/lib", appdir_root / "runtime" / "compat" / "lib")
+        os.symlink("usr/lib", appdir_root / "runtime" / "compat" / "lib64")
+        os.symlink("lib", appdir_root / "runtime" / "compat" / "usr" / "lib64")
+        os.symlink("bin", appdir_root / "runtime" / "compat" / "usr" / "sbin")
         return deployed_packages

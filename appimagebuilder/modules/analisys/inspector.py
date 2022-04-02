@@ -37,7 +37,7 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from appimagebuilder.gateways.patchelf import PatchElf, PatchElfError
+from appimagebuilder.utils.patchelf import PatchElf, PatchElfError
 from appimagebuilder.modules.analisys.appimage_mount import AppImageMount
 from appimagebuilder.utils.elf import has_magic_bytes
 from appimagebuilder.modules.analisys.app_runtime_analyser import AppRuntimeAnalyser
@@ -59,7 +59,7 @@ class Inspector:
         libs_needed = set()
         bundle_libs = set()
         for root, dirs, files in os.walk(self.app_dir):
-            if "opt/libc" in root:
+            if "runtime/compat" in root:
                 continue
 
             for file in files:
@@ -89,7 +89,7 @@ class Inspector:
     def get_dependants_of(self, lib_name):
         dependants = set()
         for root, dirs, files in os.walk(self.app_dir):
-            if "opt/libc" in root:
+            if "runtime/compat" in root:
                 continue
 
             for file in files:
