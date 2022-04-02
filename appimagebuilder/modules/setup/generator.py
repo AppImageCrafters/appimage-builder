@@ -104,7 +104,7 @@ class RuntimeGenerator:
                     allowed = False
                     break
             if allowed:
-              patcher.patch_interpreted_executable(executable.path)
+                patcher.patch_interpreted_executable(executable.path)
 
     def _find_embed_archs(self, executables):
         embed_archs = set()
@@ -272,11 +272,13 @@ class RuntimeGenerator:
         return sorted(paths)
 
     def _get_bin_paths(self):
-        paths = set(self.finder.find_dirs_containing(
-            pattern="*",
-            file_checks=[Finder.is_file, Finder.is_executable],
-            excluded_patterns=["*/runtime/compat*"],
-        ))
+        paths = set(
+            self.finder.find_dirs_containing(
+                pattern="*",
+                file_checks=[Finder.is_file, Finder.is_executable],
+                excluded_patterns=["*/runtime/compat*"],
+            )
+        )
         return sorted([path.__str__() for path in paths])
 
     def _create_default_runtime(self, runtime_env):

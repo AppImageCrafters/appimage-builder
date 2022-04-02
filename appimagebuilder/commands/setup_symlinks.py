@@ -47,12 +47,12 @@ class SetupSymlinksCommand(Command):
                     allowed = False
                     break
             if allowed:
-              relative_root = (
-                  self.context.app_dir
-                  if "runtime/compat" not in str(link)
-                  else self.context.app_dir / "runtime" / "compat"
-              )
-              self._make_symlink_relative(link, relative_root)
+                relative_root = (
+                    self.context.app_dir
+                    if "runtime/compat" not in str(link)
+                    else self.context.app_dir / "runtime" / "compat"
+                )
+                self._make_symlink_relative(link, relative_root)
 
     @staticmethod
     def _make_symlink_relative(path, relative_root):

@@ -137,7 +137,7 @@ class LibC(BaseHelper):
                     allowed = False
                     break
             if allowed:
-              self._make_interpreter_path_relative(bin_path)
+                self._make_interpreter_path_relative(bin_path)
 
     def _make_interpreter_path_relative(self, bin_path):
         try:
