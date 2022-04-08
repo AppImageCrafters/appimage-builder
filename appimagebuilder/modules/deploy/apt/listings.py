@@ -67,7 +67,7 @@ graphics = [
     "libgbm*",
     "libgl1*",
     "libglapi*",
-    "libgles2*",
+    "libgles*",
     "libglvnd*",
     "libglx*",
     "mesa-*",

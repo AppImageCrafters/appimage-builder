@@ -25,7 +25,7 @@ class Qt(BaseHelper):
         self.app_dir = Path(app_dir)
         self._qt_dirs = {}
 
-    def configure(self, env: Environment):
+    def configure(self, env: Environment, preserve_files):
         self._locate_qt5_dirs()
         if self._qt_dirs:
             # deploy a qt.conf file next to executable files that may start a Qt application

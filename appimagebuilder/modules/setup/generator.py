@@ -53,6 +53,8 @@ class RuntimeGenerator:
             logging.error("Hooks required when setting path mappings")
             raise RuntimeError("Path Mappings set without hooks")
 
+        self.preserve_paths = recipe.AppDir.runtime.preserve() or []
+
         self.finder = finder
 
         self.path_mappings_env: Final = "APPDIR_PATH_MAPPINGS"
@@ -76,6 +78,21 @@ class RuntimeGenerator:
         self._write_appdir_env(runtime_env)
         self._deploy_apprun(resolver)
 
+    def _get_preserve_files(self):
+        preserve_files = []
+        base_paths = [
+            self.finder.base_path,
+            self.finder.base_path / "runtime" / "compat",
+        ]
+        for pattern in self.preserve_paths:
+            for base_path in base_paths:
+                for match in base_path.glob(pattern):
+                    if match.is_dir():
+                        preserve_files.extend(match.glob("**/*"))
+                    else:
+                        preserve_files.append(match)
+        return preserve_files
+
     def _setup_path_mappings(self, runtime_env, interpreter_paths: list):
         # map used interpreters
         interpreter_paths = sorted(set(interpreter_paths))
@@ -94,8 +111,15 @@ class RuntimeGenerator:
             if isinstance(executable, InterpretedExecutable)
         ]
 
+        preserve_files = self._get_preserve_files()
         for executable in interpreted_executables:
-            patcher.patch_interpreted_executable(executable.path)
+            allowed = True
+            for preserve_file in preserve_files:
+                if preserve_file.samefile(executable):
+                    allowed = False
+                    break
+            if allowed:
+                patcher.patch_interpreted_executable(executable.path)
 
     def _find_embed_archs(self, executables):
         embed_archs = set()
@@ -136,7 +160,8 @@ class RuntimeGenerator:
             }
         )
 
-        self._run_configuration_helpers(global_env)
+        preserve_files = self._get_preserve_files()
+        self._run_configuration_helpers(global_env, preserve_files)
         for k, v in self.user_env.items():
             if k in global_env:
                 logging.info("Overriding runtime environment %s" % k)
@@ -147,7 +172,7 @@ class RuntimeGenerator:
 
         return global_env
 
-    def _run_configuration_helpers(self, global_env):
+    def _run_configuration_helpers(self, global_env, preserve_files: [Path]):
         execution_list = [
             helpers.GdkPixbuf,
             helpers.GLib,
@@ -164,7 +189,7 @@ class RuntimeGenerator:
         for helper in execution_list:
             logging.info("Running configuration helper: %s" % helper.__name__)
             inst = helper(self.appdir_path, self.finder)
-            inst.configure(global_env)
+            inst.configure(global_env, preserve_files)
 
     def _deploy_apprun(self, resolver: AppRunBinariesResolver):
         bin_path = self.appdir_path / self.main_exec
@@ -256,11 +281,13 @@ class RuntimeGenerator:
         return sorted(paths)
 
     def _get_bin_paths(self):
-        paths = set(self.finder.find_dirs_containing(
-            pattern="*",
-            file_checks=[Finder.is_file, Finder.is_executable],
-            excluded_patterns=["*/runtime/compat*"],
-        ))
+        paths = set(
+            self.finder.find_dirs_containing(
+                pattern="*",
+                file_checks=[Finder.is_file, Finder.is_executable],
+                excluded_patterns=["*/runtime/compat*"],
+            )
+        )
         return sorted([path.__str__() for path in paths])
 
     def _create_default_runtime(self, runtime_env):

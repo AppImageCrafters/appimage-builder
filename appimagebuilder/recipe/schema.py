@@ -41,6 +41,7 @@ class RecipeSchema:
             Optional("no_hooks"): bool,
             Optional("path_mappings"): [str],
             Optional("env"): {str: Or(str, int, bool)},
+            Optional("preserve"): [str],
         }
 
         self.v1_tests = {

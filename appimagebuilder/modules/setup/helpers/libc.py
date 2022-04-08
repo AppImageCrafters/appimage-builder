@@ -53,9 +53,9 @@ class LibC(BaseHelper):
         else:
             return None
 
-    def configure(self, env: Environment):
+    def configure(self, env: Environment, preserve_files: [pathlib.Path]):
         try:
-            self._patch_executables_interpreter()
+            self._patch_executables_interpreter(preserve_files)
             env.set("APPDIR_LIBC_LINKER_PATH", list(self.interpreters))
             env.set("APPDIR_LIBC_LIBRARY_PATH", self._get_libc_library_paths())
             env.set("APPDIR_LIBC_VERSION", self._guess_libc_version())
@@ -112,7 +112,7 @@ class LibC(BaseHelper):
             else:
                 raise InterpreterHandlerError("Unable to determine glibc version")
 
-    def _patch_executables_interpreter(self):
+    def _patch_executables_interpreter(self, preserve_files: [pathlib.Path]):
         binaries = self.finder.find(
             pattern="*",
             check_true=[
@@ -123,7 +123,13 @@ class LibC(BaseHelper):
             ],
         )
         for bin_path in binaries:
-            self._make_interpreter_path_relative(bin_path)
+            allowed = True
+            for preserve_file in preserve_files:
+                if preserve_file.samefile(bin):
+                    allowed = False
+                    break
+            if allowed:
+                self._make_interpreter_path_relative(bin_path)
 
     def _make_interpreter_path_relative(self, bin_path):
         try:

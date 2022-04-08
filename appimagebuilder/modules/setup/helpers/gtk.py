@@ -23,7 +23,7 @@ class Gtk(BaseHelper):
     Reference: https://developer.gnome.org/gtk3/stable/gtk-running.html
     """
 
-    def configure(self, env: Environment):
+    def configure(self, env: Environment, preserve_files):
         prefix = self.app_dir / "usr"
         env.set("GTK_EXE_PREFIX", str(prefix))
         env.set("GTK_DATA_PREFIX", str(prefix))

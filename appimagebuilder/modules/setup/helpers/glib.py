@@ -18,7 +18,7 @@ from ..environment import Environment
 
 
 class GLib(BaseHelper):
-    def configure(self, env: Environment):
+    def configure(self, env: Environment, preserve_files):
         self._configure_gio_modules(env)
         self._configure_schemas(env)
         self._configure_girepository(env)

@@ -21,7 +21,7 @@ from ..environment import Environment
 
 
 class GdkPixbuf(BaseHelper):
-    def configure(self, global_env: Environment):
+    def configure(self, env: Environment, preserve_files):
         loaders_dir_path = self.finder.find_one(
             "*/gdk-pixbuf-2.0/*/loaders", [Finder.is_dir]
         )
@@ -32,8 +32,8 @@ class GdkPixbuf(BaseHelper):
             logging.info("GDK loaders cache modules dir: %s" % loaders_cache_path)
             self._generate_loaders_cache(loaders_cache_path)
 
-            global_env.set("GDK_PIXBUF_MODULEDIR", loaders_dir_path)
-            global_env.set("GDK_PIXBUF_MODULE_FILE", loaders_cache_path)
+            env.set("GDK_PIXBUF_MODULEDIR", loaders_dir_path)
+            env.set("GDK_PIXBUF_MODULE_FILE", loaders_cache_path)
 
     def _generate_loaders_cache(self, loaders_cache_path):
         bin_path = self._find_gdk_pixbuf_query_loaders_bin()

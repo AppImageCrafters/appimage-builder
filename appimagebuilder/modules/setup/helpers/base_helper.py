@@ -22,7 +22,7 @@ class BaseHelper:
         self.env = {}
         self.scripts = {}
 
-    def configure(self, app_run):
+    def configure(self, env, preserve_files):
         pass
 
     @staticmethod
