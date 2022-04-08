@@ -13,7 +13,6 @@
 
 import logging
 import pathlib
-import subprocess
 
 from .command import Command
 

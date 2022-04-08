@@ -12,7 +12,7 @@
 import fnmatch
 
 from appimagebuilder.modules.deploy.apt import listings
-from appimagebuilder.gateways.dpkg_query import DpkgQuery
+from appimagebuilder.utils.dpkg_query import DpkgQuery
 
 
 class PackageFilter:
