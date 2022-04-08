@@ -18,6 +18,6 @@ from ..environment import Environment
 
 class LibGL(BaseHelper):
     def configure(self, env: Environment):
-        dri_path = self.finder.find_one("*/dri", [Finder.is_dir])
+        dri_path = self.finder.find_one("*/dri/*.so", [Finder.is_file, Finder.is_elf])
         if dri_path:
-            env.set("LIBGL_DRIVERS_PATH", dri_path)
+            env.set("LIBGL_DRIVERS_PATH", dri_path.parent)
