@@ -97,14 +97,6 @@ class LibC(BaseHelper):
         )
         return [path.__str__() for path in paths]
 
-    def _load_ld_conf_file(self, file):
-        paths = set()
-        with open(file, "r") as fin:
-            for line in fin.readlines():
-                if line.startswith("/"):
-                    paths.add(line.strip())
-        return paths
-
     @staticmethod
     def read_libc_version_from_embed_strings(libc_path):
         glib_version_re = re.compile(r"GLIBC_(?P<version>\d+\.\d+\.?\d*)")
