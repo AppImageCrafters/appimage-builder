@@ -80,7 +80,6 @@ jobs:
           chmod +x $BUILDER_PATH
           cd recipes/bash/
           $BUILDER_PATH --skip-test
-          cat AppDir/org.gnu.bash.desktop
       - name: Test bash
         run: |
           recipes/bash/bash*.AppImage --appimage-extract-and-run -c "echo Hello World"
