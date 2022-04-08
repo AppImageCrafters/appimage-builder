@@ -1,4 +1,4 @@
-#  Copyright  2020 Alexis Lopez Zubieta
+#  Copyright  2022 TheBrokenRail
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a
 #  copy of this software and associated documentation files (the "Software"),
@@ -9,15 +9,18 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import shutil
+import subprocess
 
-from .gdk_pixbuf import GdkPixbuf
-from .glib import GLib
-from .gstreamer import GStreamer
-from .gtk import Gtk
-from .libc import LibC
-from .java import Java
-from .libgl import LibGL
-from .openssl import OpenSSL
-from .python import Python
-from .qt import Qt
-from .mime import MIME
+from .base_helper import BaseHelper
+
+
+class MIME(BaseHelper):
+    def configure(self, env, preserve_files):
+        path = self.finder.base_path / "usr" / "share" / "mime"
+        if path.is_dir():
+            bin_path = shutil.which("update-mime-database")
+            if not bin_path:
+                raise RuntimeError("Missing 'update-mime-database' executable")
+
+            subprocess.run([bin_path, path])
