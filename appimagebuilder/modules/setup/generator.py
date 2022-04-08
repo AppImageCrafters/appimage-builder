@@ -15,6 +15,7 @@ import random
 import shutil
 import string
 from pathlib import Path
+from typing import Final
 
 from appimagebuilder.utils import elf, file_utils
 from appimagebuilder.utils.finder import Finder
@@ -54,6 +55,8 @@ class RuntimeGenerator:
 
         self.finder = finder
 
+        self.path_mappings_env: Final = "APPDIR_PATH_MAPPINGS"
+
     def generate(self):
         runtime_env = self._configure_runtime_environment()
 
@@ -69,8 +72,19 @@ class RuntimeGenerator:
         self._patch_interpreted_executables(executables, patcher)
         self._link_interpreters_from_runtimes(patcher.used_interpreters_paths)
         self._create_default_runtime(runtime_env)
+        self._setup_path_mappings(runtime_env, patcher.used_interpreters_paths)
         self._write_appdir_env(runtime_env)
         self._deploy_apprun(resolver)
+
+    def _setup_path_mappings(self, runtime_env, interpreter_paths: dict):
+        # map used interpreters
+        for path in interpreter_paths.values():
+            runtime_env.append(self.path_mappings_env, "/" + path + ":$APPDIR/" + path)
+
+        # map build dir to allow caches to work
+        runtime_env.append(
+            self.path_mappings_env, self.appdir_path.__str__() + ":$APPDIR"
+        )
 
     def _patch_interpreted_executables(self, executables, patcher: ExecutablesPatcher):
         interpreted_executables = [
@@ -128,7 +142,7 @@ class RuntimeGenerator:
 
             global_env.set(k, v)
 
-        global_env.set("APPDIR_PATH_MAPPINGS", self.path_mappings)
+        global_env.set(self.path_mappings_env, self.path_mappings)
 
         return global_env
 
@@ -176,12 +190,6 @@ class RuntimeGenerator:
 
         apprun_env.merge(global_environment)
         apprun_env.merge(self.user_env)
-
-        # map build dir to allow caches to work
-        apprun_env.append(
-            "APPDIR_PATH_MAPPINGS", self.appdir_path.__str__() + ":$APPDIR"
-        )
-
         apprun_env.drop_empty_keys()
 
         with open(self.appdir_path / "AppRun.env", "w") as f:
