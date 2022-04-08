@@ -44,14 +44,7 @@ class RuntimeGenerator:
         self.default_runtime_path = self.appdir_path / "runtime" / "default"
         self.compat_runtime_path = self.appdir_path / "runtime" / "compat"
 
-        self.deploy_hooks = not recipe.AppDir.runtime.no_hooks()
-        if not self.deploy_hooks:
-            logging.warning("Runtime hooks will not be deployed")
-
         self.path_mappings = recipe.AppDir.runtime.path_mappings()
-        if self.path_mappings and not self.deploy_hooks:
-            logging.error("Hooks required when setting path mappings")
-            raise RuntimeError("Path Mappings set without hooks")
 
         self.preserve_paths = recipe.AppDir.runtime.preserve() or []
 
@@ -68,8 +61,8 @@ class RuntimeGenerator:
 
         executables = self._find_executables(scanner)
         embed_archs = self._find_embed_archs(executables)
-        if self.deploy_hooks:
-            self._deploy_apprun_hooks(resolver, runtime_env, embed_archs)
+
+        self._deploy_apprun_hooks(resolver, runtime_env, embed_archs)
 
         self._patch_interpreted_executables(executables, patcher)
         self._link_interpreters_from_runtimes(patcher.used_interpreters_paths)
