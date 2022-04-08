@@ -11,7 +11,7 @@
 #  all copies or substantial portions of the Software.
 import os
 
-from appimagebuilder.gateways.command import Command
+from appimagebuilder.utils.command import Command
 
 
 class PatchElfError(RuntimeError):
