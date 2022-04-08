@@ -88,7 +88,12 @@ class Context:
     record: dict
 
     def __init__(
-        self, recipe: pathlib.Path, app_info, bundle_info, app_dir: pathlib.Path, cache_dir: pathlib.Path
+        self,
+        recipe: pathlib.Path,
+        app_info,
+        bundle_info,
+        app_dir: pathlib.Path,
+        cache_dir: pathlib.Path,
     ):
         self.recipe = recipe
         self.app_info = app_info

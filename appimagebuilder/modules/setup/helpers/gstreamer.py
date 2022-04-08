@@ -20,7 +20,7 @@ from ..environment import Environment
 
 
 class GStreamer(BaseHelper):
-    def configure(self, env: Environment):
+    def configure(self, env: Environment, preserve_files):
         self._set_gst_plugins_path(env)
         self._set_gst_plugins_scanner_path(env)
         self._set_ptp_helper_path(env)
