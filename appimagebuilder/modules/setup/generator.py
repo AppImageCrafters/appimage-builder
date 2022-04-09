@@ -108,7 +108,7 @@ class RuntimeGenerator:
         for executable in interpreted_executables:
             allowed = True
             for preserve_file in preserve_files:
-                if preserve_file.samefile(executable):
+                if str(preserve_file) == str(executable):
                     allowed = False
                     break
             if allowed:
