@@ -43,7 +43,7 @@ class SetupSymlinksCommand(Command):
         for link in self._finder.find("*", [Finder.is_symlink]):
             allowed = True
             for preserve_file in self._preserve_files:
-                if preserve_file.samefile(bin):
+                if preserve_file.samefile(link):
                     allowed = False
                     break
             if allowed:
