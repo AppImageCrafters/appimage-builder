@@ -125,7 +125,7 @@ class LibC(BaseHelper):
         for bin_path in binaries:
             allowed = True
             for preserve_file in preserve_files:
-                if preserve_file.samefile(bin):
+                if str(preserve_file) == str(bin_path):
                     allowed = False
                     break
             if allowed:
