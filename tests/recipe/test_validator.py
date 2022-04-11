@@ -67,6 +67,7 @@ class TestRecipeSchema(TestCase):
                 "env": {
                     "PATH": "${APPDIR}/usr/bin:${PATH}",
                 },
+                "arch": [ "i386", "x86_64", "aarch64", "gnueabihf"],
                 "preserve": [
                     "usr/bin/example"
                 ],

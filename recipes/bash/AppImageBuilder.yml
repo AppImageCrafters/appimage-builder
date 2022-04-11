@@ -48,6 +48,7 @@ AppDir:
       - usr/share/doc/*/TODO.*
 
   runtime:
+    arch: [ x86_64, i386 ]
     version: continuous
 
   test:
