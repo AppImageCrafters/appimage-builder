@@ -40,6 +40,7 @@ class RuntimeGenerator:
         self.apprun_debug = recipe.AppDir.runtime.debug()
         user_env_input = recipe.AppDir.runtime.env() or {}
         self.user_env = self.parse_env_input(user_env_input)
+        self.apprun_arch = set(recipe.AppDir.runtime.arch() or [])
 
         self.default_runtime_path = self.appdir_path / "runtime" / "default"
         self.compat_runtime_path = self.appdir_path / "runtime" / "compat"
@@ -60,9 +61,9 @@ class RuntimeGenerator:
         patcher = ExecutablesPatcher()
 
         executables = self._find_executables(scanner)
-        embed_archs = self._find_embed_archs(executables)
+        self.apprun_arch.update(self._find_embed_archs(executables))
 
-        self._deploy_apprun_hooks(resolver, runtime_env, embed_archs)
+        self._deploy_apprun_hooks(resolver, runtime_env)
 
         self._patch_interpreted_executables(executables, patcher)
         self._link_interpreters_from_runtimes(patcher.used_interpreters_paths)
@@ -238,14 +239,9 @@ class RuntimeGenerator:
 
         return env
 
-    def _deploy_apprun_hooks(
-        self,
-        apprun_binaries_resolver: AppRunBinariesResolver,
-        runtime_env: Environment,
-        embed_archs: [str],
-    ):
+    def _deploy_apprun_hooks(self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment):
 
-        for arch in embed_archs:
+        for arch in self.apprun_arch:
             dir_path = self.appdir_path / "lib" / arch
             dir_path.mkdir(parents=True, exist_ok=True)
 

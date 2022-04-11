@@ -39,6 +39,7 @@ class RecipeSchema:
             Optional("debug"): bool,
             Optional("version"): str,
             Optional("path_mappings"): [str],
+            Optional("arch"): [Or("gnueabihf", "x86_64", "i386", "aarch64")],
             Optional("env"): {str: Or(str, int, bool)},
             Optional("preserve"): [str],
         }
