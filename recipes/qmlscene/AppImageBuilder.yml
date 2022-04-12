@@ -1,8 +1,8 @@
 version: 1
 script:
-  - rm -rf AppDir
-  - mkdir -p AppDir
-  - cp -f main.qml AppDir/
+  - rm -rf $TARGET_APPDIR
+  - mkdir -p $TARGET_APPDIR
+  - cp -f main.qml $TARGET_APPDIR/
 
 AppDir:
   path: ./AppDir

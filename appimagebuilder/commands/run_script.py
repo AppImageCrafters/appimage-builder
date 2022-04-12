@@ -19,16 +19,18 @@ from appimagebuilder.context import Context
 from appimagebuilder.recipe.roamer import Roamer
 
 
-class RunShellScriptCommand(Command):
+class RunScriptCommand(Command):
     """
     Execute a given set of instructions on bash using appdir as workdir and the given env
     variables
     """
 
-    def __init__(self, context: Context, description, instructions: Roamer, env=None):
+    def __init__(
+        self, context: Context, script: Roamer, description: str = "script", env=None
+    ):
         super().__init__(context, description)
 
-        self.instructions = instructions
+        self.script = script
 
         if not env:
             env = {}
@@ -39,13 +41,13 @@ class RunShellScriptCommand(Command):
 
     def __call__(self, *args, **kwargs):
         # resolve value
-        self.instructions = self.instructions()
+        self.script = self.script()
 
-        if not self.instructions:
+        if not self.script:
             return
 
-        if isinstance(self.instructions, list):
-            self.instructions = "\n".join(self.instructions)
+        if isinstance(self.script, list):
+            self.script = "\n".join(self.script)
 
         run_env = os.environ.copy()
         for k, v in self.env.items():
@@ -53,20 +55,23 @@ class RunShellScriptCommand(Command):
 
         with tempfile.NamedTemporaryFile() as exported_env:
             run_env["BUILDER_ENV"] = exported_env.name
-            run_env["APPDIR"] = str(self.context.app_dir.absolute())
             run_env["RECIPE"] = str(self.context.recipe.absolute())
+            run_env["BUILD_DIR"] = str(self.context.cache_dir.absolute())
+            run_env["SOURCE_DIR"] = str(self.context.recipe.parent.absolute())
+            run_env["TARGET_APPDIR"] = str(self.context.app_dir.absolute())
 
             _proc = subprocess.Popen(
                 ["bash", "-ve"], stdin=subprocess.PIPE, env=run_env
             )
-            _proc.communicate(self.instructions.encode())
+            _proc.communicate(self.script.encode())
 
             if _proc.returncode != 0:
                 raise RuntimeError("Script exited with code: %s" % _proc.returncode)
 
             self._load_exported_env(exported_env)
 
-    def _load_exported_env(self, exported_env):
+    @staticmethod
+    def _load_exported_env(exported_env):
         exported_env.seek(0, 0)
         for line in exported_env.readlines():
             line = line.decode().strip()

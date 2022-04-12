@@ -1,18 +1,17 @@
 version: 1
 script:
   # Remove any previous build
-  - echo $PWD
-  - rm -rf $APPDIR  || true
-  - mkdir -p $APPDIR/usr/share/icons/hicolor/scalable/apps $APPDIR/usr/bin $APPDIR/opt appimage-builder-cache
-  - cp ../../resources/appimage-builder.svg $APPDIR/usr/share/icons/hicolor/scalable/apps
+  - rm -rf $TARGET_APPDIR  || true
+  - mkdir -p $TARGET_APPDIR/usr/share/icons/hicolor/scalable/apps $TARGET_APPDIR/usr/bin $TARGET_APPDIR/opt "$BUILD_DIR"
+  - cp ../../resources/appimage-builder.svg $TARGET_APPDIR/usr/share/icons/hicolor/scalable/apps
   # deploy appimagetool
   - cd appimage-builder-cache
-  - wget -c https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool.AppImage
-  - chmod +x appimagetool.AppImage
-  - ./appimagetool.AppImage --appimage-extract
-  - cp squashfs-root/usr/bin/appimagetool $APPDIR/usr/bin/appimagetool
-  - mkdir -p $APPDIR/usr/lib/appimagekit/
-  - cp squashfs-root/usr/lib/appimagekit/mksquashfs $APPDIR/usr/lib/appimagekit/
+  - wget -c https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O "$BUILD_DIR/appimagetool.AppImage"
+  - chmod +x "$BUILD_DIR/appimagetool.AppImage"
+  - cd "$BUILD_DIR" && ./appimagetool.AppImage --appimage-extract
+  - cp squashfs-root/usr/bin/appimagetool $TARGET_APPDIR/usr/bin/appimagetool
+  - mkdir -p $TARGET_APPDIR/usr/lib/appimagekit/
+  - cp squashfs-root/usr/lib/appimagekit/mksquashfs $TARGET_APPDIR/usr/lib/appimagekit/
   - cd ..
 
   # find bundle version
@@ -56,12 +55,12 @@ AppDir:
 
   after_bundle: |
     # configure tools 
-    ln -s fakeroot-sysv $APPDIR/usr/bin/fakeroot
-    ln -s bash $APPDIR/bin/sh
+    ln -s fakeroot-sysv $TARGET_APPDIR/usr/bin/fakeroot
+    ln -s bash $TARGET_APPDIR/bin/sh
 
     # install appimage-builder
-    python3.8 -m pip install --ignore-installed --prefix=/usr --root=$APPDIR  install ../../
-    python3.8 -m pip install --ignore-installed --prefix=/usr --root=$APPDIR  install certifi
+    python3.8 -m pip install --ignore-installed --prefix=/usr --root="$TARGET_APPDIR"  install ../../
+    python3.8 -m pip install --ignore-installed --prefix=/usr --root="$TARGET_APPDIR"  install certifi
 
   runtime:
     version: "continuous"

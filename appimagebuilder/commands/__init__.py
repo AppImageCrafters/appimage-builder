@@ -16,7 +16,7 @@ from .create_appimage import CreateAppImageCommand
 from .deploy_record import WriteDeployRecordCommand
 from .file_deploy import FileDeployCommand
 from .pacman_deploy import PacmanDeployCommand
-from .run_shell_script import RunShellScriptCommand
+from .run_script import RunScriptCommand
 from .run_test import RunTestCommand
 from .setup_app_info import SetupAppInfoCommand
 from .setup_runtime import SetupRuntimeCommand

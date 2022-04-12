@@ -1,7 +1,7 @@
 # appimage-builder recipe see https://appimage-builder.readthedocs.io for details
 version: 1
 script:
-  - rm -rf ./AppDir || true
+  - rm -rf "$TARGET_APPDIR" || true
 
 AppDir:
   path: AppDir
