@@ -239,7 +239,9 @@ class RuntimeGenerator:
 
         return env
 
-    def _deploy_apprun_hooks(self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment):
+    def _deploy_apprun_hooks(
+        self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment
+    ):
 
         for arch in self.apprun_arch:
             dir_path = self.appdir_path / "lib" / arch
@@ -247,7 +249,9 @@ class RuntimeGenerator:
 
             target_path = dir_path / "libapprun_hooks.so"
             source_path = apprun_binaries_resolver.resolve_hooks_library(arch)
-            logging.info('Deploying libapprun_hooks.so (%s) to "%s"' % (arch, target_path))
+            logging.info(
+                'Deploying libapprun_hooks.so (%s) to "%s"' % (arch, target_path)
+            )
             shutil.copy2(source_path, target_path, follow_symlinks=True)
 
             runtime_env.append("APPDIR_LIBRARY_PATH", str(dir_path))

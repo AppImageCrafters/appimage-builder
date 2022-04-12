@@ -1,6 +1,6 @@
 version: 1
 script:
-  - rm -r ./AppDir || true
+  - rm -r ./$TARGET_APPDIR || true
 
 AppDir:
   path: ./AppDir

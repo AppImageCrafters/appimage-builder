@@ -1,11 +1,11 @@
 version: 1
 script:
   # Remove any previous build
-  - rm -rf AppDir  | true
+  - rm -rf $TARGET_APPDIR  | true
   # Make usr and icons dirs
-  - mkdir -p AppDir/usr/src
+  - mkdir -p $TARGET_APPDIR/usr/src
   # Copy the python application code into the AppDir
-  - cp *.py  AppDir/usr/src
+  - cp *.py  $TARGET_APPDIR/usr/src
 
 
 AppDir:

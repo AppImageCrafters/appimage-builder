@@ -18,7 +18,7 @@ from appimagebuilder.commands.apt_deploy import AptDeployCommand
 from appimagebuilder.commands.create_appimage import CreateAppImageCommand
 from appimagebuilder.commands.file_deploy import FileDeployCommand
 from appimagebuilder.commands.pacman_deploy import PacmanDeployCommand
-from appimagebuilder.commands.run_shell_script import RunShellScriptCommand
+from appimagebuilder.commands.run_script import RunScriptCommand
 from appimagebuilder.commands.run_test import RunTestCommand
 from appimagebuilder.commands.setup_app_info import SetupAppInfoCommand
 from appimagebuilder.commands.setup_runtime import SetupRuntimeCommand
@@ -45,7 +45,7 @@ class Orchestrator:
         context = self._extract_v1_recipe_context(args, recipe)
         commands = []
         if not args.skip_script:
-            command = RunShellScriptCommand(context, "main script", recipe.script)
+            command = RunScriptCommand(context, recipe.script, "main script")
             commands.append(command)
 
         if not args.skip_build:
@@ -75,8 +75,8 @@ class Orchestrator:
     def _create_deploy_commands(self, context, recipe):
         commands = []
         if recipe.AppDir.before_bundle:
-            command = RunShellScriptCommand(
-                context, "before bundle script", recipe.AppDir.before_bundle
+            command = RunScriptCommand(
+                context, recipe.AppDir.before_bundle, "before bundle script"
             )
             commands.append(command)
         apt_section = recipe.AppDir.apt
@@ -96,8 +96,8 @@ class Orchestrator:
             )
             commands.append(command)
         if recipe.AppDir.after_bundle:
-            command = RunShellScriptCommand(
-                context, "after bundle script", recipe.AppDir.after_bundle
+            command = RunScriptCommand(
+                context, recipe.AppDir.after_bundle, "after bundle script"
             )
             commands.append(command)
 
@@ -106,8 +106,8 @@ class Orchestrator:
     def _create_setup_commands(self, context, recipe):
         commands = []
         if recipe.AppDir.before_runtime:
-            command = RunShellScriptCommand(
-                context, "before runtime script", recipe.AppDir.before_runtime
+            command = RunScriptCommand(
+                context, recipe.AppDir.before_runtime, "before runtime script"
             )
             commands.append(command)
 
@@ -119,8 +119,8 @@ class Orchestrator:
         commands.append(SetupAppInfoCommand(context))
 
         if recipe.AppDir.after_runtime:
-            command = RunShellScriptCommand(
-                context, "after runtime script", recipe.AppDir.after_runtime
+            command = RunScriptCommand(
+                context, recipe.AppDir.after_runtime, "after runtime script"
             )
             commands.append(command)
 
