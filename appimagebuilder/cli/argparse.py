@@ -32,6 +32,12 @@ class ArgumentsParser:
             help="Explicitly specify build directory",
         )
         self.parser.add_argument(
+            "--appdir",
+            dest="appdir",
+            default=os.path.join(os.getcwd(), "AppDir"),
+            help="Explicitly specify AppDir path",
+        )
+        self.parser.add_argument(
             "--log",
             dest="loglevel",
             default="INFO",
