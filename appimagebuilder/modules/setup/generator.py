@@ -77,19 +77,7 @@ class RuntimeGenerator:
         self._deploy_apprun(resolver)
 
     def _get_preserve_files(self):
-        preserve_files = []
-        base_paths = [
-            self.finder.base_path,
-            self.finder.base_path / "runtime" / "compat",
-        ]
-        for pattern in self.preserve_paths:
-            for base_path in base_paths:
-                for match in base_path.glob(pattern):
-                    if match.is_dir():
-                        preserve_files.extend(match.glob("**/*"))
-                    else:
-                        preserve_files.append(match)
-        return preserve_files
+        return self.finder.get_preserve_files(self.preserve_paths)
 
     def _setup_path_mappings(self, runtime_env, interpreter_paths: list):
         # map used interpreters
@@ -111,12 +99,7 @@ class RuntimeGenerator:
 
         preserve_files = self._get_preserve_files()
         for executable in interpreted_executables:
-            allowed = True
-            for preserve_file in preserve_files:
-                if str(preserve_file) == str(executable):
-                    allowed = False
-                    break
-            if allowed:
+            if Finder.list_does_not_contain_file(preserve_files, executable.path):
                 patcher.patch_interpreted_executable(executable.path)
 
     def _find_embed_archs(self, executables):

@@ -22,31 +22,16 @@ class SetupSymlinksCommand(Command):
         super().__init__(context, "symlinks setup")
         self._finder = finder
 
-        self._preserve_files = []
-        base_paths = [
-            self._finder.base_path,
-            self._finder.base_path / "runtime" / "compat",
-        ]
-        preserve_paths = recipe.AppDir.runtime.preserve() or []
-        for pattern in preserve_paths:
-            for base_path in base_paths:
-                for match in base_path.glob(pattern):
-                    if match.is_dir():
-                        self._preserve_files.extend(match.glob("**/*"))
-                    else:
-                        self._preserve_files.append(match)
+        self._preserve_files = self._finder.get_preserve_files(
+            recipe.AppDir.runtime.preserve() or []
+        )
 
     def id(self):
         return "symlinks-setup"
 
     def __call__(self, *args, **kwargs):
         for link in self._finder.find("*", [Finder.is_symlink]):
-            allowed = True
-            for preserve_file in self._preserve_files:
-                if str(preserve_file) == str(link):
-                    allowed = False
-                    break
-            if allowed:
+            if Finder.list_does_not_contain_file(self._preserve_files, link):
                 relative_root = (
                     self.context.app_dir
                     if "runtime/compat" not in str(link)
