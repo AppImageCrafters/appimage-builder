@@ -5,8 +5,6 @@ script:
   - cp -f main.qml $TARGET_APPDIR/
 
 AppDir:
-  path: ./AppDir
-
   app_info:
     id: org.qt.qmlscene
     name: qmlscene

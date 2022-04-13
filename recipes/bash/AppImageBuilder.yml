@@ -10,8 +10,6 @@ script:
   - ln -s bash $TARGET_APPDIR/bin/nubash
 
 AppDir:
-  path: ./AppDir
-
   app_info:
     id: org.gnu.bash
     name: bash
