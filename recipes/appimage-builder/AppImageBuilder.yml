@@ -5,7 +5,7 @@ script:
   - mkdir -p $TARGET_APPDIR/usr/share/icons/hicolor/scalable/apps $TARGET_APPDIR/usr/bin $TARGET_APPDIR/opt "$BUILD_DIR"
   - cp ../../resources/appimage-builder.svg $TARGET_APPDIR/usr/share/icons/hicolor/scalable/apps
   # deploy appimagetool
-  - cd appimage-builder-cache
+  - cd $BUILD_DIR
   - wget -c https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O "$BUILD_DIR/appimagetool.AppImage"
   - chmod +x "$BUILD_DIR/appimagetool.AppImage"
   - cd "$BUILD_DIR" && ./appimagetool.AppImage --appimage-extract
