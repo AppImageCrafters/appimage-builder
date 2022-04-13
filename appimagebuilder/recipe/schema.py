@@ -75,7 +75,7 @@ class RecipeSchema:
 
         self.v1_appdir = Schema(
             {
-                "path": str,
+                Optional("path"): str,
                 "app_info": self.v1_app_info,
                 Optional("files"): self.v1_files,
                 Optional("apt"): self.v1_apt,

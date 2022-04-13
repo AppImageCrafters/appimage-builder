@@ -19,8 +19,6 @@ script:
   - echo APPIMAGE_BUILDER_VERSION="$PACKAGE_VERSION-$(git rev-parse --short HEAD)" >> $BUILDER_ENV
 
 AppDir:
-  path: ./AppDir
-
   app_info:
     id: org.appimage-crafters.appimage-builder
     name: appimage-builder

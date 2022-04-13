@@ -1,8 +1,6 @@
 version: 1
 
 AppDir:
-  path: ./AppDir
-
   app_info:
     id: org.winehq.wine
     name: wine

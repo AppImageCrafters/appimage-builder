@@ -7,8 +7,6 @@ script:
 
 
 AppDir:
-  path: ./AppDir
-
   app_info:
     id: org.gtkmm.example.HelloApp
     name: hello-world-gtk
