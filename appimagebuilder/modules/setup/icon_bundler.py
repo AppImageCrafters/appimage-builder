@@ -44,14 +44,21 @@ class IconBundler:
             )
 
     def _get_icon_path(self):
-        search_paths = [
-            os.path.join(self.app_dir, "usr", "share", "icons"),
-            os.path.join(self.app_dir, "usr", "share", "pixmaps"),
-            os.path.join("/", "usr", "share", "icons"),
-            os.path.join("/", "usr", "share", "pixmaps"),
-        ]
+        data_dirs = os.getenv('XDG_DATA_DIRS', default="")
+        search_paths = data_dirs.split(":")
 
+        # include target AppDir paths
+        search_paths.extend([
+            os.path.join(self.app_dir, "usr", "share"),
+            os.path.join(self.app_dir, "usr", "local", "share")
+        ])
+
+        refined_search_paths = []
         for path in search_paths:
+            refined_search_paths.append(path + "/icons")
+            refined_search_paths.append(path + "/pixmaps")
+
+        for path in refined_search_paths:
             path = self._search_icon(path)
             if path:
                 return path
