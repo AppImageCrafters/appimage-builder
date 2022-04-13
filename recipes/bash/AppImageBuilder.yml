@@ -13,7 +13,6 @@ AppDir:
   app_info:
     id: org.gnu.bash
     name: bash
-    icon: utilities-terminal
     version: 4.4.20
     exec: bin/bash
     exec_args: $@
