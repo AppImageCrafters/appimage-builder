@@ -13,16 +13,18 @@ import os
 import logging
 from urllib import request
 
+from appimagebuilder.context import Context
 from appimagebuilder.utils.appimagetool import AppImageToolCommand
 
 
 class AppImageCreator:
-    def __init__(self, recipe):
-        self.app_dir = recipe.AppDir.path()
-        self.target_arch = recipe.AppImage.arch()
-        self.app_name = recipe.AppDir.app_info.name()
-        self.app_version = recipe.AppDir.app_info.version()
-        self.update_information = recipe.AppImage["update-information"]() or "None"
+    def __init__(self, context: Context):
+        self.context = context
+        self.app_dir = context.recipe.AppDir.path()
+        self.target_arch = context.recipe.AppImage.arch()
+        self.app_name = context.recipe.AppDir.app_info.name()
+        self.app_version = context.recipe.AppDir.app_info.version()
+        self.update_information = context.recipe.AppImage["update-information"]() or "None"
         self.guess_update_information = False
 
         if self.update_information == "None":
@@ -34,7 +36,7 @@ class AppImageCreator:
             self.update_information = None
             self.guess_update_information = True
 
-        self.sing_key = recipe.AppImage["sign-key"]() or "None"
+        self.sing_key = context.recipe.AppImage["sign-key"]() or "None"
         if self.sing_key == "None":
             self.sing_key = None
 
@@ -42,7 +44,7 @@ class AppImageCreator:
             os.getcwd(),
             "%s-%s-%s.AppImage" % (self.app_name, self.app_version, self.target_arch),
         )
-        self.target_file = recipe.AppImage.file_name() or fallback_file_name
+        self.target_file = context.recipe.AppImage.file_name() or fallback_file_name
 
     def create(self):
         self._assert_target_architecture()
@@ -77,10 +79,10 @@ class AppImageCreator:
             request.urlretrieve(runtime_url, runtime_path)
 
     def _get_runtime_path(self):
-        os.makedirs("appimage-builder-cache", exist_ok=True)
-        runtime_path = "appimage-builder-cache/runtime-%s" % self.target_arch
+        os.makedirs(self.context.build_dir, exist_ok=True)
+        runtime_path = self.context.build_dir / ("runtime-%s" % self.target_arch)
 
-        return runtime_path
+        return str(runtime_path)
 
     def _get_runtime_url(self):
         runtime_url_template = "https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-%s"

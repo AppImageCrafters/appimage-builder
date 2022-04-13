@@ -11,8 +11,8 @@ class RunScriptCommandTestCase(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.fake_context = Context(
-            recipe=pathlib.Path("/tmp/non_existent/AppImageBuilder.yml"),
-            cache_dir=pathlib.Path("/tmp/"),
+            recipe_path=pathlib.Path("/tmp/non_existent/AppImageBuilder.yml"),
+            build_dir=pathlib.Path("/tmp/"),
             app_dir=pathlib.Path("/tmp/AppDir"),
             app_info=None,
             bundle_info=None,

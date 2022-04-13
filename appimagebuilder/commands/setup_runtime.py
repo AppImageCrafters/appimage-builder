@@ -16,12 +16,12 @@ from appimagebuilder.commands.command import Command
 class SetupRuntimeCommand(Command):
     def __init__(self, context, recipe, finder):
         super().__init__(context, "runtime setup")
-        self._recipe = recipe
+        self.context = context
         self._finder = finder
 
     def id(self):
         return "runtime-setup"
 
     def __call__(self, *args, **kwargs):
-        runtime = RuntimeGenerator(self._recipe, self._finder)
+        runtime = RuntimeGenerator(self.context, self._finder)
         runtime.generate()

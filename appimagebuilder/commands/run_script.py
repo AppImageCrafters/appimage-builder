@@ -55,9 +55,9 @@ class RunScriptCommand(Command):
 
         with tempfile.NamedTemporaryFile() as exported_env:
             run_env["BUILDER_ENV"] = exported_env.name
-            run_env["RECIPE"] = str(self.context.recipe.absolute())
-            run_env["BUILD_DIR"] = str(self.context.cache_dir.absolute())
-            run_env["SOURCE_DIR"] = str(self.context.recipe.parent.absolute())
+            run_env["RECIPE"] = str(self.context.recipe_path.absolute())
+            run_env["BUILD_DIR"] = str(self.context.build_dir.absolute())
+            run_env["SOURCE_DIR"] = str(self.context.recipe_path.parent.absolute())
             run_env["TARGET_APPDIR"] = str(self.context.app_dir.absolute())
 
             _proc = subprocess.Popen(
