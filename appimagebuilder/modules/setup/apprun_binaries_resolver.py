@@ -10,6 +10,7 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import logging
+import pathlib
 from pathlib import Path
 from urllib import request
 
@@ -21,11 +22,11 @@ class AppRunBinariesResolver:
         self,
         version,
         debug,
-        cache_dir="appimage-builder-cache/AppRun",
+        build_dir: pathlib.Path,
     ):
         self.apprun_version = version
         self.apprun_build_type = "Debug" if debug else "Release"
-        self.cache_dir = Path(cache_dir).absolute() / version
+        self.cache_dir = build_dir / "AppRun" / version
 
     def resolve_executable(self, arch):
         self.cache_dir.mkdir(parents=True, exist_ok=True)

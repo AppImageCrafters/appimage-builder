@@ -17,11 +17,10 @@ from appimagebuilder.recipe.roamer import Roamer
 class CreateAppImageCommand(Command):
     def __init__(self, context, recipe: Roamer):
         super().__init__(context, "AppImage creation")
-        self.recipe = recipe
 
     def id(self):
         super().id()
 
     def __call__(self, *args, **kwargs):
-        creator = AppImageCreator(self.recipe)
+        creator = AppImageCreator(self.context)
         creator.create()

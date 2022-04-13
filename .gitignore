@@ -3,9 +3,12 @@
 
 # Example builds
 /recipes/*/AppDir
+/recipes/*/appimage-build
 /recipes/*/appimage-builder-cache
 /AppDir
+/appimage-build
 /appimage-builder-cache
+
 
 # Build results
 *.AppImage

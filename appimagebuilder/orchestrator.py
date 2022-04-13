@@ -32,9 +32,6 @@ from appimagebuilder.recipe.roamer import Roamer
 class Orchestrator:
     """Transforms a recipe into a command list"""
 
-    def __init__(self):
-        self._cache_dir_name = "appimage-builder-cache"
-
     def process(self, recipe: Roamer, args):
         if recipe.version() == 1:
             return self._prepare_commands_for_recipe_v1(args, recipe)
@@ -161,7 +158,7 @@ class Orchestrator:
 
     def _extract_v1_recipe_context(self, args, recipe):
         app_dir_path = pathlib.Path(recipe.AppDir.path())
-        cache_dir_path = pathlib.Path.cwd() / self._cache_dir_name
+        build_dir_path = pathlib.Path.cwd() / "appimage-build"
 
         app_info_section = recipe.AppDir.app_info
         app_info = AppInfo(
@@ -181,9 +178,10 @@ class Orchestrator:
             file_name=recipe.AppImage["file_name"] or None,
         )
         return Context(
-            recipe=pathlib.Path(args.recipe),
+            recipe=recipe,
+            recipe_path=pathlib.Path(args.recipe),
             app_info=app_info,
             bundle_info=bundle_info,
             app_dir=app_dir_path,
-            cache_dir=cache_dir_path,
+            build_dir=build_dir_path,
         )

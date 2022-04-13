@@ -40,7 +40,7 @@ class PacmanDeployCommand(Command):
 
     def __call__(self, *args, **kwargs):
         venv = Venv(
-            root=Path(self.context.cache_dir) / "pacman",
+            root=Path(self.context.build_dir) / "pacman",
             repositories=self._repositories,
             architecture=self._architecture,
             user_options=self._options,

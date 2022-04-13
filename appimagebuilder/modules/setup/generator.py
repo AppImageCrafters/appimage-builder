@@ -25,6 +25,7 @@ from .environment import Environment
 from .executables import BinaryExecutable, InterpretedExecutable
 from .executables_patcher import ExecutablesPatcher
 from .executables_scanner import ExecutablesScanner
+from ...context import Context
 
 
 class RuntimeGeneratorError(RuntimeError):
@@ -32,8 +33,11 @@ class RuntimeGeneratorError(RuntimeError):
 
 
 class RuntimeGenerator:
-    def __init__(self, recipe: {}, finder: Finder):
-        self.appdir_path = Path(recipe.AppDir.path()).absolute()
+    def __init__(self, context: Context, finder: Finder):
+        self.context = context
+        recipe = context.recipe
+
+        self.appdir_path = self.context.app_dir
         self.main_exec = recipe.AppDir.app_info.exec()
         self.main_exec_args = recipe.AppDir.app_info.exec_args() or "$@"
         self.apprun_version = recipe.AppDir.runtime.version() or "continuous"
@@ -57,7 +61,7 @@ class RuntimeGenerator:
         runtime_env = self._configure_runtime_environment()
 
         scanner = ExecutablesScanner(self.appdir_path, self.finder)
-        resolver = AppRunBinariesResolver(self.apprun_version, self.apprun_debug)
+        resolver = AppRunBinariesResolver(self.apprun_version, self.apprun_debug, self.context.build_dir)
         patcher = ExecutablesPatcher()
 
         executables = self._find_executables(scanner)
@@ -229,9 +233,9 @@ class RuntimeGenerator:
                 v = v.replace("${APPDIR}", self.appdir_path.__str__())
 
                 if (
-                    k == "PATH"
-                    or k == "APPDIR_LIBRARY_PATH"
-                    or k == "APPDIR_LIBC_LIBRARY_PATH"
+                        k == "PATH"
+                        or k == "APPDIR_LIBRARY_PATH"
+                        or k == "APPDIR_LIBC_LIBRARY_PATH"
                 ):
                     v = v.split(":")
 
@@ -240,7 +244,7 @@ class RuntimeGenerator:
         return env
 
     def _deploy_apprun_hooks(
-        self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment
+            self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment
     ):
 
         for arch in self.apprun_arch:

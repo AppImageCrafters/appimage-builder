@@ -11,6 +11,8 @@
 #  all copies or substantial portions of the Software.
 import pathlib
 
+import roam
+
 
 class AppInfo:
     id: str
@@ -80,24 +82,27 @@ class Context:
     app_info: AppInfo
     bundle_info: BundleInfo
 
-    recipe: pathlib.Path
+    recipe: roam.Roamer
+    recipe_path: pathlib.Path
     app_dir: pathlib.Path
-    cache_dir: pathlib.Path
+    build_dir: pathlib.Path
 
     # Used by command to register their actions
     record: dict
 
     def __init__(
         self,
-        recipe: pathlib.Path,
+        recipe: roam.Roamer,
+        recipe_path: pathlib.Path,
         app_info,
         bundle_info,
         app_dir: pathlib.Path,
-        cache_dir: pathlib.Path,
+        build_dir: pathlib.Path,
     ):
         self.recipe = recipe
+        self.recipe_path = recipe_path
         self.app_info = app_info
         self.bundle_info = bundle_info
         self.app_dir = app_dir.absolute()
-        self.cache_dir = cache_dir.absolute()
+        self.build_dir = build_dir.absolute()
         self.record = {}
