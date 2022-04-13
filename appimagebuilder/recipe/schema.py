@@ -24,7 +24,7 @@ class RecipeSchema:
         self.v1_app_info = {
             "id": str,
             "name": str,
-            "icon": str,
+            Optional("icon"): str,
             "version": str,
             "exec": str,
             Optional("exec_args"): str,
