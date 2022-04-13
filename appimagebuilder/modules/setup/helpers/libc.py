@@ -123,12 +123,7 @@ class LibC(BaseHelper):
             ],
         )
         for bin_path in binaries:
-            allowed = True
-            for preserve_file in preserve_files:
-                if str(preserve_file) == str(bin_path):
-                    allowed = False
-                    break
-            if allowed:
+            if Finder.list_does_not_contain_file(preserve_files, bin_path):
                 self._make_interpreter_path_relative(bin_path)
 
     def _make_interpreter_path_relative(self, bin_path):

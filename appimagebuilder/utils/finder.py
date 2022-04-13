@@ -160,3 +160,27 @@ class Finder:
             passed = check_function(path)
             self.cache[key] = passed
             return passed
+
+    @staticmethod
+    def list_does_not_contain_file(file_list: [pathlib.Path], file: pathlib.Path):
+        allowed = True
+        for item in file_list:
+            if str(item) == str(file):
+                allowed = False
+                break
+        return allowed
+
+    def get_preserve_files(self, preserve_paths: [str]):
+        _preserve_files = []
+        base_paths = [
+            self.base_path,
+            self.base_path / "runtime" / "compat",
+        ]
+        for pattern in preserve_paths:
+            for base_path in base_paths:
+                for match in base_path.glob(pattern):
+                    if match.is_dir():
+                        _preserve_files.extend(match.glob("**/*"))
+                    else:
+                        _preserve_files.append(match)
+        return _preserve_files
