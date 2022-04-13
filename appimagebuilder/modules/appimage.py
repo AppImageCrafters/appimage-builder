@@ -20,7 +20,7 @@ from appimagebuilder.utils.appimagetool import AppImageToolCommand
 class AppImageCreator:
     def __init__(self, context: Context):
         self.context = context
-        self.app_dir = context.recipe.AppDir.path()
+        self.app_dir = context.app_dir
         self.target_arch = context.recipe.AppImage.arch()
         self.app_name = context.recipe.AppDir.app_info.name()
         self.app_version = context.recipe.AppDir.app_info.version()
