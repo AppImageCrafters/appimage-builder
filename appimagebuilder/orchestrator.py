@@ -158,7 +158,7 @@ class Orchestrator:
 
     def _extract_v1_recipe_context(self, args, recipe):
         app_dir_path = pathlib.Path(recipe.AppDir.path())
-        build_dir_path = pathlib.Path.cwd() / "appimage-build"
+        build_dir_path = pathlib.Path(args.build_dir).absolute()
 
         app_info_section = recipe.AppDir.app_info
         app_info = AppInfo(

@@ -26,6 +26,12 @@ class ArgumentsParser:
             help="recipe file path (default: $PWD/AppImageBuilder.yml)",
         )
         self.parser.add_argument(
+            "--build-dir",
+            dest="build_dir",
+            default=os.path.join(os.getcwd(), "appimage-build"),
+            help="Explicitly specify build directory",
+        )
+        self.parser.add_argument(
             "--log",
             dest="loglevel",
             default="INFO",
