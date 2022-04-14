@@ -87,7 +87,7 @@ jobs:
         uses: actions/upload-artifact@v2.1.4
         with:
           name: bash
-          path: 'recipes/bash/bash*.AppImage*'
+          path: 'recipes/bash/*.AppImage*'
   publish:
     runs-on: ubuntu-latest
     needs: test-pack-bash
@@ -103,4 +103,4 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: true
           automatic_release_tag: Continuous
-          files: 'recipes/bash/appimage-builder*.AppImage*'
+          files: 'appimage-builder*.AppImage*'

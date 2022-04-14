@@ -61,7 +61,7 @@ jobs:
         uses: actions/upload-artifact@v2.1.4
         with:
           name: bash
-          path: 'recipes/bash/bash*.AppImage*'
+          path: 'recipes/bash/*.AppImage*'
   publish-appimage:
     runs-on: ubuntu-20.04
     needs: test
@@ -75,7 +75,7 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
-          files: 'recipes/appimage-builder/appimage-builder*.AppImage*'
+          files: 'appimage-builder*.AppImage*'
   publish-python-wheel:
     runs-on: ubuntu-latest
     needs: test
