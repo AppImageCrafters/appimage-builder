@@ -163,7 +163,7 @@ class Orchestrator:
         app_info_section = recipe.AppDir.app_info
         app_info = AppInfo(
             app_info_section.id(),
-            app_info_section.name(),
+            app_info_section.name() or app_info_section.id(),
             app_info_section.icon() or "application-vnd.appimage",
             app_info_section.version(),
             app_info_section.exec(),
