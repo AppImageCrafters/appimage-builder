@@ -44,23 +44,18 @@ AppDir:
     debian:
       image: appimagecrafters/tests-env:debian-stable
       command: "dbus-launch ./AppRun"
-      use_host_x: True
     centos:
       image: appimagecrafters/tests-env:centos-7
       command: "dbus-launch ./AppRun"
-      use_host_x: True
     arch:
       image: appimagecrafters/tests-env:archlinux-latest
       command: "dbus-launch ./AppRun"
-      use_host_x: True
     fedora:
       image: appimagecrafters/tests-env:fedora-30
       command: "dbus-launch ./AppRun"
-      use_host_x: True
     ubuntu:
       image: appimagecrafters/tests-env:ubuntu-xenial
       command: "dbus-launch ./AppRun"
-      use_host_x: True
 
 AppImage:
   arch: x86_64

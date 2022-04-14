@@ -21,9 +21,7 @@ from appimagebuilder.modules.test.errors import TestFailed
 
 
 class ExecutionTest:
-    def __init__(
-        self, appdir: Path, name, image, command, use_host_x=False, env: [str] = None
-    ):
+    def __init__(self, appdir: Path, name, image, command, env: [str] = None):
         if env is None:
             env = []
 
@@ -31,7 +29,6 @@ class ExecutionTest:
         self.name = name
         self.image = image
         self.command = command
-        self.use_host_x = use_host_x
         self.env = env
 
         self.client = docker.from_env()
@@ -94,10 +91,10 @@ class ExecutionTest:
             self.logger.info(line.decode("utf-8").strip())
 
     def _get_container_volumes(self):
-        volumes = {self.appdir: {"bind": "/app", "mode": "ro"}}
-
-        if self.use_host_x:
-            volumes["/tmp/.X11-unix"] = {"bind": "/tmp/.X11-unix", "mode": "rw"}
+        volumes = {
+            self.appdir: {"bind": "/app", "mode": "ro"},
+            "/tmp/.X11-unix": {"bind": "/tmp/.X11-unix", "mode": "rw"}
+        }
 
         dbus_session_address = os.getenv("DBUS_SESSION_BUS_ADDRESS")
 
@@ -113,8 +110,7 @@ class ExecutionTest:
         return volumes
 
     def get_container_environment(self):
-        if self.use_host_x:
-            self.env.append("DISPLAY=%s" % os.getenv("DISPLAY"))
+        self.env.append("DISPLAY=%s" % os.getenv("DISPLAY"))
 
         dbus_session_address = os.getenv("DBUS_SESSION_BUS_ADDRESS")
         if dbus_session_address:

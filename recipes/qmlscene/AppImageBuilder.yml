@@ -67,23 +67,18 @@ AppDir:
     debian:
       image: appimagecrafters/tests-env:debian-stable
       command: "./AppRun"
-      use_host_x: True
     centos:
       image: appimagecrafters/tests-env:centos-7
       command: "./AppRun"
-      use_host_x: True
     arch:
       image: appimagecrafters/tests-env:archlinux-latest
       command: "./AppRun"
-      use_host_x: True
     fedora:
       image: appimagecrafters/tests-env:fedora-30
       command: "./AppRun"
-      use_host_x: True
     ubuntu:
       image: appimagecrafters/tests-env:ubuntu-xenial
       command: "./AppRun"
-      use_host_x: True
 
 AppImage:
   update-information: None
