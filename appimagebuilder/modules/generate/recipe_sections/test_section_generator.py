@@ -27,7 +27,6 @@ class TestSectionGenerator:
             test_case_title = image.rsplit(":", maxsplit=1)[1]
             section[test_case_title] = {
                 "image": image,
-                "command": "./AppRun",
-                "use_host_x": True,
+                "command": "./AppRun"
             }
         return section
