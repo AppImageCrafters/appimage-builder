@@ -56,7 +56,7 @@ jobs:
           cat AppDir/org.gnu.bash.desktop
       - name: Test bash
         run: |
-          recipes/bash/bash*.AppImage --appimage-extract-and-run -c "echo Hello World"
+          recipes/bash/*.AppImage --appimage-extract-and-run -c "echo Hello World"
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2.1.4
         with:
