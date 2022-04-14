@@ -12,10 +12,8 @@ script:
 AppDir:
   app_info:
     id: org.gnu.bash
-    name: bash
     version: 4.4.20
     exec: bin/bash
-    exec_args: $@
 
   apt:
     arch: [ amd64, i386 ]

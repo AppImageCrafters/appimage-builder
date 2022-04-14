@@ -21,9 +21,10 @@ class AppImageCreator:
     def __init__(self, context: Context):
         self.context = context
         self.app_dir = context.app_dir
+        self.app_name = context.app_info.name
+        self.app_version = context.app_info.version
+
         self.target_arch = context.recipe.AppImage.arch()
-        self.app_name = context.recipe.AppDir.app_info.name()
-        self.app_version = context.recipe.AppDir.app_info.version()
         self.update_information = context.recipe.AppImage["update-information"]() or "None"
         self.guess_update_information = False
 
