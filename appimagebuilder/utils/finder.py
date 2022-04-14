@@ -163,12 +163,10 @@ class Finder:
 
     @staticmethod
     def list_does_not_contain_file(file_list: [pathlib.Path], file: pathlib.Path):
-        allowed = True
         for item in file_list:
-            if str(item) == str(file):
-                allowed = False
-                break
-        return allowed
+            if item == file:
+                return False
+        return True
 
     def get_preserve_files(self, preserve_paths: [str]):
         _preserve_files = []
