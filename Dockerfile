@@ -1,6 +1,7 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get -y install python3 python3-setuptools python3-pip wget fakeroot gnupg2 libglib2.0-bin file \
+RUN apt-get update && apt-get -yq install python3 python3-setuptools python3-pip wget fakeroot gnupg2 libglib2.0-bin file \
  desktop-file-utils libgdk-pixbuf2.0-dev librsvg2-dev libyaml-dev zsync gtk-update-icon-cache strace elfutils
 
 ADD . /opt/appimage-builder
@@ -22,4 +23,4 @@ RUN wget https://github.com/NixOS/patchelf/releases/download/0.12/patchelf-0.12.
     rm -rf patchelf-*
 
 WORKDIR /
-RUN apt-get -y autoclean
+RUN apt-get -yq autoclean
