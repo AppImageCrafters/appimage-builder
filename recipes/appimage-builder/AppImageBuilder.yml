@@ -41,6 +41,7 @@ AppDir:
       - bash
       - coreutils
       - binutils
+      - util-linux
       - file
       - desktop-file-utils
       - fakeroot
