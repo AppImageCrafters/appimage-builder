@@ -15,6 +15,7 @@ import fnmatch
 import hashlib
 import logging
 import os
+import pathlib
 import subprocess
 from pathlib import Path
 from urllib import request
@@ -94,7 +95,7 @@ class Venv:
         # write apt.conf
         with open(self._apt_conf_path, "w") as f:
             for k, v in options.items():
-                if isinstance(v, str):
+                if isinstance(v, str) or isinstance(v, pathlib.Path):
                     f.write('%s "%s";\n' % (k, v))
                     continue
 
