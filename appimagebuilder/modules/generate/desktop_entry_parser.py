@@ -43,6 +43,8 @@ class DesktopEntryParser:
         app_info.exec = exec_str_parts[0]
 
         if len(exec_str_parts) > 1:
-            app_info.exec_args = exec_str_parts[1:]
+            app_info.exec_args = " ".join(exec_str_parts[1:])
+        else:
+            app_info.exec_args = ""
 
         return app_info
