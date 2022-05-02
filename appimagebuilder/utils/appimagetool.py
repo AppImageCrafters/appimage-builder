@@ -56,5 +56,8 @@ class AppImageToolCommand(Command):
         if self.guess_update_information:
             command.extend(["--guess"])
 
+        # appstreamcli calls from
+        command.extend(["--no-appstream"])
+
         command.extend([str(self.app_dir), str(self.target_file)])
         return command
