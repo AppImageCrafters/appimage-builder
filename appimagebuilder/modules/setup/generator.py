@@ -40,7 +40,7 @@ class RuntimeGenerator:
         self.appdir_path = self.context.app_dir
         self.main_exec = recipe.AppDir.app_info.exec()
         self.main_exec_args = recipe.AppDir.app_info.exec_args() or "$@"
-        self.apprun_version = recipe.AppDir.runtime.version() or "continuous"
+        self.apprun_version = recipe.AppDir.runtime.version() or "v2.0.0"
         self.apprun_debug = recipe.AppDir.runtime.debug()
         user_env_input = recipe.AppDir.runtime.env() or {}
         self.user_env = self.parse_env_input(user_env_input)
