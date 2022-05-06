@@ -308,5 +308,8 @@ class RuntimeGenerator:
                         % (exec_path, interp_path)
                     )
 
+                compat_path.unlink(missing_ok=True)
                 compat_path.symlink_to(link_target)
+
+                default_path.unlink(missing_ok=True)
                 default_path.symlink_to(link_target)
