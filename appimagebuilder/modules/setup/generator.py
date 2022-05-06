@@ -280,6 +280,7 @@ class RuntimeGenerator:
             default_path = self.default_runtime_path / ld_path
             if not default_path.exists():
                 default_path.parent.mkdir(exist_ok=True, parents=True)
+                default_path.unlink(missing_ok=True)
                 default_path.symlink_to("/" + ld_path)
 
     def _link_interpreters_from_runtimes(self, used_interpreters_paths: dict):
