@@ -48,6 +48,7 @@ class RecipeSchema:
             str: {
                 "image": str,
                 "command": str,
+                Optional("before_command"): self.script,
                 Optional("use_host_x"): bool,
                 Optional("env"): {str: Or(str, int, bool)},
             }

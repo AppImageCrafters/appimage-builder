@@ -21,7 +21,7 @@ from appimagebuilder.modules.test.errors import TestFailed
 
 
 class ExecutionTest:
-    def __init__(self, appdir: Path, name, image, command, env: [str] = None):
+    def __init__(self, appdir: Path, name, image, command, before_command=None, env: [str] = None):
         if env is None:
             env = []
 
@@ -29,6 +29,7 @@ class ExecutionTest:
         self.name = name
         self.image = image
         self.command = command
+        self.before_command = before_command
         self.env = env
 
         self.client = docker.from_env()
@@ -62,11 +63,15 @@ class ExecutionTest:
                 container,
                 accepted_exit_codes=[0, 9],
             )
+
             self._run_command(
                 "mkdir -p /home/%s/.config" % os.getenv("USER"),
                 container,
                 user=os.getenv("USER"),
             )
+
+            if self.before_command:
+                self._run_command(self.before_command, container)
 
             self.logger.info("command")
             self._run_command(self.command, container, user=os.getenv("USER"))

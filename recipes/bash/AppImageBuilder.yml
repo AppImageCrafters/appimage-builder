@@ -49,6 +49,7 @@ AppDir:
   test:
     debian:
       image: appimagecrafters/tests-env:debian-stable
+      before_command: "pwd"
       command: "./AppRun ./run_tests.sh"
     centos:
       image: appimagecrafters/tests-env:centos-7
