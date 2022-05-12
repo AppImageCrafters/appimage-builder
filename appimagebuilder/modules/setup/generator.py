@@ -61,7 +61,9 @@ class RuntimeGenerator:
         runtime_env = self._configure_runtime_environment()
 
         scanner = ExecutablesScanner(self.appdir_path, self.finder)
-        resolver = AppRunBinariesResolver(self.apprun_version, self.apprun_debug, self.context.build_dir)
+        resolver = AppRunBinariesResolver(
+            self.apprun_version, self.apprun_debug, self.context.build_dir
+        )
         patcher = ExecutablesPatcher()
 
         executables = self._find_executables(scanner)
@@ -216,9 +218,9 @@ class RuntimeGenerator:
                 v = v.replace("${APPDIR}", self.appdir_path.__str__())
 
                 if (
-                        k == "PATH"
-                        or k == "APPDIR_LIBRARY_PATH"
-                        or k == "APPDIR_LIBC_LIBRARY_PATH"
+                    k == "PATH"
+                    or k == "APPDIR_LIBRARY_PATH"
+                    or k == "APPDIR_LIBC_LIBRARY_PATH"
                 ):
                     v = v.split(":")
 
@@ -227,7 +229,7 @@ class RuntimeGenerator:
         return env
 
     def _deploy_apprun_hooks(
-            self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment
+        self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment
     ):
 
         for arch in self.apprun_arch:

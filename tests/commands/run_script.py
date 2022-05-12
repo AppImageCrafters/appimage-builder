@@ -44,9 +44,7 @@ class RunScriptCommandTestCase(unittest.TestCase):
                 "fi",
             ]
         )
-        command = RunScriptCommand(
-            self.fake_context, script, env={"var": "value"}
-        )
+        command = RunScriptCommand(self.fake_context, script, env={"var": "value"})
         command()
 
     def test_builder_env_set(self):

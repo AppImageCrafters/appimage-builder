@@ -48,16 +48,21 @@ class ElfResolver(BaseResolver):
 
         # set locale to C to avoid output variations due localizations
         _proc_env = os.environ.copy()
-        _proc_env['LC_ALL'] = "C"
+        _proc_env["LC_ALL"] = "C"
 
-        _proc = subprocess.run([ldd_bin, str(file)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=_proc_env)
+        _proc = subprocess.run(
+            [ldd_bin, str(file)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=_proc_env,
+        )
 
         # process output
         output = _proc.stdout.decode()
         needed_libraries = []
         for line in output.splitlines():
             # match paths in lines
-            path_search = re.search(r'(/.*)\s?\(', line)
+            path_search = re.search(r"(/.*)\s?\(", line)
             if path_search:
                 path = path_search.group(1)
                 needed_libraries.append(path.strip())

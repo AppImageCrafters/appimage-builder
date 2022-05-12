@@ -21,9 +21,7 @@ class Resolver(BaseResolver):
     """
 
     def __init__(self):
-        self.resolvers = [
-            ElfResolver()
-        ]
+        self.resolvers = [ElfResolver()]
 
     def resolve(self, files: [pathlib.Path]) -> [pathlib.Path]:
         results = set()

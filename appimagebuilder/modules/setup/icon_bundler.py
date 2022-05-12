@@ -47,11 +47,11 @@ class IconBundler:
         # include target AppDir paths
         search_paths = [
             os.path.join(self.app_dir, "usr", "share"),
-            os.path.join(self.app_dir, "usr", "local", "share")
+            os.path.join(self.app_dir, "usr", "local", "share"),
         ]
 
         # include system data dirs
-        data_dirs = os.getenv('XDG_DATA_DIRS', default="")
+        data_dirs = os.getenv("XDG_DATA_DIRS", default="")
         search_paths.extend(data_dirs.split(":"))
 
         refined_search_paths = []

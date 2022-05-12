@@ -13,11 +13,12 @@ import pathlib
 import unittest
 from shutil import which
 
-from appimagebuilder.modules.deploy.files.dependencies_resolver.elf_resolver import ElfResolver
+from appimagebuilder.modules.deploy.files.dependencies_resolver.elf_resolver import (
+    ElfResolver,
+)
 
 
 class ElfResolverTestCase(unittest.TestCase):
-
     def setUp(self) -> None:
         self.bash_path = pathlib.Path(which("bash"))
         self.resolver = ElfResolver()
@@ -28,5 +29,5 @@ class ElfResolverTestCase(unittest.TestCase):
         self.assertIn("/lib/x86_64-linux-gnu/libc.so.6", results)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
