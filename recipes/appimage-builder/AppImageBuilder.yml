@@ -7,7 +7,7 @@ script:
   - cp ../../resources/application-vnd.appimage.svg $TARGET_APPDIR/usr/share/icons/hicolor/scalable/apps
   # deploy appimagetool
   - cd $BUILD_DIR
-  - wget -c https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O "$BUILD_DIR/appimagetool.AppImage"
+  - wget -c https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage -O "$BUILD_DIR/appimagetool.AppImage"
   - chmod +x "$BUILD_DIR/appimagetool.AppImage"
   - cd "$BUILD_DIR" && ./appimagetool.AppImage --appimage-extract
   - cp squashfs-root/usr/bin/appimagetool $TARGET_APPDIR/usr/bin/appimagetool
