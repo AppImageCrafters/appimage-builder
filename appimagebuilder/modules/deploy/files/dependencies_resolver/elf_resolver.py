@@ -50,7 +50,7 @@ class ElfResolver(BaseResolver):
         _proc_env = os.environ.copy()
         _proc_env['LC_ALL'] = "C"
 
-        _proc = subprocess.run([ldd_bin, str(file)], stdout=subprocess.PIPE, env=_proc_env)
+        _proc = subprocess.run([ldd_bin, str(file)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=_proc_env)
 
         # process output
         output = _proc.stdout.decode()
