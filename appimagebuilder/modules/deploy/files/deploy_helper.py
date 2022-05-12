@@ -17,6 +17,8 @@ import os
 import pathlib
 import shutil
 
+from .dependencies_resolver.resolver import Resolver
+
 
 class FileDeploy:
     """
@@ -109,6 +111,9 @@ class FileDeploy:
         expanded_list = set()
         for path in paths:
             expanded_list = expanded_list.union(glob.glob(path, recursive=True))
+
+        resolver = Resolver()
+        expanded_list.update(resolver.resolve(expanded_list))
 
         for path in expanded_list:
             self._deploy_path(path)
