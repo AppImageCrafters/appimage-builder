@@ -47,9 +47,14 @@ class RunTestCommand(Command):
             if isinstance(env, dict):
                 env = ["%s=%s" % (k, v) for k, v in env.items()]
 
-            test = ExecutionTest(appdir=self.app_dir, name=name, image=data_accessor.image(),
-                                 command=data_accessor.command(), before_command=data_accessor.before_command(),
-                                 env=env)
+            test = ExecutionTest(
+                appdir=self.app_dir,
+                name=name,
+                image=data_accessor.image(),
+                command=data_accessor.command(),
+                before_command=data_accessor.before_command(),
+                env=env,
+            )
             test_cases.append(test)
 
         return test_cases

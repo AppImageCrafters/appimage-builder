@@ -25,8 +25,5 @@ class TestSectionGenerator:
         section = {}
         for image in self.docker_images:
             test_case_title = image.rsplit(":", maxsplit=1)[1]
-            section[test_case_title] = {
-                "image": image,
-                "command": "./AppRun"
-            }
+            section[test_case_title] = {"image": image, "command": "./AppRun"}
         return section

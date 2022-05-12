@@ -25,7 +25,9 @@ class AppImageCreator:
         self.app_version = context.app_info.version
 
         self.target_arch = context.recipe.AppImage.arch()
-        self.update_information = context.recipe.AppImage["update-information"]() or "None"
+        self.update_information = (
+            context.recipe.AppImage["update-information"]() or "None"
+        )
         self.guess_update_information = False
 
         if self.update_information == "None":

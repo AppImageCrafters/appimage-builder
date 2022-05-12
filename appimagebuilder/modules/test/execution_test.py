@@ -21,7 +21,9 @@ from appimagebuilder.modules.test.errors import TestFailed
 
 
 class ExecutionTest:
-    def __init__(self, appdir: Path, name, image, command, before_command=None, env: [str] = None):
+    def __init__(
+        self, appdir: Path, name, image, command, before_command=None, env: [str] = None
+    ):
         if env is None:
             env = []
 
@@ -98,7 +100,7 @@ class ExecutionTest:
     def _get_container_volumes(self):
         volumes = {
             self.appdir: {"bind": "/app", "mode": "ro"},
-            "/tmp/.X11-unix": {"bind": "/tmp/.X11-unix", "mode": "rw"}
+            "/tmp/.X11-unix": {"bind": "/tmp/.X11-unix", "mode": "rw"},
         }
 
         dbus_session_address = os.getenv("DBUS_SESSION_BUS_ADDRESS")
