@@ -122,13 +122,11 @@ class FileDeploy:
         deploy_prefix = self._resolve_deploy_prefix(path)
         deploy_path = deploy_prefix + path.lstrip("/")
 
-        self.logger.info("deploying %s" % path)
-        if os.path.isfile(path):
+        if not os.path.exists(deploy_path) and os.path.isfile(path):
+            self.logger.info("deploying %s" % path)
             os.makedirs(os.path.dirname(deploy_path), exist_ok=True)
             shutil.copy2(path, deploy_path)
-        elif os.path.isdir(path):
-            os.makedirs(deploy_path, exist_ok=True)
-        # special files (devices, sockets, etc.) get ignored here
+        # special files (devices, sockets, etc.) and directories get ignored here
 
     def _is_a_graphic_library(self, path):
         for pattern in self.listings["graphics"]:
