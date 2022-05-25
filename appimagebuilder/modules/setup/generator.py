@@ -58,8 +58,8 @@ class RuntimeGenerator:
 
         self.path_mappings_env: Final = "APPDIR_PATH_MAPPINGS"
 
-        if version.parse(self.apprun_version) < version.parse("2.0.0"):
-            raise RuntimeGeneratorError("Unsupported AppRun version, please use v2")
+        if self.apprun_version != "continuous" and version.parse(self.apprun_version) < version.parse("v2.0.0"):
+            raise RuntimeGeneratorError("Unsupported AppRun version (%s), please use v2.0.0 or newer" % self.apprun_version)
 
     def generate(self):
         runtime_env = self._configure_runtime_environment()
@@ -222,9 +222,9 @@ class RuntimeGenerator:
                 v = v.replace("${APPDIR}", self.appdir_path.__str__())
 
                 if (
-                    k == "PATH"
-                    or k == "APPDIR_LIBRARY_PATH"
-                    or k == "APPDIR_LIBC_LIBRARY_PATH"
+                        k == "PATH"
+                        or k == "APPDIR_LIBRARY_PATH"
+                        or k == "APPDIR_LIBC_LIBRARY_PATH"
                 ):
                     v = v.split(":")
 
@@ -233,7 +233,7 @@ class RuntimeGenerator:
         return env
 
     def _deploy_apprun_hooks(
-        self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment
+            self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment
     ):
 
         for arch in self.apprun_arch:
