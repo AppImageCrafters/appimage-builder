@@ -11,6 +11,8 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import logging
+import subprocess
+from importlib.metadata import version
 
 from appimagebuilder import recipe
 from appimagebuilder.cli.argparse import ArgumentsParser
@@ -24,6 +26,11 @@ def __main__():
     args = parser.parse()
 
     _setup_logging_config(args)
+
+    if args.version:
+        print("appimage-builder version", version("appimage-builder"))
+        subprocess.call(("appimagetool", "--version"))
+        exit(0)
 
     if args.generate:
         generator = CommandGenerate()

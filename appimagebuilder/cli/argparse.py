@@ -20,6 +20,12 @@ class ArgumentsParser:
         self.parser = argparse.ArgumentParser(description="AppImage crafting tool")
 
         self.parser.add_argument(
+            "-v", "--version",
+            dest="version",
+            action="store_true",
+            help="Show the version of appimagetool and appimage-builder",
+        )
+        self.parser.add_argument(
             "--recipe",
             dest="recipe",
             default=os.path.join(os.getcwd(), "AppImageBuilder.yml"),
