@@ -16,6 +16,7 @@ import shutil
 import string
 from pathlib import Path
 from typing import Final
+from packaging import version
 
 from appimagebuilder.utils import elf, file_utils
 from appimagebuilder.utils.finder import Finder
@@ -56,6 +57,9 @@ class RuntimeGenerator:
         self.finder = finder
 
         self.path_mappings_env: Final = "APPDIR_PATH_MAPPINGS"
+
+        if version.parse(self.apprun_version) < version.parse("2.0.0"):
+            raise RuntimeGeneratorError("Unsupported AppRun version, please use v2")
 
     def generate(self):
         runtime_env = self._configure_runtime_environment()
