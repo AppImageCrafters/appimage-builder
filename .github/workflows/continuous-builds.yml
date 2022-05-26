@@ -60,7 +60,7 @@ jobs:
       - name: Build AppImage
         run: |
           cd recipes/appimage-builder
-          export APPIMAGE_BUILDER_VERSION=$(appimage-builder --version)
+          export APPIMAGE_BUILDER_VERSION=$(appimage-builder --version | head -1 | cut -f 2 -d" ")
           appimage-builder --skip-test
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2.1.4
