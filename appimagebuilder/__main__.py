@@ -28,7 +28,7 @@ def __main__():
     _setup_logging_config(args)
 
     if args.version:
-        print("appimage-builder version", version("appimage-builder"))
+        print("appimage-builder:", version("appimage-builder"))
         subprocess.call(("appimagetool", "--version"))
         exit(0)
 
