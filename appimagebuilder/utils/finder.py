@@ -124,7 +124,7 @@ class Finder:
 
         check_true_names = [item.__name__ for item in check_true]
         check_false_names = [item.__name__ for item in check_false]
-        logging.debug(
+        self.logger.debug(
             "FIND %s %s %s"
             % (pattern, " ".join(check_true_names), " ".join(check_false_names))
         )
@@ -140,8 +140,10 @@ class Finder:
         if check_false is None:
             check_false = []
 
+        self.logger.debug("Inspecting: %s" % path)
         for check_function in check_true:
             passed = self._run_check(check_function, path)
+            self.logger.debug("%s : %s" % (check_function, passed))
             if not passed:
                 return False
 
