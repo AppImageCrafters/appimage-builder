@@ -13,11 +13,6 @@ script:
   - cp squashfs-root/usr/bin/appimagetool $TARGET_APPDIR/usr/bin/appimagetool
   - mkdir -p $TARGET_APPDIR/usr/lib/appimagekit/
   - cp squashfs-root/usr/lib/appimagekit/mksquashfs $TARGET_APPDIR/usr/lib/appimagekit/
-  - cd ..
-
-  # find bundle version
-  - PACKAGE_VERSION=$(grep -Po 'version="\K((\d|\.)+)' ../../setup.py)
-  - echo APPIMAGE_BUILDER_VERSION="$PACKAGE_VERSION-$(git rev-parse --short HEAD)" >> $BUILDER_ENV
 
 AppDir:
   app_info:
