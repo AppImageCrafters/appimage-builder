@@ -77,7 +77,7 @@ class TestFinder(TestCase):
         finder = Finder("/lib")
         results = finder.find(
             "libc.*",
-            [Finder.is_dynamically_linked_executable, Finder.is_elf_shared_lib],
+            [Finder.is_elf_shared_lib],
         )
         self.assertIn(pathlib.Path("/lib/x86_64-linux-gnu/libc.so.6"), results)
 
