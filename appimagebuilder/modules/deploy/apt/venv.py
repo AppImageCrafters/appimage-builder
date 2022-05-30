@@ -215,11 +215,13 @@ class Venv:
         return paths
 
     def extract_package(self, package, target):
+        # ensure target path existence
+        # os.makedirs(target, exist_ok=True) # may fall in a race condition see https://github.com/python/cpython/issues/46016
+        subprocess.run(["mkdir", "-p", target])
+
         path = self._apt_archives_path / package.get_expected_file_name()
 
-        command = "{dpkg-deb} -x {archive} {directory}".format(
-            **self._deps, archive=path, directory=target
-        )
+        command = " ".join([str(self._deps["dpkg-deb"]), "-x", str(path), str(target)])
         self.logger.debug(command)
         output = subprocess.run(command, shell=True, env=self._get_environment())
         shell.assert_successful_result(output)
