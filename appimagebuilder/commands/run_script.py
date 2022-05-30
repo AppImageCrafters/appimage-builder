@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
+import shutil
 import subprocess
 import tempfile
 
@@ -60,8 +61,18 @@ class RunScriptCommand(Command):
             run_env["SOURCE_DIR"] = str(self.context.recipe_path.parent.absolute())
             run_env["TARGET_APPDIR"] = str(self.context.app_dir.absolute())
 
+            # ensure commands get executed using the system shell (and environment)
+            appdir_env = os.getenv("APPDIR")
+            if appdir_env:
+                # remove internal paths from lockup
+                path_env = os.getenv("PATH").split(":")
+                path_env = ":".join([path for path in path_env if appdir_env not in path])
+            else:
+                path_env = os.getenv("PATH")
+            bash_path = shutil.which("bash", path=path_env)
+
             _proc = subprocess.Popen(
-                ["bash", "-ve"], stdin=subprocess.PIPE, env=run_env
+                [bash_path, "-ve"], stdin=subprocess.PIPE, env=run_env
             )
             _proc.communicate(self.script.encode())
 
