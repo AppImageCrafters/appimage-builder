@@ -78,19 +78,14 @@ class RuntimeGenerator:
         self._patch_interpreted_executables(executables, patcher)
         self._link_interpreters_from_runtimes(patcher.used_interpreters_paths)
         self._create_default_runtime(runtime_env)
-        self._setup_path_mappings(runtime_env, patcher.used_interpreters_paths.values())
+        self._setup_path_mappings(runtime_env)
         self._write_appdir_env(runtime_env)
         self._deploy_apprun(resolver)
 
     def _get_preserve_files(self):
         return self.finder.get_preserve_files(self.preserve_paths)
 
-    def _setup_path_mappings(self, runtime_env, interpreter_paths: list):
-        # map used interpreters
-        interpreter_paths = sorted(set(interpreter_paths))
-        for path in interpreter_paths:
-            runtime_env.append(self.path_mappings_env, "/" + path + ":$APPDIR/" + path)
-
+    def _setup_path_mappings(self, runtime_env):
         # map build dir to allow caches to work
         runtime_env.append(
             self.path_mappings_env, self.appdir_path.__str__() + ":$APPDIR"
