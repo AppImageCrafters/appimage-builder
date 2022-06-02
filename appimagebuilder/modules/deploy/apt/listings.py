@@ -71,7 +71,7 @@ graphics = [
     "libglvnd*",
     "libglx*",
     "mesa-*",
-    # the following X11 libraries are tightly related to the packages above
+    # the following X11/Wayland libraries are tightly related to the packages above
     "libx11-*",
     "libxcb-dri2-0",
     "libxcb-dri3-0",
@@ -83,6 +83,7 @@ graphics = [
     "libxcb-xfixes0",
     "libxcb1",
     "x11-common",
+    "libwayland-*",
 ]
 
 default_exclude_list = []
