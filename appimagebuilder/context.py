@@ -94,7 +94,7 @@ class Context:
         self,
         recipe: roam.Roamer,
         recipe_path: pathlib.Path,
-        app_info,
+        app_info: AppInfo,
         bundle_info,
         app_dir: pathlib.Path,
         build_dir: pathlib.Path,
