@@ -37,6 +37,7 @@ class IconBundler:
                 % (source_icon_path, os.path.relpath(target_icon_path, self.app_dir))
             )
             shutil.copyfile(source_icon_path, target_icon_path)
+            os.symlink(os.path.basename(source_icon_path), self.app_dir / ".DirIcon")
         except Exception:
             raise IconBundler.Error(
                 "Unable to copy icon from: %s to %s"
