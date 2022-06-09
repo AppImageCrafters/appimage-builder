@@ -31,7 +31,7 @@ class AppImagePrimer(BasePrimer):
         self.config = self.context.recipe.AppImage
         self.bundle_main_arch = self.config.arch()
         self.carrier_path = (
-            self.context.build_dir / "prime" / ("runtime-%s" % self.bundle_main_arch)
+                self.context.build_dir / "prime" / ("runtime-%s" % self.bundle_main_arch)
         )
 
         appimage_file_name = self._resolve_appimage_file_name()
@@ -81,14 +81,18 @@ class AppImagePrimer(BasePrimer):
             "-root-owned",
             "-noappend",
             "-reproducible",
+            "-quiet",
+            "-comp",
+            "xz",
         ]
+        self.logger.info("Creating squashfs from AppDir")
         self.logger.debug(" ".join(command))
         subprocess.run(command, check=True)
 
     def _get_appimage_kit_runtime(self):
         url = (
-            "https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-%s"
-            % self.bundle_main_arch
+                "https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-%s"
+                % self.bundle_main_arch
         )
         logging.info("Downloading: %s" % url)
 
@@ -119,7 +123,7 @@ class AppImagePrimer(BasePrimer):
             )
 
     def _sign_bundle_sha256_digest(
-        self, carrier_elf: lief.Binary, bundle_sha256: bytes
+            self, carrier_elf: lief.Binary, bundle_sha256: bytes
     ):
         sign_key = self.config["sign-key"]()
         if sign_key:
