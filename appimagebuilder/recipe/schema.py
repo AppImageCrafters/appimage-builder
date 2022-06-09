@@ -104,7 +104,7 @@ class RecipeSchema:
                 "version": int,
                 Optional("script"): self.script,
                 "AppDir": self.v1_appdir,
-                "AppImage": self.v1_appimage,
+                Optional("AppImage"): self.v1_appimage,
             }
         )
 

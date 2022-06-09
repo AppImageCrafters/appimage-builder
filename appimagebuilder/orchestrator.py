@@ -52,7 +52,7 @@ class Orchestrator:
             command = RunTestCommand(context, recipe.AppDir.test)
             commands.append(command)
 
-        if not args.skip_appimage:
+        if not args.skip_appimage and recipe.AppImage:
             command = CreateAppImageCommand(context, recipe)
             commands.append(command)
 
