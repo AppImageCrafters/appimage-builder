@@ -9,7 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-import itertools
+import hashlib
 import logging
 import os
 import pathlib
@@ -20,7 +20,6 @@ from urllib import request
 
 import gnupg
 import lief
-from io import BytesIO
 
 from appimagebuilder.modules.prime.base_primer import BasePrimer
 
@@ -47,13 +46,17 @@ class AppImagePrimer(BasePrimer):
         self._make_squashfs(self.context.app_dir, payload_path)
 
         # prepare carrier (a.k.a. "runtime" using a different name to differentiate from the AppRun settings)
+        shutil.copyfile(self.carrier_path, self.appimage_path)
+        self._add_payload(payload_path)
+
         carrier_binary = lief.parse(self.carrier_path.__str__())
         self._add_appimage_update_information(carrier_binary)
-        carrier_binary.write(self.appimage_path.__str__())
-        self._sign_bundle(carrier_binary, payload_path)
-        carrier_binary.write(self.appimage_path.__str__())
+        (bundle_md5, bundle_sha256) = self._generate_checksums()
+        # md5 digest skips sections instead of using 0 which differ from how the signature checksum is generated
+        # this will be skipped is not a mandatory on the spec
+        # self._add_md5_digest(carrier_binary, bundle_md5)
+        self._sign_bundle_sha256_digest(carrier_binary, bundle_sha256)
 
-        self._add_payload(payload_path)
         self._generate_zsync_file()
         self._make_appimage_executable()
 
@@ -111,24 +114,46 @@ class AppImagePrimer(BasePrimer):
         if update_information:
             self.logger.info("Setting update information: \"%s\"" % update_information)
             section = binary.get_section(".upd_info")
-            section.content = list(bytes(update_information, "utf-8"))
+            self._patch_appimage(section.file_offset, bytes(update_information, "utf-8"))
 
-    def _sign_bundle(self, carrier_elf: lief.Binary, payload_path: pathlib.Path):
+    def _sign_bundle_sha256_digest(self, carrier_elf: lief.Binary, bundle_sha256: bytes):
         sign_key = self.config["sign-key"]()
         if sign_key:
             gpg = gnupg.GPG()
             # sign both files as if they were together
-            with open(self.appimage_path, 'rb') as carrier_file:
-                with open(payload_path, 'rb') as payload_file:
-                    concatenated_files = ConcatenatedFiles([carrier_file, payload_file])
-                    signature = gpg.sign_file(concatenated_files, keyid=sign_key, detach=True)
-                    signature_section = carrier_elf.get_section(".sha256_sig")
-                    signature_section.content = list(signature.data)
+
+            signature = gpg.sign(bundle_sha256.hex(), keyid=sign_key, detach=True)
+            signature_section = carrier_elf.get_section(".sha256_sig")
+            self._patch_appimage(signature_section.file_offset, signature.data)
 
             # resolve secret key id in case a key fingerprint was used
             key = gpg.export_keys(keyids=[sign_key])
             signature_key_section = carrier_elf.get_section(".sig_key")
-            signature_key_section.content = list(bytes(key, "utf-8"))
+            self._patch_appimage(signature_key_section.file_offset, bytes(key, "utf-8"))
+
+    def _generate_checksums(self):
+        md5 = hashlib.md5()
+        sha256 = hashlib.sha256()
+        with open(self.appimage_path, "rb") as appimage_file:
+            while True:
+                data = appimage_file.read(2 ** 10)
+                if not data:
+                    break
+                md5.update(data)
+                sha256.update(data)
+
+        return md5.digest(), sha256.digest()
+
+    def _add_md5_digest(self, carrier_binary, bundle_md5):
+        md5_digest_section = carrier_binary.get_section(".digest_md5")
+        if md5_digest_section:
+            self._patch_appimage(md5_digest_section.file_offset, bundle_md5)
+
+    def _patch_appimage(self, offset, data):
+        # using manual patch over lief as the elf structure should not be changed
+        with open(self.appimage_path, "r+b") as appimage_file:
+            appimage_file.seek(offset, 0)
+            appimage_file.write(data)
 
     def _generate_zsync_file(self):
         if self.config['update-information']:
@@ -136,20 +161,3 @@ class AppImagePrimer(BasePrimer):
             command = [zsyncmake_bin, "-u", self.appimage_path.name, self.appimage_path.__str__()]
             self.logger.debug(command)
             subprocess.run(command, check=True)
-
-
-class ConcatenatedFiles(object):
-    def __init__(self, file_objects):
-        self.fds = list(reversed(file_objects))
-
-    def read(self, size=None):
-        remaining = size
-        data = BytesIO()
-        while self.fds and (remaining > 0 or remaining is None):
-            data_read = self.fds[-1].read(remaining or -1)
-            if len(data_read) < remaining or remaining is None:  # exhausted file
-                self.fds.pop()
-            if not remaining is None:
-                remaining -= len(data_read)
-            data.write(data_read)
-        return data.getvalue()
