@@ -36,7 +36,7 @@ class Venv:
         user_options: {} = None,
     ):
         self.logger = logging.getLogger("apt")
-        self._deps = shell.resolve_commands_paths(DEPENDS_ON)
+        self._deps = shell.require_executables(DEPENDS_ON)
 
         self.sources = sources
         self.keys = keys

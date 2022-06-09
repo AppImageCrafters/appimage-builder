@@ -26,7 +26,7 @@ DEPENDS_ON = ["strace", "patchelf"]
 class AppRuntimeAnalyser:
     def __init__(self):
         self.logger = logging.getLogger("AppRuntimeAnalyser")
-        self._deps = shell.resolve_commands_paths(DEPENDS_ON)
+        self._deps = shell.require_executables(DEPENDS_ON)
 
     def run_app_analysis(self, app_dir: pathlib.Path, exec: str, exec_args: str):
         full_exec_path = app_dir / exec

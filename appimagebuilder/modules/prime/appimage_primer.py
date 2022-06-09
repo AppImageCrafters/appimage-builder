@@ -31,7 +31,7 @@ class AppImagePrimer(BasePrimer):
         self.config = self.context.recipe.AppImage
         self.bundle_main_arch = self.config.arch()
         self.carrier_path = (
-                self.context.build_dir / "prime" / ("runtime-%s" % self.bundle_main_arch)
+            self.context.build_dir / "prime" / ("runtime-%s" % self.bundle_main_arch)
         )
 
         appimage_file_name = self._resolve_appimage_file_name()
@@ -87,8 +87,8 @@ class AppImagePrimer(BasePrimer):
 
     def _get_appimage_kit_runtime(self):
         url = (
-                "https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-%s"
-                % self.bundle_main_arch
+            "https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-%s"
+            % self.bundle_main_arch
         )
         logging.info("Downloading: %s" % url)
 
@@ -112,11 +112,15 @@ class AppImagePrimer(BasePrimer):
     def _add_appimage_update_information(self, binary):
         update_information = self.config["update-information"]()
         if update_information:
-            self.logger.info("Setting update information: \"%s\"" % update_information)
+            self.logger.info('Setting update information: "%s"' % update_information)
             section = binary.get_section(".upd_info")
-            self._patch_appimage(section.file_offset, bytes(update_information, "utf-8"))
+            self._patch_appimage(
+                section.file_offset, bytes(update_information, "utf-8")
+            )
 
-    def _sign_bundle_sha256_digest(self, carrier_elf: lief.Binary, bundle_sha256: bytes):
+    def _sign_bundle_sha256_digest(
+        self, carrier_elf: lief.Binary, bundle_sha256: bytes
+    ):
         sign_key = self.config["sign-key"]()
         if sign_key:
             gpg = gnupg.GPG()
@@ -156,8 +160,13 @@ class AppImagePrimer(BasePrimer):
             appimage_file.write(data)
 
     def _generate_zsync_file(self):
-        if self.config['update-information']:
+        if self.config["update-information"]:
             zsyncmake_bin = shutil.which("zsyncmake")
-            command = [zsyncmake_bin, "-u", self.appimage_path.name, self.appimage_path.__str__()]
+            command = [
+                zsyncmake_bin,
+                "-u",
+                self.appimage_path.name,
+                self.appimage_path.__str__(),
+            ]
             self.logger.debug(command)
             subprocess.run(command, check=True)

@@ -22,7 +22,7 @@ class FilePackageResolver:
 
     def __init__(self):
         self.logger = logging.getLogger(str(self.__class__.__name__))
-        self._cli_tools = shell.resolve_commands_paths(CLI_REQUIRE)
+        self._cli_tools = shell.require_executables(CLI_REQUIRE)
 
     def resolve(self, files) -> {}:
         stdout_data = self._run_dpkg_query_s(files)

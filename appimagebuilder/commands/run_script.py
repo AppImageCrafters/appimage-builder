@@ -66,7 +66,9 @@ class RunScriptCommand(Command):
             if appdir_env:
                 # remove internal paths from lockup
                 path_env = os.getenv("PATH").split(":")
-                path_env = ":".join([path for path in path_env if appdir_env not in path])
+                path_env = ":".join(
+                    [path for path in path_env if appdir_env not in path]
+                )
             else:
                 path_env = os.getenv("PATH")
             bash_path = shutil.which("bash", path=path_env)

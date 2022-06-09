@@ -9,6 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+import shutil
 import subprocess
 
 from appimagebuilder.utils import shell
@@ -29,13 +30,12 @@ def has_soname(path):
 
     Elf must have a SONAME tag in the dynamic section
     """
-    command_args = shell.resolve_commands_paths(["readelf"])
-    command_args["path"] = path
+    readelf_path = shell.require_executable("readelf")
+    # note: don't use `shell=True` as it forces the usage of the system shell which cases a failure if readelf is embed.
     _proc = subprocess.run(
-        "{readelf} -d {path}".format(**command_args),
+        [readelf_path, "-d", path],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        shell=True,
     )
 
     has_soname_tag = False
@@ -52,13 +52,12 @@ def has_start_symbol(path):
     The `_start` symbol must be present in every runnable elf file.
     http://www.dbp-consulting.com/tutorials/debugging/linuxProgramStartup.html
     """
-    command_args = shell.resolve_commands_paths(["readelf"])
-    command_args["path"] = path
+    readelf_path = shell.require_executable("readelf")
+    # note: don't use `shell=True` as it forces the usage of the system shell which cases a failure if readelf is embed.
     _proc = subprocess.run(
-        "{readelf} -s {path}".format(**command_args),
+        [readelf_path, "-s", path],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        shell=True,
     )
 
     has_main_method = False
