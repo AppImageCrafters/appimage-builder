@@ -29,7 +29,6 @@ def __main__():
 
     if args.version:
         print("appimage-builder:", version("appimage-builder"))
-        subprocess.call(("appimagetool", "--version"))
         exit(0)
 
     if args.generate:
