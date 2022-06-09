@@ -25,7 +25,7 @@ class FilePackageResolver:
 
     def __init__(self):
         self.logger = logging.getLogger(str(self.__class__.__name__))
-        self._cli_tools = shell.resolve_commands_paths(self.REQUIRED_COMMANDS)
+        self._cli_tools = shell.require_executables(self.REQUIRED_COMMANDS)
 
     def resolve(self, files) -> {}:
         output = self._run_pacman_f(files)

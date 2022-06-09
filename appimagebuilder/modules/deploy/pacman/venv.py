@@ -54,7 +54,7 @@ class Venv:
         self._gpg_dir.mkdir(parents=True, exist_ok=True)
 
         self._logger = logging.getLogger("pacman")
-        self._deps = shell.resolve_commands_paths(DEPENDS_ON)
+        self._deps = shell.require_executables(DEPENDS_ON)
         self._generate_config()
         self._start_gpg_agent()
         self._configure_keyring()
