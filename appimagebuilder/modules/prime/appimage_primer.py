@@ -61,14 +61,14 @@ class AppImagePrimer(BasePrimer):
         self._make_appimage_executable()
 
     def _resolve_appimage_file_name(self):
-        if not self.context.recipe.AppImage.filename():
+        if not self.context.recipe.AppImage.file_name():
             appimage_file_name = "%s-%s-%s.AppImage" % (
                 self.context.app_info.name,
                 self.context.app_info.version,
                 self.bundle_main_arch,
             )
         else:
-            appimage_file_name = self.context.recipe.AppImage.filename()
+            appimage_file_name = self.context.recipe.AppImage.file_name()
 
         return appimage_file_name
 
