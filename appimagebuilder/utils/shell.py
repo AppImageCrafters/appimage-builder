@@ -20,7 +20,7 @@ def require_executables(executables: [str]):
 def require_executable(tool):
     tool_path = shutil.which(tool)
     if not tool_path:
-        raise CommandNotFoundError("Could not find '{exe}' on $PATH.".format(exe=dep))
+        raise CommandNotFoundError("Could not find '{exe}' on $PATH.".format(exe=tool))
 
     return tool_path
 
