@@ -22,6 +22,7 @@ import gnupg
 import lief
 
 from appimagebuilder.modules.prime.base_primer import BasePrimer
+from appimagebuilder.utils import shell
 
 
 class AppImagePrimer(BasePrimer):
@@ -42,8 +43,7 @@ class AppImagePrimer(BasePrimer):
             self._get_appimage_kit_runtime()
 
         # create payload
-        payload_path = self.context.app_dir.with_suffix(".squashfs")
-        self._make_squashfs(self.context.app_dir, payload_path)
+        payload_path = self._make_squashfs(self.context.app_dir)
 
         # prepare carrier (a.k.a. "runtime" using a different name to differentiate from the AppRun settings)
         shutil.copyfile(self.carrier_path, self.appimage_path)
@@ -72,12 +72,13 @@ class AppImagePrimer(BasePrimer):
 
         return appimage_file_name
 
-    def _make_squashfs(self, appdir: pathlib.Path, appdir_squashfs_path):
-        mksquashfs_bin = shutil.which("mksquashfs")
+    def _make_squashfs(self, appdir: pathlib.Path):
+        payload_path = appdir.with_suffix(".squashfs")
+        mksquashfs_bin = shell.require_executable("mksquashfs")
         command = [
             mksquashfs_bin,
             str(appdir),
-            str(appdir_squashfs_path),
+            str(payload_path),
             "-root-owned",
             "-noappend",
             "-reproducible",
@@ -88,6 +89,7 @@ class AppImagePrimer(BasePrimer):
         self.logger.info("Creating squashfs from AppDir")
         self.logger.debug(" ".join(command))
         subprocess.run(command, check=True)
+        return payload_path
 
     def _get_appimage_kit_runtime(self):
         url = (
