@@ -82,7 +82,6 @@ class AppImagePrimer(BasePrimer):
             "-root-owned",
             "-noappend",
             "-reproducible",
-            "-quiet",
             "-comp",
             "xz",
         ]
