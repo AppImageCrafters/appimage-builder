@@ -25,13 +25,12 @@ class Deploy:
         self.logger = logging.getLogger("AptPackageDeploy")
 
     def deploy(
-        self, include_patterns: [str], appdir_root: pathlib.Path, exclude_patterns=None
+            self, include_patterns: [str], appdir_root: pathlib.Path, exclude_patterns=None
     ) -> [str]:
         """Deploy the packages and their dependencies to appdir_root.
 
         Packages listed in exclude will not be deployed nor their dependencies.
         Packages from the system services and graphics listings will be added by default to the exclude list.
-        Packages from the glibc listing will be deployed using <target>/runtime/compat as prefix
         """
         if not include_patterns:
             # quick return if there is no packages to be deployed
@@ -73,34 +72,16 @@ class Deploy:
         return deploy_list
 
     def _extract_packages(self, appdir_root, packages):
-        # manually extract downloaded packages to be able to create the runtime/compat partition
-        # where the glibc library and other related packages will be placed
-
         # ensure target directories exists
-        libc_root = appdir_root / "runtime" / "compat"
         appdir_root.mkdir(exist_ok=True, parents=True)
-        libc_root.mkdir(exist_ok=True, parents=True)
-        libc_packages = self.list_glibc_related_packages()
-
         for package in packages:
             final_target = appdir_root
-            if package in libc_packages:
-                final_target = libc_root
-
             self.logger.info(
                 "Deploying %s to %s" % (package.get_expected_file_name(), final_target)
             )
             self.apt_venv.extract_package(package, final_target)
 
         return packages
-
-    def list_glibc_related_packages(self):
-        initial_libc_packages = []
-        for pkg_name in listings.glibc:
-            for arch in self.apt_venv.architectures:
-                initial_libc_packages.append("%s:%s" % (pkg_name, arch))
-        libc_packages = self.apt_venv.resolve_packages(initial_libc_packages)
-        return libc_packages
 
     def _remove_old_packages(self, apt_core_packages):
         latest_packages = {}
