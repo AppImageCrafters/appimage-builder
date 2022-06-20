@@ -9,7 +9,7 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.modules.setup.generator import RuntimeGenerator
+from appimagebuilder.modules.setup.apprun2 import AppRunV2Setup
 from appimagebuilder.commands.command import Command
 
 
@@ -23,5 +23,5 @@ class SetupRuntimeCommand(Command):
         return "runtime-setup"
 
     def __call__(self, *args, **kwargs):
-        runtime = RuntimeGenerator(self.context, self._finder)
-        runtime.generate()
+        runtime = AppRunV2Setup(self.context, self._finder)
+        runtime.setup()
