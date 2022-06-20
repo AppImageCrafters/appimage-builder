@@ -61,7 +61,7 @@ class RecipeGenerator:
 
         results = {}
         for section_generator in self._package_manager_sections_generators:
-            recipe_section, unresolved_files = section_generator.generate(
+            recipe_section, unresolved_files = section_generator.setup(
                 runtime_dependencies, bundle_info
             )
 

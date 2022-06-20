@@ -29,11 +29,11 @@ from .executables_scanner import ExecutablesScanner
 from ...context import Context
 
 
-class RuntimeGeneratorError(RuntimeError):
+class AppRunV2SetupError(RuntimeError):
     pass
 
 
-class RuntimeGenerator:
+class AppRunV2Setup:
     def __init__(self, context: Context, finder: Finder):
         self.context = context
         recipe = context.recipe
@@ -61,12 +61,12 @@ class RuntimeGenerator:
         if self.apprun_version != "continuous" and version.parse(
             self.apprun_version
         ) < version.parse("v2.0.0"):
-            raise RuntimeGeneratorError(
+            raise AppRunV2SetupError(
                 "Unsupported AppRun version (%s), please use v2.0.0 or newer"
                 % self.apprun_version
             )
 
-    def generate(self):
+    def setup(self):
         runtime_env = self._configure_runtime_environment()
 
         scanner = ExecutablesScanner(self.appdir_path, self.finder)
