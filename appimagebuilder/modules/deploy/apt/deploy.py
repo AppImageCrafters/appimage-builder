@@ -25,7 +25,7 @@ class Deploy:
         self.logger = logging.getLogger("AptPackageDeploy")
 
     def deploy(
-            self, include_patterns: [str], appdir_root: pathlib.Path, exclude_patterns=None
+        self, include_patterns: [str], appdir_root: pathlib.Path, exclude_patterns=None
     ) -> [str]:
         """Deploy the packages and their dependencies to appdir_root.
 
