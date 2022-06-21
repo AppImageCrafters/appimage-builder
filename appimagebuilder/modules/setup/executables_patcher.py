@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 import logging
 import pathlib
+import lief
 
 
 class ExecutablesPatcherError(RuntimeError):
@@ -19,7 +20,8 @@ class ExecutablesPatcherError(RuntimeError):
 
 class ExecutablesPatcher:
     def __init__(self):
-        self.used_interpreters_paths = {}
+        self.script_interpreters_paths = {}
+        self.binary_interpreters_paths = {}
         self.logger = logging.getLogger("ExecutablesPatcher")
 
     def patch_interpreted_executable(self, path: pathlib.Path):
@@ -37,7 +39,7 @@ class ExecutablesPatcher:
 
     def _register_interpreter_used_in_shebang(self, executable_path, shebang):
         interpreter_path = self.read_interpreter_path_from_shebang(shebang)
-        self.used_interpreters_paths[executable_path] = interpreter_path
+        self.script_interpreters_paths[executable_path] = interpreter_path
 
     @staticmethod
     def read_interpreter_path_from_shebang(shebang):
@@ -55,3 +57,16 @@ class ExecutablesPatcher:
         patched = shebang[:2] + " " * (idx - 2) + shebang[idx:]
 
         return patched
+
+    def patch_binary_executable(self, path: pathlib.Path):
+        try:
+            binary = lief.parse(path.__str__())
+            interpreter_path = binary.interpreter
+            if interpreter_path:
+                patched_interpreter_path = interpreter_path.lstrip("/")
+                binary.interpreter = patched_interpreter_path
+                binary.write(path.__str__())
+
+                self.binary_interpreters_paths[path] = patched_interpreter_path
+        except Exception as e:
+            logging.warning(f"Unable to patch binary executables: {e}")

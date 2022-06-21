@@ -48,7 +48,7 @@ class TestExecutablesPatcher(unittest.TestCase):
             expected_shebang = "#! bin/bash\n"
             self.assertEqual(expected_shebang, patched_shebang)
             self.assertEqual(
-                "bin/bash", patcher.used_interpreters_paths[file_mock_path]
+                "bin/bash", patcher.script_interpreters_paths[file_mock_path]
             )
 
 
