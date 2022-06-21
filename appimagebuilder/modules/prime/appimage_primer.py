@@ -166,7 +166,7 @@ class AppImagePrimer(BasePrimer):
 
     def _generate_zsync_file(self):
         if self.config["update-information"]:
-            zsyncmake_bin = shutil.which("zsyncmake")
+            zsyncmake_bin = shell.require_executable("zsyncmake")
             command = [
                 zsyncmake_bin,
                 "-u",
