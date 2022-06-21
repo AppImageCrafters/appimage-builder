@@ -61,7 +61,7 @@ class AppRunV2Setup:
         self.path_mappings_env: Final = "APPDIR_PATH_MAPPINGS"
 
         if self.apprun_version != "continuous" and version.parse(
-            self.apprun_version
+                self.apprun_version
         ) < version.parse("v2.0.0"):
             raise AppRunV2SetupError(
                 "Unsupported AppRun version (%s), please use v2.0.0 or newer"
@@ -83,8 +83,10 @@ class AppRunV2Setup:
 
         self._deploy_apprun_hooks(resolver, runtime_env)
 
-        self._patch_interpreted_executables(executables, patcher)
-        self._link_interpreters_from_runtimes(patcher.used_interpreters_paths)
+        self._patch_executables(executables, patcher)
+        runtime_env.set("APPDIR_LIBC_LINKER_PATH", set(patcher.binary_interpreters_paths.values()))
+
+        self._link_interpreters_from_runtimes(patcher.script_interpreters_paths)
         self._create_default_runtime(runtime_env)
         self._setup_path_mappings(runtime_env)
         self._write_appdir_env(runtime_env)
@@ -99,17 +101,14 @@ class AppRunV2Setup:
             self.path_mappings_env, self.appdir_path.__str__() + ":$APPDIR"
         )
 
-    def _patch_interpreted_executables(self, executables, patcher: ExecutablesPatcher):
-        interpreted_executables = [
-            executable
-            for executable in executables
-            if isinstance(executable, InterpretedExecutable)
-        ]
-
+    def _patch_executables(self, executables, patcher: ExecutablesPatcher):
         preserve_files = self._get_preserve_files()
-        for executable in interpreted_executables:
+        for executable in executables:
             if Finder.list_does_not_contain_file(preserve_files, executable.path):
-                patcher.patch_interpreted_executable(executable.path)
+                if isinstance(executable, InterpretedExecutable):
+                    patcher.patch_interpreted_executable(executable.path)
+                else:
+                    patcher.patch_binary_executable(executable.path)
 
     def _find_embed_archs(self, executables):
         embed_archs = set()
@@ -225,9 +224,9 @@ class AppRunV2Setup:
                 v = v.replace("${APPDIR}", self.appdir_path.__str__())
 
                 if (
-                    k == "PATH"
-                    or k == "APPDIR_LIBRARY_PATH"
-                    or k == "APPDIR_LIBC_LIBRARY_PATH"
+                        k == "PATH"
+                        or k == "APPDIR_LIBRARY_PATH"
+                        or k == "APPDIR_LIBC_LIBRARY_PATH"
                 ):
                     v = v.split(":")
 
@@ -236,7 +235,7 @@ class AppRunV2Setup:
         return env
 
     def _deploy_apprun_hooks(
-        self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment
+            self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment
     ):
 
         for arch in self.apprun_arch:

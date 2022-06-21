@@ -55,7 +55,6 @@ class LibC(BaseHelper):
 
     def configure(self, env: Environment, preserve_files: [pathlib.Path]):
         try:
-            self._patch_executables_interpreter(preserve_files)
             env.set("APPDIR_LIBC_LINKER_PATH", list(self.interpreters))
             env.set("APPDIR_LIBC_LIBRARY_PATH", self._get_libc_library_paths())
             env.set("APPDIR_LIBC_VERSION", self._guess_libc_version())
@@ -111,31 +110,3 @@ class LibC(BaseHelper):
                 return str(max_glibc_version)
             else:
                 raise InterpreterHandlerError("Unable to determine glibc version")
-
-    def _patch_executables_interpreter(self, preserve_files: [pathlib.Path]):
-        binaries = self.finder.find(
-            pattern="*",
-            check_true=[
-                Finder.is_file,
-                Finder.is_executable,
-                Finder.is_elf,
-                Finder.is_dynamically_linked_executable,
-            ],
-        )
-        for bin_path in binaries:
-            if Finder.list_does_not_contain_file(preserve_files, bin_path):
-                self._make_interpreter_path_relative(bin_path)
-
-    def _make_interpreter_path_relative(self, bin_path):
-        try:
-            patchelf_command = PatchElf()
-            patchelf_command.log_stderr = False
-            patchelf_command.log_stdout = False
-
-            interpreter_path = patchelf_command.get_interpreter(bin_path)
-            if interpreter_path.startswith("/"):
-                rel_path = interpreter_path.lstrip("/")
-                patchelf_command.set_interpreter(bin_path, rel_path)
-                self.interpreters.add(rel_path)
-        except PatchElfError:
-            pass
