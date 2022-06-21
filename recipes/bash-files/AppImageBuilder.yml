@@ -1,0 +1,50 @@
+version: 1
+script:
+  - rm -rf $TARGET_APPDIR | true
+
+AppDir:
+  app_info:
+    id: org.gnu.bash
+    version: 4.4.20
+    exec: bin/bash
+
+  files:
+    include:
+      - /bin/bash
+      - /usr/bin/bash
+    exclude:
+      - etc/**
+      - usr/share/doc/**/recipes/**
+      - usr/include/**
+      - usr/lib/*/gconv/**
+      - usr/share/man/**
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
+
+  runtime:
+    arch: [ x86_64, i386 ]
+    version: continuous
+
+  test:
+    debian:
+      image: appimagecrafters/tests-env:debian-stable
+      before_command: "pwd"
+      command: "./AppRun --version"
+    centos:
+      image: appimagecrafters/tests-env:centos-7
+      command: "./AppRun --version"
+    arch:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: "./AppRun --version"
+    fedora:
+      image: appimagecrafters/tests-env:fedora-30
+      command: "./AppRun --version"
+    ubuntu:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: "./AppRun --version"
+
+
+AppImage:
+  arch: x86_64
