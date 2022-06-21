@@ -19,7 +19,6 @@ from typing import Optional
 
 from packaging import version
 
-from appimagebuilder.utils.patchelf import PatchElf, PatchElfError
 from appimagebuilder.utils.finder import Finder
 from .base_helper import BaseHelper
 from ..environment import Environment
@@ -34,9 +33,6 @@ class LibC(BaseHelper):
         super().__init__(app_dir, finder)
 
         self.priority = 100
-        self.patch_elf = PatchElf()
-        self.patch_elf.logger.level = logging.WARNING
-        self.interpreters = set()
 
     def get_glibc_path(self) -> str:
         path = self.finder.find_one("*/libc.so.*", [Finder.is_elf_shared_lib])
@@ -55,7 +51,6 @@ class LibC(BaseHelper):
 
     def configure(self, env: Environment, preserve_files: [pathlib.Path]):
         try:
-            env.set("APPDIR_LIBC_LINKER_PATH", list(self.interpreters))
             env.set("APPDIR_LIBC_LIBRARY_PATH", self._get_libc_library_paths())
             env.set("APPDIR_LIBC_VERSION", self._guess_libc_version())
         except InterpreterHandlerError as err:
