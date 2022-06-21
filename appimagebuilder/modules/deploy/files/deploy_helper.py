@@ -41,66 +41,6 @@ class FileDeploy:
             "**/libxcb-xfixes.so*",
             "**/libxcb.so*",
         ],
-        "glibc": [
-            "**/libc-*.so",
-            "**/libc.so*",
-            "**/ld-*.so",
-            "**/ld-linux-x86-64.so*",
-            "etc/ld.so.conf.d/*",
-            "**/libcrypt.so*",
-            "**/libnss_compat-*.so",
-            "**/libnss_nis.so*",
-            "**/libmemusage.so*",
-            "**/libpthread.so*",
-            "**/libcrypt.so*",
-            "**/libz.so*",
-            "**/libpthread-*.so",
-            "**/libutil.so*",
-            "**/libnsl.so*",
-            "**/libnss_nis-*.so",
-            "**/libutil-*.so",
-            "**/libdl-*.so",
-            "**/libmvec-*.so",
-            "**/libBrokenLocale.so*",
-            "**/libnss_nisplus.so*",
-            "**/libgcc_s.so*",
-            "**/libnss_compat.so*",
-            "**/libz.so*",
-            "**/libthread_db-*.so",
-            "**/libpcprofile.so",
-            "**/librt.so*",
-            "**/libnss_nisplus-*.so",
-            "**/libnss_hesiod.so*",
-            "**/libresolv.so*",
-            "**/libBrokenLocale-*.so",
-            "**/libnss_hesiod-*.so",
-            "**/libSegFault.so",
-            "**/libnss_files.so*",
-            "**/libanl.so*",
-            "**/librt-*.so",
-            "**/libanl-*.so",
-            "**/libresolv-*.so",
-            "**/libm.so*",
-            "**/libnss_files-*.so",
-            "**/libthread_db.so*",
-            "**/libdl.so*",
-            "**/libnss_dns.so*",
-            "**/libnsl-*.so",
-            "**/libmvec.so*",
-            "**/libnss_dns-*.so",
-            "**/libm-*.so",
-            "**/ld-linux-x86-64.so*",
-            "**/gconv/*",
-            "**/audit/*",
-            "**/libstdc++.so*",
-            "**/libstdcxx/*",
-            "**/doc/zlib1g/*",
-            "**/doc/libc6/*",
-            "**/doc/gcc-10-base/*",
-            "**/doc/libgcc-s1/*",
-            "**/doc/libcrypt1/*",
-            "**/doc/libstdc++6/*",
-        ],
     }
 
     def __init__(self, app_dir: str):
@@ -119,8 +59,7 @@ class FileDeploy:
             self._deploy_path(path)
 
     def _deploy_path(self, path):
-        deploy_prefix = self._resolve_deploy_prefix(path)
-        deploy_path = deploy_prefix + path.lstrip("/")
+        deploy_path = os.path.normpath(self.app_dir + path)
 
         if not os.path.exists(deploy_path) and os.path.isfile(path):
             self.logger.info("deploying %s" % path)
@@ -134,13 +73,6 @@ class FileDeploy:
                 return True
 
         return False
-
-    def _resolve_deploy_prefix(self, path: str):
-        for pattern in self.listings["glibc"]:
-            if fnmatch.fnmatch(path, pattern):
-                return self.app_dir.rstrip("/") + "/runtime/compat/"
-
-        return self.app_dir.rstrip("/") + "/"
 
     def clean(self, paths: [str]):
         self.logger.info("Removing excluded files")
