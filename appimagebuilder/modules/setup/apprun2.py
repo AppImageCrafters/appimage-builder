@@ -12,12 +12,12 @@
 import fnmatch
 import logging
 import os
-import queue
 import random
 import shutil
 import string
 from pathlib import Path
 from typing import Final
+
 from packaging import version
 
 from appimagebuilder.utils import elf, file_utils
@@ -167,7 +167,7 @@ class AppRunV2Setup:
             helpers.GLib,
             helpers.GStreamer,
             helpers.Gtk,
-            helpers.LibC,
+            helpers.AppRun2LibC,
             helpers.Java,
             helpers.LibGL,
             helpers.OpenSSL,
