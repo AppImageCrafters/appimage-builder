@@ -14,7 +14,7 @@ from .gdk_pixbuf import GdkPixbuf
 from .glib import GLib
 from .gstreamer import GStreamer
 from .gtk import Gtk
-from .libc import LibC
+from .apprun_2_libc import AppRun2LibC
 from .java import Java
 from .libgl import LibGL
 from .openssl import OpenSSL

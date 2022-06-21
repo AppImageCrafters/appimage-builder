@@ -28,7 +28,9 @@ class InterpreterHandlerError(RuntimeError):
     pass
 
 
-class LibC(BaseHelper):
+class AppRun2LibC(BaseHelper):
+    """AppRun v2 glibc setup"""
+
     def __init__(self, app_dir, finder):
         super().__init__(app_dir, finder)
 
