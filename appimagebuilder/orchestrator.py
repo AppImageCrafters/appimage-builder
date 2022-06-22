@@ -111,7 +111,7 @@ class Orchestrator:
         finder = Finder(context.app_dir)
         commands.append(SetupSymlinksCommand(context, recipe, finder))
 
-        commands.append(SetupRuntimeCommand(context, recipe, finder))
+        commands.append(SetupRuntimeCommand(context, finder))
 
         commands.append(SetupAppInfoCommand(context))
 
