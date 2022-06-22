@@ -9,12 +9,13 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+from appimagebuilder.context import Context
 from appimagebuilder.modules.setup.apprun_2.apprun2 import AppRunV2Setup
 from appimagebuilder.commands.command import Command
 
 
 class SetupRuntimeCommand(Command):
-    def __init__(self, context, recipe, finder):
+    def __init__(self, context: Context, finder):
         super().__init__(context, "runtime setup")
         self.context = context
         self._finder = finder
