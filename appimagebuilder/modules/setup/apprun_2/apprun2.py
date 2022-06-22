@@ -35,11 +35,20 @@ from packaging import version
 from appimagebuilder.utils import elf, file_utils
 from appimagebuilder.utils.finder import Finder
 from appimagebuilder.modules.setup import helpers
-from appimagebuilder.modules.setup.apprun_binaries_resolver import AppRunBinariesResolver
+from appimagebuilder.modules.setup.apprun_binaries_resolver import (
+    AppRunBinariesResolver,
+)
 from appimagebuilder.modules.setup.environment import Environment
-from appimagebuilder.modules.setup.apprun_2.executables import BinaryExecutable, InterpretedExecutable
-from appimagebuilder.modules.setup.apprun_2.executables_patcher import ExecutablesPatcher
-from appimagebuilder.modules.setup.apprun_2.executables_scanner import ExecutablesScanner
+from appimagebuilder.modules.setup.apprun_2.executables import (
+    BinaryExecutable,
+    InterpretedExecutable,
+)
+from appimagebuilder.modules.setup.apprun_2.executables_patcher import (
+    ExecutablesPatcher,
+)
+from appimagebuilder.modules.setup.apprun_2.executables_scanner import (
+    ExecutablesScanner,
+)
 from appimagebuilder.context import Context
 
 
@@ -72,9 +81,11 @@ class AppRunV2Setup:
 
         self.path_mappings_env: Final = "APPDIR_PATH_MAPPINGS"
 
-        if self.apprun_version != "continuous" and version.parse(
-                self.apprun_version
-        ) < version.parse("v2.0.0"):
+        parsed_version = version.parse(self.apprun_version)
+        if self.apprun_version != "continuous" and (
+            parsed_version < version.parse("v2.0.0")
+            or parsed_version > version.parse("v3.0.0")
+        ):
             raise AppRunV2SetupError(
                 "Unsupported AppRun version (%s), please use v2.0.0 or newer"
                 % self.apprun_version
@@ -96,7 +107,9 @@ class AppRunV2Setup:
         self._deploy_apprun_hooks(resolver, runtime_env)
 
         self._patch_executables(executables, patcher)
-        runtime_env.set("APPDIR_LIBC_LINKER_PATH", set(patcher.binary_interpreters_paths.values()))
+        runtime_env.set(
+            "APPDIR_LIBC_LINKER_PATH", set(patcher.binary_interpreters_paths.values())
+        )
 
         self._link_interpreters_from_runtimes(patcher.script_interpreters_paths)
         self._create_default_runtime(runtime_env)
@@ -236,9 +249,9 @@ class AppRunV2Setup:
                 v = v.replace("${APPDIR}", self.appdir_path.__str__())
 
                 if (
-                        k == "PATH"
-                        or k == "APPDIR_LIBRARY_PATH"
-                        or k == "APPDIR_LIBC_LIBRARY_PATH"
+                    k == "PATH"
+                    or k == "APPDIR_LIBRARY_PATH"
+                    or k == "APPDIR_LIBC_LIBRARY_PATH"
                 ):
                     v = v.split(":")
 
@@ -247,7 +260,7 @@ class AppRunV2Setup:
         return env
 
     def _deploy_apprun_hooks(
-            self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment
+        self, apprun_binaries_resolver: AppRunBinariesResolver, runtime_env: Environment
     ):
 
         for arch in self.apprun_arch:
