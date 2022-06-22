@@ -1,4 +1,4 @@
-#  Copyright  2021 Alexis Lopez Zubieta
+#  Copyright  2022 Alexis Lopez Zubieta
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a
 #  copy of this software and associated documentation files (the "Software"),
@@ -9,19 +9,3 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-from appimagebuilder.modules.setup.apprun_2.apprun2 import AppRunV2Setup
-from appimagebuilder.commands.command import Command
-
-
-class SetupRuntimeCommand(Command):
-    def __init__(self, context, recipe, finder):
-        super().__init__(context, "runtime setup")
-        self.context = context
-        self._finder = finder
-
-    def id(self):
-        return "runtime-setup"
-
-    def __call__(self, *args, **kwargs):
-        runtime = AppRunV2Setup(self.context, self._finder)
-        runtime.setup()
