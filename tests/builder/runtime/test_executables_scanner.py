@@ -14,11 +14,11 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
-from appimagebuilder.modules.setup.executables import (
+from appimagebuilder.modules.setup.apprun_2.executables import (
     BinaryExecutable,
     InterpretedExecutable,
 )
-from appimagebuilder.modules.setup.executables_scanner import ExecutablesScanner
+from appimagebuilder.modules.setup.apprun_2.executables_scanner import ExecutablesScanner
 from appimagebuilder.utils.finder import Finder
 
 

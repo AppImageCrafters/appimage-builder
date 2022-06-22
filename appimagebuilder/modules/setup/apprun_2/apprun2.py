@@ -1,3 +1,15 @@
+#  Copyright  2022 Alexis Lopez Zubieta
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation the
+#  rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+#  sell copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in
+#  all copies or substantial portions of the Software.
+
 #  Copyright  2021 Alexis Lopez Zubieta
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,13 +34,13 @@ from packaging import version
 
 from appimagebuilder.utils import elf, file_utils
 from appimagebuilder.utils.finder import Finder
-from . import helpers
-from .apprun_binaries_resolver import AppRunBinariesResolver
-from .environment import Environment
-from .executables import BinaryExecutable, InterpretedExecutable
-from .executables_patcher import ExecutablesPatcher
-from .executables_scanner import ExecutablesScanner
-from ...context import Context
+from appimagebuilder.modules.setup import helpers
+from appimagebuilder.modules.setup.apprun_binaries_resolver import AppRunBinariesResolver
+from appimagebuilder.modules.setup.environment import Environment
+from appimagebuilder.modules.setup.apprun_2.executables import BinaryExecutable, InterpretedExecutable
+from appimagebuilder.modules.setup.apprun_2.executables_patcher import ExecutablesPatcher
+from appimagebuilder.modules.setup.apprun_2.executables_scanner import ExecutablesScanner
+from appimagebuilder.context import Context
 
 
 class AppRunV2SetupError(RuntimeError):
