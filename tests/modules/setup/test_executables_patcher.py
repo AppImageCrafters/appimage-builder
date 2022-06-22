@@ -3,7 +3,9 @@ import pathlib
 import tempfile
 import unittest
 
-from appimagebuilder.modules.setup.apprun_2.executables_patcher import ExecutablesPatcher
+from appimagebuilder.modules.setup.apprun_2.executables_patcher import (
+    ExecutablesPatcher,
+)
 
 
 class TestExecutablesPatcher(unittest.TestCase):

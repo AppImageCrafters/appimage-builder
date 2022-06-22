@@ -18,7 +18,9 @@ from appimagebuilder.modules.setup.apprun_2.executables import (
     BinaryExecutable,
     InterpretedExecutable,
 )
-from appimagebuilder.modules.setup.apprun_2.executables_scanner import ExecutablesScanner
+from appimagebuilder.modules.setup.apprun_2.executables_scanner import (
+    ExecutablesScanner,
+)
 from appimagebuilder.utils.finder import Finder
 
 
