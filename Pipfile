@@ -20,6 +20,7 @@ roam = "*"
 urllib3 = "==1.26.9"
 lief = "==0.12.1"
 python-gnupg = "==0.4.9"
+libconf = "*"
 
 [requires]
 python_version = "3.8"

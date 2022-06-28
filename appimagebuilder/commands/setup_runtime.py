@@ -14,6 +14,8 @@ from appimagebuilder.modules.setup.apprun_2.apprun2 import AppRunV2Setup
 from appimagebuilder.commands.command import Command
 from packaging import version
 
+from appimagebuilder.modules.setup.apprun_3.apprun3 import AppRunV3Setup
+
 
 class SetupRuntimeCommand(Command):
     def __init__(self, context: Context, finder):
@@ -28,9 +30,13 @@ class SetupRuntimeCommand(Command):
         apprun_version = self.context.recipe.AppDir.runtime.version() or "v2.0.0"
         apprun_version = version.parse(apprun_version)
         runtime_setup = None
-        if (version.parse("v2.0.0") <= apprun_version < version.parse("v3.0.0")) \
-                or apprun_version == version.parse("continuous"):
+        if (
+            version.parse("v2.0.0") <= apprun_version < version.parse("v3.0.0")
+        ) or apprun_version == version.parse("continuous"):
             runtime_setup = AppRunV2Setup(self.context, self._finder)
+
+        if version.parse("v3.0.0-devel") <= apprun_version < version.parse("v4.0.0"):
+            runtime_setup = AppRunV3Setup(self.context, self._finder)
 
         if not runtime_setup:
             raise RuntimeError("Unsupported runtime version: %s" % apprun_version)
