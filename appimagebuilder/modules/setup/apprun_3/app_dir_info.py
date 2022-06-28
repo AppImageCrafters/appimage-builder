@@ -25,12 +25,15 @@ class AppDirFileInfo:
     """
 
     path: pathlib.Path
-    is_executable: bool
-    is_elf: bool
-    shebang: [str]
-    interpreter: str
-    machine_type: str
-    soname: str
+    is_executable: bool = False
+    is_elf: bool = False
+    shebang: [str] = None
+    interpreter: str = None
+    machine_type: str = None
+    soname: str = None
+
+    def __init__(self, path):
+        path = pathlib.Path(path)
 
 
 class AppDir:
@@ -68,7 +71,7 @@ class AppDir:
 
     @staticmethod
     def read_file_info(entry: pathlib.Path):
-        file_info = AppDirFileInfo()
+        file_info = AppDirFileInfo(entry)
 
         if entry.is_file():
             binary = lief.parse(entry.__str__())
