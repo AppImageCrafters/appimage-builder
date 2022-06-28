@@ -24,6 +24,7 @@
 import logging
 import os
 
+from appimagebuilder.modules.setup import apprun_utils
 from appimagebuilder.modules.setup.apprun_2.executables import (
     Executable,
     BinaryExecutable,
@@ -47,7 +48,7 @@ class ExecutablesScanner:
         iterations = 0
         binary_found = False
         while iterations < 5 and not binary_found:
-            shebang = ExecutablesScanner.read_shebang(path)
+            shebang = apprun_utils.read_shebang(path)
             if shebang:
                 try:
                     executable = InterpretedExecutable(path, shebang)
@@ -101,22 +102,3 @@ class ExecutablesScanner:
                 % interpreter_name
             )
         return path
-
-    @staticmethod
-    def read_shebang(path) -> [str]:
-        with open(path, "rb") as f:
-            buf = f.read(128)
-
-            if len(buf) < 2 or buf[0] != ord("#") or buf[1] != ord("!"):
-                return None
-
-            end_idx = buf.find(b"\n")
-            if end_idx == -1:
-                end_idx = len(buf)
-
-            buf = buf[2:end_idx].decode()
-            buf = buf.strip()
-
-            parts = buf.split(" ")
-            parts = [part.strip() for part in parts if part]
-            return parts

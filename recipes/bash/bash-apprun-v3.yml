@@ -1,0 +1,70 @@
+version: 1
+script:
+  - echo $PWD
+  - rm -rf $TARGET_APPDIR | true
+  - mkdir -p $TARGET_APPDIR/bin
+  - cp run_tests.sh $TARGET_APPDIR
+  - cp -r tests $TARGET_APPDIR
+  - ln -s ../usr/bin/env $TARGET_APPDIR/tests/test_internal_binary_env
+  - ln -s /usr/bin/env $TARGET_APPDIR/tests/test_external_binary_env
+  - ln -s bash $TARGET_APPDIR/bin/nubash
+
+AppDir:
+  app_info:
+    id: org.gnu.bash
+    version: 4.4.20
+    exec: bin/bash
+
+  apt:
+    arch: [ amd64, i386 ]
+    allow_unauthenticated: true
+    sources:
+      - sourceline: 'deb http://archive.ubuntu.com/ubuntu bionic main'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+
+    include:
+      - bash
+      - coreutils
+      - libc6
+      - libc6:i386
+    exclude:
+      - libpcre3
+
+  files:
+    exclude:
+      - etc/**
+      - usr/share/doc/**/recipes/**
+      - usr/include/**
+      - usr/lib/*/gconv/**
+      - usr/share/man/**
+      - usr/share/doc/*/README.*
+      - usr/share/doc/*/changelog.*
+      - usr/share/doc/*/NEWS.*
+      - usr/share/doc/*/TODO.*
+
+  runtime:
+    arch: [ x86_64, i386 ]
+    version: v3.0.0-devel-1
+    debug: true
+
+  test:
+    debian:
+      image: appimagecrafters/tests-env:debian-stable
+      before_command: "pwd"
+      command: "./AppRun ./run_tests.sh"
+    centos:
+      image: appimagecrafters/tests-env:centos-7
+      command: "./AppRun ./run_tests.sh"
+    arch:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: "./AppRun ./run_tests.sh"
+    fedora:
+      image: appimagecrafters/tests-env:fedora-30
+      command: "./AppRun ./run_tests.sh"
+    ubuntu:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: "./AppRun ./run_tests.sh"
+
+
+AppImage:
+  arch: x86_64

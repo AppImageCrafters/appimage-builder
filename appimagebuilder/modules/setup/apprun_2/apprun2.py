@@ -34,7 +34,7 @@ from packaging import version
 
 from appimagebuilder.utils import elf, file_utils
 from appimagebuilder.utils.finder import Finder
-from appimagebuilder.modules.setup import helpers
+from appimagebuilder.modules.setup import helpers, file_matching_patterns
 from appimagebuilder.modules.setup.apprun_binaries_resolver import (
     AppRunBinariesResolver,
 )
@@ -359,69 +359,6 @@ class AppRunV2Setup:
             os.rename(file_path, target_path)
 
     def _list_glibc_files(self):
-        glibc_file_patterns = [
-            "**/libc-*.so",
-            "**/libc.so*",
-            "**/ld-*.so",
-            "**/ld-linux-x86-64.so*",
-            "**/ld-linux-x86-64.so.2",
-            "**/ld-linux.so.2",
-            "etc/ld.so.conf.d/*",
-            "**/libcrypt.so*",
-            "**/libnss_compat-*.so",
-            "**/libnss_nis.so*",
-            "**/libmemusage.so*",
-            "**/libpthread.so*",
-            "**/libcrypt.so*",
-            "**/libz.so*",
-            "**/libpthread-*.so",
-            "**/libutil.so*",
-            "**/libnsl.so*",
-            "**/libnss_nis-*.so",
-            "**/libutil-*.so",
-            "**/libdl-*.so",
-            "**/libmvec-*.so",
-            "**/libBrokenLocale.so*",
-            "**/libnss_nisplus.so*",
-            "**/libgcc_s.so*",
-            "**/libnss_compat.so*",
-            "**/libz.so*",
-            "**/libthread_db-*.so",
-            "**/libpcprofile.so",
-            "**/librt.so*",
-            "**/libnss_nisplus-*.so",
-            "**/libnss_hesiod.so*",
-            "**/libresolv.so*",
-            "**/libBrokenLocale-*.so",
-            "**/libnss_hesiod-*.so",
-            "**/libSegFault.so",
-            "**/libnss_files.so*",
-            "**/libanl.so*",
-            "**/librt-*.so",
-            "**/libanl-*.so",
-            "**/libresolv-*.so",
-            "**/libm.so*",
-            "**/libnss_files-*.so",
-            "**/libthread_db.so*",
-            "**/libdl.so*",
-            "**/libnss_dns.so*",
-            "**/libnsl-*.so",
-            "**/libmvec.so*",
-            "**/libnss_dns-*.so",
-            "**/libm-*.so",
-            "**/ld-linux-x86-64.so*",
-            "**/gconv/*",
-            "**/audit/*",
-            "**/libstdc++.so*",
-            "**/libstdcxx/*",
-            "**/doc/zlib1g/*",
-            "**/doc/libc6/*",
-            "**/doc/gcc-10-base/*",
-            "**/doc/libgcc-s1/*",
-            "**/doc/libcrypt1/*",
-            "**/doc/libstdc++6/*",
-        ]
-
         appdir_files = set()
         runtimes_prefix = str(self.appdir_path / "runtime")
         for root, dirs, files in os.walk(self.appdir_path):
@@ -431,7 +368,7 @@ class AppRunV2Setup:
                     appdir_files.add(os.path.normpath(path))
 
         glibc_files = set()
-        for pat in glibc_file_patterns:
+        for pat in file_matching_patterns.glibc_with_glibstdcpp:
             pat_match = fnmatch.filter(appdir_files, pat)
             glibc_files.update(pat_match)
         return glibc_files
