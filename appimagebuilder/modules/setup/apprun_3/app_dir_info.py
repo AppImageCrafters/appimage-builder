@@ -79,10 +79,12 @@ class AppDir:
             file_info.is_executable = os.access(entry, os.X_OK)
             file_info.shebang = apprun_utils.read_shebang(entry)
 
-            file_info.is_elf = binary is not None
-            file_info.interpreter = binary.interpreter if binary else None
-            file_info.machine_type = binary.header.machine_type if binary else None
-            file_info.soname = binary.get(lief.ELF.DYNAMIC_TAGS.SONAME) if binary else None
+            # check if file is an ELF binary
+            file_info.is_elf = isinstance(binary, lief.ELF.Binary)
+            if file_info.is_elf:
+                file_info.interpreter = binary.interpreter if binary else None
+                file_info.machine_type = binary.header.machine_type if binary else None
+                file_info.soname = binary.get(lief.ELF.DYNAMIC_TAGS.SONAME) if binary else None
 
         return file_info
 
@@ -113,17 +115,20 @@ class AppDir:
         """Moves the files inside the AppDir"""
 
         for entry in file_list:
-            source_path = entry.path
-            relative_path = source_path.relative_to(self.base_path)
-            target_path = dest_dir / relative_path
+            if entry.path.exists():
+                source_path = entry.path
+                relative_path = source_path.relative_to(self.base_path)
+                target_path = dest_dir / relative_path
 
-            # ensure target dir exists
-            target_path.parent.mkdir(parents=True, exist_ok=True)
+                # ensure target dir exists
+                target_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # move file to target dir
-            shutil.move(source_path, target_path)
-            entry.path = target_path
+                # move file to target dir
+                shutil.move(source_path, target_path)
+                entry.path = target_path
 
-            # update file info map
-            self.files.pop(source_path)
-            self.files[target_path] = entry
+                # update file info map
+                self.files.pop(source_path)
+                self.files[target_path] = entry
+            else:
+                self.files.pop(entry.path)
