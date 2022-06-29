@@ -84,9 +84,12 @@ class AppDir:
             # check if file is an ELF binary
             file_info.is_elf = isinstance(binary, lief.ELF.Binary)
             if file_info.is_elf:
-                file_info.interpreter = binary.interpreter if binary else None
-                file_info.machine_type = binary.header.machine_type if binary else None
-                file_info.soname = binary.get(lief.ELF.DYNAMIC_TAGS.SONAME) if binary else None
+                file_info.interpreter = binary.interpreter
+                file_info.machine_type = binary.header.machine_type
+                soname = binary.get(lief.ELF.DYNAMIC_TAGS.SONAME)
+                # store only the string representation of the soname
+                if soname:
+                    file_info.soname = soname.name
 
         return file_info
 
