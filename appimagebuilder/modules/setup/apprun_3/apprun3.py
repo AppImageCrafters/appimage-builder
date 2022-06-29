@@ -45,8 +45,7 @@ class AppRunV3Setup:
         # resolve main architecture to know which AppRun binaries should be used later
         self.context.main_arch = self._get_main_arch()
 
-        self._setup_apprun_modules()
-        self._run_helpers()
+        self._run_setup_helpers()
 
         self.context.architectures.update(self.context.app_dir.architectures)
 
@@ -211,15 +210,6 @@ class AppRunV3Setup:
 
         return matching_files
 
-    def _setup_apprun_modules(self):
-        """Sets up the AppRun modules"""
-
-        glibc_helper = AppRun3GLibCSetupHelper(self.context)
-        glibc_helper.setup()
-
-        glibstdcpp_helper = AppRun3GLibStdCppSetupHelper(self.context)
-        glibstdcpp_helper.setup()
-
     def _get_main_arch(self):
         """Resolves the main architecture"""
 
@@ -328,5 +318,13 @@ class AppRunV3Setup:
         path_str = str(path)
         return path_str.replace(self.context.app_dir.path.__str__(), "$APPDIR")
 
-    def _run_helpers(self):
-        pass
+    def _run_setup_helpers(self):
+        """Runs the setup helpers"""
+        helpers = [
+            AppRun3GLibCSetupHelper(self.context),
+            AppRun3GLibStdCppSetupHelper(self.context),
+
+        ]
+
+        for helper in helpers:
+            helper.run()
