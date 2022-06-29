@@ -10,6 +10,7 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import fnmatch
+import logging
 import os
 import pathlib
 
@@ -119,6 +120,7 @@ class AppDir:
     def move_files(self, file_list: [AppDirFileInfo], dest_dir):
         """Moves the files inside the AppDir"""
 
+        missing_entries = []
         for entry in file_list:
             source_path = entry.path
             relative_path = source_path.relative_to(self.base_path)
@@ -127,11 +129,17 @@ class AppDir:
             # ensure target dir exists
             target_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # move file to target dir
-            source_path.rename(target_path)
-            entry.path = target_path
+            try:
+                # move file to target dir
+                source_path.rename(target_path)
+                entry.path = target_path
 
-            # update file info map
-            self.files.pop(source_path)
-            self.files[target_path] = entry
+                # update file info map
+                self.files.pop(source_path)
+                self.files[target_path] = entry
+            except FileNotFoundError:
+                missing_entries.append(entry)
+                logging.warning(f"File not found: {source_path}")
 
+        for entry in missing_entries:
+            file_list.remove(entry)
