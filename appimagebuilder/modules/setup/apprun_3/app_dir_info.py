@@ -12,7 +12,6 @@
 import fnmatch
 import os
 import pathlib
-import shutil
 
 import lief
 
@@ -118,20 +117,18 @@ class AppDir:
         """Moves the files inside the AppDir"""
 
         for entry in file_list:
-            if entry.path.exists():
-                source_path = entry.path
-                relative_path = source_path.relative_to(self.base_path)
-                target_path = dest_dir / relative_path
+            source_path = entry.path
+            relative_path = source_path.relative_to(self.base_path)
+            target_path = dest_dir / relative_path
 
-                # ensure target dir exists
-                target_path.parent.mkdir(parents=True, exist_ok=True)
+            # ensure target dir exists
+            target_path.parent.mkdir(parents=True, exist_ok=True)
 
-                # move file to target dir
-                shutil.move(source_path, target_path)
-                entry.path = target_path
+            # move file to target dir
+            source_path.rename(target_path)
+            entry.path = target_path
 
-                # update file info map
-                self.files.pop(source_path)
-                self.files[target_path] = entry
-            else:
-                self.files.pop(entry.path)
+            # update file info map
+            self.files.pop(source_path)
+            self.files[target_path] = entry
+
