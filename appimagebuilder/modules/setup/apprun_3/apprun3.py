@@ -15,14 +15,15 @@ import logging
 import os
 import shlex
 import shutil
+
 import lief
 
 from appimagebuilder.context import Context
 from appimagebuilder.modules.setup import apprun_utils
-from appimagebuilder.modules.setup.apprun_3.app_dir_info import AppDir, AppDirFileInfo
+from appimagebuilder.modules.setup.apprun_3.app_dir_info import AppDirFileInfo
+from appimagebuilder.modules.setup.apprun_3.apprun3_context import AppRun3Context
 from appimagebuilder.modules.setup.apprun_3.helpers.glibc_module import AppRun3GLibCSetupHelper
 from appimagebuilder.modules.setup.apprun_3.helpers.glibstcpp_module import AppRun3GLibStdCppSetupHelper
-from appimagebuilder.modules.setup.apprun_binaries_resolver import AppRunBinariesResolver
 
 
 class AppRunV3Setup:
@@ -33,37 +34,21 @@ class AppRunV3Setup:
     """
 
     def __init__(self, context: Context):
-        self.context = context
-        self._apprun_version = self.context.recipe.AppDir.runtime.version() or "v3.0.0"
-        self._apprun_cache_dir = context.build_dir / "AppRun" / self._apprun_version
-        self._apprun_debug = self.context.recipe.AppDir.runtime.debug() or False
-        self._apprun_modules_dir = self.context.app_dir / "opt"
-
-        self._apprun_binaries_resolver = AppRunBinariesResolver(self._apprun_version, self._apprun_debug,
-                                                                self.context.build_dir)
-
-        # information gathered during the setup process
-        self._bundle_archs = set(self.context.recipe.AppDir.runtime.architecture())
-
-        # use first architecture from list as default
-        self._main_arch = None
-
-        self._binary_interpreters = set()
-
-        self._app_dir_info = AppDir(self.context.app_dir)
+        self.context = AppRun3Context(context)
 
     def setup(self):
         """Configures the AppDir to use the AppRun v3 runtime format."""
 
         # scan AppDir contents
-        self._app_dir_info.scan_files()
+        self.context.app_dir.scan_files()
 
         # resolve main architecture to know which AppRun binaries should be used later
-        self._main_arch = self._get_main_arch()
+        self.context.main_arch = self._get_main_arch()
 
         self._setup_apprun_modules()
+        self._run_helpers()
 
-        self._bundle_archs.update(self._app_dir_info.architectures)
+        self.context.architectures.update(self.context.app_dir.architectures)
 
         # patch scripts shebang to use embed interpreters
         self._patch_scripts_shebang()
@@ -75,9 +60,8 @@ class AppRunV3Setup:
 
     def _find_dirs_containing_libraries(self):
         library_paths = set()
-        appdir_path_str = self._app_dir_info.base_path.__str__()
 
-        for file in self._app_dir_info.files.values():
+        for file in self.context.app_dir.files.values():
             # check if the binary is a library
             if file.soname and not self._is_file_in_a_module(file):
                 # record the library dir path for later use in the apprun config generation
@@ -90,17 +74,17 @@ class AppRunV3Setup:
         """Checks if a file belongs to a module"""
 
         path_str = file.path.__str__()
-        return path_str.startswith(self._apprun_modules_dir.__str__())
+        return path_str.startswith(self.context.modules_dir.__str__())
 
     def _deploy_librapprun_hooks_so(self):
-        for arch in self._bundle_archs:
+        for arch in self.context.architectures:
             self._deploy_libapprun_hooks_so(arch.name)
 
     def _deploy_apprun_bin(self):
         """Deploys the AppRun binary for the main architecture"""
 
-        apprun_bin_path = self._apprun_binaries_resolver.resolve_executable(self._main_arch)
-        apprun_bin_target_path = self.context.app_dir / "AppRun"
+        apprun_bin_path = self.context.binaries_resolver.resolve_executable(self.context.main_arch)
+        apprun_bin_target_path = self.context.app_dir.path / "AppRun"
 
         shutil.copy(apprun_bin_path, apprun_bin_target_path)
 
@@ -110,13 +94,13 @@ class AppRunV3Setup:
     def _deploy_libapprun_hooks_so(self, arch):
         """Deploys the libapprun_hooks.so for a given architecture"""
 
-        libapprun_so_path = self._apprun_binaries_resolver.resolve_hooks_library(arch)
+        libapprun_so_path = self.context.binaries_resolver.resolve_hooks_library(arch)
 
         libapprun_so_target_dir = self._find_libapprun_hooks_so_target_dir(arch)
 
         # provide a target dir if none was found
         if not libapprun_so_target_dir:
-            libapprun_so_target_dir = self.context.app_dir / "lib" / arch
+            libapprun_so_target_dir = self.context.app_dir.path / "lib" / arch
             libapprun_so_target_dir.mkdir(parents=True, exist_ok=True)
 
         # copy the libapprun_hooks.so to the target dir
@@ -127,10 +111,10 @@ class AppRunV3Setup:
         """Finds a suitable directory for the libapprun_hooks.so"""
 
         base_dirs = [
-            self.context.app_dir / "lib",
-            self.context.app_dir / "lib64",
-            self.context.app_dir / "usr/lib",
-            self.context.app_dir / "usr/lib64",
+            self.context.app_dir.path / "lib",
+            self.context.app_dir.path / "lib64",
+            self.context.app_dir.path / "usr/lib",
+            self.context.app_dir.path / "usr/lib64",
         ]
         # find dedicated folder for the architecture
         for base_dir in base_dirs:
@@ -160,22 +144,21 @@ class AppRunV3Setup:
             "runtime": {
                 "exec": exec_line,
                 "library_paths": library_paths,
-                "linkers": list(self._binary_interpreters),
                 "environment": {
                     "PATH": ":".join(path_env) + ":$PATH",
-                    "LD_PRELOAD": "libapprun_hooks.so:$LD_PRELOAD:",
+                    "LD_PRELOAD": "libapprun_hooks.so:$LD_PRELOAD",
                 },
             },
         }
 
-        if len(list(self._apprun_modules_dir.iterdir())) > 0:
+        if len(list(self.context.modules_dir.iterdir())) > 0:
             config["runtime"]["modules_dir"] = (
                     "$APPDIR/"
-                    + self._apprun_modules_dir.relative_to(self.context.app_dir).__str__()
+                    + self.context.modules_dir.relative_to(self.context.app_dir.path).__str__()
             )
 
         # write the config file
-        apprun_config_path = self.context.app_dir / "AppRun.config"
+        apprun_config_path = self.context.app_dir.path / "AppRun.config"
         apprun_utils.write_config_file(config, apprun_config_path)
 
     def _replace_appdir_path_by_environment_variable_in_paths(self, paths: [str]):
@@ -183,7 +166,7 @@ class AppRunV3Setup:
 
         patched_paths = []
         for path in paths:
-            appdir_path_str = self.context.app_dir.__str__()
+            appdir_path_str = self.context.app_dir.path.__str__()
             if appdir_path_str in path:
                 new_path = path.replace(appdir_path_str, "$APPDIR")
                 patched_paths.append(new_path)
@@ -195,7 +178,7 @@ class AppRunV3Setup:
 
         new_file_paths = []
         for entry in files:
-            relative_path = entry.relative_to(self.context.app_dir)
+            relative_path = entry.relative_to(self.context.app_dir.path)
             target_path = target_module_dir / relative_path
 
             # ensure target dir exists
@@ -213,7 +196,7 @@ class AppRunV3Setup:
         matching_files = []
 
         # iterate over all files in the app dir
-        search_queue = [self.context.app_dir]
+        search_queue = [self.context.app_dir.path]
         while search_queue:
             current_dir = search_queue.pop()
 
@@ -231,23 +214,21 @@ class AppRunV3Setup:
     def _setup_apprun_modules(self):
         """Sets up the AppRun modules"""
 
-        glibc_helper = AppRun3GLibCSetupHelper(self.context, self._app_dir_info, self._apprun_modules_dir,
-                                               self._apprun_binaries_resolver, self._main_arch)
+        glibc_helper = AppRun3GLibCSetupHelper(self.context)
         glibc_helper.setup()
 
-        glibstdcpp_helper = AppRun3GLibStdCppSetupHelper(self.context, self._app_dir_info, self._apprun_modules_dir,
-                                                         self._apprun_binaries_resolver, self._main_arch)
+        glibstdcpp_helper = AppRun3GLibStdCppSetupHelper(self.context)
         glibstdcpp_helper.setup()
 
     def _get_main_arch(self):
         """Resolves the main architecture"""
 
         # check if there are user defined archictectures and use first one as main arch
-        if self._bundle_archs:
-            return next(iter(self._bundle_archs))
+        if self.context.bundle_archs:
+            return next(iter(self.context.bundle_archs))
 
         # get executable archictecture
-        executable_path = self.context.app_dir / self.context.app_info.exec
+        executable_path = self.context.app_dir.path / self.context.app_info.exec
         arch = self._get_executable_architecture(executable_path)
 
         return arch
@@ -277,7 +258,7 @@ class AppRunV3Setup:
                 if shebang:
                     rel_interpreter_path = shebang[0].lstrip("/")
                     current_executable_path = (
-                            self.context.app_dir / rel_interpreter_path
+                            self.context.app_dir.path / rel_interpreter_path
                     )
                 else:
                     raise Exception(
@@ -295,7 +276,7 @@ class AppRunV3Setup:
         """Patches the scripts shebang"""
 
         # patch scripts shebang
-        search_queue = [self.context.app_dir]
+        search_queue = [self.context.app_dir.path]
         while search_queue:
             current_dir = search_queue.pop()
 
@@ -320,8 +301,8 @@ class AppRunV3Setup:
                 first_line = chunk.decode("utf-8").split("\n")[0]
 
                 # check if script interpreter is embed in the AppDir
-                interpreter_path = shlex.split(first_line)[0]
-                embed_interpreter_path = self.context.app_dir / interpreter_path
+                interpreter_path = shlex.split(first_line)[1]
+                embed_interpreter_path = self.context.app_dir.path / interpreter_path
                 if embed_interpreter_path.exists():
                     # write back the modified chunk
                     f.seek(0)
@@ -334,7 +315,7 @@ class AppRunV3Setup:
         """Finds the dirs containing executable files"""
 
         executable_dirs = set()
-        for file in self._app_dir_info.files.values():
+        for file in self.context.app_dir.files.values():
             if file.is_executable and not self._is_file_in_a_module(file):
                 dir_path = file.path.parent.__str__()
                 executable_dirs.add(dir_path)
@@ -345,4 +326,7 @@ class AppRunV3Setup:
         """Replaces the app dir in a path"""
 
         path_str = str(path)
-        return path_str.replace(self.context.app_dir.__str__(), "$APPDIR")
+        return path_str.replace(self.context.app_dir.path.__str__(), "$APPDIR")
+
+    def _run_helpers(self):
+        pass

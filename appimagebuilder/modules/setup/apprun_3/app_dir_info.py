@@ -42,7 +42,7 @@ class AppDir:
     files: {pathlib.Path: AppDirFileInfo} = dict()
 
     def __init__(self, app_dir_path: pathlib.Path):
-        self.base_path = pathlib.Path(app_dir_path)
+        self.path = pathlib.Path(app_dir_path)
 
         # file information aggregations
         self.architectures = set()
@@ -56,7 +56,7 @@ class AppDir:
         lief.logging.disable()
 
         # iterate over the files in the AppDir
-        concurrent_dir = self.base_path
+        concurrent_dir = self.path
         explore_queue = []
         while concurrent_dir:
             for entry in concurrent_dir.iterdir():
@@ -123,7 +123,7 @@ class AppDir:
         missing_entries = []
         for entry in file_list:
             source_path = entry.path
-            relative_path = source_path.relative_to(self.base_path)
+            relative_path = source_path.relative_to(self.path)
             target_path = dest_dir / relative_path
 
             # ensure target dir exists

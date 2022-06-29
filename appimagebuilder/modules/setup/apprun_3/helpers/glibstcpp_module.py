@@ -10,34 +10,27 @@
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
 import os
-import pathlib
 import shutil
 
-from appimagebuilder.context import Context
 from appimagebuilder.modules.setup import file_matching_patterns, apprun_utils
-from appimagebuilder.modules.setup.apprun_3.app_dir_info import AppDir
-from appimagebuilder.modules.setup.apprun_binaries_resolver import AppRunBinariesResolver
+from appimagebuilder.modules.setup.apprun_3.apprun3_context import AppRun3Context
 from appimagebuilder.modules.setup.apprun_utils import replace_app_dir_in_path
 
 
 class AppRun3GLibStdCppSetupHelper:
-    def __init__(self, context: Context, app_dir_info: AppDir, apprun_modules_dir: pathlib.Path,
-                 binaries_resolver: AppRunBinariesResolver, arch: str):
+    def __init__(self, context: AppRun3Context):
         self.context = context
-        self._apprun_modules_dir = apprun_modules_dir
-        self._module_dir = self._apprun_modules_dir / "glibstdcpp"
-        self._app_dir_info = app_dir_info
+
+        self._module_dir = self.context.modules_dir / "glibstdcpp"
         self._glibstdcpp_module_files = []
-        self._binaries_resolver = binaries_resolver
-        self._arch = arch
 
     def setup(self):
-        self._glibstdcpp_module_files = self._app_dir_info.find(file_matching_patterns.glibstdcpp)
+        self._glibstdcpp_module_files = self.context.app_dir.find(file_matching_patterns.glibstdcpp)
 
         if self._glibstdcpp_module_files:
             self._module_dir.mkdir(parents=True, exist_ok=True)
 
-            self._app_dir_info.move_files(self._glibstdcpp_module_files, self._module_dir)
+            self.context.app_dir.move_files(self._glibstdcpp_module_files, self._module_dir)
             self._deploy_check_glibstdcpp_binary()
 
             libstdcpp_version = self._extract_libstdcpp_version()
@@ -46,7 +39,7 @@ class AppRun3GLibStdCppSetupHelper:
             self._generate_glibstdcpp_module_config(libstdcpp_version, library_paths)
 
     def _deploy_check_glibstdcpp_binary(self):
-        glibstdcpp_check_binary_path = self._binaries_resolver.resolve_check_glibstdcpp_binary(self._arch)
+        glibstdcpp_check_binary_path = self.context.binaries_resolver.resolve_check_glibstdcpp_binary(self.context.main_arch)
         glibstdcpp_check_binary_target_path = self._module_dir / "check"
 
         # ensure the target directory exists
@@ -59,7 +52,7 @@ class AppRun3GLibStdCppSetupHelper:
         os.chmod(glibstdcpp_check_binary_target_path, 0o755)
 
     def _generate_glibstdcpp_module_config(self, libstdcpp_version, library_paths):
-        library_paths = [replace_app_dir_in_path(self.context.app_dir, path) for path in library_paths]
+        library_paths = [replace_app_dir_in_path(self.context.app_dir.path, path) for path in library_paths]
 
         config = {
             "version": "1.0",
