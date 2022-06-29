@@ -9,23 +9,20 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
+
 import fnmatch
 import logging
 import os
-import pathlib
 import shlex
 import shutil
-import tarfile
-
 import lief
-import packaging.version
 
 from appimagebuilder.context import Context
-from appimagebuilder.modules.setup import file_matching_patterns, apprun_utils
+from appimagebuilder.modules.setup import apprun_utils
 from appimagebuilder.modules.setup.apprun_3.app_dir_info import AppDir, AppDirFileInfo
 from appimagebuilder.modules.setup.apprun_3.helpers.glibc_module import AppRun3GLibCSetupHelper
+from appimagebuilder.modules.setup.apprun_3.helpers.glibstcpp_module import AppRun3GLibStdCppSetupHelper
 from appimagebuilder.modules.setup.apprun_binaries_resolver import AppRunBinariesResolver
-from appimagebuilder.utils.finder import Finder
 
 
 class AppRunV3Setup:
@@ -35,9 +32,8 @@ class AppRunV3Setup:
     Configures an AppDir to use the AppRun v3 runtime format.
     """
 
-    def __init__(self, context: Context, finder: Finder):
+    def __init__(self, context: Context):
         self.context = context
-        self.finder = finder
         self._apprun_version = self.context.recipe.AppDir.runtime.version() or "v3.0.0"
         self._apprun_cache_dir = context.build_dir / "AppRun" / self._apprun_version
         self._apprun_debug = self.context.recipe.AppDir.runtime.debug() or False
@@ -166,7 +162,7 @@ class AppRunV3Setup:
                 "library_paths": library_paths,
                 "linkers": list(self._binary_interpreters),
                 "environment": {
-                    "PATH": ":".join(path_env),
+                    "PATH": ":".join(path_env) + ":$PATH",
                     "LD_PRELOAD": "libapprun_hooks.so:$LD_PRELOAD:",
                 },
             },
@@ -239,20 +235,9 @@ class AppRunV3Setup:
                                                self._apprun_binaries_resolver, self._main_arch)
         glibc_helper.setup()
 
-        self._setup_glibstdcpp_module()
-
-    def _setup_glibstdcpp_module(self):
-        self._glibstdcpp_module_files = self._match_files_in_dir(
-            file_matching_patterns.glibstdcpp
-        )
-
-        if self._glibstdcpp_module_files:
-            glibc_module_dir = self._apprun_modules_dir / "glibstdcpp"
-            glibc_module_dir.mkdir(parents=True, exist_ok=True)
-
-            self._glibstdcpp_module_files = self._move_files_to_module_dir(
-                file_matching_patterns.glibstdcpp, glibc_module_dir
-            )
+        glibstdcpp_helper = AppRun3GLibStdCppSetupHelper(self.context, self._app_dir_info, self._apprun_modules_dir,
+                                                         self._apprun_binaries_resolver, self._main_arch)
+        glibstdcpp_helper.setup()
 
     def _get_main_arch(self):
         """Resolves the main architecture"""
@@ -330,8 +315,12 @@ class AppRunV3Setup:
             chunk = f.read(1024)
             if chunk[0:2] == b"#!":
                 chunk = apprun_utils.remove_left_slashes_on_shebang(chunk)
+
+                # extract the first line to avoid shlex errors validating incomplete lines
+                first_line = chunk.decode("utf-8").split("\n")[0]
+
                 # check if script interpreter is embed in the AppDir
-                interpreter_path = shlex.split(chunk[2:].decode("utf-8"))[0]
+                interpreter_path = shlex.split(first_line)[0]
                 embed_interpreter_path = self.context.app_dir / interpreter_path
                 if embed_interpreter_path.exists():
                     # write back the modified chunk

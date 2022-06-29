@@ -77,6 +77,17 @@ class AppRunBinariesResolver:
 
         return file
 
+    def resolve_check_glibstdcpp_binary(self, arch):
+        asset = f"check-glibstdc++-{self.apprun_build_type}-{arch}"
+        file = (
+                self.cache_dir / asset
+        )
+
+        if not file.exists():
+            self._download_release_asset(asset, file)
+
+        return file
+
     def _download_release_asset(self, asset, path):
         path.parent.mkdir(parents=True, exist_ok=True)
 
