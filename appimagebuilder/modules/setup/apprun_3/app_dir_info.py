@@ -13,6 +13,7 @@ import fnmatch
 import logging
 import os
 import pathlib
+from typing import Union
 
 import lief
 
@@ -106,7 +107,7 @@ class AppDir:
         if file_info.shebang:
             self.script_interpreters.update(file_info.shebang)
 
-    def find(self, patterns: [str]) -> [{}]:
+    def find(self, patterns: [str]) -> [AppDirFileInfo]:
         """Finds the files from the cache matching the patterns"""
 
         matching_files = []
@@ -116,6 +117,16 @@ class AppDir:
                 matching_files.append(info)
 
         return matching_files
+
+    def find_one(self, patterns: [str]) -> Union[AppDirFileInfo, None]:
+        """Finds the first file from the cache matching the patterns"""
+
+        for info in self.files.values():
+            path_str = info.path.__str__()
+            if any(fnmatch.fnmatch(path_str, pattern) for pattern in patterns):
+                return info
+
+        return None
 
     def move_files(self, file_list: [AppDirFileInfo], dest_dir):
         """Moves the files inside the AppDir"""
