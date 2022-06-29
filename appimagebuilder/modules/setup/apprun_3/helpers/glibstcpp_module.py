@@ -14,17 +14,18 @@ import shutil
 
 from appimagebuilder.modules.setup import file_matching_patterns, apprun_utils
 from appimagebuilder.modules.setup.apprun_3.apprun3_context import AppRun3Context
+from appimagebuilder.modules.setup.apprun_3.helpers.base_helper import AppRun3Helper
 from appimagebuilder.modules.setup.apprun_utils import replace_app_dir_in_path
 
 
-class AppRun3GLibStdCppSetupHelper:
+class AppRun3GLibStdCppSetupHelper(AppRun3Helper):
     def __init__(self, context: AppRun3Context):
-        self.context = context
+        super().__init__(context)
 
         self._module_dir = self.context.modules_dir / "glibstdcpp"
         self._glibstdcpp_module_files = []
 
-    def setup(self):
+    def run(self):
         self._glibstdcpp_module_files = self.context.app_dir.find(file_matching_patterns.glibstdcpp)
 
         if self._glibstdcpp_module_files:
@@ -39,7 +40,8 @@ class AppRun3GLibStdCppSetupHelper:
             self._generate_glibstdcpp_module_config(libstdcpp_version, library_paths)
 
     def _deploy_check_glibstdcpp_binary(self):
-        glibstdcpp_check_binary_path = self.context.binaries_resolver.resolve_check_glibstdcpp_binary(self.context.main_arch)
+        glibstdcpp_check_binary_path = self.context.binaries_resolver.resolve_check_glibstdcpp_binary(
+            self.context.main_arch)
         glibstdcpp_check_binary_target_path = self._module_dir / "check"
 
         # ensure the target directory exists

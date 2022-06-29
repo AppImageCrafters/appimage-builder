@@ -21,20 +21,21 @@ import packaging
 from appimagebuilder.modules.setup import apprun_utils, file_matching_patterns
 from appimagebuilder.modules.setup.apprun_3.app_dir_info import AppDirFileInfo
 from appimagebuilder.modules.setup.apprun_3.apprun3_context import AppRun3Context
+from appimagebuilder.modules.setup.apprun_3.helpers.base_helper import AppRun3Helper
 from appimagebuilder.modules.setup.apprun_utils import replace_app_dir_in_path
 
 
-class AppRun3GLibCSetupHelper:
+class AppRun3GLibCSetupHelper(AppRun3Helper):
     """Setups the GLibC module for AppRun 3"""
 
     def __init__(self, context: AppRun3Context):
-        self.context = context
+        super().__init__(context)
 
         self._module_dir = self.context.modules_dir / "glibc"
         self._glibc_module_files = []
 
-    def setup(self):
-        """Setups the glibc module"""
+    def run(self):
+        """Configures glibc for AppRun 3"""
 
         # extract glibc module files
         self._glibc_module_files = self.context.app_dir.find(file_matching_patterns.glibc)

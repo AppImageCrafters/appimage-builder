@@ -26,6 +26,10 @@ class AppRun3Context:
 
     main_arch: str = None
     architectures = set()
+    environment_variables = set()
+
+    # files matching the given pattern will not be modified by setup helpers
+    files_to_preserve = set()
 
     def __init__(self, build_context: Context):
         self.build_context = build_context
