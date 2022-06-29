@@ -22,6 +22,12 @@ class IconBundler:
     def __init__(self, app_dir, icon):
         self.app_dir = app_dir
         self.icon = icon
+        if icon.endswith(".ico"):
+            logging.info("File .ico is not supported as app icon, searching for svg or png files: %s " % icon)
+            self.icon = icon[:-4]
+        elif icon.endswith(".png") or icon.endswith(".svg"):
+            logging.info("Don't use extension in app icon file name, cutting it down: %s " % icon )
+            self.icon = icon[:-4]
 
     def bundle_icon(self):
         source_icon_path = self._get_icon_path()
