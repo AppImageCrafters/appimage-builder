@@ -62,22 +62,17 @@ def write_config_file(config, path):
 
 
 def read_shebang(path):
-    with open(path, "rb") as f:
-        buf = f.read(128)
+    try:
+        with open(path, "rb") as fhandler:
+            line = fhandler.readline().strip().decode()
 
-        if len(buf) < 2 or buf[0] != ord("#") or buf[1] != ord("!"):
-            return None
+        if len(line) > 2 and line[0:2] == '#!':
+            shebang_split = shlex.split(line[2:].strip())
+            return shebang_split
+    except UnicodeDecodeError:
+        pass
 
-        end_idx = buf.find(b"\n")
-        if end_idx == -1:
-            end_idx = len(buf)
-
-        buf = buf[2:end_idx].decode()
-        buf = buf.strip()
-
-        parts = buf.split(" ")
-        parts = [part.strip() for part in parts if part]
-        return parts
+    return None
 
 
 def remove_left_slashes_on_shebang(chunk):
