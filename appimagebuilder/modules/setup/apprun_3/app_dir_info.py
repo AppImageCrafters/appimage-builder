@@ -32,7 +32,7 @@ class AppDirFileInfo:
     soname: str = None
 
     def __init__(self, path):
-        path = pathlib.Path(path)
+        self.path = pathlib.Path(path)
 
 
 class AppDir:
