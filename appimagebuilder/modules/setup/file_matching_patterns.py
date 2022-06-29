@@ -69,7 +69,6 @@ glibc = [
     "**/libresolv.so*",
     "**/librt-*.so",
     "**/librt.so*",
-    "**/libstdcxx/*",
     "**/libthread_db-*.so",
     "**/libthread_db.so*",
     "**/libutil-*.so",
@@ -84,6 +83,7 @@ glibstdcpp = [
     "**/doc/libstdc++6/*",
     "**/libstdc++.so*",
     "**/libstdc++stdc++.so*",
+    "**/libstdcxx/*",
 ]
 
 "glibc and glibstc++ related binaries (used for compatibility with AppRun v2)"
