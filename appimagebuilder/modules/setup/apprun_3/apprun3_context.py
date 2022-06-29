@@ -26,7 +26,7 @@ class AppRun3Context:
 
     main_arch: str = None
     architectures = set()
-    environment_variables = set()
+    runtime_env = dict()
 
     # files matching the given pattern will not be modified by setup helpers
     files_to_preserve = set()
