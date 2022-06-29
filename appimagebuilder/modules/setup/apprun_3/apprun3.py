@@ -137,17 +137,17 @@ class AppRunV3Setup:
         library_paths = [self._replace_app_dir_in_path(path) for path in library_paths]
 
         path_env = self._find_dirs_containing_executable_files()
-        path_env = [self._replace_app_dir_in_path(path) for path in path_env]
+        self.context.runtime_env["PATH"] = ":".join(path_env) + ":$PATH"
+        self.context.runtime_env["LD_PRELOAD"] = "libapprun_hooks.so:$LD_PRELOAD"
+
+        self._replace_appdir_path_occurrences_in_env()
 
         config = {
             "version": "1.0",
             "runtime": {
                 "exec": exec_line,
                 "library_paths": library_paths,
-                "environment": {
-                    "PATH": ":".join(path_env) + ":$PATH",
-                    "LD_PRELOAD": "libapprun_hooks.so:$LD_PRELOAD",
-                },
+                "environment": self.context.runtime_env,
             },
         }
 
@@ -160,6 +160,11 @@ class AppRunV3Setup:
         # write the config file
         apprun_config_path = self.context.app_dir.path / "AppRun.config"
         apprun_utils.write_config_file(config, apprun_config_path)
+
+    def _replace_appdir_path_occurrences_in_env(self):
+        app_dir_path_str = self.context.app_dir.path.__str__()
+        for k, v in self.context.runtime_env.items():
+            self.context.runtime_env[k] = v.replace(app_dir_path_str, "$APPDIR")
 
     def _replace_appdir_path_by_environment_variable_in_paths(self, paths: [str]):
         """Replaces the appdir path by the $APPDIR environment variable in a list of paths"""
