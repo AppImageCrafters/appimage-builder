@@ -274,40 +274,31 @@ class AppRunV3Setup:
         """Patches the scripts shebang"""
 
         # patch scripts shebang
-        search_queue = [self.context.app_dir.path]
-        while search_queue:
-            current_dir = search_queue.pop()
+        for entry in self.context.app_dir.files.values():
+            if entry.shebang and not entry.path.is_symlink():
+                self._patch_script_shebang(entry)
 
-            for entry in current_dir.iterdir():
-                if entry.is_dir():
-                    search_queue.append(entry)
-
-                elif entry.is_file() and not entry.is_symlink():
-                    # patch file shebang
-                    self._patch_script_shebang(entry)
-
-    def _patch_script_shebang(self, entry):
+    def _patch_script_shebang(self, entry: AppDirFileInfo):
         """Patches a script shebang"""
 
-        with open(entry.__str__(), "rb+") as f:
-            # assume that the shebang is not longer than 1024 bytes
-            chunk = f.read(1024)
-            if chunk[0:2] == b"#!":
-                chunk = apprun_utils.remove_left_slashes_on_shebang(chunk)
+        if not entry.shebang:
+            return
 
-                # extract the first line to avoid shlex errors validating incomplete lines
-                first_line = chunk.decode("utf-8").split("\n")[0]
+        rel_interpreter_path = entry.shebang[0].strip("/")
+        embed_interpreter_path = self.context.app_dir.path / rel_interpreter_path
+        if embed_interpreter_path.exists():
+            with open(entry.path.__str__(), "rb+") as f:
+                # assume that the shebang is not longer than 1024 bytes
+                chunk = f.read(1024)
+                if chunk[0:2] == b"#!":
+                    chunk = apprun_utils.remove_left_slashes_on_shebang(chunk)
 
-                # check if script interpreter is embed in the AppDir
-                interpreter_path = shlex.split(first_line)[1]
-                embed_interpreter_path = self.context.app_dir.path / interpreter_path
-                if embed_interpreter_path.exists():
                     # write back the modified chunk
                     f.seek(0)
                     f.write(chunk)
                     logging.info("Patched script shebang: %s", entry.__str__())
-                else:
-                    logging.warning("Script interpreter not found in AppDir: %s", interpreter_path)
+        else:
+            logging.warning("Script interpreter not found in AppDir: %s", rel_interpreter_path)
 
     def _find_dirs_containing_executable_files(self):
         """Finds the dirs containing executable files"""
