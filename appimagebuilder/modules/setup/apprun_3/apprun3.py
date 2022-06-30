@@ -132,7 +132,7 @@ class AppRunV3Setup:
 
         exec_line = ["$APPDIR/" + self.context.app_info.exec]
         if self.context.app_info.exec_args:
-            exec_line.extend(self.context.app_info.exec_args)
+            exec_line.extend(shlex.split(self.context.app_info.exec_args))
         else:
             exec_line.append("$@")
 
