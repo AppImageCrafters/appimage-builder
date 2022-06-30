@@ -149,6 +149,7 @@ class AppRunV3Setup:
             "runtime": {
                 "exec": exec_line,
                 "library_paths": library_paths,
+                "path_mappings": self.context.path_mappings,
                 "environment": self.context.runtime_env,
             },
         }
