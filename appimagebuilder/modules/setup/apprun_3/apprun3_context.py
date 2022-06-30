@@ -35,6 +35,7 @@ class AppRun3Context:
         self.build_context = build_context
         self.modules_dir = build_context.app_dir / "opt"
         self.debug = build_context.recipe.AppDir.runtime.debug() or False
+        self.path_mappings = build_context.recipe.AppDir.runtime.path_mappings() or []
 
         # init AppRun binaries resolver
         apprun_version = build_context.recipe.AppDir.runtime.version() or "v3.0.0"
