@@ -144,6 +144,8 @@ class AppRunV3Setup:
         self.context.runtime_env["PATH"] = ":".join(path_env) + ":$PATH"
         self.context.runtime_env["LD_PRELOAD"] = "libapprun_hooks.so:$LD_PRELOAD"
 
+        self._set_user_defined_env_vars()
+
         self._replace_appdir_path_occurrences_in_env()
 
         config = {
@@ -334,3 +336,13 @@ class AppRunV3Setup:
 
         for helper in helpers:
             helper.run()
+
+    def _set_user_defined_env_vars(self):
+        """Sets the user defined environment variables"""
+
+        user_env = self.context.build_context.recipe.AppDir.runtime.env or {}
+        for k, v in user_env.items():
+            if k in self.context.runtime_env:
+                logging.warning("User defined environment variable overrides generated config: %s", k)
+
+            self.context.runtime_env[k] = v
