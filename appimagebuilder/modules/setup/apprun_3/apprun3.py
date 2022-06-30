@@ -26,6 +26,7 @@ from appimagebuilder.modules.setup.apprun_3.helpers.gdk_pixbuf import AppRun3Gdk
 from appimagebuilder.modules.setup.apprun_3.helpers.glib import AppRun3GLib
 from appimagebuilder.modules.setup.apprun_3.helpers.glibc_module import AppRun3GLibCSetupHelper
 from appimagebuilder.modules.setup.apprun_3.helpers.glibstcpp_module import AppRun3GLibStdCppSetupHelper
+from appimagebuilder.modules.setup.apprun_3.helpers.gstreamer import AppRun3GStreamer
 from appimagebuilder.modules.setup.apprun_3.helpers.qt import AppRun3QtSetup
 
 
@@ -325,7 +326,8 @@ class AppRunV3Setup:
             AppRun3GLibStdCppSetupHelper(self.context),
             AppRun3QtSetup(self.context),
             AppRun3GLib(self.context),
-            AppRun3GdkPixbuf(self.context)
+            AppRun3GdkPixbuf(self.context),
+            AppRun3GStreamer(self.context),
         ]
 
         for helper in helpers:
