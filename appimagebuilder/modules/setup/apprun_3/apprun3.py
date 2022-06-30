@@ -22,6 +22,7 @@ from appimagebuilder.context import Context
 from appimagebuilder.modules.setup import apprun_utils
 from appimagebuilder.modules.setup.apprun_3.app_dir_info import AppDirFileInfo
 from appimagebuilder.modules.setup.apprun_3.apprun3_context import AppRun3Context
+from appimagebuilder.modules.setup.apprun_3.helpers.gdk_pixbuf import AppRun3GdkPixbuf
 from appimagebuilder.modules.setup.apprun_3.helpers.glib import AppRun3GLib
 from appimagebuilder.modules.setup.apprun_3.helpers.glibc_module import AppRun3GLibCSetupHelper
 from appimagebuilder.modules.setup.apprun_3.helpers.glibstcpp_module import AppRun3GLibStdCppSetupHelper
@@ -332,6 +333,7 @@ class AppRunV3Setup:
             AppRun3GLibStdCppSetupHelper(self.context),
             AppRun3QtSetup(self.context),
             AppRun3GLib(self.context),
+            AppRun3GdkPixbuf(self.context)
         ]
 
         for helper in helpers:
