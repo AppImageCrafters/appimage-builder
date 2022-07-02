@@ -17,6 +17,8 @@ from appimagebuilder.recipe.roamer import Roamer
 from appimagebuilder.modules.test import ExecutionTest, TestFailed
 from ..context import Context
 
+import docker
+from docker.errors import DockerException
 
 class RunTestCommand(Command):
     def __init__(self, context: Context, tests_settings: Roamer):
@@ -28,7 +30,14 @@ class RunTestCommand(Command):
         return "test"
 
     def __call__(self, *args, **kwargs):
-        test_cases = self._load_tests(self.tests_settings())
+        try:
+            test_cases = self._load_tests(self.tests_settings())
+        except DockerException as e:
+            logging.error("Docker error : "+str(e))
+            logging.error("(Is docker installed/started ?)")
+            logging.error("Tests will be skipped")
+            return
+
         try:
             for test in test_cases:
                 test.run()
