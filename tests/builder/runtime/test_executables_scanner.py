@@ -14,6 +14,7 @@ import tempfile
 from pathlib import Path
 from unittest import TestCase
 
+from appimagebuilder.modules.setup import apprun_utils
 from appimagebuilder.modules.setup.apprun_2.executables import (
     BinaryExecutable,
     InterpretedExecutable,
@@ -51,15 +52,15 @@ class TestExecutablesScanner(TestCase):
         self.temp_dir.cleanup()
 
     def test_read_shebang_absolute_path(self):
-        shebang = ExecutablesScanner.read_shebang(self.script_abs_shebang_path)
+        shebang = apprun_utils.read_shebang(self.script_abs_shebang_path)
         self.assertEqual(shebang, ["/usr/bin/python3"])
 
     def test_read_shebang_relative_path(self):
-        shebang = ExecutablesScanner.read_shebang(self.script_rel_shebang_path)
+        shebang = apprun_utils.read_shebang(self.script_rel_shebang_path)
         self.assertEqual(shebang, ["/usr/bin/env", "python3"])
 
     def test_read_shebang_no_shebang(self):
-        shebang = ExecutablesScanner.read_shebang(self.bin_path)
+        shebang = apprun_utils.read_shebang(self.bin_path)
         self.assertIsNone(shebang)
 
     def test_scan_file_binary_executable(self):
