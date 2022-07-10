@@ -56,6 +56,7 @@ setuptools.setup(
         "urllib3",
         "lief",
         "python-gnupg",
+        "libconf",
     ],
     python_requires=">=3.6",
     package_data={"": []},
