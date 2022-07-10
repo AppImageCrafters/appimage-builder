@@ -35,7 +35,7 @@ class SetupRuntimeCommand(Command):
         ) or apprun_version == version.parse("continuous"):
             runtime_setup = AppRunV2Setup(self.context, self._finder)
 
-        if version.parse("v3.0.0-devel") <= apprun_version < version.parse("v4.0.0"):
+        if not runtime_setup and version.parse("v3.0.0-devel") <= apprun_version < version.parse("v4.0.0"):
             runtime_setup = AppRunV3Setup(self.context)
 
         if not runtime_setup:
