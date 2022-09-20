@@ -89,26 +89,39 @@ class Qt(BaseHelper):
             # don't go any forward if libQtCore.so.4.... is not found
             return
 
-        # ??
+        # ?? seems to be not available in Qt4
         # qtwebengine_path = self.finder.find_one(
         #     "*/QtWebEngineProcess", [Finder.is_file, Finder.is_executable]
         # )
         # if qtwebengine_path:
         #     self._qt4_dirs["LibraryExecutables"] = qtwebengine_path.parent
 
-        qmake_path = self.finder.find_one(
-            "*/qmake", [Finder.is_file, Finder.is_executable]
+        paths = list(
+            self.finder.find_dirs_containing(
+                pattern="qmake",
+                file_checks=[Finder.is_file, Finder.is_executable],
+                excluded_patterns=[
+                    "*/qt5/*",
+                    "*/qt6/*",
+                    "/usr/bin",
+                ],
+            )
         )
+        qmake_path = paths[0]
+        # qmake_path = self.finder.find_one(
+        #     "*/qmake", [Finder.is_file, Finder.is_executable]
+        # )
         if qmake_path:
             self._qt4_dirs["Binaries"] = qmake_path.parent
 
-        # ??
+        # just to find plugin directory, lookup a lib included in libqtcore4:<arch>
         libqminimal_path = self.finder.find_one(
-            "*/libqminimal.so", [Finder.is_file, Finder.is_elf]
+            "*/libqjpcodecs.so", [Finder.is_file, Finder.is_elf]
         )
         if libqminimal_path:
             self._qt4_dirs["Plugins"] = libqminimal_path.parent.parent
 
+        # ok
         builtins_qmltypes_path = self.finder.find_one(
             "*/builtins.qmltypes", [Finder.is_file]
         )
@@ -122,9 +135,10 @@ class Qt(BaseHelper):
         if qtbase_translations_path:
             self._qt4_dirs["Translations"] = qtbase_translations_path
 
-        data_path = self.finder.find_one("*/qt4/resources", [Finder.is_dir])
-        if data_path:
-            self._qt4_dirs["Data"] = data_path.parent
+        # ? not found
+        # data_path = self.finder.find_one("*/qt4/resources", [Finder.is_dir])
+        # if data_path:
+        #     self._qt4_dirs["Data"] = data_path.parent
 
     def _locate_qt5_dirs(self):
         libqt5core_path = self.finder.find_one(
