@@ -35,7 +35,11 @@ class Qt(BaseHelper):
     def _configure_qt4(self):
         self._locate_qt4_dirs()
         if self._qt4_dirs:
-            pass
+            # deploy a qt.conf file next to executable files that may start a Qt application
+            exec_dirs = self._find_exec_dirs()
+            for path in exec_dirs:
+                qt_conf = self._generate_conf(path, self._qt4_dirs)
+                self._write_qt_conf(qt_conf, path)
 
     def _configure_qt5(self):
         self._locate_qt5_dirs()
