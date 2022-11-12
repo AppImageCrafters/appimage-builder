@@ -52,6 +52,10 @@ class Deploy:
         self.logger = logging.getLogger("PacmanPackageDeploy")
 
     def deploy(self, packages: [str], appdir_root: str, exclude: [str] = None):
+        if not packages:
+            # quick return if there is no packages to be deployed
+            return
+
         self.pacman_venv.update()
 
         appdir_root = Path(appdir_root)
