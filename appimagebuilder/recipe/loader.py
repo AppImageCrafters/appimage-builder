@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 import os
 import re
+import logging
 
 import yaml
 
@@ -72,5 +73,9 @@ class Loader:
         self._loader.add_constructor(self._tag, constructor_env_variables)
 
     def load(self, path):
-        with open(path) as recipe_file:
-            return yaml.load(recipe_file, Loader=self._loader)
+        if os.path.isfile(path):
+            with open(path) as recipe_file:
+                return yaml.load(recipe_file, Loader=self._loader)
+        else:
+            logging.error("The recipe file %s was not found", path)
+            exit(1)
