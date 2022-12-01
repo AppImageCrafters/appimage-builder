@@ -32,3 +32,30 @@ Features:
 [![Glimpse](https://raw.githubusercontent.com/glimpse-editor/Glimpse/dev-g210/icons/Color/128/glimpse-icon.png)](https://github.com/glimpse-editor/Glimpse)
 [![MystiQ](https://raw.githubusercontent.com/swl-x/MystiQ/master/icons/mystiq_128x128.png)](https://github.com/swl-x/MystiQ)
 [![MAUI](https://invent.kde.org/uploads/-/system/group/avatar/1557/avatar.png?width=64)](https://invent.kde.org/maui)
+
+
+## Developers
+
+If you want to contribute to this project, you can install this project from source like this :
+(After cloning the repository)
+
+Enter the virtual environnment :
+```
+pipenv shell
+```
+if you do not have python 3.8 installed you can try to use another version
+```
+pipenv shell --python path/to/python
+```
+
+Install the dependencies :
+```
+pipenv install
+```
+
+Add the current directory to the list of python modules :
+```
+export PYTHONPATH="`pwd`"
+```
+
+At this point you should be able to run appimage-builder by running `python appimagebuilder` !
