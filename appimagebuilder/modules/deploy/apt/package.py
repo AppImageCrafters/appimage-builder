@@ -13,7 +13,7 @@ import re
 import urllib
 from pathlib import Path
 
-from packaging import version
+from pydpkg import Dpkg
 
 
 class Package:
@@ -76,7 +76,7 @@ class Package:
 
     def __gt__(self, other):
         if isinstance(other, Package):
-            return version.parse(self.version) > version.parse(other.version)
+            return Dpkg.compare_versions(self.version, other.version) > 0
 
     def __hash__(self):
         return self.__str__().__hash__()
