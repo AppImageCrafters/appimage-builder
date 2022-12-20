@@ -30,6 +30,7 @@ glibc = [
     "**/ld-linux-x86-64.so*",
     "**/ld-linux-x86-64.so*",
     "**/ld-linux-x86-64.so.2",
+    "**/ld-linux-aarch64.so*",
     "**/ld-linux.so.2",
     "**/libBrokenLocale-*.so",
     "**/libBrokenLocale.so*",
