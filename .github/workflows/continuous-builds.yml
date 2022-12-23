@@ -35,7 +35,8 @@ jobs:
       - name: Install dependencies
         run: pacman -Sy --noconfirm python-pip python-pytest python-setuptools binutils patchelf fakeroot strace patchelf git
       - uses: actions/checkout@v3
-      - run: |
+      - name: Install appimage-builder
+        run: |
           git config --global --add safe.directory $PWD
           git fetch --prune --unshallow
           python3 -m pip install -e .[dev]
