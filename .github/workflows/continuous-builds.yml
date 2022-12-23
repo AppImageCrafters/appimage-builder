@@ -33,7 +33,7 @@ jobs:
     container: archlinux
     steps:
       - name: Install dependencies
-        run: pacman -Sy --noconfirm python-pip python-pytest python-setuptools binutils patchelf fakeroot strace patchelf git
+        run: pacman -Syu --noconfirm python-pip python-pytest python-setuptools binutils patchelf fakeroot strace patchelf git
       - uses: actions/checkout@v3
       - name: Install appimage-builder
         run: |
