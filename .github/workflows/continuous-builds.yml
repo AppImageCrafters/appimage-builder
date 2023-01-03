@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update 
-          apt-get install -y python3 python3-pip python3-pytest fakeroot binutils patchelf git
+          apt-get install -y python3.11 python3-pip python3-pytest fakeroot binutils patchelf git
       - uses: actions/checkout@v3
       - name: Install appimage-builder
         run: |
@@ -49,7 +49,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          sudo apt install -y python3.8-minimal python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace git
+          sudo apt install -y python3.11-minimal python3-pip python3-setuptools patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace git
           sudo wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
           sudo chmod +x /usr/local/bin/appimagetool
       - uses: actions/checkout@v3
@@ -57,7 +57,7 @@ jobs:
         run: |
           git config --global --add safe.directory $PWD
           git fetch --prune --unshallow
-          sudo python3.8 -m pip install .
+          sudo python3.11 -m pip install .
       - name: Build AppImage
         run: |
           cd recipes/appimage-builder
