@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get update 
-          apt-get install -y python3 python3-pip python3-pytest fakeroot binutils patchelf git
+          apt-get install -y python3.11 python3-pip python3-pytest fakeroot binutils patchelf git
       - uses: actions/checkout@v3
       - name: Install appimage-builder
         run: |
@@ -56,7 +56,7 @@ jobs:
         run: |
           git config --global --add safe.directory $PWD
           git fetch --prune --unshallow
-          sudo python3 -m pip install .
+          sudo python3.11 -m pip install .
       - name: Build AppImage
         run: |
           cd recipes/appimage-builder
