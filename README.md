@@ -33,6 +33,7 @@ Features:
 [![MystiQ](https://raw.githubusercontent.com/swl-x/MystiQ/master/icons/mystiq_128x128.png)](https://github.com/swl-x/MystiQ)
 [![MAUI](https://invent.kde.org/uploads/-/system/group/avatar/1557/avatar.png)](https://invent.kde.org/maui)
 [![Saber](https://raw.githubusercontent.com/adil192/saber/main/assets/icon/resized/icon-128x128.png)](https://github.com/adil192/saber)
+[![ProtonUp-QT](https://github.com/DavidoTek/ProtonUp-Qt/blob/main/share/icons/hicolor/128x128/apps/net.davidotek.pupgui2.png)](https://davidotek.github.io/protonup-qt/#home)
 
 
 ## Developers
