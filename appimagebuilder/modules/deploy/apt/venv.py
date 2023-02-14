@@ -238,6 +238,7 @@ class Venv:
         pkg_version = None
         pkg_arch = None
 
+        names = [name.split("=", maxsplit=1)[0] for name in names]
         output = self._run_apt_cache_show(names)
         for line in output.stdout.decode("utf-8").splitlines():
             if line.startswith("Package:"):
