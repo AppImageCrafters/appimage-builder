@@ -24,9 +24,9 @@ RUN apt-get update && \
     apt-get -yq autoclean
 
 WORKDIR /tmp
-RUN wget https://github.com/NixOS/patchelf/releases/download/0.12/patchelf-0.12.tar.bz2; \
-    tar -xvf patchelf-0.12.tar.bz2;  \
-    cd patchelf-0.12.20200827.8d3a16e; \
+RUN wget https://github.com/NixOS/patchelf/releases/download/0.17.2/patchelf-0.17.2.tar.bz2; \
+    tar -xvf patchelf-0.17.2.tar.bz2;  \
+    cd patchelf-0.17.2; \
     ./configure && make && make install; \
     rm -rf patchelf-*
 
