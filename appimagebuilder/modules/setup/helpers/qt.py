@@ -23,12 +23,23 @@ class Qt(BaseHelper):
     def __init__(self, app_dir, app_dir_files):
         super().__init__(app_dir, app_dir_files)
         self.app_dir = Path(app_dir)
+        self._qt4_dirs = {}
         self._qt5_dirs = {}
         self._qt6_dirs = {}
 
     def configure(self, env: Environment, preserve_files):
+        self._configure_qt4()
         self._configure_qt5()
         self._configure_qt6()
+
+    def _configure_qt4(self):
+        self._locate_qt4_dirs()
+        if self._qt4_dirs:
+            # deploy a qt.conf file next to executable files that may start a Qt application
+            exec_dirs = self._find_exec_dirs()
+            for path in exec_dirs:
+                qt_conf = self._generate_conf(path, self._qt4_dirs)
+                self._write_qt_conf(qt_conf, path)
 
     def _configure_qt5(self):
         self._locate_qt5_dirs()
@@ -67,6 +78,52 @@ class Qt(BaseHelper):
             config[k] = v.relative_to(self.app_dir)
 
         return config
+
+    def _locate_qt4_dirs(self):
+        libqt4core_path = self.finder.find_one(
+            "*/libQtCore.so.4.*", [Finder.is_file, Finder.is_elf_shared_lib]
+        )
+        if libqt4core_path:
+            self._qt4_dirs["Libraries"] = libqt4core_path.parent
+        else:
+            # don't go any forward if libQtCore.so.4.... is not found
+            return
+
+        paths = list(
+            self.finder.find_dirs_containing(
+                pattern="qmake",
+                file_checks=[Finder.is_file, Finder.is_executable],
+                excluded_patterns=[
+                    "*/qt5/*",
+                    "*/qt6/*",
+                    "/usr/bin",
+                ],
+            )
+        )
+        qmake_path = paths[0]
+        if qmake_path:
+            self._qt4_dirs["Binaries"] = qmake_path.parent
+
+        # just to find plugin directory, lookup a lib included in libqtcore4:<arch>
+        libqminimal_path = self.finder.find_one(
+            "*/libqjpcodecs.so", [Finder.is_file, Finder.is_elf]
+        )
+        if libqminimal_path:
+            self._qt4_dirs["Plugins"] = libqminimal_path.parent.parent
+
+        # ok
+        builtins_qmltypes_path = self.finder.find_one(
+            "*/builtins.qmltypes", [Finder.is_file]
+        )
+        if builtins_qmltypes_path:
+            self._qt4_dirs["Qml2Imports"] = builtins_qmltypes_path.parent
+
+        # ok
+        qtbase_translations_path = self.finder.find_one(
+            "*/qt4/translations", [Finder.is_dir]
+        )
+        if qtbase_translations_path:
+            self._qt4_dirs["Translations"] = qtbase_translations_path
 
     def _locate_qt5_dirs(self):
         libqt5core_path = self.finder.find_one(
