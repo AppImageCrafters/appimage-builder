@@ -36,7 +36,7 @@ class FilePackageResolver:
         # make sure that the files are str
         files = [str(file) for file in files]
 
-        command = "{pacman} -Fy {files}"
+        command = "{pacman} -Qo {files}"
 
         # ensure C locale is used to avoid locales affecting the output format
         env = os.environ.copy()
