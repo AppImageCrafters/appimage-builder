@@ -83,7 +83,7 @@ class AppImagePrimer(BasePrimer):
             "-noappend",
             "-reproducible",
             "-comp",
-            "xz",
+            "zstd",
         ]
         self.logger.info("Creating squashfs from AppDir")
         self.logger.debug(" ".join(command))
