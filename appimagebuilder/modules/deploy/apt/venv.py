@@ -21,6 +21,7 @@ from pathlib import Path
 from urllib import request
 
 from appimagebuilder.utils import shell
+from appimagebuilder.utils.dpkg_architecture import DpkgArchitecture
 from .package import Package
 
 DEPENDS_ON = ["dpkg-deb", "apt-get", "apt-key", "fakeroot", "apt-cache"]
@@ -69,6 +70,7 @@ class Venv:
         self._dpkg_status_path.touch(exist_ok=True)
 
     def _write_apt_conf(self, user_options, architectures: [str]):
+        architectures = [a.replace("aarch64", "arm64") for a in architectures]
         options = {
             "Dir": self._base_path,
             "Dir::State": self._base_path,
@@ -180,7 +182,8 @@ class Venv:
         return proc
 
     def resolve_packages(self, packages: [Package]) -> [Package]:
-        packages_str = [str(package) for package in packages]
+        dpkg_architecture = DpkgArchitecture()
+        packages_str = [str(package)+":"+str(dpkg_architecture) for package in packages]
         output = self._run_apt_get_install_download_only(packages_str)
 
         stdout_str = output.stderr.decode("utf-8")
