@@ -183,7 +183,7 @@ class Venv:
 
     def resolve_packages(self, packages: [Package]) -> [Package]:
         dpkg_architecture = DpkgArchitecture()
-        packages_str = [str(package)+":"+str(dpkg_architecture) for package in packages]
+        packages_str = [str(package) for package in packages]
         output = self._run_apt_get_install_download_only(packages_str)
 
         stdout_str = output.stderr.decode("utf-8")
