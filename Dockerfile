@@ -20,6 +20,7 @@ RUN apt-get update && \
         python3-setuptools \
         strace \
         wget \
+        squashfs-tools \
         zsync && \
     apt-get -yq autoclean
 
