@@ -78,7 +78,13 @@ At this point you should be able to run appimage-builder by running `pipenv run 
 
 For those who don't want to use `pipenv` there's a `requirements.txt` file that contains all the dependencies.
 
-After installing the required dependencies you can run the project like so:
+Next you need to add the current directory to the list of python modules:
+
+```shell
+export PYTHONPATH="`pwd`"
+```
+
+Then you can run the project like so:
 
 ```shell
 python appimagebuilder/__main__.py
