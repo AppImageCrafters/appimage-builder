@@ -1,6 +1,9 @@
 # PyCharm
 .idea
 
+# vscode
+.vscode/*
+
 # Example builds
 /recipes/*/AppDir
 /recipes/*/appimage-build
