@@ -82,9 +82,16 @@ class AppImagePrimer(BasePrimer):
             "-root-owned",
             "-noappend",
             "-reproducible",
-            "-comp",
-            "xz",
         ]
+
+        # I think this is better than hardcoding the supported compressions
+        # If the team behind AppImageKit adds a new compression
+        # we wouldn't need to update the code and release a new version just for a new compression method
+        if self.config.comp() != "None":
+            command += [ "-comp", self.config.comp()]
+        else:
+            command += ["-no-compression"]
+
         self.logger.info("Creating squashfs from AppDir")
         self.logger.debug(" ".join(command))
         subprocess.run(command, check=True)

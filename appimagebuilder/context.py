@@ -52,6 +52,9 @@ class BundleInfo:
     # appimage runtime arch
     runtime_arch: str
 
+    # compression to be used for the appImage
+    compression: str
+
     # sign key to be used
     sign_key: str
 
@@ -64,6 +67,7 @@ class BundleInfo:
         app_info: AppInfo = None,
         update_string: str = None,
         runtime_arch: str = None,
+        compression: str = None,
         sign_key: str = None,
         file_name: str = None,
     ):
@@ -72,6 +76,7 @@ class BundleInfo:
 
         self.update_string = update_string
         self.runtime_arch = runtime_arch
+        self.compression = compression
         self.sign_key = sign_key
         self.file_name = file_name
 
