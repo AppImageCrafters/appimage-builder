@@ -108,7 +108,11 @@ class Orchestrator:
             )
             commands.append(command)
 
-        finder = Finder(context.app_dir)
+        if os.path.exists(recipe.AppDir.path()):
+            finder = Finder(pathlib.PosixPath(recipe.AppDir.path()))
+        else:
+            finder = Finder(context.app_dir)
+
         commands.append(SetupSymlinksCommand(context, recipe, finder))
 
         commands.append(SetupRuntimeCommand(context, finder))
