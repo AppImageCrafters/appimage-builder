@@ -15,7 +15,7 @@ from appimagebuilder.modules.setup.desktop_entry_generator import (
 from appimagebuilder.modules.setup.icon_bundler import IconBundler
 from appimagebuilder.context import AppInfo, Context
 from appimagebuilder.commands.command import Command
-
+from pathlib import PosixPath
 
 class SetupAppInfoCommand(Command):
     def __init__(self, context: Context):
@@ -25,10 +25,11 @@ class SetupAppInfoCommand(Command):
         return "app-info-setup"
 
     def __call__(self, *args, **kwargs):
-        icon_bundler = IconBundler(self.context.app_dir, self.context.app_info.icon)
+        appdir_path = PosixPath(self.context.recipe.AppDir.path()) or self.context.app_dir
+        icon_bundler = IconBundler(appdir_path, self.context.app_info.icon)
         icon_bundler.bundle_icon()
 
-        desktop_entry_generator = DesktopEntryGenerator(self.context.app_dir)
+        desktop_entry_generator = DesktopEntryGenerator(appdir_path)
         desktop_entry_generator.generate(
             self.context.app_info, self.context.bundle_info.runtime_arch
         )

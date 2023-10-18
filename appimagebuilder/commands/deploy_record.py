@@ -11,6 +11,7 @@
 #  all copies or substantial portions of the Software.
 import logging
 import os
+from pathlib import PosixPath
 
 from ruamel.yaml import YAML
 
@@ -25,7 +26,7 @@ class WriteDeployRecordCommand(Command):
         return "write-deploy-record"
 
     def __call__(self, *args, **kwargs):
-        path = self.context.app_dir / ".bundle.yml"
+        path = (PosixPath(self.context.recipe.AppDir.path()) or self.context.app_dir) / ".bundle.yml"
         with open(path, "w") as f:
             logging.info(
                 "Writing deploy record to: %s"

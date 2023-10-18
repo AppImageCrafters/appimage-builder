@@ -42,8 +42,9 @@ class AppImagePrimer(BasePrimer):
         if not self.carrier_path.exists():
             self._get_appimage_kit_runtime()
 
+        appdir_path = pathlib.PosixPath(self.context.recipe.AppDir.path()) or self.context.app_dir
         # create payload
-        payload_path = self._make_squashfs(self.context.app_dir)
+        payload_path = self._make_squashfs(appdir_path)
 
         # prepare carrier (a.k.a. "runtime" using a different name to differentiate from the AppRun settings)
         shutil.copyfile(self.carrier_path, self.appimage_path)
