@@ -27,7 +27,7 @@ import os
 import random
 import shutil
 import string
-from pathlib import Path
+from pathlib import Path, PosixPath
 from typing import Final
 
 from packaging import version
@@ -61,7 +61,7 @@ class AppRunV2Setup:
         self.context = context
         recipe = context.recipe
 
-        self.appdir_path = recipe.AppDir.path() or self.context.app_dir
+        self.appdir_path = PosixPath(recipe.AppDir.path()) or self.context.app_dir
         self.main_exec = recipe.AppDir.app_info.exec()
         self.main_exec_args = recipe.AppDir.app_info.exec_args() or "$@"
         self.apprun_version = recipe.AppDir.runtime.version() or "v2.0.0"
