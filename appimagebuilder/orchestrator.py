@@ -157,7 +157,11 @@ class Orchestrator:
         )
 
     def _extract_v1_recipe_context(self, args, recipe):
-        app_dir_path = pathlib.Path(args.appdir).absolute()
+        if recipe.AppDir.path() and os.path.exists(recipe.AppDir.path()):
+            app_dir_path = pathlib.Path(recipe.AppDir.path()).absolute()
+        else:
+            app_dir_path = pathlib.Path(args.appdir).absolute()
+
         build_dir_path = pathlib.Path(args.build_dir).absolute()
 
         app_info_section = recipe.AppDir.app_info
