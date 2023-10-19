@@ -36,11 +36,11 @@ class GenerateMethodError(RuntimeError):
 
 
 class CommandGenerate:
-    def __init__(self):
+    def __init__(self, app_dir):
         self.logger = logging.getLogger("Generator")
 
         self.logger.info("Searching AppDir")
-        self.app_dir = self._locate_app_dir()
+        self.app_dir = self._locate_app_dir(app_dir)
 
         # configure Recipe Generator
         package_manager_section_generators = []
@@ -88,7 +88,10 @@ class CommandGenerate:
             yaml.dump(recipe, f)
 
     @staticmethod
-    def _locate_app_dir():
+    def _locate_app_dir(given_appdir):
+        if os.path.isdir(given_appdir):
+            return pathlib.Path(given_appdir).absolute()
+
         for file_name in os.listdir(os.path.curdir):
             if os.path.isdir(file_name) and file_name.lower() == "appdir":
                 return pathlib.Path(file_name).absolute()

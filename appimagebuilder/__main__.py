@@ -32,7 +32,7 @@ def __main__():
         exit(0)
 
     if args.generate:
-        generator = CommandGenerate()
+        generator = CommandGenerate(args.appdir)
         generator.generate()
         exit(0)
 
