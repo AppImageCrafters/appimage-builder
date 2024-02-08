@@ -100,7 +100,8 @@ class RecipeGenerator:
             },
             "AppImage": {
                 "arch": bundle_info.runtime_arch,
-                "update-information": bundle_info.update_string,
+                "comp": bundle_info.compression,
+                "update-information": bundle_info.update_string
             },
         }
 

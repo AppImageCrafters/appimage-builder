@@ -69,6 +69,8 @@ class Venv:
         self._dpkg_status_path.touch(exist_ok=True)
 
     def _write_apt_conf(self, user_options, architectures: [str]):
+        # aarch64 will fail on ubuntu as the repositories indexes only cater for arm64 name
+        architectures = [a.replace("aarch64", "arm64") for a in architectures]
         options = {
             "Dir": self._base_path,
             "Dir::State": self._base_path,

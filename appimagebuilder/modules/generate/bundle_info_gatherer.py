@@ -58,6 +58,9 @@ class BundleInfoGatherer:
         # ask for the appimage runtime arch to be used
         self._gather_appimage_information()
 
+        # ask for the compression method
+        self._gather_appimage_compression()
+
         return self._bundle_info
 
     @staticmethod
@@ -92,6 +95,13 @@ class BundleInfoGatherer:
             "Architecture:",
             choices=["x86_64", "i686", "armhf", "aarch64"],
             default=self._bundle_info.runtime_arch,
+        )
+
+    def _confirm_bundle_compression(self):
+        self._bundle_info.compression = self._ui.ask_select(
+            "Compression:",
+            choices=["xz", "gzip", "None"],
+            default=self._bundle_info.compression,
         )
 
     def _confirm_bundle_update_information(self):
@@ -148,3 +158,6 @@ class BundleInfoGatherer:
 
     def _gather_appimage_information(self):
         self._confirm_bundle_architecture()
+
+    def _gather_appimage_compression(self):
+        self._confirm_bundle_compression()
