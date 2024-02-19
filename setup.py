@@ -57,7 +57,6 @@ setuptools.setup(
         "lief",
         "python-gnupg",
         "libconf",
-        "pydpkg",
     ],
     python_requires=">=3.6",
     package_data={"": []},
