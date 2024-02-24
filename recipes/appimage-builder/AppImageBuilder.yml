@@ -1,3 +1,7 @@
+# To build AppImageBuilder, specify explicit AppDir path other than current directory
+# e.g.
+# cd recipes/appimage-builder
+# APPIMAGE_BUILDER_VERSION=eaadff4 python ../../__main__.py --recipe AppImageBuilder.yml --appdir /tmp/appimage-builder
 version: 1
 script:
   # Remove any previous build
