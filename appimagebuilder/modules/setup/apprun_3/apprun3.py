@@ -28,6 +28,7 @@ from appimagebuilder.modules.setup.apprun_3.helpers.glibc_module import AppRun3G
 from appimagebuilder.modules.setup.apprun_3.helpers.glibstcpp_module import AppRun3GLibStdCppSetupHelper
 from appimagebuilder.modules.setup.apprun_3.helpers.gstreamer import AppRun3GStreamer
 from appimagebuilder.modules.setup.apprun_3.helpers.python import AppRun3Python
+from appimagebuilder.modules.setup.apprun_3.helpers.mime import AppRun3MIME
 from appimagebuilder.modules.setup.apprun_3.helpers.qt import AppRun3QtSetup
 
 
@@ -335,6 +336,7 @@ class AppRunV3Setup:
             AppRun3GdkPixbuf(self.context),
             AppRun3GStreamer(self.context),
             AppRun3Python(self.context),
+            AppRun3MIME(self.context),
         ]
 
         for helper in helpers:
