@@ -132,9 +132,12 @@ class AppRun3GLibCSetupHelper(AppRun3Helper):
             # compare with current major version and update if necessary
             if version_name and version_name.startswith("GLIBC_"):
                 version_value = version_name.split("_")[1]
-                parsed_version = packaging.version.parse(version_value)
-                if parsed_version > major_version:
-                    major_version = parsed_version
+                try:
+                    parsed_version = packaging.version.parse(version_value)
+                    if parsed_version > major_version:
+                        major_version = parsed_version
+                except Exception:
+                    pass
 
         if major_version == packaging.version.parse("0.0.0"):
             raise Exception("Could not find glibc library in module files")
