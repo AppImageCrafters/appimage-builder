@@ -122,9 +122,12 @@ class AppRunV3Setup:
         ]
         # find dedicated folder for the architecture
         for base_dir in base_dirs:
-            for entry in base_dir.iterdir():
-                if entry.is_dir() and arch in entry.name:
-                    return entry
+            try:
+                for entry in base_dir.iterdir():
+                    if entry.is_dir() and arch in entry.name:
+                        return entry
+            except FileNotFoundError: # /usr/lib64 is often omitted
+                pass
 
         return None
 
