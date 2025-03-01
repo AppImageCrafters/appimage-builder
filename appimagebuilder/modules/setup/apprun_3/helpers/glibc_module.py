@@ -60,16 +60,16 @@ class AppRun3GLibCSetupHelper(AppRun3Helper):
         for file in self.context.app_dir.files.values():
             if file.interpreter and not self._is_file_in_a_module(file) and not file.path.is_symlink():
                 binary = lief.parse(file.path.__str__())
-                self._patch_binary_interpreter_path(binary)
+                self._patch_binary_interpreter_path(binary, file.path.__str__())
 
-    def _patch_binary_interpreter_path(self, binary):
+    def _patch_binary_interpreter_path(self, binary, output):
         """Patch the interpreter of a binary making it relative"""
 
         interpreter = binary.interpreter
         new_interpreter = interpreter.lstrip("/")
 
         binary.interpreter = new_interpreter
-        binary.write(binary.name)
+        binary.write(output)
 
     def _extract_library_paths_from_glibc_module_files(self):
         """Extracts library paths from glibc module files"""
