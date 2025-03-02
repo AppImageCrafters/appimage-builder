@@ -101,6 +101,10 @@ class AppRunV3Setup:
 
         libapprun_so_path = self.context.binaries_resolver.resolve_hooks_library(arch)
 
+        libapprun_so_target_path = self.get_hooks_library_target_path(arch)
+        shutil.copy(libapprun_so_path, libapprun_so_target_path)
+
+    def get_hooks_library_target_path(self, arch):
         libapprun_so_target_dir = self._find_libapprun_hooks_so_target_dir(arch)
 
         # provide a target dir if none was found
@@ -110,7 +114,7 @@ class AppRunV3Setup:
 
         # copy the libapprun_hooks.so to the target dir
         libapprun_so_target_path = libapprun_so_target_dir / "libapprun_hooks.so"
-        shutil.copy(libapprun_so_path, libapprun_so_target_path)
+        return libapprun_so_target_path
 
     def _find_libapprun_hooks_so_target_dir(self, arch):
         """Finds a suitable directory for the libapprun_hooks.so"""
@@ -146,7 +150,7 @@ class AppRunV3Setup:
 
         path_env = self._find_dirs_containing_executable_files()
         self.context.runtime_env["PATH"] = ":".join(path_env) + ":$PATH"
-        self.context.runtime_env["LD_PRELOAD"] = "libapprun_hooks.so:$LD_PRELOAD"
+        self.context.runtime_env["LD_PRELOAD"] = str(self.get_hooks_library_target_path(self.context.main_arch))+":$LD_PRELOAD"
 
         self._set_user_defined_env_vars()
 
