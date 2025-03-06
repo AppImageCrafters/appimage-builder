@@ -89,8 +89,6 @@ class AppImagePrimer(BasePrimer):
         # we wouldn't need to update the code and release a new version just for a new compression method
         if self.config.comp() != "None":
             command += [ "-comp", self.config.comp()]
-        else:
-            command += ["-no-compression"]
 
         self.logger.info("Creating squashfs from AppDir")
         self.logger.debug(" ".join(command))
