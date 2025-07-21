@@ -12,6 +12,7 @@
 import logging
 import pathlib
 import lief
+import subprocess
 
 
 class ExecutablesPatcherError(RuntimeError):
@@ -64,8 +65,15 @@ class ExecutablesPatcher:
             interpreter_path = binary.interpreter
             if interpreter_path:
                 patched_interpreter_path = interpreter_path.lstrip("/")
-                binary.interpreter = patched_interpreter_path
-                binary.write(path.__str__())
+                subprocess.run(
+                    [
+                        "patchelf",
+                        "--set-interpreter",
+                        patched_interpreter_path,
+                        path.__str__(),
+                    ],
+                    check=True,
+                )
 
                 self.binary_interpreters_paths[path] = patched_interpreter_path
         except Exception as e:

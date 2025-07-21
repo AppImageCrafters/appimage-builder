@@ -14,6 +14,7 @@ import logging
 import os
 import pathlib
 import shutil
+import subprocess
 
 import lief
 import packaging
@@ -38,7 +39,9 @@ class AppRun3GLibCSetupHelper(AppRun3Helper):
         """Configures glibc for AppRun 3"""
 
         # extract glibc module files
-        self._glibc_module_files = self.context.app_dir.find(file_matching_patterns.glibc)
+        self._glibc_module_files = self.context.app_dir.find(
+            file_matching_patterns.glibc
+        )
         if self._glibc_module_files:
             self._module_dir.mkdir(parents=True, exist_ok=True)
 
@@ -58,18 +61,29 @@ class AppRun3GLibCSetupHelper(AppRun3Helper):
         """Patches the binaries interpreter path on the AppDir"""
 
         for file in self.context.app_dir.files.values():
-            if file.interpreter and not self._is_file_in_a_module(file) and not file.path.is_symlink():
+            if (
+                file.interpreter
+                and not self._is_file_in_a_module(file)
+                and not file.path.is_symlink()
+            ):
                 binary = lief.parse(file.path.__str__())
-                self._patch_binary_interpreter_path(binary)
+                self._patch_binary_interpreter_path(binary, file.path)
 
-    def _patch_binary_interpreter_path(self, binary):
+    def _patch_binary_interpreter_path(self, binary, path: pathlib.Path):
         """Patch the interpreter of a binary making it relative"""
 
         interpreter = binary.interpreter
         new_interpreter = interpreter.lstrip("/")
 
-        binary.interpreter = new_interpreter
-        binary.write(binary.name)
+        subprocess.run(
+            [
+                "patchelf",
+                "--set-interpreter",
+                new_interpreter,
+                path.__str__(),
+            ],
+            check=True,
+        )
 
     def _extract_library_paths_from_glibc_module_files(self):
         """Extracts library paths from glibc module files"""
@@ -82,8 +96,14 @@ class AppRun3GLibCSetupHelper(AppRun3Helper):
         return library_paths
 
     def _generate_glibc_module_config(self, library_paths):
-        library_paths = [replace_app_dir_in_path(self.context.app_dir.path, path) for path in library_paths]
-        runtime_dir = "$APPDIR/" + self._module_dir.relative_to(self.context.app_dir.path).__str__()
+        library_paths = [
+            replace_app_dir_in_path(self.context.app_dir.path, path)
+            for path in library_paths
+        ]
+        runtime_dir = (
+            "$APPDIR/"
+            + self._module_dir.relative_to(self.context.app_dir.path).__str__()
+        )
         config = {
             "version": "1.0",
             "check": {
@@ -144,9 +164,11 @@ class AppRun3GLibCSetupHelper(AppRun3Helper):
     def _link_binary_interpreter_to_their_default_path(self):
         """Links the binary interpreter to their default path"""
 
-        sys_root = pathlib.Path('/')
+        sys_root = pathlib.Path("/")
         for binary_interpreter in self.context.app_dir.binary_interpreters:
-            binary_interpreter_path = self.context.app_dir.path / binary_interpreter.__str__().strip("/")
+            binary_interpreter_path = (
+                self.context.app_dir.path / binary_interpreter.__str__().strip("/")
+            )
 
             # ensure the binary interpreter dir exists
             binary_interpreter_path.parent.mkdir(parents=True, exist_ok=True)
@@ -167,12 +189,18 @@ class AppRun3GLibCSetupHelper(AppRun3Helper):
                 logging.info("Linking script interpreter: %s", interpreter_path)
                 mirror_path.symlink_to(rel_mirror_path)
             else:
-                logging.warning("Script interpreter not found in AppDir: %s", interpreter_path)
+                logging.warning(
+                    "Script interpreter not found in AppDir: %s", interpreter_path
+                )
 
     def _deploy_check_glibc_binary(self):
         """Deploys the glibc check binary"""
 
-        glibc_check_binary_path = self.context.binaries_resolver.resolve_check_glibc_binary(self.context.main_arch)
+        glibc_check_binary_path = (
+            self.context.binaries_resolver.resolve_check_glibc_binary(
+                self.context.main_arch
+            )
+        )
         glibc_check_binary_target_path = self._module_dir / "check"
 
         # ensure the target directory exists
