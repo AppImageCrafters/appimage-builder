@@ -224,7 +224,7 @@ class Venv:
 
         # need to split the command into args
         _proc = subprocess.Popen(
-            shlex.split(command), stdout=stdout, stdin=sys.stdin, stderr=sys.stderr
+            shlex.split(command), stdout=stdout, stdin=subprocess.PIPE, stderr=sys.stderr
         )
 
         if wait_for_completion:
