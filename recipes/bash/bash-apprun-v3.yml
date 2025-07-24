@@ -7,6 +7,7 @@ script:
   - cp -r tests $TARGET_APPDIR
   - ln -s ../usr/bin/env $TARGET_APPDIR/tests/test_internal_binary_env
   - ln -s /usr/bin/env $TARGET_APPDIR/tests/test_external_binary_env
+  - mkdir -p $TARGET_APPDIR/bin
   - ln -s bash $TARGET_APPDIR/bin/nubash
 
 AppDir:
