@@ -43,7 +43,7 @@ class Loader:
         self._tag = "!ENV"
 
         # pattern for global vars: look for ${word}
-        pattern = re.compile(".*?\${(\w+)}.*?")
+        pattern = re.compile(r".*?\${(\w+)}.*?")
 
         self._loader.add_implicit_resolver(self._tag, pattern, None)
 
