@@ -19,6 +19,8 @@ from appimagebuilder.cli.argparse import ArgumentsParser
 from appimagebuilder.modules.generate.command_generate import CommandGenerate
 from appimagebuilder.invoker import Invoker
 from appimagebuilder.orchestrator import Orchestrator
+from os import environ
+from sys import version_info
 
 
 def __main__():
@@ -37,6 +39,7 @@ def __main__():
         exit(0)
 
     recipe_loader = recipe.Loader()
+    environ["APPIMAGE_BUILDER_PY_VERSION"] = rf"{version_info.major}.{version_info.minor}"
     raw_recipe_data = recipe_loader.load(args.recipe)
     recipe_roamer = recipe.Roamer(raw_recipe_data)
 
