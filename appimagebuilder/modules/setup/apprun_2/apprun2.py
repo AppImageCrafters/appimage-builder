@@ -81,7 +81,8 @@ class AppRunV2Setup:
 
         self.path_mappings_env: Final = "APPDIR_PATH_MAPPINGS"
 
-        parsed_version = version.parse(self.apprun_version)
+        if self.apprun_version != "continuous":
+            parsed_version = version.parse(self.apprun_version)
         if self.apprun_version != "continuous" and (
             parsed_version < version.parse("v2.0.0")
             or parsed_version > version.parse("v3.0.0")
