@@ -2,6 +2,9 @@
 
 *GNU/Linux packaging made easy!* ™
 
+**WE ARE LOOKING FOR A NEW MAINTAINER**
+https://github.com/AppImageCrafters/appimage-builder/issues/381
+
 ## What is it?
 
 It's a tool for packing applications along with all of its dependencies using the system package manager to obtain binaries and resolve dependencies. It creates a **self-sufficient** and **portable** bundle using the [AppImage](https://appimage.org) format.
