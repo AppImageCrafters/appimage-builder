@@ -1,6 +1,6 @@
 arpy==2.3.0
 certifi==2023.7.22
-cffi==1.16.0
+cffi==1.17.1
 charset-normalizer==3.3.0
 configparser==6.0.0
 contextlib2==21.6.0
@@ -13,8 +13,8 @@ filelock==3.12.4
 idna==3.4
 jsonpath-rw==1.4.0
 libconf==2.0.1
-lief==0.12.2
-packaging==23.2
+lief==0.16.4
+packaging==24.2
 PGPy==0.6.0
 pipenv==2023.10.3
 platformdirs==3.11.0

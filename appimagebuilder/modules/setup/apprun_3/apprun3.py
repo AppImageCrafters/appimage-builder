@@ -28,6 +28,7 @@ from appimagebuilder.modules.setup.apprun_3.helpers.glibc_module import AppRun3G
 from appimagebuilder.modules.setup.apprun_3.helpers.glibstcpp_module import AppRun3GLibStdCppSetupHelper
 from appimagebuilder.modules.setup.apprun_3.helpers.gstreamer import AppRun3GStreamer
 from appimagebuilder.modules.setup.apprun_3.helpers.python import AppRun3Python
+from appimagebuilder.modules.setup.apprun_3.helpers.mime import AppRun3MIME
 from appimagebuilder.modules.setup.apprun_3.helpers.qt import AppRun3QtSetup
 
 
@@ -100,6 +101,10 @@ class AppRunV3Setup:
 
         libapprun_so_path = self.context.binaries_resolver.resolve_hooks_library(arch)
 
+        libapprun_so_target_path = self.get_hooks_library_target_path(arch)
+        shutil.copy(libapprun_so_path, libapprun_so_target_path)
+
+    def get_hooks_library_target_path(self, arch):
         libapprun_so_target_dir = self._find_libapprun_hooks_so_target_dir(arch)
 
         # provide a target dir if none was found
@@ -109,7 +114,7 @@ class AppRunV3Setup:
 
         # copy the libapprun_hooks.so to the target dir
         libapprun_so_target_path = libapprun_so_target_dir / "libapprun_hooks.so"
-        shutil.copy(libapprun_so_path, libapprun_so_target_path)
+        return libapprun_so_target_path
 
     def _find_libapprun_hooks_so_target_dir(self, arch):
         """Finds a suitable directory for the libapprun_hooks.so"""
@@ -122,9 +127,12 @@ class AppRunV3Setup:
         ]
         # find dedicated folder for the architecture
         for base_dir in base_dirs:
-            for entry in base_dir.iterdir():
-                if entry.is_dir() and arch in entry.name:
-                    return entry
+            try:
+                for entry in base_dir.iterdir():
+                    if entry.is_dir() and arch in entry.name:
+                        return entry
+            except FileNotFoundError: # /usr/lib64 is often omitted
+                pass
 
         return None
 
@@ -142,7 +150,7 @@ class AppRunV3Setup:
 
         path_env = self._find_dirs_containing_executable_files()
         self.context.runtime_env["PATH"] = ":".join(path_env) + ":$PATH"
-        self.context.runtime_env["LD_PRELOAD"] = "libapprun_hooks.so:$LD_PRELOAD"
+        self.context.runtime_env["LD_PRELOAD"] = str(self.get_hooks_library_target_path(self.context.main_arch))+":$LD_PRELOAD"
 
         self._set_user_defined_env_vars()
 
@@ -303,7 +311,7 @@ class AppRunV3Setup:
                     f.write(chunk)
                     logging.info("Patched script shebang: %s", entry.__str__())
         else:
-            logging.warning("Script interpreter not found in AppDir: %s", rel_interpreter_path)
+            logging.warning("Script interpreter for %s not found in AppDir: %s", entry.path.__str__(), rel_interpreter_path)
 
     def _find_dirs_containing_executable_files(self):
         """Finds the dirs containing executable files"""
@@ -332,6 +340,7 @@ class AppRunV3Setup:
             AppRun3GdkPixbuf(self.context),
             AppRun3GStreamer(self.context),
             AppRun3Python(self.context),
+            AppRun3MIME(self.context),
         ]
 
         for helper in helpers:

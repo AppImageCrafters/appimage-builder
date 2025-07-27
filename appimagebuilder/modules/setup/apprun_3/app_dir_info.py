@@ -88,7 +88,7 @@ class AppDir:
             if file_info.is_elf:
                 file_info.interpreter = binary.interpreter
                 file_info.machine_type = binary.header.machine_type
-                soname = binary.get(lief.ELF.DYNAMIC_TAGS.SONAME)
+                soname = binary.get(lief.ELF.DynamicEntry.TAG.SONAME)
                 # store only the string representation of the soname
                 if soname:
                     file_info.soname = soname.name
