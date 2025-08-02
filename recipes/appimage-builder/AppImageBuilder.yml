@@ -45,14 +45,17 @@ AppDir:
     exclude: []
 
   after_bundle: |
-    # configure tools 
+    # configure tools
     mkdir -p $TARGET_APPDIR/bin
-    ln -s fakeroot-sysv $TARGET_APPDIR/usr/bin/fakeroot
-    ln -s bash $TARGET_APPDIR/bin/sh
+    pushd $TARGET_APPDIR/usr/bin/
+    ln -sr ./fakeroot-sysv fakeroot
+    ln -sr ./bash sh
+    ln -sr ./sh $TARGET_APPDIR/bin/sh
 
     # install appimage-builder
-    python3 -m pip install --ignore-installed --prefix=/usr/local --root="$TARGET_APPDIR" ../../
-    python3 -m pip install --ignore-installed --prefix=/usr/local --root="$TARGET_APPDIR" certifi
+    popd
+    python3 -m pip install --ignore-installed --prefix=/usr --root="$TARGET_APPDIR" ../../
+    python3 -m pip install --ignore-installed --prefix=/usr --root="$TARGET_APPDIR" certifi
 
   runtime:
     version: "continuous"
