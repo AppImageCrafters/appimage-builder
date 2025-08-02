@@ -1,19 +1,15 @@
 version: 1
 script:
   - echo $PWD
-  - rm -rf $TARGET_APPDIR | true
   - mkdir -p $TARGET_APPDIR/bin
   - cp run_tests.sh $TARGET_APPDIR
   - cp -r tests $TARGET_APPDIR
-  - ln -s ../usr/bin/env $TARGET_APPDIR/tests/test_internal_binary_env
-  - ln -s /usr/bin/env $TARGET_APPDIR/tests/test_external_binary_env
-  - mkdir -p $TARGET_APPDIR/bin
-  - ln -s bash $TARGET_APPDIR/bin/nubash
 
 AppDir:
   app_info:
     id: org.gnu.bash
-    version: 4.4.20
+    name: bash
+    version: 5.2.21
     exec: bin/bash
 
   apt:
@@ -28,7 +24,16 @@ AppDir:
       - coreutils
       - libc6
       - libc6:i386
+    exclude:
       - libpcre3
+
+  after_bundle: |
+    cd $TARGET_APPDIR
+    ln -sr usr/bin/env tests/test_internal_binary_env
+    ln -sr /usr/bin/env tests/test_external_binary_env
+    mkdir -p bin
+    ln -sr usr/bin/bash bin/bash
+    ln -sr bin/bash bin/nubash
 
   files:
     exclude:
@@ -67,4 +72,5 @@ AppDir:
 
 
 AppImage:
+  comp: zstd
   arch: x86_64
