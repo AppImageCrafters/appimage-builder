@@ -40,6 +40,7 @@ def __main__():
 
     recipe_loader = recipe.Loader()
     environ["APPIMAGE_BUILDER_PY_VERSION"] = rf"{version_info.major}.{version_info.minor}"
+    environ["APPIMAGE_BUILDER_REMOTE_REPO_OWNER"] = environ.get("APPIMAGE_BUILDER_REMOTE_REPO_OWNER","AppImageCrafters").lower()
     raw_recipe_data = recipe_loader.load(args.recipe)
     recipe_roamer = recipe.Roamer(raw_recipe_data)
 
