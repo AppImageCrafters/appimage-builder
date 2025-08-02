@@ -94,6 +94,30 @@ class AppRunV2Setup:
 
     def setup(self):
         self.move_glibc_to_compat_runtime()
+        ubuntu_compat_linker_folder = self.compat_runtime_path / "lib64"
+
+        if ubuntu_compat_linker_folder.exists():
+            logging.info(
+                "Linker expected under %s for Ubuntu; path should be a symlink..."
+                % ubuntu_compat_linker_folder.__str__()
+            )
+            if ubuntu_compat_linker_folder.is_file():
+                logging.info("Unlinking file at %s" % ubuntu_compat_linker_folder.__str__())
+                ubuntu_compat_linker_folder.unlink()
+            elif not ubuntu_compat_linker_folder.is_symlink() and ubuntu_compat_linker_folder.is_dir():
+                logging.info("Removing directory at %s" % ubuntu_compat_linker_folder.__str__())
+                shutil.rmtree(ubuntu_compat_linker_folder)
+        linker_folder = self.finder.find_one(
+            "*/x86_64-linux-gnu/ld-linux*.so*", [Finder.is_file, Finder.is_elf_shared_lib]
+        ).parent
+        logging.info(f"Found linker at: {linker_folder.__str__()}")
+        logging.info(
+            "Creating symlink to %s at %s"
+            % (linker_folder.relative_to(self.appdir_path), ubuntu_compat_linker_folder.__str__())
+        )
+        symlink_dest = linker_folder.relative_to(ubuntu_compat_linker_folder.parent)
+        ubuntu_compat_linker_folder.symlink_to(symlink_dest)
+
         runtime_env = self._configure_runtime_environment()
 
         scanner = ExecutablesScanner(self.appdir_path, self.finder)
