@@ -1,95 +1,37 @@
-# This workflows will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
-
-name: Release builds
+name: "Tagged Release"
 
 on:
   push:
     tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      - "v*"
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get install -y patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace git lsb-release
-          sudo wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
-          sudo chmod +x /usr/local/bin/appimagetool
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Install appimage-builder
-        run: |
-          pip install .
-      - name: Build AppImage
-        run: |
-          cd recipes/appimage-builder
-          export APPIMAGE_BUILDER_VERSION=$(appimage-builder --version | head -1 | cut -f 2 -d" ")
-          appimage-builder --skip-test
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: appimage-builder
-          path: 'recipes/appimage-builder/appimage-builder*.AppImage*'
-  test:
-    runs-on: ubuntu-24.04
+    name: "Run Build and Test Matrix"
+    uses: ./.github/workflows/build-test.yml
+
+  publish:
+    name: "Publish Tagged Release"
+    runs-on: ubuntu-latest
     needs: build
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Download AppImage from build job
+      - name: Download all build artifacts from build job
         uses: actions/download-artifact@v4
         with:
-          name: appimage-builder
-      - name: Install dependencies
-        run: |
-          sudo apt install -y adwaita-icon-theme
-      - name: Pack bash
-        run: |
-          # build bash
-          BUILDER_PATH=$(find $PWD -name appimage-builder-*.AppImage)
-          chmod +x "$BUILDER_PATH"
-          cd recipes/bash/
-          "$BUILDER_PATH" --skip-test
-      - name: Test bash
-        run: |
-          recipes/bash/*.AppImage --appimage-extract-and-run -c "echo Hello World"
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+          pattern: "appimage-builder*-pydist"
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: bash
-          path: 'recipes/bash/*.AppImage*'
-  publish-appimage:
-    runs-on: ubuntu-24.04
-    needs: test
-    steps:
-      - name: Download AppImage from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: appimage-builder
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          files: release-assets/*
           prerelease: false
-          files: 'appimage-builder*.AppImage*'
-  publish-python-wheel:
-    runs-on: ubuntu-24.04
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install dependencies
-        run: |
-          sudo pip install --upgrade pip
-          sudo pip install setuptools twine
-      - name: Build and publish
+      - name: Publish wheel
         env:
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          python3 -m build
-          twine upload dist/*
+         sudo apt-get -y install python3-twine
+         twine upload release-assets/*

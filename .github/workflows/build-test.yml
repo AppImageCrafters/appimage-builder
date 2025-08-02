@@ -1,0 +1,135 @@
+name: Run tests
+
+on:
+  workflow_call:
+env:
+  APPIMAGE_BUILDER_REMOTE_REPO_OWNER: ${{ github.repository_owner }}
+
+jobs:
+  pytest-ubuntu-container:
+    name: Run tests on Ubuntu 24.04 (Docker)
+    runs-on: ubuntu-24.04
+    container: ubuntu:24.04
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get -y update
+          apt-get install -y fakeroot python3-pip python3-venv lsb-release binutils patchelf git
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up a virtualenv
+        run: |
+          python3 -m venv .venv
+      - name: Install appimage-builder and run tests
+        run: |
+          . .venv/bin/activate
+          pip install pytest
+          pip install -e .[dev]
+          pytest tests
+
+  pytest-archlinux:
+    name: Run tests on ArchLinux (Docker)
+    runs-on: ubuntu-24.04
+    container: archlinux
+    steps:
+      - name: Install dependencies
+        run: pacman -Syu --noconfirm python-pip binutils patchelf fakeroot lsb-release strace patchelf git
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up a virtualenv
+        run: |
+          python3 -m venv .venv
+      - name: Install appimage-builder and run tests
+        run: |
+          . .venv/bin/activate
+          pip install pytest
+          pip install -e .[dev]
+          pytest tests
+
+  pytest-ubuntu-runner:
+    name: Run tests on Ubuntu 24.04 with python 3.13.
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get -y update
+          sudo apt-get install -y fakeroot lsb-release binutils patchelf git
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Clear Python cache
+        run: |
+          sudo rm -rf /__t/Python
+      - name: Install python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+      - name: Install appimage-builder and run tests
+        run: |
+          pip install pytest
+          pip install -e .[dev]
+          python3 -m pytest tests
+
+  build-pack-bash:
+    runs-on: ubuntu-24.04
+    needs: [ pytest-ubuntu-container, pytest-ubuntu-runner, pytest-archlinux ]
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace git lsb-release python3-build python3-setuptools adwaita-icon-theme
+          sudo wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
+          sudo chmod +x /usr/local/bin/appimagetool
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build Python Wheel
+        run: |
+          cd ${{ github.workspace }}
+          python3 -m build
+      - name: Install appimage-builder
+        run: |
+          pip install --ignore-installed --user --break-system-packages .
+      - name: Build AppImage
+        run: |
+          cd ${{ github.workspace }}/recipes/appimage-builder
+          export APPIMAGE_BUILDER_VERSION=$(appimage-builder --version | head -1 | cut -f 2 -d" ") 
+          echo "APPIMAGE_BUILDER_VERSION=${APPIMAGE_BUILDER_VERSION}" >> $GITHUB_ENV
+          appimage-builder --skip-test
+      - name: Pack bash
+        run: |
+          # build bash
+          BUILDER_PATH=$(find $PWD -name appimage-builder-*.AppImage)
+          chmod +x "$BUILDER_PATH"
+          cd ${{ github.workspace }}/recipes/bash/
+          "$BUILDER_PATH" --skip-test
+      - name: Test bash
+        run: |
+          cd ${{ github.workspace }}/recipes/bash/
+          ./bash*.AppImage --appimage-extract-and-run -c "echo Hello World"
+      - name: Upload AppImageBuilder AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: appimage-builder-${{ env.APPIMAGE_BUILDER_VERSION }}.AppImage
+          path: '${{ github.workspace }}/recipes/appimage-builder/*.AppImage*'
+          retention-days: 7
+      - name: Upload AppImageBuilder Python dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: appimage-builder-${{ env.APPIMAGE_BUILDER_VERSION }}-pydist
+          path: '${{ github.workspace }}/dist/*'
+          retention-days: 7
+      - name: Upload Bash AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: bash.AppImage
+          path: '${{ github.workspace }}/recipes/bash/*.AppImage*'
+          retention-days: 7
+
