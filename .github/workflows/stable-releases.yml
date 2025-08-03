@@ -100,5 +100,5 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
           . .venv/bin/activate
-          python setup.py sdist bdist_wheel
+          python3 -m build
           twine upload dist/*
