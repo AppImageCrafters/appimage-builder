@@ -25,8 +25,8 @@ class TestVenv(TestCase):
         cls.venv_path = "/tmp/apt-venv"
         cls.apt_venv = Venv(
             cls.venv_path,
-            ["deb http://deb.debian.org/debian/ bullseye main"],
-            ["https://ftp-master.debian.org/keys/archive-key-10.asc"],
+            ["deb http://deb.debian.org/debian/ bookworm main"],
+            ["https://ftp-master.debian.org/keys/archive-key-12.asc"],
             ["amd64"],
         )
         cls.apt_venv.update()

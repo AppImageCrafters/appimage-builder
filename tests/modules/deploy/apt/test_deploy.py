@@ -29,8 +29,8 @@ class TestDeploy(TestCase):
         cls.appdir_path = Path("/tmp/AppDir")
         cls.apt_venv = Venv(
             cls.venv_path,
-            ["deb [arch=amd64] http://deb.debian.org/debian/ bullseye main"],
-            ["https://ftp-master.debian.org/keys/archive-key-10.asc"],
+            ["deb [arch=amd64] http://deb.debian.org/debian/ bookworm main"],
+            ["https://ftp-master.debian.org/keys/archive-key-12.asc"],
             ["amd64"],
         )
 
