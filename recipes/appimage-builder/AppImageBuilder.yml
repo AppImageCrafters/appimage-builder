@@ -19,7 +19,7 @@ AppDir:
     # Set the python executable as entry point
     exec: usr/bin/python{{APPIMAGE_BUILDER_PY_VERSION}}
     # Set the application main script path as argument. Use '$@' to forward CLI parameters
-    exec_args: "$APPDIR/usr/bin/appimage-builder $@"
+    exec_args: "$APPDIR/usr/local/bin/appimage-builder $@"
 
   apt:
     arch: amd64
@@ -51,8 +51,8 @@ AppDir:
     ln -s bash $TARGET_APPDIR/bin/sh
 
     # install appimage-builder
-    python3 -m pip install --ignore-installed --prefix=/usr --root="$TARGET_APPDIR" ../../
-    python3 -m pip install --ignore-installed --prefix=/usr --root="$TARGET_APPDIR" certifi
+    python3 -m pip install --ignore-installed --prefix=/usr/local --root="$TARGET_APPDIR" ../../
+    python3 -m pip install --ignore-installed --prefix=/usr/local --root="$TARGET_APPDIR" certifi
 
   runtime:
     version: "continuous"
