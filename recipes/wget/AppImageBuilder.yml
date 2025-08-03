@@ -14,7 +14,7 @@ AppDir:
     arch: !ENV ${TARGET_ARCH}
     sources:
       - sourceline: !ENV 'deb [arch=${TARGET_ARCH}] http://archive.ubuntu.com/ubuntu/ xenial main restricted universe multiverse'
-        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
 
     include:
       - wget
@@ -37,19 +37,19 @@ AppDir:
 
   test:
     debian:
-      image: appimagecrafters/tests-env:debian-stable
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
       command: "./AppRun --version"
     centos:
-      image: appimagecrafters/tests-env:centos-7
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:centos-10
       command: "./AppRun --version"
     arch:
-      image: appimagecrafters/tests-env:archlinux-latest
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:archlinux-latest
       command: "./AppRun --version"
     fedora:
-      image: appimagecrafters/tests-env:fedora-30
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
       command: "./AppRun --version"
     ubuntu:
-      image: appimagecrafters/tests-env:ubuntu-xenial
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-noble
       command: "./AppRun --version"
 
 AppImage:

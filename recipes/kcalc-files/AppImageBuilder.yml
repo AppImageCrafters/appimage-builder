@@ -160,20 +160,20 @@ AppDir:
       - usr/share/doc/*/TODO.*
   runtime: {}
   test:
-    fedora-30:
-      image: appimagecrafters/tests-env:fedora-30
+    fedora-42:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
       command: ./AppRun
-    debian-stable:
-      image: appimagecrafters/tests-env:debian-stable
+    debian-bookworm:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
       command: ./AppRun
     archlinux-latest:
-      image: appimagecrafters/tests-env:archlinux-latest
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:archlinux-latest
       command: ./AppRun
-    centos-7:
-      image: appimagecrafters/tests-env:centos-7
+    centos-10:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:centos-10
       command: ./AppRun
-    ubuntu-xenial:
-      image: appimagecrafters/tests-env:ubuntu-xenial
+    ubuntu-noble:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-noble
       command: ./AppRun
 AppImage:
   arch: x86_64

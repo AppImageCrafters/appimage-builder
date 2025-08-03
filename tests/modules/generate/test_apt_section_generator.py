@@ -54,7 +54,7 @@ class TestAptSectionGenerator(TestCase):
                 "allow_unauthenticated": True,
                 "sources": [
                     {
-                        "sourceline": "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse"
+                        "sourceline": "deb http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse"
                     }
                 ],
                 "include": ["libc6:amd64"],

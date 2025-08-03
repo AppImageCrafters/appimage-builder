@@ -17,5 +17,5 @@ from appimagebuilder.modules.generate.package_managers.apt import (
 class FakePackageRepositoryResolver(PackageRepositoryResolver):
     def resolve_source_lines(self, packages) -> []:
         return [
-            "deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse"
+            "deb http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse"
         ]

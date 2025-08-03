@@ -13,8 +13,8 @@ AppDir:
   apt:
     arch: amd64
     sources:
-      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse'
-        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
 
     include:
       - parole
@@ -42,19 +42,19 @@ AppDir:
       - usr/share/metainfo/org.kde.kcalc.appdata.xml
   test:
     debian:
-      image: appimagecrafters/tests-env:debian-stable
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
       command: "dbus-launch ./AppRun"
     centos:
-      image: appimagecrafters/tests-env:centos-7
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:centos-10
       command: "dbus-launch ./AppRun"
     arch:
-      image: appimagecrafters/tests-env:archlinux-latest
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:archlinux-latest
       command: "dbus-launch ./AppRun"
     fedora:
-      image: appimagecrafters/tests-env:fedora-30
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
       command: "dbus-launch ./AppRun"
     ubuntu:
-      image: appimagecrafters/tests-env:ubuntu-xenial
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-noble
       command: "dbus-launch ./AppRun"
 
 AppImage:

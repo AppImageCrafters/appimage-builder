@@ -11,11 +11,11 @@ AppDir:
   apt:
     arch: [amd64, i386]
     sources:
-      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ focal main restricted universe multiverse'
-      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ focal-updates main restricted universe multiverse'
-      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ focal-backports main restricted universe multiverse'
-        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32'
-      - sourceline: 'deb https://dl.winehq.org/wine-builds/ubuntu/ focal main'
+      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse'
+      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse'
+      - sourceline: 'deb http://archive.ubuntu.com/ubuntu/ noble-backports main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
+      - sourceline: 'deb https://dl.winehq.org/wine-builds/ubuntu/ noble main'
         key_url: 'https://dl.winehq.org/wine-builds/winehq.key'
 
     include:
@@ -38,19 +38,19 @@ AppDir:
 
   test:
     debian:
-      image: appimagecrafters/tests-env:debian-stable
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
       command: "./AppRun --version"
     centos:
-      image: appimagecrafters/tests-env:centos-7
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:centos-10
       command: "./AppRun --version"
     arch:
-      image: appimagecrafters/tests-env:archlinux-latest
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:archlinux-latest
       command: "./AppRun --version"
     fedora:
-      image: appimagecrafters/tests-env:fedora-30
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
       command: "./AppRun --version"
     ubuntu:
-      image: appimagecrafters/tests-env:ubuntu-xenial
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-noble
       command: "./AppRun --version"
 
 AppImage:

@@ -20,10 +20,10 @@ AppDir:
       - amd64
     allow_unauthenticated: true
     sources:
-      - sourceline: deb http://mx.archive.ubuntu.com/ubuntu/ jammy main restricted universe multiverse
-      - sourceline: deb http://mx.archive.ubuntu.com/ubuntu/ jammy-updates main restricted universe multiverse
-      - sourceline: deb http://mx.archive.ubuntu.com/ubuntu/ jammy-backports main restricted universe multiverse
-      - sourceline: deb http://security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse
+      - sourceline: deb http://mx.archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse
+      - sourceline: deb http://mx.archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse
+      - sourceline: deb http://mx.archive.ubuntu.com/ubuntu/ noble-backports main restricted universe multiverse
+      - sourceline: deb http://security.ubuntu.com/ubuntu/ noble-security main restricted universe multiverse
     include:
       - libcap2:amd64
       - libcom-err2:amd64
@@ -87,20 +87,20 @@ AppDir:
     # and the bundle may not work in such systems
     - strip --remove-section=.note.ABI-tag $TARGET_APPDIR/usr/lib/x86_64-linux-gnu/libQt6Core.so.6
   test:
-    centos-7:
-      image: appimagecrafters/tests-env:centos-7
+    centos-10:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:centos-10
       command: ./AppRun
-    fedora-30:
-      image: appimagecrafters/tests-env:fedora-30
+    fedora-42:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
       command: ./AppRun
-    ubuntu-xenial:
-      image: appimagecrafters/tests-env:ubuntu-bionic
+    ubuntu-noble:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-noble
       command: ./AppRun
-    debian-stable:
-      image: appimagecrafters/tests-env:debian-stable
+    debian-bookworm:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
       command: ./AppRun
     archlinux-latest:
-      image: appimagecrafters/tests-env:archlinux-latest
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:archlinux-latest
       command: ./AppRun
 
 

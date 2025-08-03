@@ -34,19 +34,19 @@ AppDir:
 
   test:
     debian:
-      image: appimagecrafters/tests-env:debian-stable
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
       command: "./AppRun --version"
     centos:
-      image: appimagecrafters/tests-env:centos-7
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:centos-10
       command: "./AppRun --version"
     arch:
-      image: appimagecrafters/tests-env:archlinux-latest
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:archlinux-latest
       command: "./AppRun --version"
     fedora:
-      image: appimagecrafters/tests-env:fedora-30
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
       command: "./AppRun --version"
     ubuntu:
-      image: appimagecrafters/tests-env:ubuntu-xenial
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-noble
       command: "./AppRun --version"
 
 

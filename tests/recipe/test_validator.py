@@ -92,8 +92,8 @@ class TestRecipeSchema(TestCase):
             "arch": "i386",
             "sources": [
                 {
-                    "sourceline": "deb [arch=i386] http://mx.archive.ubuntu.com/ubuntu/ bionic main",
-                    "key_url": "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x3b4fe6acc0b21f32",
+                    "sourceline": "deb [arch=i386] http://mx.archive.ubuntu.com/ubuntu/ noble main",
+                    "key_url": "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c",
                 }
             ],
             "include": ["qmlscene"],

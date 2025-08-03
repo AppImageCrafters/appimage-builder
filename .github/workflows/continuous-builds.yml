@@ -12,7 +12,7 @@ on:
 
 jobs:
   pytest-ubuntu-noble:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: ubuntu:24.04
     steps:
       - name: Install dependencies
@@ -38,7 +38,7 @@ jobs:
           python3 -m pytest tests
 
   pytest-archlinux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: archlinux
     steps:
       - name: Install dependencies
@@ -62,7 +62,7 @@ jobs:
           pytest tests
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [ pytest-ubuntu-noble, pytest-archlinux ]
     steps:
       - name: Install dependencies
@@ -98,7 +98,7 @@ jobs:
           name: appimage-builder
           path: 'recipes/appimage-builder/appimage-builder*.AppImage*'
   test-pack-bash:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     steps:
       - name: Checkout
@@ -128,7 +128,7 @@ jobs:
           name: bash
           path: 'recipes/bash/*.AppImage*'
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: test-pack-bash
     if: github.ref == 'refs/heads/main'
     steps:
