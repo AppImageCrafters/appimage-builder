@@ -1,0 +1,91 @@
+version: 1
+script:
+  # Remove any previous build
+  - rm -rf $TARGET_APPDIR  || true
+  - mkdir -p $TARGET_APPDIR/usr/share/icons/hicolor/scalable/apps $TARGET_APPDIR/usr/bin $TARGET_APPDIR/opt "$BUILD_DIR"
+  - cp ../../resources/appimage-builder.svg $TARGET_APPDIR/usr/share/icons/hicolor/scalable/apps
+  - cp ../../resources/application-vnd.appimage.svg $TARGET_APPDIR/usr/share/icons/hicolor/scalable/apps
+
+AppDir:
+  app_info:
+    id: org.appimage-crafters.appimage-builder
+    name: appimage-builder
+    icon: appimage-builder
+    version: 'latest'
+    # Set the python executable as entry point
+    exec: usr/bin/python{{APPIMAGE_BUILDER_PY_VERSION}}
+    # Set the application main script path as argument. Use '$@' to forward CLI parameters
+    exec_args: "$APPDIR/usr/local/bin/appimage-builder $@"
+
+  apt:
+    arch: amd64
+    sources:
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse'
+        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
+
+    include:
+      - bash
+      - coreutils
+      - binutils
+      - util-linux
+      - file
+      - desktop-file-utils
+      - fakeroot
+      - libgdk-pixbuf2.0-dev
+      - patchelf
+      - python{{APPIMAGE_BUILDER_PY_VERSION}}-minimal
+      - squashfs-tools
+      - strace
+      - zsync
+    exclude: []
+
+  after_bundle: |
+    # configure tools
+    mkdir -p $TARGET_APPDIR/bin
+    pushd $TARGET_APPDIR/usr/bin/
+    ln -sr ./fakeroot-sysv fakeroot
+    ln -sr ./bash sh
+    ln -sr ./sh $TARGET_APPDIR/bin/sh
+
+    # install appimage-builder
+    popd
+    python3 -m pip install --ignore-installed --prefix=/usr --root="$TARGET_APPDIR" ../../
+    python3 -m pip install --ignore-installed --prefix=/usr --root="$TARGET_APPDIR" certifi
+
+  runtime:
+    debug: true
+    version: "continuous"
+    env:
+      # Set python home
+      # See https://docs.python.org/3/using/cmdline.html#envvar-PYTHONHOME
+      PYTHONHOME: '${APPDIR}/usr'
+      # Path to the site-packages dir or other modules dirs
+      # See https://docs.python.org/3/using/cmdline.html#envvar-PYTHONPATH
+      PYTHONPATH: '${APPDIR}/usr/lib/python{{APPIMAGE_BUILDER_PY_VERSION}}/site-packages'
+      # SSL Certificates are placed in a different location for every system therefore we ship our own copy
+      SSL_CERT_FILE: '${APPDIR}/usr/lib/python{{APPIMAGE_BUILDER_PY_VERSION}}/site-packages/certifi/cacert.pem'
+
+  test:
+    fedora:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
+      command: ./AppRun --help
+    debian:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
+      command: ./AppRun --help
+    arch:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:archlinux-latest
+      command: ./AppRun --help
+    centos:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:centos-10
+      command: ./AppRun --help
+    ubuntu:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-noble
+      command: ./AppRun --help
+
+AppImage:
+  file_name: "appimage-builder-{{APPIMAGE_BUILDER_VERSION}}-x86_64-DEBUG.AppImage"
+  update-information: 'gh-releases-zsync|AppImageCrafters|appimage-builder|latest|-*x86_64.AppImage.zsync'
+  sign-key: None
+  arch: x86_64
+  comp: zstd

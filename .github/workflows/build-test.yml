@@ -114,11 +114,21 @@ jobs:
         run: |
           cd ${{ github.workspace }}/recipes/bash/
           ./bash*.AppImage --appimage-extract-and-run -c "echo Hello World"
+      - name: Build AppImage (DEBUG runtime)
+        run: |
+          cd ${{ github.workspace }}/recipes/appimage-builder
+          appimage-builder --skip-test --recipe ./AppImageBuilder-debug.yml
       - name: Upload AppImageBuilder AppImage
         uses: actions/upload-artifact@v4
         with:
-          name: appimage-builder-${{ env.APPIMAGE_BUILDER_VERSION }}.AppImage
-          path: '${{ github.workspace }}/recipes/appimage-builder/*.AppImage*'
+          name: appimage-builder.AppImage
+          path: '${{ github.workspace }}/recipes/appimage-builder/*x86_64.AppImage*'
+          retention-days: 7
+      - name: Upload AppImageBuilder Debug AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: appimage-builder-DEBUG.AppImage
+          path: '${{ github.workspace }}/recipes/appimage-builder/*-DEBUG*.AppImage*'
           retention-days: 7
       - name: Upload AppImageBuilder Python dist
         uses: actions/upload-artifact@v4
