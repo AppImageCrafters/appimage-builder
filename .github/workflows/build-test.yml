@@ -100,7 +100,7 @@ jobs:
       - name: Build AppImage
         run: |
           cd ${{ github.workspace }}/recipes/appimage-builder
-          export APPIMAGE_BUILDER_VERSION=$(appimage-builder --version | head -1 | cut -f 2 -d" ") 
+          export APPIMAGE_BUILDER_VERSION=$(appimage-builder --version | head -1 | cut -f 2 -d" ")
           echo "APPIMAGE_BUILDER_VERSION=${APPIMAGE_BUILDER_VERSION}" >> $GITHUB_ENV
           appimage-builder --skip-test
       - name: Pack bash
@@ -118,23 +118,29 @@ jobs:
         run: |
           cd ${{ github.workspace }}/recipes/appimage-builder
           appimage-builder --skip-test --recipe ./AppImageBuilder-debug.yml
+      - name: Compress Assets
+        run: |
+          cd ${{ github.workspace }}/recipes/appimage-builder
+          tar -cvf appimage-builder_x86_64-AppImage.tar ${{ github.workspace }}/recipes/appimage-builder/*x86_64.AppImage*
+          tar -cvf appimage-builder_x86_64-AppImage-DEBUG.tar ${{ github.workspace }}/recipes/appimage-builder/*-DEBUG.AppImage*
+          tar -cvf ${{ github.workspace }}/appimage-builder_python-dist.tar -C ${{ github.workspace }}/dist .
       - name: Upload AppImageBuilder AppImage
         uses: actions/upload-artifact@v4
         with:
           name: appimage-builder.AppImage
-          path: '${{ github.workspace }}/recipes/appimage-builder/*x86_64.AppImage*'
+          path: '${{ github.workspace }}/recipes/appimage-builder/appimage-builder_x86_64-AppImage.tar'
           retention-days: 7
       - name: Upload AppImageBuilder Debug AppImage
         uses: actions/upload-artifact@v4
         with:
           name: appimage-builder-DEBUG.AppImage
-          path: '${{ github.workspace }}/recipes/appimage-builder/*-DEBUG*.AppImage*'
+          path: '${{ github.workspace }}/recipes/appimage-builder/appimage-builder_x86_64-AppImage-DEBUG.tar'
           retention-days: 7
       - name: Upload AppImageBuilder Python dist
         uses: actions/upload-artifact@v4
         with:
-          name: appimage-builder-${{ env.APPIMAGE_BUILDER_VERSION }}-pydist
-          path: '${{ github.workspace }}/dist/*'
+          name: appimage-builder-pydist
+          path: '${{ github.workspace }}/appimage-builder_python-dist.tar'
           retention-days: 7
       - name: Upload Bash AppImage
         uses: actions/upload-artifact@v4
@@ -142,4 +148,3 @@ jobs:
           name: bash.AppImage
           path: '${{ github.workspace }}/recipes/bash/*.AppImage*'
           retention-days: 7
-
