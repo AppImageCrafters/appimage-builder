@@ -73,7 +73,7 @@ class AppRun3GLibStdCppSetupHelper(AppRun3Helper):
     def _extract_libstdcpp_version(self):
         version = None
         for entry in self._glibstdcpp_module_files:
-            if entry.soname == 'libstdc++.so.6':
+            if entry.soname == 'libstdc++.so.6' and not entry.path.is_symlink():
                 # extract libstdc++ version from file name
                 version = entry.path.name.split('.so.')[-1]
                 break

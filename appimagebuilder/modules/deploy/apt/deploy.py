@@ -66,8 +66,10 @@ class Deploy:
         required_packages = set(self.apt_venv.search_packages(include_patterns))
         excluded_packages = excluded_packages.difference(required_packages)
         self.apt_venv.set_installed_packages(excluded_packages)
-        # lists packages to be installed including dependencies
+        # lists packages to be installed including dependencies, without explicitly excluded packages
+        # if a dependency is required to be deployed, please include it in the include list
         deploy_list = set(self.apt_venv.resolve_packages(include_patterns))
+        deploy_list = deploy_list.difference(excluded_packages)
 
         return deploy_list
 

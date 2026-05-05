@@ -69,7 +69,7 @@ class TestRecipeSchema(TestCase):
                 },
                 "arch": ["i386", "x86_64", "aarch64", "gnueabihf"],
                 "preserve": ["usr/bin/example"],
-                "debug": False,
+                "debug": "False",
             },
             "files": {"include": ["/one", "/two"], "exclude": ["three", "four"]},
             "test": {

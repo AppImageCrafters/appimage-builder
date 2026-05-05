@@ -37,7 +37,7 @@ def is_binary_a_shared_library(binary):
 
     # read soname from ELF header
     if binary:
-        soname = binary.get(lief.ELF.DYNAMIC_TAGS.SONAME)
+        soname = binary.get(lief.ELF.DynamicEntry.TAG.SONAME)
         return soname is not None
 
     return False

@@ -36,7 +36,7 @@ class RecipeSchema:
         }
 
         self.v1_runtime = {
-            Optional("debug"): bool,
+            Optional("debug"): str,
             Optional("version"): str,
             Optional("path_mappings"): [str],
             Optional("arch"): [Or("gnueabihf", "x86_64", "i386", "aarch64")],

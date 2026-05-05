@@ -34,7 +34,7 @@ class AppRun3Context:
     def __init__(self, build_context: Context):
         self.build_context = build_context
         self.modules_dir = build_context.app_dir / "opt"
-        self.debug = build_context.recipe.AppDir.runtime.debug() or False
+        self.debug = (build_context.recipe.AppDir.runtime.debug().strip().lower() == "true") or False
         self.path_mappings = build_context.recipe.AppDir.runtime.path_mappings() or []
 
         # init AppRun binaries resolver

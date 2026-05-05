@@ -65,7 +65,7 @@ class AppRunV2Setup:
         self.main_exec = recipe.AppDir.app_info.exec()
         self.main_exec_args = recipe.AppDir.app_info.exec_args() or "$@"
         self.apprun_version = recipe.AppDir.runtime.version() or "v2.0.0"
-        self.apprun_debug = recipe.AppDir.runtime.debug()
+        self.apprun_debug = (recipe.AppDir.runtime.debug().strip().lower() == "true") or False
         user_env_input = recipe.AppDir.runtime.env() or {}
         self.user_env = self.parse_env_input(user_env_input)
         self.apprun_arch = set(recipe.AppDir.runtime.arch() or [])
