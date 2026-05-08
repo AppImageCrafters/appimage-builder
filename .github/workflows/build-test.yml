@@ -14,7 +14,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get -y update
-          apt-get install -y fakeroot python3-pip python3-venv lsb-release binutils patchelf git
+          apt-get install -y fakeroot lsb-release binutils patchelf git python3-pip python3-venv
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -24,6 +24,7 @@ jobs:
           python3 -m venv .venv
       - name: Install appimage-builder and run tests
         run: |
+          git config --global --add safe.directory $PWD
           . .venv/bin/activate
           pip install pytest
           pip install -e .[dev]
@@ -35,9 +36,9 @@ jobs:
     container: archlinux
     steps:
       - name: Install dependencies
-        run: pacman -Syu --noconfirm python-pip binutils patchelf fakeroot lsb-release strace patchelf git
+        run: pacman -Syu --noconfirm binutils fakeroot lsb-release strace patchelf git python-pip gcc
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Set up a virtualenv
@@ -45,6 +46,7 @@ jobs:
           python3 -m venv .venv
       - name: Install appimage-builder and run tests
         run: |
+          git config --global --add safe.directory $PWD
           . .venv/bin/activate
           pip install pytest
           pip install -e .[dev]
