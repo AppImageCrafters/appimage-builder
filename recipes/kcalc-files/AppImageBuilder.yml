@@ -158,7 +158,8 @@ AppDir:
       - usr/share/doc/*/changelog.*
       - usr/share/doc/*/NEWS.*
       - usr/share/doc/*/TODO.*
-  runtime: {}
+  runtime:
+    version: v2.0.0-alpha
   test:
     fedora-42:
       image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
@@ -178,4 +179,3 @@ AppDir:
 AppImage:
   arch: x86_64
   update-information: guess
-  comp: gzip

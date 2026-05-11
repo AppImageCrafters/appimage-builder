@@ -37,6 +37,9 @@ AppDir:
       # exclude glibc for a smaller but non backward compatible bundles
       - opt/libc
 
+  runtime:
+    version: "continuous"
+
   test:
     debian:
       image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
@@ -59,4 +62,3 @@ AppImage:
   update-information: None
   sign-key: None
   arch: x86_64
-  comp: gzip
