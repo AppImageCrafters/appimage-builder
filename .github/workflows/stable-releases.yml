@@ -17,14 +17,14 @@ jobs:
     needs: build
     steps:
       - name: Download all build artifacts from build job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "appimage-builder*-pydist"
           path: release-assets
           merge-multiple: true
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: release-assets/*
           prerelease: false

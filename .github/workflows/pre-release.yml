@@ -17,7 +17,7 @@ jobs:
     needs: build
     steps:
       - name: Download all build artifacts from build job
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: "appimage-builder*"
           path: "${{ github.workspace }}/release-assets"
@@ -27,7 +27,7 @@ jobs:
           ls -l "${{ github.workspace }}/"
           ls -l "${{ github.workspace }}/release-assets/"
       - name: Create 'continuous' Pre-release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: "${{ github.workspace }}/release-assets/*"
           tag_name: "continuous"

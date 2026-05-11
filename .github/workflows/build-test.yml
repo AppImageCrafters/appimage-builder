@@ -16,7 +16,7 @@ jobs:
           apt-get -y update
           apt-get install -y fakeroot lsb-release binutils patchelf git python3-pip python3-venv
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Set up a virtualenv
@@ -61,14 +61,14 @@ jobs:
           sudo apt-get -y update
           sudo apt-get install -y fakeroot lsb-release binutils patchelf git
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Clear Python cache
         run: |
           sudo rm -rf /__t/Python
       - name: Install python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
           cache: 'pip'
@@ -89,7 +89,7 @@ jobs:
           sudo wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
           sudo chmod +x /usr/local/bin/appimagetool
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Build Python Wheel
@@ -127,25 +127,25 @@ jobs:
           tar -cvf appimage-builder_x86_64-AppImage-DEBUG.tar ${{ github.workspace }}/recipes/appimage-builder/*-DEBUG.AppImage*
           tar -cvf ${{ github.workspace }}/appimage-builder_python-dist.tar -C ${{ github.workspace }}/dist .
       - name: Upload AppImageBuilder AppImage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: appimage-builder.AppImage
           path: '${{ github.workspace }}/recipes/appimage-builder/appimage-builder_x86_64-AppImage.tar'
           retention-days: 7
       - name: Upload AppImageBuilder Debug AppImage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: appimage-builder-DEBUG.AppImage
           path: '${{ github.workspace }}/recipes/appimage-builder/appimage-builder_x86_64-AppImage-DEBUG.tar'
           retention-days: 7
       - name: Upload AppImageBuilder Python dist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: appimage-builder-pydist
           path: '${{ github.workspace }}/appimage-builder_python-dist.tar'
           retention-days: 7
       - name: Upload Bash AppImage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bash.AppImage
           path: '${{ github.workspace }}/recipes/bash/*.AppImage*'
