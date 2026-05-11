@@ -159,6 +159,7 @@ class Venv:
             f.write("DBPath = %s\n" % self._db_path)
             f.write("CacheDir = %s\n" % self._cache_dir)
             f.write("GPGDir = %s\n" % self._gpg_dir)
+            f.write("SigLevel = Required DatabaseOptional\n")
             if not self._repositories:
                 f.write("Include = /etc/pacman.conf\n")
 
