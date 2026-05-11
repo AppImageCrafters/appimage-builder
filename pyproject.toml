@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "appimage-builder"
+dynamic = ["version"]
+description = "Recipe based AppImage creation meta-tool"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.6"
+authors = [
+    { name = "Alexis Lopez Zubieta", email = "contact@azubieta.net" },
+]
+dependencies = [
+    "docker",
+    "emrichen",
+    "libconf",
+    "lief",
+    "packaging",
+    "pydpkg",
+    "python-gnupg",
+    "pyyaml>=5",
+    "questionary",
+    "requests",
+    "roam",
+    "ruamel.yaml",
+    "schema",
+    "urllib3",
+]
+
+[project.scripts]
+appimage-builder = "appimagebuilder.__main__:__main__"
+
+[project.urls]
+"Bug Tracker" = "https://github.com/AppImageCrafters/appimage-builder/issues"
+Documentation = "https://appimage-builder.readthedocs.io"
+Homepage = "https://github.com/AppImageCrafters/appimage-builder"
+"Source Code" = "https://github.com/AppImageCrafters/appimage-builder"
+
+[tool.setuptools_scm]
+
+[tool.setuptools]
+packages = ["appimagebuilder", "tests"]

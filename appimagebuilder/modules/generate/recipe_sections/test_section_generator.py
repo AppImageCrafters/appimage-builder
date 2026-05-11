@@ -9,16 +9,17 @@
 #
 #  The above copyright notice and this permission notice shall be included in
 #  all copies or substantial portions of the Software.
-
+from os import environ
 
 class TestSectionGenerator:
     def __init__(self):
+        remote_repo = environ["APPIMAGE_BUILDER_REMOTE_REPO_OWNER"]
         self.docker_images = [
-            "appimagecrafters/tests-env:fedora-30",
-            "appimagecrafters/tests-env:debian-stable",
-            "appimagecrafters/tests-env:archlinux-latest",
-            "appimagecrafters/tests-env:centos-7",
-            "appimagecrafters/tests-env:ubuntu-xenial",
+            f"{remote_repo}/tests-env:fedora-42",
+            f"{remote_repo}/tests-env:debian-bookworm",
+            f"{remote_repo}/tests-env:archlinux-latest",
+            f"{remote_repo}/tests-env:centos-10",
+            f"{remote_repo}/tests-env:ubuntu-noble",
         ]
 
     def generate(self):

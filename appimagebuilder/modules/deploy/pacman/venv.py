@@ -159,6 +159,7 @@ class Venv:
             f.write("DBPath = %s\n" % self._db_path)
             f.write("CacheDir = %s\n" % self._cache_dir)
             f.write("GPGDir = %s\n" % self._gpg_dir)
+            f.write("SigLevel = Required DatabaseOptional\n")
             if not self._repositories:
                 f.write("Include = /etc/pacman.conf\n")
 
@@ -224,7 +225,7 @@ class Venv:
 
         # need to split the command into args
         _proc = subprocess.Popen(
-            shlex.split(command), stdout=stdout, stdin=sys.stdin, stderr=sys.stderr
+            shlex.split(command), stdout=stdout, stdin=subprocess.PIPE, stderr=sys.stderr
         )
 
         if wait_for_completion:

@@ -41,7 +41,7 @@ class TestVenv(TestCase):
         cls.pacman_venv = Venv(
             cls.venv_path,
             repositories={
-                "core": ["https://mirror.rackspace.com/archlinux/$repo/os/$arch"]
+                "core": ["https://fastly.mirror.pkgbuild.com/$repo/os/$arch"]
             },
             architecture="auto",
         )
