@@ -23,7 +23,7 @@ from urllib import request
 from appimagebuilder.utils import shell
 from .package import Package
 
-DEPENDS_ON = ["dpkg-deb", "apt-get", "apt-key", "fakeroot", "apt-cache"]
+DEPENDS_ON = ["dpkg-deb", "apt-get", "fakeroot", "apt-cache"]
 
 
 class Venv:

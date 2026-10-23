@@ -17,7 +17,7 @@ AppDir:
     arch: [ amd64, i386 ]
     allow_unauthenticated: true
     sources:
-      - sourceline: 'deb http://archive.ubuntu.com/ubuntu noble main'
+      - sourceline: 'deb http://archive.ubuntu.com/ubuntu resolute main'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
 
     include:
@@ -54,7 +54,7 @@ AppDir:
 
   test:
     debian:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-trixie
       before_command: "pwd"
       command: "./AppRun ./run_tests.sh"
     centos:
@@ -64,10 +64,10 @@ AppDir:
       image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:archlinux-latest
       command: "./AppRun ./run_tests.sh"
     fedora:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-44
       command: "./AppRun ./run_tests.sh"
     ubuntu:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-noble
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-resolute
       command: "./AppRun ./run_tests.sh"
 
 AppImage:

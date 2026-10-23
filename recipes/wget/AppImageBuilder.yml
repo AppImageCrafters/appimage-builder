@@ -13,7 +13,7 @@ AppDir:
   apt:
     arch: !ENV ${TARGET_ARCH}
     sources:
-      - sourceline: !ENV 'deb [arch=${TARGET_ARCH}] http://archive.ubuntu.com/ubuntu/ xenial main restricted universe multiverse'
+      - sourceline: !ENV 'deb [arch=${TARGET_ARCH}] http://archive.ubuntu.com/ubuntu/ resolute main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
 
     include:
@@ -37,7 +37,7 @@ AppDir:
 
   test:
     debian:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-trixie
       command: "./AppRun --version"
     centos:
       image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:centos-10
@@ -46,10 +46,10 @@ AppDir:
       image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:archlinux-latest
       command: "./AppRun --version"
     fedora:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-44
       command: "./AppRun --version"
     ubuntu:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-noble
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-resolute
       command: "./AppRun --version"
 
 AppImage:

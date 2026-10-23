@@ -161,11 +161,11 @@ AppDir:
   runtime:
     version: v2.0.0-alpha
   test:
-    fedora-42:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
+    fedora-44:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-44
       command: ./AppRun
-    debian-bookworm:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
+    debian-trixie:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-trixie
       command: ./AppRun
     archlinux-latest:
       image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:archlinux-latest
@@ -173,8 +173,8 @@ AppDir:
     centos-10:
       image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:centos-10
       command: ./AppRun
-    ubuntu-noble:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-noble
+    ubuntu-resolute:
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-resolute
       command: ./AppRun
 AppImage:
   arch: x86_64

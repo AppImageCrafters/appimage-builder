@@ -7,16 +7,16 @@ env:
 
 jobs:
   pytest-ubuntu-container:
-    name: Run tests on Ubuntu 24.04 (Docker)
-    runs-on: ubuntu-24.04
-    container: ubuntu:24.04
+    name: Run tests on Ubuntu 26.04 (Docker)
+    runs-on: ubuntu-26.04
+    container: ubuntu:26.04
     steps:
       - name: Install dependencies
         run: |
           apt-get -y update
-          apt-get install -y fakeroot lsb-release binutils patchelf git python3-pip python3-venv
+          apt-get install -y fakeroot lsb-release binutils patchelf git python3-dev python3-pip python3-venv libffi-dev
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up a virtualenv
@@ -32,13 +32,13 @@ jobs:
 
   pytest-archlinux:
     name: Run tests on ArchLinux (Docker)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     container: archlinux
     steps:
       - name: Install dependencies
         run: pacman -Syu --noconfirm binutils fakeroot lsb-release strace patchelf git python-pip gcc
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Set up a virtualenv
@@ -53,24 +53,24 @@ jobs:
           pytest tests
 
   pytest-ubuntu-runner:
-    name: Run tests on Ubuntu 24.04 with python 3.13.
-    runs-on: ubuntu-24.04
+    name: Run tests on Ubuntu 26.04 with python 3.14.
+    runs-on: ubuntu-26.04
     steps:
       - name: Install dependencies
         run: |
           sudo apt-get -y update
-          sudo apt-get install -y fakeroot lsb-release binutils patchelf git
+          sudo apt-get install -y fakeroot lsb-release binutils patchelf git libffi-dev
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Clear Python cache
         run: |
           sudo rm -rf /__t/Python
       - name: Install python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
-          python-version: '3.13'
+          python-version: '3.14'
           cache: 'pip'
       - name: Install appimage-builder and run tests
         run: |
@@ -79,17 +79,17 @@ jobs:
           python3 -m pytest tests
 
   build-pack-bash:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     needs: [ pytest-ubuntu-container, pytest-ubuntu-runner, pytest-archlinux ]
     steps:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y patchelf desktop-file-utils libgdk-pixbuf2.0-dev fakeroot strace git lsb-release python3-build python3-setuptools adwaita-icon-theme
+          sudo apt-get install -y patchelf desktop-file-utils libgdk-pixbuf-2.0-dev fakeroot strace git lsb-release python3-build python3-setuptools adwaita-icon-theme libffi-dev
           sudo wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
           sudo chmod +x /usr/local/bin/appimagetool
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Build Python Wheel

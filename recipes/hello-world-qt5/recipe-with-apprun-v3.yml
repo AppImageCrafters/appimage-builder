@@ -19,10 +19,10 @@ AppDir:
       - amd64
     allow_unauthenticated: true
     sources:
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse
-      - sourceline: deb http://security.ubuntu.com/ubuntu/ noble-security main restricted universe multiverse
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse
-      - sourceline: deb http://archive.neon.kde.org/user noble main
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ resolute main restricted universe multiverse
+      - sourceline: deb http://security.ubuntu.com/ubuntu/ resolute-security main restricted universe multiverse
+      - sourceline: deb http://archive.ubuntu.com/ubuntu/ resolute-updates main restricted universe multiverse
+      - sourceline: deb http://archive.neon.kde.org/user resolute main
     include:
       - libbz2-1.0
       - libcom-err2
@@ -53,11 +53,11 @@ AppDir:
     version: v3.0.0-devel-1
     debug: true
   test:
-    fedora-42:
-      image: Lord-Kamina/tests-env:fedora-42
+    fedora-44:
+      image: Lord-Kamina/tests-env:fedora-44
       command: ./AppRun
-    debian-bookworm:
-      image: Lord-Kamina/tests-env:debian-bookworm
+    debian-trixie:
+      image: Lord-Kamina/tests-env:debian-trixie
       command: ./AppRun
     archlinux-latest:
       image: Lord-Kamina/tests-env:archlinux-latest
@@ -65,8 +65,8 @@ AppDir:
     centos-10:
       image: Lord-Kamina/tests-env:centos-10
       command: ./AppRun
-    ubuntu-noble:
-      image: Lord-Kamina/tests-env:ubuntu-noble
+    ubuntu-resolute:
+      image: Lord-Kamina/tests-env:ubuntu-resolute
       command: ./AppRun
 AppImage:
   arch: x86_64

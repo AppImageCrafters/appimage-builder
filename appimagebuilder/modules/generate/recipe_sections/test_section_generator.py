@@ -15,11 +15,11 @@ class TestSectionGenerator:
     def __init__(self):
         remote_repo = environ["APPIMAGE_BUILDER_REMOTE_REPO_OWNER"]
         self.docker_images = [
-            f"{remote_repo}/tests-env:fedora-42",
-            f"{remote_repo}/tests-env:debian-bookworm",
+            f"{remote_repo}/tests-env:fedora-44",
+            f"{remote_repo}/tests-env:debian-trixie",
             f"{remote_repo}/tests-env:archlinux-latest",
             f"{remote_repo}/tests-env:centos-10",
-            f"{remote_repo}/tests-env:ubuntu-noble",
+            f"{remote_repo}/tests-env:ubuntu-resolute",
         ]
 
     def generate(self):

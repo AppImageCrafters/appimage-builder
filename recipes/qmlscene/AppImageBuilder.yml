@@ -16,10 +16,10 @@ AppDir:
   apt:
     arch: amd64
     sources:
-      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ noble main restricted universe multiverse'
-      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ noble-updates main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ resolute main restricted universe multiverse'
+      - sourceline: 'deb [arch=amd64] http://mx.archive.ubuntu.com/ubuntu/ resolute-updates main restricted universe multiverse'
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
-      - sourceline: 'deb http://archive.neon.kde.org/user noble main'
+      - sourceline: 'deb http://archive.neon.kde.org/user resolute main'
         key_url: 'http://archive.neon.kde.org/public.key'
 
     include:
@@ -65,7 +65,7 @@ AppDir:
 
   test:
     debian:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-bookworm
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-trixie
       command: "./AppRun"
     centos:
       image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:centos-10
@@ -74,10 +74,10 @@ AppDir:
       image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:archlinux-latest
       command: "./AppRun"
     fedora:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-42
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:fedora-44
       command: "./AppRun"
     ubuntu:
-      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-noble
+      image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:ubuntu-resolute
       command: "./AppRun"
 
 AppImage:

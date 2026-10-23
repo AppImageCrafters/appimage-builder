@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:26.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
@@ -11,7 +11,7 @@ RUN apt-get update && \
         git \
         gnupg2 \
         gtk-update-icon-cache \
-        libgdk-pixbuf2.0-dev \
+        libgdk-pixbuf-2.0-dev \
         libglib2.0-bin \
         librsvg2-dev \
         libyaml-dev \
@@ -25,9 +25,9 @@ RUN apt-get update && \
     apt-get -yq autoclean
 
 WORKDIR /tmp
-RUN wget https://github.com/NixOS/patchelf/releases/download/0.12/patchelf-0.12.tar.bz2; \
-    tar -xvf patchelf-0.12.tar.bz2;  \
-    cd patchelf-0.12.20200827.8d3a16e; \
+RUN wget https://github.com/NixOS/patchelf/releases/download/0.19.2/patchelf-0.19.2.tar.bz2; \
+    tar -xvf patchelf-0.19.2.tar.bz2;  \
+    cd patchelf-0.19.2; \
     ./configure && make && make install; \
     rm -rf patchelf-*
 
