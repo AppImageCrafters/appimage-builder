@@ -15,6 +15,7 @@ RUN apt-get update && \
         libglib2.0-bin \
         librsvg2-dev \
         libyaml-dev \
+        patchelf \
         python3 \
         python3-pip \
         python3-setuptools \
@@ -24,12 +25,12 @@ RUN apt-get update && \
         zsync && \
     apt-get -yq autoclean
 
-WORKDIR /tmp
-RUN wget https://github.com/NixOS/patchelf/releases/download/0.19.2/patchelf-0.19.2.tar.bz2; \
-    tar -xvf patchelf-0.19.2.tar.bz2;  \
-    cd patchelf-0.19.2; \
-    ./configure && make && make install; \
-    rm -rf patchelf-*
+# WORKDIR /tmp
+# RUN wget https://github.com/NixOS/patchelf/releases/download/0.19.2/patchelf-0.19.2.tar.bz2; \
+#     tar -xvf patchelf-0.19.2.tar.bz2;  \
+#     cd patchelf-0.19.2; \
+#     ./configure && make && make install; \
+#     rm -rf patchelf-*
 
 ADD . /opt/appimage-builder
 RUN python3 -m pip install /opt/appimage-builder
