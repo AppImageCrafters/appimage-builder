@@ -123,8 +123,8 @@ jobs:
       - name: Compress Assets
         run: |
           cd ${{ github.workspace }}/recipes/appimage-builder
-          tar -cvf appimage-builder_x86_64-AppImage.tar ${{ github.workspace }}/recipes/appimage-builder/*x86_64.AppImage*
-          tar -cvf appimage-builder_x86_64-AppImage-DEBUG.tar ${{ github.workspace }}/recipes/appimage-builder/*-DEBUG.AppImage*
+          tar -cvf appimage-builder_x86_64-AppImage.tar -C ${{ github.workspace }}/recipes/appimage-builder/ *x86_64.AppImage*
+          tar -cvf appimage-builder_x86_64-AppImage-DEBUG.tar -C ${{ github.workspace }}/recipes/appimage-builder/ *-DEBUG.AppImage*
           tar -cvf ${{ github.workspace }}/appimage-builder_python-dist.tar -C ${{ github.workspace }}/dist .
       - name: Upload AppImageBuilder AppImage
         uses: actions/upload-artifact@v7
