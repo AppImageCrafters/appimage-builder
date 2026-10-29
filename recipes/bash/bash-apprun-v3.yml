@@ -21,11 +21,14 @@ AppDir:
 
     include:
       - bash
-      - coreutils
+      - gnu-coreutils
+      - coreutils-from-gnu
       - libc6
       - libc6:i386
     exclude:
       - libpcre3
+      - coreutils-from-uutils
+      - rust-coreutils
 
   after_bundle: |
     cd $TARGET_APPDIR

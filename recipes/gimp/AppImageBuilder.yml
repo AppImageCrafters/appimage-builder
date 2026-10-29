@@ -18,7 +18,8 @@ AppDir:
         key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
 
     include:
-      - coreutils
+      - gnu-coreutils
+      - coreutils-from-gnu
       - gimp
       - libgtk2.0-0
       - librsvg2-common
@@ -74,6 +75,8 @@ AppDir:
     exclude:
       - adwaita-icon-theme
       - humanity-icon-theme
+      - coreutils-from-uutils
+      - rust-coreutils
 
   files:
     exclude:
