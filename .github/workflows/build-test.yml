@@ -85,7 +85,9 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
+          sudo apt-get install -y rust-coreutils- coreutils-from-uutils- gnu-coreutils coreutils-from-gnu --auto-remove --allow-remove-essential
           sudo apt-get install -y patchelf desktop-file-utils libgdk-pixbuf-2.0-dev fakeroot strace git lsb-release python3-build python3-setuptools adwaita-icon-theme libffi-dev
+
           sudo wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O /usr/local/bin/appimagetool
           sudo chmod +x /usr/local/bin/appimagetool
       - name: Checkout

@@ -27,6 +27,8 @@ AppDir:
     include:
       - bash
       - coreutils
+      - gnu-coreutils
+      - coreutils-from-gnu
       - binutils
       - util-linux
       - file
@@ -38,7 +40,9 @@ AppDir:
       - squashfs-tools
       - strace
       - zsync
-    exclude: []
+    exclude: 
+      - coreutils-from-uutils
+      - rust-coreutils
 
   after_bundle: |
     # configure tools

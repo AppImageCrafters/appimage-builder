@@ -25,8 +25,11 @@ AppDir:
 
     include:
       - python3
-      - coreutils
-    exclude: [ ]
+      - gnu-coreutils
+      - coreutils-from-gnu
+    exclude:
+      - coreutils-from-uutils
+      - rust-coreutils
 
   runtime:
     version: "continuous"

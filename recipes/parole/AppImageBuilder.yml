@@ -25,7 +25,8 @@ AppDir:
       - gstreamer1.0-plugins-bad
       - gstreamer1.0-plugins-ugly
       - gstreamer1.0-pulseaudio
-      - coreutils
+      - gnu-coreutils
+      - coreutils-from-gnu
       - dash
       - dbus
       - libdbus-1-3
@@ -40,6 +41,9 @@ AppDir:
       - usr/share/doc/*/NEWS.*
       - usr/share/doc/*/TODO.*
       - usr/share/metainfo/org.kde.kcalc.appdata.xml
+      - coreutils-from-uutils
+      - rust-coreutils
+
   test:
     debian:
       image: ${APPIMAGE_BUILDER_REMOTE_REPO_OWNER}/tests-env:debian-trixie
