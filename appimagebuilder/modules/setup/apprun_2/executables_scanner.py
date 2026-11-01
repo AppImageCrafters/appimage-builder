@@ -59,7 +59,7 @@ class ExecutablesScanner:
                     )
                     break
             else:
-                if elf.has_magic_bytes(path) and elf.has_start_symbol(path):
+                if elf.has_magic_bytes(path) and elf.has_interp_section(path):
                     arch = elf.get_arch(path)
                     executable = BinaryExecutable(path, arch)
                     binary_found = True

@@ -40,12 +40,13 @@ def has_soname(path):
     )
 
 
-def has_start_symbol(path):
+def has_interp_section(path):
     """
     Determine if an elf is executable
 
-    The `_start` symbol must be present in every runnable elf file.
-    http://www.dbp-consulting.com/tutorials/debugging/linuxProgramStartup.html
+    Linux executables often lack a `_start_` if they've been stripped. The kernel usually starts from a memory address instead. What we care about is patching the dynamic linker reference, so let's look for that instead.
+
+    https://unix.stackexchange.com/questions/454726/where-is-start-symbol-in-cat-executable
     """
     try:
         binary = lief.parse(str(path))
@@ -53,7 +54,8 @@ def has_start_symbol(path):
         return False
     if binary is None:
         return False
-    return any(symbol.name == "_start" for symbol in binary.dynamic_symbols)
+    return binary.has(lief.ELF.Segment.TYPE.INTERP) and not has_soname(path)
+
 
 
 
