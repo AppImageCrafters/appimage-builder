@@ -69,7 +69,7 @@ class Finder:
     @staticmethod
     def is_dynamically_linked_executable(path: pathlib.Path):
         try:
-            return appimagebuilder.utils.elf.has_start_symbol(path)
+            return appimagebuilder.utils.elf.has_interp_section(path)
         except shell.CommandNotFoundError:
             raise
         except:
