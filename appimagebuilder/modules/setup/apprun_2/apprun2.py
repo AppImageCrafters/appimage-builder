@@ -59,6 +59,7 @@ class AppRunV2SetupError(RuntimeError):
 class AppRunV2Setup:
     def __init__(self, context: Context, finder: Finder):
         self.context = context
+        self.logger = logging.getLogger("AppRunV2")
         recipe = context.recipe
 
         self.appdir_path = self.context.app_dir
@@ -154,11 +155,15 @@ class AppRunV2Setup:
     def _patch_executables(self, executables, patcher: ExecutablesPatcher):
         preserve_files = self._get_preserve_files()
         for executable in executables:
+            logmsg = f"Executable: {executable.__str__()}"
             if Finder.list_does_not_contain_file(preserve_files, executable.path):
                 if isinstance(executable, InterpretedExecutable):
+                    logmsg += "... will handle as an InterpretedExecutable."
                     patcher.patch_interpreted_executable(executable.path)
                 else:
+                    logmsg += "... will handle as a BinaryExecutable."
                     patcher.patch_binary_executable(executable.path)
+                self.logger.debug(logmsg)
 
     def _find_embed_archs(self, executables):
         embed_archs = set()
