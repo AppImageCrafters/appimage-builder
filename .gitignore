@@ -6,6 +6,7 @@
 
 # Example builds
 /recipes/*/AppDir
+squashfs-root
 /recipes/*/appimage-build
 /recipes/*/appimage-builder-cache
 /AppDir
