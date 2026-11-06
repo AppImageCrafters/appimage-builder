@@ -20,10 +20,10 @@ AppDir:
       - amd64
     allow_unauthenticated: true
     sources:
-      - sourceline: deb http://mx.archive.ubuntu.com/ubuntu/ resolute main restricted universe multiverse
-      - sourceline: deb http://mx.archive.ubuntu.com/ubuntu/ resolute-updates main restricted universe multiverse
-      - sourceline: deb http://mx.archive.ubuntu.com/ubuntu/ resolute-backports main restricted universe multiverse
-      - sourceline: deb http://security.ubuntu.com/ubuntu/ resolute-security main restricted universe multiverse
+      - sourceline: deb https://mx.archive.ubuntu.com/ubuntu/ resolute main restricted universe multiverse
+      - sourceline: deb https://mx.archive.ubuntu.com/ubuntu/ resolute-updates main restricted universe multiverse
+      - sourceline: deb https://mx.archive.ubuntu.com/ubuntu/ resolute-backports main restricted universe multiverse
+      - sourceline: deb https://security.ubuntu.com/ubuntu/ resolute-security main restricted universe multiverse
     include:
       - libcap2:amd64
       - libcom-err2:amd64

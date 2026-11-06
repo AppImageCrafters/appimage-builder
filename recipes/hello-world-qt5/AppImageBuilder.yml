@@ -19,10 +19,10 @@ AppDir:
       - amd64
     allow_unauthenticated: true
     sources:
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ resolute main restricted universe multiverse
-      - sourceline: deb http://security.ubuntu.com/ubuntu/ resolute-security main restricted universe multiverse
-      - sourceline: deb http://archive.ubuntu.com/ubuntu/ resolute-updates main restricted universe multiverse
-      - sourceline: deb http://archive.neon.kde.org/user resolute main
+      - sourceline: deb https://archive.ubuntu.com/ubuntu/ resolute main restricted universe multiverse
+      - sourceline: deb https://security.ubuntu.com/ubuntu/ resolute-security main restricted universe multiverse
+      - sourceline: deb https://archive.ubuntu.com/ubuntu/ resolute-updates main restricted universe multiverse
+      - sourceline: deb https://archive.neon.kde.org/user resolute main
     include:
       - libbz2-1.0
       - libcom-err2
