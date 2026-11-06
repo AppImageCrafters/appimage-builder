@@ -256,6 +256,7 @@ class AppRunV2Setup:
                 "APPIMAGE_UUID": None,
                 "APPDIR_EXEC_PATH": "$APPDIR/" + self.main_exec,
                 "APPDIR_EXEC_ARGS": self.main_exec_args,
+                "_PYTHON_SUBPROCESS_USE_POSIX_SPAWN": "0",
             }
         )
 
