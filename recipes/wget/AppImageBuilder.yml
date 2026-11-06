@@ -13,8 +13,8 @@ AppDir:
   apt:
     arch: !ENV ${TARGET_ARCH}
     sources:
-      - sourceline: !ENV 'deb [arch=${TARGET_ARCH}] http://archive.ubuntu.com/ubuntu/ resolute main restricted universe multiverse'
-        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
+      - sourceline: !ENV 'deb [arch=${TARGET_ARCH}] https://archive.ubuntu.com/ubuntu/ resolute main restricted universe multiverse'
+        key_url: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
 
     include:
       - wget

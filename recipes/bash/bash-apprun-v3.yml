@@ -16,8 +16,8 @@ AppDir:
     arch: [ amd64, i386 ]
     allow_unauthenticated: true
     sources:
-      - sourceline: 'deb http://archive.ubuntu.com/ubuntu resolute main'
-        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
+      - sourceline: 'deb https://archive.ubuntu.com/ubuntu resolute main'
+        key_url: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920d1991bc93c'
 
     include:
       - bash

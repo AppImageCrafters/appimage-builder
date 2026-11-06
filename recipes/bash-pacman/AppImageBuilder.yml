@@ -15,7 +15,7 @@ AppDir:
     Architecture: aarch64
     repositories:
       core:
-        - http://mirror.archlinuxarm.org/$arch/$repo
+        - https://mirror.archlinuxarm.org/$arch/$repo
     include:
       - bash
     exclude:
