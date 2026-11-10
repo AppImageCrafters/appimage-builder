@@ -93,6 +93,19 @@ class AppRunV2Setup:
                 % self.apprun_version
             )
 
+    def _find_linker_folder(self) -> Path:
+        # the multiarch directory name depends on the target architecture
+        # (x86_64-linux-gnu, aarch64-linux-gnu, ...), do not hardcode it.
+        linker = self.finder.find_one(
+            "*/*-linux-gnu*/ld-linux*.so*", [Finder.is_file, Finder.is_elf_shared_lib]
+        )
+        if linker is None:
+            raise AppRunV2SetupError(
+                "Unable to find the dynamic linker (ld-linux*.so*) under a "
+                "*-linux-gnu* directory in %s" % self.appdir_path
+            )
+        return linker.parent
+
     def setup(self):
         self.move_glibc_to_compat_runtime()
         ubuntu_compat_linker_folder = self.compat_runtime_path / "lib64"
@@ -108,9 +121,7 @@ class AppRunV2Setup:
             elif not ubuntu_compat_linker_folder.is_symlink() and ubuntu_compat_linker_folder.is_dir():
                 logging.info("Removing directory at %s" % ubuntu_compat_linker_folder.__str__())
                 shutil.rmtree(ubuntu_compat_linker_folder)
-        linker_folder = self.finder.find_one(
-            "*/x86_64-linux-gnu/ld-linux*.so*", [Finder.is_file, Finder.is_elf_shared_lib]
-        ).parent
+        linker_folder = self._find_linker_folder()
         logging.info(f"Found linker at: {linker_folder.__str__()}")
         logging.info(
             "Creating symlink to %s at %s"
