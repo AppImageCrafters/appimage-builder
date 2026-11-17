@@ -45,6 +45,10 @@ class Roamer(roam.Roamer):
         result = super().__getattr__(attr_name)
         return Roamer(result)
 
+    def __getitem__(self, key):
+        result = super().__getitem__(key)
+        return Roamer(result)
+
     def _resolve_variables(self, variable):
         if isinstance(variable, str):
             return self._replace_env_variables_in_str(variable)
