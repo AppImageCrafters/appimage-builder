@@ -34,6 +34,8 @@ class Venv:
         keys: [str],
         architectures: [],
         user_options: {} = None,
+        archives_path: Path = None,
+        lists_path: Path = None,
     ):
         self.logger = logging.getLogger("apt")
         self._deps = shell.require_executables(DEPENDS_ON)
@@ -43,13 +45,13 @@ class Venv:
         self.architectures = architectures
         self.user_options = user_options
 
-        self._generate_paths(base_path)
+        self._generate_paths(base_path, archives_path, lists_path)
         self._write_apt_conf(user_options, architectures)
         self._write_sources_list(sources)
         self._write_keys(keys)
         self._write_dpkg_arch(architectures)
 
-    def _generate_paths(self, base_path):
+    def _generate_paths(self, base_path, archives_path=None, lists_path=None):
         self._base_path = Path(base_path).absolute()
         self._apt_conf_path = self._base_path / "apt.conf"
         self._apt_conf_parts_path = self._base_path / "apt.conf.d"
@@ -59,9 +61,23 @@ class Venv:
         self._apt_key_parts_path = self._base_path / "keys"
         self._dpkg_path = self._base_path / "dpkg"
         self._dpkg_status_path = self._dpkg_path / "status"
-        self._apt_archives_path = self._base_path / "archives"
+        # only set explicitly when relocated, otherwise apt uses its defaults under Dir::Cache/Dir::State.
+        self._relocated_archives = archives_path is not None
+        self._relocated_lists = lists_path is not None
+        self._apt_archives_path = (
+            Path(archives_path).absolute()
+            if archives_path
+            else self._base_path / "archives"
+        )
+        self._apt_lists_path = (
+            Path(lists_path).absolute() if lists_path else self._base_path / "lists"
+        )
 
         self._base_path.mkdir(parents=True, exist_ok=True)
+        if self._relocated_archives:
+            self._apt_archives_path.mkdir(parents=True, exist_ok=True)
+        if self._relocated_lists:
+            (self._apt_lists_path / "partial").mkdir(parents=True, exist_ok=True)
         self._apt_conf_parts_path.mkdir(parents=True, exist_ok=True)
         self._apt_preferences_parts_path.mkdir(parents=True, exist_ok=True)
         self._apt_key_parts_path.mkdir(parents=True, exist_ok=True)
@@ -90,6 +106,11 @@ class Venv:
             "APT::Architectures": architectures,
             "Acquire::Languages": "none",
         }
+
+        if self._relocated_archives:
+            options["Dir::Cache::archives"] = self._apt_archives_path
+        if self._relocated_lists:
+            options["Dir::State::lists"] = self._apt_lists_path
 
         if user_options:
             options.update(user_options)

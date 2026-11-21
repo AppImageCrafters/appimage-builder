@@ -39,8 +39,7 @@ class AppRun3Context:
 
         # init AppRun binaries resolver
         apprun_version = build_context.recipe.AppDir.runtime.version() or "v3.0.0"
-        build_context.build_dir / "AppRun" / apprun_version
-        self.binaries_resolver = AppRunBinariesResolver(apprun_version, self.debug, build_context.build_dir)
+        self.binaries_resolver = AppRunBinariesResolver(apprun_version, self.debug, build_context.cache_dir)
 
         self.app_info = build_context.app_info
 

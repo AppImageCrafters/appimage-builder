@@ -63,5 +63,7 @@ class AptDeployCommand(Command):
             self._keys,
             self._architectures,
             apt_options,
+            archives_path=Path(self.context.cache_dir) / "apt" / "archives",
+            lists_path=Path(self.context.cache_dir) / "apt" / "lists",
         )
         return apt_venv

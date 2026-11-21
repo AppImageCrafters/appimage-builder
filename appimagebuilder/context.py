@@ -91,6 +91,7 @@ class Context:
     recipe_path: pathlib.Path
     app_dir: pathlib.Path
     build_dir: pathlib.Path
+    cache_dir: pathlib.Path
 
     # Used by command to register their actions
     record: dict
@@ -103,6 +104,7 @@ class Context:
         bundle_info,
         app_dir: pathlib.Path,
         build_dir: pathlib.Path,
+        cache_dir: pathlib.Path = None,
     ):
         self.recipe = recipe
         self.recipe_path = recipe_path
@@ -110,4 +112,6 @@ class Context:
         self.bundle_info = bundle_info
         self.app_dir = app_dir.absolute()
         self.build_dir = build_dir.absolute()
+        # build independent data (downloads) lives here; defaults to the build dir.
+        self.cache_dir = (cache_dir or build_dir).absolute()
         self.record = {}
