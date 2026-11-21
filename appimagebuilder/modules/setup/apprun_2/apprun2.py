@@ -134,7 +134,7 @@ class AppRunV2Setup:
 
         scanner = ExecutablesScanner(self.appdir_path, self.finder)
         resolver = AppRunBinariesResolver(
-            self.apprun_version, self.apprun_debug, self.context.build_dir
+            self.apprun_version, self.apprun_debug, self.context.cache_dir
         )
         patcher = ExecutablesPatcher()
 
