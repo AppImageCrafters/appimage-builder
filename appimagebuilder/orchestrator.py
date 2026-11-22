@@ -163,6 +163,7 @@ class Orchestrator:
             app_dir_path = pathlib.Path(args.appdir).absolute()
 
         build_dir_path = pathlib.Path(args.build_dir).absolute()
+        cache_dir_path = pathlib.Path(args.cache_dir or args.build_dir).absolute()
 
         app_info_section = recipe.AppDir.app_info
         app_info = AppInfo(
@@ -188,4 +189,5 @@ class Orchestrator:
             bundle_info=bundle_info,
             app_dir=app_dir_path,
             build_dir=build_dir_path,
+            cache_dir=cache_dir_path,
         )

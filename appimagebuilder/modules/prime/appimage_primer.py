@@ -32,7 +32,7 @@ class AppImagePrimer(BasePrimer):
         self.config = self.context.recipe.AppImage
         self.bundle_main_arch = self.config.arch()
         self.carrier_path = (
-            self.context.build_dir / "prime" / ("runtime-%s" % self.bundle_main_arch)
+            self.context.cache_dir / "prime" / ("runtime-%s" % self.bundle_main_arch)
         )
 
         appimage_file_name = self._resolve_appimage_file_name()
@@ -46,6 +46,7 @@ class AppImagePrimer(BasePrimer):
         payload_path = self._make_squashfs(self.context.app_dir)
 
         # prepare carrier (a.k.a. "runtime" using a different name to differentiate from the AppRun settings)
+        self.appimage_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(self.carrier_path, self.appimage_path)
         self._add_payload(payload_path)
 

@@ -106,7 +106,7 @@ class ExecutionTest:
         dbus_session_address = os.getenv("DBUS_SESSION_BUS_ADDRESS")
 
         if dbus_session_address:
-            regex = re.compile("unix:path=(?P<dbus_path>(\/\w+)+)")
+            regex = re.compile(r"unix:path=(?P<dbus_path>(/\w+)+)")
             search_result = regex.search(dbus_session_address)
             if search_result:
                 volumes[search_result.group(1)] = {

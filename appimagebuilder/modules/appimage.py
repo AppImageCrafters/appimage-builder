@@ -82,8 +82,8 @@ class AppImageCreator:
             request.urlretrieve(runtime_url, runtime_path)
 
     def _get_runtime_path(self):
-        os.makedirs(self.context.build_dir, exist_ok=True)
-        runtime_path = self.context.build_dir / ("runtime-%s" % self.target_arch)
+        os.makedirs(self.context.cache_dir, exist_ok=True)
+        runtime_path = self.context.cache_dir /("runtime-%s" % self.target_arch)
 
         return str(runtime_path)
 

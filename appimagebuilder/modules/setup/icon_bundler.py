@@ -100,7 +100,7 @@ class IconBundler:
         return path
 
     def _extract_icon_size_from_path(self, path):
-        size_search = re.search(".*/(\d+)x\d+/.*", path, re.IGNORECASE)
+        size_search = re.search(r".*/(\d+)x\d+/.*", path, re.IGNORECASE)
         if size_search:
             return int(size_search.group(1))
         else:

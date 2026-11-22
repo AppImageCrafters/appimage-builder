@@ -35,8 +35,19 @@ class ArgumentsParser:
         self.parser.add_argument(
             "--build-dir",
             dest="build_dir",
-            default=os.path.join(os.getcwd(), "appimage-build"),
-            help="Explicitly specify build directory",
+            default=os.environ.get(
+                "APPIMAGE_BUILDER_BUILD_DIR",
+                os.path.join(os.getcwd(), "appimage-build"),
+            ),
+            help="Explicitly specify build directory "
+            "(default: $APPIMAGE_BUILDER_BUILD_DIR or $PWD/appimage-build)",
+        )
+        self.parser.add_argument(
+            "--cache-dir",
+            dest="cache_dir",
+            default=os.environ.get("APPIMAGE_BUILDER_CACHE_DIR"),
+            help="Directory for build independent cached data (apt packages, AppRun binaries, runtime) "
+            "(default: $APPIMAGE_BUILDER_CACHE_DIR or the build directory)",
         )
         self.parser.add_argument(
             "--appdir",
