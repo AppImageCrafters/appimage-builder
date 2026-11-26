@@ -97,4 +97,12 @@ class AppRunBinariesResolver:
             asset,
         )
         logging.info("Downloading: %s" % url)
-        request.urlretrieve(url, path)
+        # download to a temporary file first so an interrupted download is never
+        # mistaken for a valid cached asset on the next run
+        partial = path.with_name(path.name + ".part")
+        try:
+            request.urlretrieve(url, partial)
+            partial.replace(path)
+        finally:
+            if partial.exists():
+                partial.unlink()
